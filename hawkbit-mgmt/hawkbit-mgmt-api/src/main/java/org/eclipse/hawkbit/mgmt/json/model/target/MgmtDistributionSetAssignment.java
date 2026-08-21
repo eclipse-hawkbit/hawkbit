@@ -42,6 +42,9 @@ public class MgmtDistributionSetAssignment extends MgmtId {
     @Schema(description = "Separation of download and install by defining a maintenance window for the installation")
     private MgmtMaintenanceWindowRequestBody maintenanceWindow;
 
+    @Schema(description = "If set, the external reference is applied to the resulting action", example = "extRef1234")
+    private String externalRef;
+
     /**
      * Constructor
      *

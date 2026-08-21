@@ -26,6 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.jayway.jsonpath.JsonPath;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -37,8 +38,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-
-import com.jayway.jsonpath.JsonPath;
 import org.eclipse.hawkbit.auth.SpRole;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtId;
@@ -1719,6 +1718,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
 
     /**
      * An assignment request containing a weight is only accepted when weight is valide and multi assignment is on.
+     * The assignment also carries an externalRef that is expected to be persisted on the resulting action.
      */
     @Test
     void weightValidation() throws Exception {
@@ -1726,21 +1726,23 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
         final Long dsId1 = testdataFactory.createDistributionSet().getId();
         final Long dsId2 = testdataFactory.createDistributionSet().getId();
         final int weight = 78;
+        final String externalRef = "extRef-" + weight;
 
-        final JSONArray bodyValide = new JSONArray().put(getAssignmentObject(targetId, MgmtActionType.FORCED, weight));
-        final JSONArray bodyInvalide = new JSONArray()
+        final JSONArray bodyValid = new JSONArray()
+                .put(getAssignmentObject(targetId, MgmtActionType.FORCED, weight).put("externalRef", externalRef));
+        final JSONArray bodyInvalid = new JSONArray()
                 .put(getAssignmentObject(targetId, MgmtActionType.FORCED, Action.WEIGHT_MIN - 1));
 
-        mvc.perform(post("/rest/v1/distributionsets/{ds}/assignedTargets", dsId1).content(bodyValide.toString())
+        mvc.perform(post("/rest/v1/distributionsets/{ds}/assignedTargets", dsId1).content(bodyValid.toString())
                         .contentType(APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
-        mvc.perform(post("/rest/v1/distributionsets/{ds}/assignedTargets", dsId2).content(bodyInvalide.toString())
+        mvc.perform(post("/rest/v1/distributionsets/{ds}/assignedTargets", dsId2).content(bodyInvalid.toString())
                         .contentType(APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errorCode", equalTo("hawkbit.server.error.repo.constraintViolation")));
-        mvc.perform(post("/rest/v1/distributionsets/{ds}/assignedTargets", dsId2).content(bodyValide.toString())
+        mvc.perform(post("/rest/v1/distributionsets/{ds}/assignedTargets", dsId2).content(bodyValid.toString())
                         .contentType(APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
@@ -1748,6 +1750,8 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
         final List<Action> actions = deploymentManagement.findActionsAll(PAGE).get().toList();
         assertThat(actions).size().isEqualTo(2);
         assertThat(actions.get(0).getWeight()).get().isEqualTo(weight);
+        assertThat(actions.get(0).getExternalRef()).isEqualTo(externalRef);
+        assertThat(actions.get(1).getExternalRef()).isEqualTo(externalRef);
     }
 
     /**
