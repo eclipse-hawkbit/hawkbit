@@ -407,7 +407,7 @@ public class BaseEntityRepositoryProxy<T extends AbstractJpaBaseEntity> implemen
                                     !List.of(TargetClassAware.class, Advised.class, DecoratingProxy.class, BaseEntityRepository.class)
                                             .contains(m.getDeclaringClass())
                                             // toString shall not be ACM handled
-                                            && !(("toString".equals(m.getName()) && m.getParameterCount() == 0))
+                                            && !("toString".equals(m.getName()) && m.getParameterCount() == 0)
                                             // not a find or get methods with handled response types
                                             && !((m.getName().startsWith("find") || m.getName().startsWith("get"))
                                                 && (Iterable.class.isAssignableFrom(method.getReturnType())

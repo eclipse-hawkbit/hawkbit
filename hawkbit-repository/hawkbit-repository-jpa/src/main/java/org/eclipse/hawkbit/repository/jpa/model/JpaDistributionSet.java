@@ -150,7 +150,10 @@ public class JpaDistributionSet
     public Long getTypeId() {
         // typeId mirrors the ds_type FK and is populated only when the entity is loaded from the DB; a freshly
         // created (not yet reloaded) instance has it null, so fall back to the in-memory type.
-        return typeId != null ? typeId : (type == null ? null : type.getId());
+        if (typeId == null && type != null) {
+            typeId = type.getId();
+        }
+        return typeId;
     }
 
     @Override

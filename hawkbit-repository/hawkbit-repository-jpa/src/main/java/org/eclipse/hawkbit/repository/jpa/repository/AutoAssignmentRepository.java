@@ -48,7 +48,7 @@ public interface AutoAssignmentRepository extends BaseEntityRepository<JpaAutoAs
         if (ids.isEmpty()) {
             return Map.of();
         }
-        final Map<Long, String> result = new HashMap<>(ids.size());
+        final Map<Long, String> result = HashMap.newHashMap(ids.size());
         for (final Object[] row : findAccessControlContexts(ids)) {
             result.put((Long) row[0], (String) row[1]);
         }
