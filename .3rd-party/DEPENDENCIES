@@ -139,7 +139,7 @@ maven/mavencentral/io.protostuff/protostuff-runtime/1.8.0, Apache-2.0, approved,
 maven/mavencentral/io.smallrye/jandex/3.3.2, Apache-2.0, approved, #22775
 maven/mavencentral/io.swagger.core.v3/swagger-annotations-jakarta/2.2.38, Apache-2.0, approved, #5947
 maven/mavencentral/io.swagger.core.v3/swagger-annotations-jakarta/2.2.52, Apache-2.0, approved, #5947
-maven/mavencentral/io.swagger.core.v3/swagger-annotations-jakarta/2.2.53, Apache-2.0, approved, #5947
+maven/mavencentral/io.swagger.core.v3/swagger-annotations-jakarta/2.2.54, Apache-2.0, approved, #5947
 maven/mavencentral/io.swagger.core.v3/swagger-core-jakarta/2.2.52, Apache-2.0, approved, #5929
 maven/mavencentral/io.swagger.core.v3/swagger-models-jakarta/2.2.52, Apache-2.0, approved, #5919
 maven/mavencentral/jakarta.activation/jakarta.activation-api/2.1.4, EPL-2.0 OR BSD-3-Clause OR GPL-2.0-only with Classpath-exception-2.0, approved, ee4j.jaf
