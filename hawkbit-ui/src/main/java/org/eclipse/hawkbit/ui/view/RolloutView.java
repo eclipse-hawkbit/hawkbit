@@ -77,6 +77,13 @@ public final class RolloutView extends TableView<MgmtRolloutResponseBody, Long> 
 
     @Serial
     private static final long serialVersionUID = 1L;
+    public static final String READY_STATUS = "READY";
+    public static final String RUNNING_STATUS = "RUNNING";
+    public static final String PAUSED_STATUS = "PAUSED";
+    public static final String RESUME_STATUS = "Resume";
+    public static final String WAITING_FOR_APPROVAL_STATUS = "WAITING_FOR_APPROVAL";
+    public static final String APPROVE_CONFIRMATION = "Approve";
+    public static final String DENY_CONFIRMATION = "Deny";
 
     public RolloutView(final HawkbitMgmtClient hawkbitClient) {
         super(
@@ -148,7 +155,7 @@ public final class RolloutView extends TableView<MgmtRolloutResponseBody, Long> 
         }
 
         private void init(final MgmtRolloutResponseBody rollout) {
-            if ("READY".equalsIgnoreCase(rollout.getStatus())) {
+            if (READY_STATUS.equalsIgnoreCase(rollout.getStatus())) {
                 add(Utils.tooltip(new Button(VaadinIcon.START_COG.create()) {
 
                     {
@@ -158,7 +165,7 @@ public final class RolloutView extends TableView<MgmtRolloutResponseBody, Long> 
                         });
                     }
                 }, "Start"));
-            } else if ("RUNNING".equalsIgnoreCase(rollout.getStatus())) {
+            } else if (RUNNING_STATUS.equalsIgnoreCase(rollout.getStatus())) {
                 add(Utils.tooltip(new Button(VaadinIcon.PAUSE.create()) {
 
                     {
@@ -168,7 +175,7 @@ public final class RolloutView extends TableView<MgmtRolloutResponseBody, Long> 
                         });
                     }
                 }, "Pause"));
-            } else if ("PAUSED".equalsIgnoreCase(rollout.getStatus())) {
+            } else if (PAUSED_STATUS.equalsIgnoreCase(rollout.getStatus())) {
                 add(Utils.tooltip(new Button(VaadinIcon.START_COG.create()) {
 
                     {
@@ -177,20 +184,20 @@ public final class RolloutView extends TableView<MgmtRolloutResponseBody, Long> 
                             refresh();
                         });
                     }
-                }, "Resume"));
+                }, RESUME_STATUS));
             }
-            if ("WAITING_FOR_APPROVAL".equalsIgnoreCase(rollout.getStatus())) {
+            if (WAITING_FOR_APPROVAL_STATUS.equalsIgnoreCase(rollout.getStatus())) {
                 final boolean canApprove = hasApprovePermission();
 
                 final Button approve = new Button(VaadinIcon.CHECK.create());
                 approve.setEnabled(canApprove);
                 approve.addClickListener(v -> new ApprovalDialog(rollout, true, hawkbitClient, this::refresh));
-                add(Utils.tooltip(approve, canApprove ? "Approve" : NO_APPROVE_PERMISSION));
+                add(Utils.tooltip(approve, canApprove ? APPROVE_CONFIRMATION : NO_APPROVE_PERMISSION));
 
                 final Button deny = new Button(VaadinIcon.CLOSE.create());
                 deny.setEnabled(canApprove);
                 deny.addClickListener(v -> new ApprovalDialog(rollout, false, hawkbitClient, this::refresh));
-                add(Utils.tooltip(deny, canApprove ? "Deny" : NO_APPROVE_PERMISSION));
+                add(Utils.tooltip(deny, canApprove ? DENY_CONFIRMATION : NO_APPROVE_PERMISSION));
             }
             if (ROLLOUT_STATUS_STOPPABLE.contains(rollout.getStatus())) {
                 add(Utils.tooltip(new Button(VaadinIcon.STOP.create()) {
@@ -247,11 +254,11 @@ public final class RolloutView extends TableView<MgmtRolloutResponseBody, Long> 
                 final HawkbitMgmtClient hawkbitClient, final Runnable onDone) {
             super(approve ? "Approve Rollout" : "Deny Rollout");
 
-            final Span target = new Span((approve ? "Approve" : "Deny") + " rollout: " + rollout.getName());
+            final Span target = new Span((approve ? APPROVE_CONFIRMATION : DENY_CONFIRMATION) + " rollout: " + rollout.getName());
             final TextArea remark = new TextArea("Remark");
             remark.setWidthFull();
 
-            final Button confirm = new Button(approve ? "Approve" : "Deny");
+            final Button confirm = new Button(approve ? APPROVE_CONFIRMATION : DENY_CONFIRMATION);
             confirm.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
             confirm.addClickListener(e -> {
                 close();

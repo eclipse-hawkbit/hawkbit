@@ -477,8 +477,8 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             if (groupScheduledActions.getContent().isEmpty()) {
                 return 0L;
             } else {
-                // self invocation won't check @PreAuthorize but it is already checked for the method
-                startScheduledActions(groupScheduledActions.getContent());
+                // internal call skips @PreAuthorize but it is already checked for the entry method
+                startScheduledActions0(groupScheduledActions.getContent());
                 return groupScheduledActions.getTotalElements();
             }
         }) > 0) ;
@@ -487,6 +487,10 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public void startScheduledActions(final List<Action> rolloutGroupActions) {
+        startScheduledActions0(rolloutGroupActions);
+    }
+
+    private void startScheduledActions0(final List<Action> rolloutGroupActions) {
         // Close actions already assigned and collect pending assignments
         final List<JpaAction> pendingTargetAssignments = rolloutGroupActions.stream()
                 .map(JpaAction.class::cast).map(this::closeActionIfSetWasAlreadyAssigned).filter(Objects::nonNull).toList();
@@ -576,6 +580,11 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public void handleMaxAssignmentsExceeded(
+            final Long targetId, final Long requested, final AssignmentQuotaExceededException quotaExceededException) {
+        handleMaxAssignmentsExceeded0(targetId, requested, quotaExceededException);
+    }
+
+    private void handleMaxAssignmentsExceeded0(
             final Long targetId, final Long requested, final AssignmentQuotaExceededException quotaExceededException) {
         int actionsPurgePercentage = getActionsPurgePercentage();
         int quota = quotaManagement.getMaxActionsPerTarget();
@@ -905,7 +914,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         } catch (final AssignmentQuotaExceededException ex) {
             targetRepository.findByControllerId(controllerId).ifPresentOrElse(
                     // assume requested are always smaller than int size
-                    target -> handleMaxAssignmentsExceeded(target.getId(), requested, ex),
+                    target -> handleMaxAssignmentsExceeded0(target.getId(), requested, ex),
                     () -> {
                         throw new EntityNotFoundException(Target.class, controllerId);
                     });

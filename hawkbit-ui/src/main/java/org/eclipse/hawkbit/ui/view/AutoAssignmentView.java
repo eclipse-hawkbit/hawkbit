@@ -73,6 +73,12 @@ public final class AutoAssignmentView extends TableView<MgmtAutoAssignmentRespon
 
     @Serial
     private static final long serialVersionUID = 1L;
+    public static final String READY_STATUS = "READY";
+    public static final String RUNNING_STATUS = "RUNNING";
+    public static final String PAUSED_STATUS = "PAUSED";
+    public static final String WAITING_FOR_APPROVAL_STATUS = "WAITING_FOR_APPROVAL";
+    public static final String APPROVE_CONFIRMATION = "Approve";
+    public static final String DENY_CONFIRMATION = "Deny";
 
     public AutoAssignmentView(final HawkbitMgmtClient hawkbitClient) {
         super(
@@ -163,7 +169,7 @@ public final class AutoAssignmentView extends TableView<MgmtAutoAssignmentRespon
         }
 
         private void init(final MgmtAutoAssignmentResponseBody autoAssignment) {
-            if("READY".equalsIgnoreCase(autoAssignment.getStatus())) {
+            if(READY_STATUS.equalsIgnoreCase(autoAssignment.getStatus())) {
                 add(Utils.tooltip(new Button(START_COG.create()) {
 
                     {
@@ -173,7 +179,7 @@ public final class AutoAssignmentView extends TableView<MgmtAutoAssignmentRespon
                         });
                     }
                 }, "Start"));
-            } else if("RUNNING".equalsIgnoreCase(autoAssignment.getStatus())) {
+            } else if(RUNNING_STATUS.equalsIgnoreCase(autoAssignment.getStatus())) {
                 add(Utils.tooltip(new Button(PAUSE.create()) {
 
                     {
@@ -183,7 +189,7 @@ public final class AutoAssignmentView extends TableView<MgmtAutoAssignmentRespon
                         });
                     }
                 }, "Pause"));
-            } else if("PAUSED".equalsIgnoreCase(autoAssignment.getStatus())) {
+            } else if(PAUSED_STATUS.equalsIgnoreCase(autoAssignment.getStatus())) {
                 add(Utils.tooltip(new Button(START_COG.create()) {
 
                     {
@@ -193,18 +199,18 @@ public final class AutoAssignmentView extends TableView<MgmtAutoAssignmentRespon
                         });
                     }
                 }, "Resume"));
-            } else if("WAITING_FOR_APPROVAL".equalsIgnoreCase(autoAssignment.getStatus())) {
+            } else if(WAITING_FOR_APPROVAL_STATUS.equalsIgnoreCase(autoAssignment.getStatus())) {
                 final boolean canApprove = hasApprovePermission();
 
                 final Button approve = new Button(CHECK.create());
                 approve.setEnabled(canApprove);
                 approve.addClickListener(v -> new ApprovalDialog(autoAssignment, true, hawkbitClient, this::refresh));
-                add(Utils.tooltip(approve, canApprove ? "Approve" : NO_APPROVE_PERMISSION));
+                add(Utils.tooltip(approve, canApprove ? APPROVE_CONFIRMATION : NO_APPROVE_PERMISSION));
 
                 final Button deny = new Button(CLOSE.create());
                 deny.setEnabled(canApprove);
                 deny.addClickListener(v -> new ApprovalDialog(autoAssignment, false, hawkbitClient, this::refresh));
-                add(Utils.tooltip(deny, canApprove ? "Deny" : NO_APPROVE_PERMISSION));
+                add(Utils.tooltip(deny, canApprove ? DENY_CONFIRMATION : NO_APPROVE_PERMISSION));
             }
             add(Utils.tooltip(new Button(TRASH.create()) {
 
@@ -245,11 +251,11 @@ public final class AutoAssignmentView extends TableView<MgmtAutoAssignmentRespon
                 final HawkbitMgmtClient hawkbitClient, final Runnable onDone) {
             super(approve ? "Approve Auto Assignment" : "Deny Auto Assignment");
 
-            final Span target = new Span((approve ? "Approve" : "Deny") + " auto assignment: " + autoAssignment.getName());
+            final Span target = new Span((approve ? APPROVE_CONFIRMATION : DENY_CONFIRMATION) + " auto assignment: " + autoAssignment.getName());
             final TextArea remark = new TextArea("Remark");
             remark.setWidthFull();
 
-            final Button confirm = new Button(approve ? "Approve" : "Deny");
+            final Button confirm = new Button(approve ? APPROVE_CONFIRMATION : DENY_CONFIRMATION);
             confirm.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
             confirm.addClickListener(e -> {
                 close();
