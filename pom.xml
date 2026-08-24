@@ -41,14 +41,9 @@
     </scm>
 
     <properties>
-        <!-- Overrides START - to be reviewed regularly -->
-        <!-- Spring boot version overrides (should be reviewed with every Spring boot upgrade) - START -->
-        <!-- Remove when upgrading to next spring-cloud-starter-stream-rabbit to 5.0.3 -->
-        <httpclient5.version>5.6.2</httpclient5.version>
-        <httpcore5.version>5.4.3</httpcore5.version>
-        <!-- Spring boot version overrides - END -->
-        <!-- Override vulnerable commons-fileupload used by feign-form-spring (via spring-cloud-starter-openfeign) -->
-        <commons-fileupload.version>1.6.0</commons-fileupload.version>
+        <!-- Overrides START - to be reviewed regularly current overrides against spring-boot 4.1.1-->
+        <!-- Override logback version since 1.5.38 from spring-boot 4.1.1 is vulnerable -->
+        <logback.version>1.6.3</logback.version>
         <!-- Override commons-lang3 version since 3.17 is vulnerable -->
         <commons-lang.version>3.20.0</commons-lang.version>
         <!-- Overrides END -->
@@ -67,8 +62,8 @@
         <springdoc-openapi.version>3.1.0</springdoc-openapi.version>
 
         <!-- openfeign versions -->
-        <spring-cloud-openfeign.version>5.0.2</spring-cloud-openfeign.version>
-        <openfeign-hc5.version>13.13</openfeign-hc5.version>
+        <spring-cloud-openfeign.version>5.0.3</spring-cloud-openfeign.version>
+        <openfeign-hc5.version>13.14</openfeign-hc5.version>
 
         <!-- Eclipselink - START -->
         <!--
@@ -224,11 +219,6 @@
         <dependencies>
             <!-- Overrides START -->
             <dependency>
-                <groupId>commons-fileupload</groupId>
-                <artifactId>commons-fileupload</artifactId>
-                <version>${commons-fileupload.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
                 <version>${commons-lang.version}</version>
@@ -300,23 +290,6 @@
                 <groupId>org.springdoc</groupId>
                 <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
                 <version>${springdoc-openapi.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.springframework.cloud</groupId>
-                <artifactId>spring-cloud-starter-openfeign</artifactId>
-                <version>${spring-cloud-openfeign.version}</version>
-                <!--
-                  CVE-2025-48976: override commons-fileupload dependency - 1.5 -> 1.6.0,
-                  remove it when spring-cloud-openfeign start bringing it down,
-                  commons-fileupload 1.6.0(+) shall be added explicitly if needed
-                -->
-                <exclusions>
-                    <exclusion>
-                        <groupId>commons-fileupload</groupId>
-                        <artifactId>commons-fileupload</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>io.github.openfeign</groupId>
