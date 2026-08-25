@@ -32,6 +32,7 @@ public class TargetWithActionType {
     private final String maintenanceSchedule;
     private final String maintenanceWindowDuration;
     private final String maintenanceWindowTimeZone;
+    private final String externalRef;
 
     /**
      * Constructor that also accepts maintenance schedule parameters and checks for validity of the specified maintenance schedule.
@@ -45,13 +46,15 @@ public class TargetWithActionType {
      * @param maintenanceWindowDuration in HH:mm:ss format specifying the duration of a maintenance window, for example 00:30:00 for 30 minutes
      * @param maintenanceWindowTimeZone is the time zone specified as +/-hh:mm offset from UTC, for example +02:00 for CET summer time
      *         and +00:00 for UTC. The start time of a maintenance window calculated based on the cron expression is relative to this time zone.
+     * @param confirmationRequired whether confirmation is required for the resulting {@link Action}.
+     * @param externalRef (optional) external reference that is set on the resulting {@link Action}.
      * @throws InvalidMaintenanceScheduleException if the parameters do not define a valid maintenance schedule.
      */
     @SuppressWarnings("java:S107")
     public TargetWithActionType(
             final String controllerId, final ActionType actionType, final long forceTime, final Integer weight,
             final String maintenanceSchedule, final String maintenanceWindowDuration, final String maintenanceWindowTimeZone,
-            final boolean confirmationRequired) {
+            final boolean confirmationRequired, final String externalRef) {
         this.controllerId = controllerId;
         this.actionType = actionType != null ? actionType : ActionType.FORCED;
         this.forceTime = actionType == ActionType.TIMEFORCED ? forceTime : RepositoryModelConstants.NO_FORCE_TIME;
@@ -62,5 +65,6 @@ public class TargetWithActionType {
         this.maintenanceWindowTimeZone = maintenanceWindowTimeZone;
 
         this.confirmationRequired = confirmationRequired;
+        this.externalRef = externalRef;
     }
 }

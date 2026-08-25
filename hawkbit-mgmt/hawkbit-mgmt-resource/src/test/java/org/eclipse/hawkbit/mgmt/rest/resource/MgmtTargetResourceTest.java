@@ -32,6 +32,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.jayway.jsonpath.JsonPath;
+import jakarta.validation.ConstraintViolationException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -42,10 +44,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
-
-import jakarta.validation.ConstraintViolationException;
-
-import com.jayway.jsonpath.JsonPath;
 import org.eclipse.hawkbit.auth.SpPermission;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtActionConfirmationRequestBodyPut;
@@ -2211,14 +2209,16 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
 
     /**
      * An assignment request containing a weight is only accepted when weight is valid and multi assignment is on.
+     * The assignment also carries an externalRef that is expected to be persisted on the resulting action.
      */
     @Test
     void weightValidation() throws Exception {
         final String targetId = testdataFactory.createTarget().getControllerId();
         final Long dsId = testdataFactory.createDistributionSet().getId();
         final int weight = 98;
+        final String externalRef = "extRef-" + weight;
 
-        final JSONObject bodyValid = getAssignmentObject(dsId, MgmtActionType.FORCED, weight);
+        final JSONObject bodyValid = getAssignmentObject(dsId, MgmtActionType.FORCED, weight).put("externalRef", externalRef);
         final JSONObject bodyInvalid = getAssignmentObject(dsId, MgmtActionType.FORCED, Action.WEIGHT_MIN - 1);
 
         mvc.perform(post("/rest/v1/targets/{targetId}/assignedDS", targetId).content(bodyInvalid.toString()).contentType(APPLICATION_JSON))
@@ -2232,6 +2232,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final List<Action> actions = deploymentManagement.findActionsAll(PAGE).get().toList();
         assertThat(actions).size().isEqualTo(1);
         assertThat(actions.get(0).getWeight()).get().isEqualTo(weight);
+        assertThat(actions.get(0).getExternalRef()).isEqualTo(externalRef);
     }
 
     /**

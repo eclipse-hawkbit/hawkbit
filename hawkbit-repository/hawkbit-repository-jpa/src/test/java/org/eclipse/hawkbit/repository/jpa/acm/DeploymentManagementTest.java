@@ -40,7 +40,7 @@ class DeploymentManagementTest extends AbstractAccessControllerManagementTest {
                         READ_DISTRIBUTION_SET),
                 () -> assertThat(deploymentManagement.assignDistributionSets(List.of(new DeploymentRequest(
                                 target1Type1.getControllerId(), ds1Type1.getId(), Action.ActionType.FORCED, 0,
-                                null, null, null, null, false)), null)
+                                null, null, null, null, false, null)), null)
                         .get(0).getAssignedEntity().stream().map(Action::getTarget)
                         .map(Target::getId))
                         .hasSize(1)
@@ -52,7 +52,7 @@ class DeploymentManagementTest extends AbstractAccessControllerManagementTest {
                         READ_DISTRIBUTION_SET),
                 () -> assertThat(deploymentManagement.assignDistributionSets(List.of(new DeploymentRequest(
                         target1Type1.getControllerId(), ds1Type1.getId(), Action.ActionType.FORCED, 0,
-                        null, null, null, null, false)), null)).isEmpty());
+                        null, null, null, null, false, null)), null)).isEmpty());
     }
 
     @Test

@@ -44,6 +44,9 @@ public class MgmtTargetAssignmentRequestBody {
             "an action. Confirmation is required per default")
     private Boolean confirmationRequired;
 
+    @Schema(description = "If set, the external reference is applied to the resulting action", example = "extRef1234")
+    private String externalRef;
+
     /**
      * JsonCreator Constructor
      *
