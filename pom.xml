@@ -46,6 +46,8 @@
         <logback.version>1.6.3</logback.version>
         <!-- Override commons-lang3 version since 3.17 is vulnerable -->
         <commons-lang.version>3.20.0</commons-lang.version>
+        <!-- Override rabbit-amqp-client version since 5.30.0 is vulnerable -->
+        <rabbit-amqp-client.version>5.35.0</rabbit-amqp-client.version>
         <!-- Overrides END -->
 
         <revision>0-SNAPSHOT</revision>
