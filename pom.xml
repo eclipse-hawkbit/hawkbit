@@ -84,7 +84,7 @@
         <swagger-annotations-jakarta.version>2.2.54</swagger-annotations-jakarta.version>
 
         <!-- test -->
-        <rabbitmq-http-client.version>5.6.0</rabbitmq-http-client.version>
+        <rabbitmq-http-client.version>5.7.0</rabbitmq-http-client.version>
         <classgraph.version>4.8.192</classgraph.version>
         <awaitility.version>4.3.0</awaitility.version>
         <!-- Misc libraries versions - END -->
