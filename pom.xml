@@ -48,6 +48,8 @@
         <commons-lang.version>3.20.0</commons-lang.version>
         <!-- Override rabbit-amqp-client version since 5.30.0 is vulnerable -->
         <rabbit-amqp-client.version>5.35.0</rabbit-amqp-client.version>
+        <!-- Override tomcat version since 11.0.24 from spring-boot 4.1.1 is vulnerable -->
+        <tomcat.version>11.0.25</tomcat.version>
         <!-- Overrides END -->
 
         <revision>0-SNAPSHOT</revision>
