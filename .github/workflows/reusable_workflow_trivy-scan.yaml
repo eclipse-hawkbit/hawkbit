@@ -130,7 +130,7 @@ jobs:
 
       - name: Upload Docker image scan results to GitHub Security tab hawkbit-ddi-server
         if: ${{ inputs.upload }}
-        uses: github/codeql-action/upload-sarif@v4.37.8
+        uses: github/codeql-action/upload-sarif@v4.37.9
         with:
           ref: ${{ steps.upload-ref.outputs.ref }}
           sha: ${{ steps.get-sha.outputs.sha }}
@@ -138,7 +138,7 @@ jobs:
           category: "Container Images (hawkbit-ddi-server) [${{ inputs.ref }}]"
       - name: Upload Docker image scan results to GitHub Security tab hawkbit-dmf-server
         if: ${{ inputs.upload }}
-        uses: github/codeql-action/upload-sarif@v4.37.8
+        uses: github/codeql-action/upload-sarif@v4.37.9
         with:
           ref: ${{ steps.upload-ref.outputs.ref }}
           sha: ${{ steps.get-sha.outputs.sha }}
@@ -146,7 +146,7 @@ jobs:
           category: "Container Images (hawkbit-dmf-server) [${{ inputs.ref }}]"
       - name: Upload Docker image scan results to GitHub Security tab hawkbit-mgmt-server
         if: ${{ inputs.upload }}
-        uses: github/codeql-action/upload-sarif@v4.37.8
+        uses: github/codeql-action/upload-sarif@v4.37.9
         with:
           ref: ${{ steps.upload-ref.outputs.ref }}
           sha: ${{ steps.get-sha.outputs.sha }}
@@ -154,7 +154,7 @@ jobs:
           category: "Container Images (hawkbit-mgmt-server) [${{ inputs.ref }}]"
       - name: Upload Docker image scan results to GitHub Security tab hawkbit-ui
         if: ${{ inputs.upload }}
-        uses: github/codeql-action/upload-sarif@v4.37.8
+        uses: github/codeql-action/upload-sarif@v4.37.9
         with:
           ref: ${{ steps.upload-ref.outputs.ref }}
           sha: ${{ steps.get-sha.outputs.sha }}
@@ -163,7 +163,7 @@ jobs:
 
       - name: Upload Docker image scan results to GitHub Security tab hawkbit-update-server
         if: ${{ inputs.upload }}
-        uses: github/codeql-action/upload-sarif@v4.37.8
+        uses: github/codeql-action/upload-sarif@v4.37.9
         with:
           ref: ${{ steps.upload-ref.outputs.ref }}
           sha: ${{ steps.get-sha.outputs.sha }}
@@ -172,7 +172,7 @@ jobs:
 
       - name: Upload Docker image scan results to GitHub Security tab hawkbit-repository-jpa-init
         if: ${{ inputs.upload }}
-        uses: github/codeql-action/upload-sarif@v4.37.8
+        uses: github/codeql-action/upload-sarif@v4.37.9
         with:
           ref: ${{ steps.upload-ref.outputs.ref }}
           sha: ${{ steps.get-sha.outputs.sha }}
