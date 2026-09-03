@@ -387,9 +387,7 @@ public class JpaTargetManagement
     @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public void assignTargetGroupWithRsql(String group, String rsql) {
         // Quota check
-        if (group != null) {
-            assertTargetGroupQuota(Collections.singletonList(group));
-        }
+        assertTargetGroupQuota(Collections.singletonList(group));
 
         // Switch back to UpdateAllQuery if switching back to hibernate. (EclipseLink does not work well with UpdateAllQuery)
         // EclipseLink: using subquery approach — applying predicate directly to the UPDATE root
@@ -453,9 +451,7 @@ public class JpaTargetManagement
     @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public void assignTargetsWithGroup(String group, List<String> controllerIds) {
         // Quota check
-        if (group != null) {
-            assertTargetGroupQuota(Collections.singletonList(group));
-        }
+        assertTargetGroupQuota(Collections.singletonList(group));
 
         final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaUpdate<JpaTarget> criteriaQuery = cb.createCriteriaUpdate(JpaTarget.class);
