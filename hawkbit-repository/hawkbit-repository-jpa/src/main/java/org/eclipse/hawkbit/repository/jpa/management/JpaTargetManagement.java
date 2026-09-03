@@ -19,6 +19,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -34,6 +36,7 @@ import jakarta.persistence.metamodel.MapAttribute;
 import jakarta.validation.constraints.NotEmpty;
 
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.ql.jpa.QLSupport;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
@@ -100,6 +103,50 @@ public class JpaTargetManagement
         this.quotaManagement = quotaManagement;
         this.targetTypeRepository = targetTypeRepository;
         this.targetTagRepository = targetTagRepository;
+    }
+
+    @Override
+    @Transactional
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
+    public JpaTarget create(final TargetManagement.Create create) {
+        assertTargetGroupQuota(Collections.singletonList(create.getGroup()));
+        return super.create(create);
+    }
+
+    @Override
+    @Transactional
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
+    public List<JpaTarget> create(final Collection<TargetManagement.Create> create) {
+        assertTargetGroupQuota(create.stream().map(TargetManagement.Create::getGroup).toList());
+        return super.create(create);
+    }
+
+    @Override
+    @Transactional
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
+    public JpaTarget update(final TargetManagement.Update update) {
+        try {
+            assertTargetGroupQuota(Collections.singletonList(update.getGroup()));
+        } catch (final Exception ex) {
+            // target existence check in order to throw EntityNotFound instead of AssignmentQuotaException if both applicable
+            getValid(update.getId());
+            throw ex;
+        }
+        return super.update(update);
+    }
+
+    @Override
+    @Transactional
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
+    public Map<Long, JpaTarget> update(final Collection<TargetManagement.Update> update) {
+        try {
+            assertTargetGroupQuota(update.stream().map(TargetManagement.Update::getGroup).toList());
+        } catch (final Exception ex) {
+            // target existence check in order to throw EntityNotFound instead of AssignmentQuotaException if both applicable
+            get(update.stream().map(TargetManagement.Update::getId).toList());
+            throw ex;
+        }
+        return super.update(update);
     }
 
     @Override
@@ -339,6 +386,8 @@ public class JpaTargetManagement
     @Transactional
     @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public void assignTargetGroupWithRsql(String group, String rsql) {
+        // Quota check
+        assertTargetGroupQuota(Collections.singletonList(group));
 
         // Switch back to UpdateAllQuery if switching back to hibernate. (EclipseLink does not work well with UpdateAllQuery)
         // EclipseLink: using subquery approach — applying predicate directly to the UPDATE root
@@ -401,6 +450,9 @@ public class JpaTargetManagement
     @Transactional
     @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public void assignTargetsWithGroup(String group, List<String> controllerIds) {
+        // Quota check
+        assertTargetGroupQuota(Collections.singletonList(group));
+
         final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaUpdate<JpaTarget> criteriaQuery = cb.createCriteriaUpdate(JpaTarget.class);
         Root<JpaTarget> root = criteriaQuery.from(JpaTarget.class);
@@ -551,5 +603,35 @@ public class JpaTargetManagement
         if (!targetTagRepository.existsById(tagId)) {
             throw new EntityNotFoundException(TargetTag.class, tagId);
         }
+    }
+
+    private void assertTargetGroupQuota(final Collection<String> requested) {
+        final SortedSet<String> wanted = requested.stream()
+                .filter(Objects::nonNull)
+                .collect(Collectors.toCollection(TreeSet::new));
+
+        if (wanted.isEmpty()) {
+            return; // no group(s), skip findDistinctGroups db call
+        }
+
+        final long limit = quotaManagement.getMaxTargetGroups();
+        if (limit <= 0) {
+            return;
+        }
+
+        // one group, already present -> allowed
+        if (wanted.size() == 1 && jpaRepository.existsByGroup(wanted.first())) {
+            return;
+        }
+        final List<String> existing = jpaRepository.findDistinctGroups(AccessContext.tenant());
+
+        existing.forEach(wanted::remove);
+        if (wanted.isEmpty()) {
+            return; // no growth -> allowed
+        }
+
+        QuotaHelper.assertAssignmentQuota(
+                AccessContext.tenant(), wanted.size(), limit, "target group", "tenant",
+                tenant -> existing.size());
     }
 }
