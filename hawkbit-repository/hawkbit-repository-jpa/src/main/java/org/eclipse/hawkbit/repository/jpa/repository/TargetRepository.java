@@ -110,4 +110,12 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget> {
      */
     @Query(value = "SELECT DISTINCT target_group FROM sp_target WHERE tenant = ?1 AND target_group IS NOT NULL", nativeQuery = true)
     List<String> findDistinctGroups(@Param("tenant") String tenant);
+
+    /**
+     * Checks if a target group is present
+     *
+     * @param group to check existence
+     * @return whether a target group is present or not
+     */
+    boolean existsByGroup(String group);
 }
