@@ -610,17 +610,17 @@ public class JpaTargetManagement
     }
 
     private void assertTargetGroupQuota(final Collection<String> requested) {
-        final long limit = quotaManagement.getMaxTargetGroups();
-        if (limit <= 0) {
-            return;
-        }
-
         final SortedSet<String> wanted = requested.stream()
                 .filter(Objects::nonNull)
-                .collect(Collectors.toCollection(() -> new TreeSet<>(String.CASE_INSENSITIVE_ORDER)));
+                .collect(Collectors.toCollection(TreeSet::new));
 
         if (wanted.isEmpty()) {
             return; // no group(s), skip findDistinctGroups db call
+        }
+
+        final long limit = quotaManagement.getMaxTargetGroups();
+        if (limit <= 0) {
+            return;
         }
 
         // one group, already present -> allowed
@@ -628,10 +628,8 @@ public class JpaTargetManagement
             return;
         }
         final List<String> existing = jpaRepository.findDistinctGroups(AccessContext.tenant());
-        final Set<String> existingCi = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
-        existingCi.addAll(existing);
 
-        wanted.removeAll(existingCi);
+        existing.forEach(wanted::remove);
         if (wanted.isEmpty()) {
             return; // no growth -> allowed
         }
