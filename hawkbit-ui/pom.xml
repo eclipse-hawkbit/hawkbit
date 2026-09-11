@@ -44,7 +44,7 @@
         <revision>0-SNAPSHOT</revision>
         <java.version>21</java.version>
         <vaadin.version>25.2.7</vaadin.version>
-        <springdoc-openapi.version>2.9.1</springdoc-openapi.version>
+        <springdoc-openapi.version>3.1.1</springdoc-openapi.version>
         <spring-cloud.version>2025.1.2</spring-cloud.version>
 
         <!-- Maven Plugin versions - START -->
