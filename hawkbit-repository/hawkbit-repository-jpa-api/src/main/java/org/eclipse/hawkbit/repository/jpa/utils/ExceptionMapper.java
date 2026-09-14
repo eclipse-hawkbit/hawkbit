@@ -86,6 +86,14 @@ public class ExceptionMapper {
             return replaceWithCauseIfConstraintViolationException(transactionSystemException);
         }
 
+        // Unwrap ThrottledException from JpaSystemException (happens when throttled during transaction)
+        if (e instanceof org.springframework.orm.jpa.JpaSystemException jpaEx) {
+            final Throwable rootCause = getRootCause(jpaEx);
+            if (rootCause instanceof org.eclipse.hawkbit.throttle.ThrottledException throttled) {
+                return throttled;
+            }
+        }
+
         for (final Class<?> mappedEx : MAPPED_EXCEPTION_ORDER) {
             if (!mappedEx.isAssignableFrom(e.getClass())) {
                 continue;
@@ -139,5 +147,13 @@ public class ExceptionMapper {
         } while (exception != null);
 
         return rex;
+    }
+
+    private static Throwable getRootCause(final Throwable throwable) {
+        Throwable cause = throwable;
+        while (cause.getCause() != null && cause.getCause() != cause) {
+            cause = cause.getCause();
+        }
+        return cause;
     }
 }

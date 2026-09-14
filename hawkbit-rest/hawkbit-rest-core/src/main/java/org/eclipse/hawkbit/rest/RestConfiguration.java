@@ -40,6 +40,7 @@ import org.eclipse.hawkbit.rest.exception.FileStreamingFailedException;
 import org.eclipse.hawkbit.rest.exception.MessageNotReadableException;
 import org.eclipse.hawkbit.rest.exception.MultiPartFileUploadException;
 import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
+import org.eclipse.hawkbit.throttle.ThrottledException;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -180,6 +181,27 @@ public class RestConfiguration {
                 responseStatus = DEFAULT_RESPONSE_STATUS;
             }
             return new ResponseEntity<>(response, responseStatus);
+        }
+
+        /**
+         * Handles {@link ThrottledException} raised by the per-tenant throttle,
+         * including when the transaction manager wraps it while opening a connection (Spring matches
+         * {@code @ExceptionHandler} against the cause chain). Responds 429 so clients back off.
+         *
+         * @param request the Http request
+         * @param ex the throttling exception which occurred
+         * @return a 429 response
+         */
+        @ExceptionHandler(ThrottledException.class)
+        public ResponseEntity<ExceptionInfo> handleThrottledException(final HttpServletRequest request, final ThrottledException ex) {
+            log.warn("Throttled request from tenant '{}' to {} {}: {}",
+                    org.eclipse.hawkbit.context.AccessContext.tenant(),
+                    request.getMethod(),
+                    request.getRequestURI(),
+                    ex.getMessage());
+
+            return ResponseEntity.status(TOO_MANY_REQUESTS)
+                    .body(createExceptionInfo(ex));
         }
 
         /**
