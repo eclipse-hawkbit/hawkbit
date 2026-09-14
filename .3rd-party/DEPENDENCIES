@@ -206,8 +206,8 @@ maven/mavencentral/org.skyscreamer/jsonassert/1.5.3, Apache-2.0, approved, clear
 maven/mavencentral/org.slf4j/jul-to-slf4j/2.0.18, MIT, approved, #7698
 maven/mavencentral/org.slf4j/slf4j-api/2.0.18, MIT, approved, #5915
 maven/mavencentral/org.snakeyaml/snakeyaml-engine/3.0.1, Apache-2.0, approved, clearlydefined
-maven/mavencentral/org.springdoc/springdoc-openapi-starter-common/3.1.1, , restricted, clearlydefined
-maven/mavencentral/org.springdoc/springdoc-openapi-starter-webmvc-api/3.1.1, , restricted, clearlydefined
+maven/mavencentral/org.springdoc/springdoc-openapi-starter-common/3.1.1, Apache-2.0, approved, #31036
+maven/mavencentral/org.springdoc/springdoc-openapi-starter-webmvc-api/3.1.1, Apache-2.0, approved, #31035
 maven/mavencentral/org.springdoc/springdoc-openapi-starter-webmvc-ui/3.1.1, Apache-2.0, approved, #30092
 maven/mavencentral/org.springframework.ai/mcp-spring-webmvc/2.0.1, Apache-2.0, approved, #28866
 maven/mavencentral/org.springframework.ai/spring-ai-autoconfigure-mcp-server-common/2.0.1, Apache-2.0, approved, #28868
