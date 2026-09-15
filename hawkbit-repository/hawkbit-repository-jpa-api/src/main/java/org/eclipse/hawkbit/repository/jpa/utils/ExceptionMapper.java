@@ -15,6 +15,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import jakarta.validation.ConstraintViolationException;
+
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.exception.GenericSpServerException;
@@ -24,10 +26,13 @@ import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
+import org.eclipse.hawkbit.throttle.ThrottledException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
+import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.TransactionSystemException;
 
 /**
@@ -66,7 +71,7 @@ public class ExceptionMapper {
     }
 
     /**
-     * Maps exceptions of the TransactionManager and PreAuthorize and wrap them to custom exceptions.
+     * Maps the exceptions of the TransactionManager and PreAuthorize and wrap them to custom exceptions.
      *
      * @param e the thrown and catch exception
      * @return the mapped exception
@@ -86,11 +91,11 @@ public class ExceptionMapper {
             return replaceWithCauseIfConstraintViolationException(transactionSystemException);
         }
 
-        // Unwrap ThrottledException from JpaSystemException (happens when throttled during transaction)
-        if (e instanceof org.springframework.orm.jpa.JpaSystemException jpaEx) {
-            final Throwable rootCause = getRootCause(jpaEx);
-            if (rootCause instanceof org.eclipse.hawkbit.throttle.ThrottledException throttled) {
-                return throttled;
+        // Unwrap wrapped ThrottledException (happens when throttled during transaction)
+        if (e instanceof JpaSystemException || e instanceof CannotCreateTransactionException) {
+            final Exception throttledEx = getCauseOfType(e, ThrottledException.class);
+            if (throttledEx != null) {
+                return throttledEx;
             }
         }
 
@@ -140,7 +145,7 @@ public class ExceptionMapper {
         Throwable exception = rex;
         do {
             final Throwable cause = exception.getCause();
-            if (cause instanceof jakarta.validation.ConstraintViolationException) {
+            if (cause instanceof ConstraintViolationException) {
                 return (Exception) cause;
             }
             exception = cause;
@@ -149,11 +154,16 @@ public class ExceptionMapper {
         return rex;
     }
 
-    private static Throwable getRootCause(final Throwable throwable) {
+    private static <T extends Exception> T getCauseOfType(final Throwable throwable, final Class<T> causeType) {
         Throwable cause = throwable;
-        while (cause.getCause() != null && cause.getCause() != cause) {
-            cause = cause.getCause();
-        }
-        return cause;
+        do {
+            if (causeType.isInstance(cause)) {
+                return causeType.cast(cause);
+            }
+            if (cause.getCause() == cause) {
+                break;
+            }
+        } while ((cause = cause.getCause()) != null);
+        return null;
     }
 }

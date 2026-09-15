@@ -41,9 +41,11 @@ import org.eclipse.hawkbit.rest.exception.MessageNotReadableException;
 import org.eclipse.hawkbit.rest.exception.MultiPartFileUploadException;
 import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
 import org.eclipse.hawkbit.throttle.ThrottledException;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
@@ -55,13 +57,16 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.filter.ShallowEtagHeaderFilter;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.multipart.MultipartException;
+import org.springframework.web.servlet.HandlerExceptionResolver;
 
 /**
- * Configuration for Rest api.
+ * Configuration for REST API.
  */
+@Slf4j
 @Configuration
 @EnableHypermediaSupport(type = { HypermediaType.HAL })
 public class RestConfiguration {
@@ -97,6 +102,45 @@ public class RestConfiguration {
     }
 
     /**
+     * Filter registration bean mapping {@link ThrottledException} to 429 when it is raised <em>upstream of the
+     * {@code DispatcherServlet}</em> — the security filter chain resolves tenant metadata, and that borrows a
+     * throttled connection. {@link ControllerAdvice} is only consulted by the servlet, so without this the container
+     * would turn a shed request into a 500.
+     *
+     * @param resolver the MVC exception resolver, reused so both paths render the same response
+     * @return the filter registration bean, ordered outermost so it also wraps the security chain
+     */
+    @Bean
+    FilterRegistrationBean<OncePerRequestFilter> throttledExceptionFilter(
+            @Qualifier("handlerExceptionResolver") final HandlerExceptionResolver resolver) {
+        final FilterRegistrationBean<OncePerRequestFilter> filterRegBean = new FilterRegistrationBean<>(new OncePerRequestFilter() {
+
+            @Override
+            protected void doFilterInternal(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain)
+                    throws ServletException, IOException {
+                try {
+                    chain.doFilter(request, response);
+                } catch (final Exception e) {
+                    // the transaction manager wraps it while opening a connection, so search the cause chain
+                    final ThrottledException throttled = ExceptionUtils.throwableOfType(e, ThrottledException.class);
+                    if (throttled == null || response.isCommitted()) {
+                        throw e; // precise rethrow: the try can only raise ServletException, IOException or unchecked
+                    }
+                    // null handler: matches the unrestricted ResponseExceptionHandler advice, so the body is identical
+                    if (resolver.resolveException(request, response, null, throttled) == null) {
+                        log.warn("Failed to resolve ThrottledException to 429", e);
+                        throw e;
+                    }
+                }
+            }
+        });
+        filterRegBean.addUrlPatterns("/*");
+        // Spring Security's chain registers at -100; anything later sits inside it and misses the throw
+        filterRegBean.setOrder(Ordered.HIGHEST_PRECEDENCE);
+        return filterRegBean;
+    }
+
+    /**
      * General controller advice for exception handling.
      */
     @Slf4j
@@ -128,6 +172,7 @@ public class RestConfiguration {
             ERROR_TO_HTTP_STATUS.put(SpServerError.SP_ARTIFACT_DELETE_FAILED, INTERNAL_SERVER_ERROR);
             ERROR_TO_HTTP_STATUS.put(SpServerError.SP_ARTIFACT_BINARY_DELETED, GONE);
             ERROR_TO_HTTP_STATUS.put(SpServerError.SP_ARTIFACT_LOAD_FAILED, INTERNAL_SERVER_ERROR);
+            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_THROTTLED, TOO_MANY_REQUESTS);
             ERROR_TO_HTTP_STATUS.put(SpServerError.SP_QUOTA_EXCEEDED, TOO_MANY_REQUESTS);
             ERROR_TO_HTTP_STATUS.put(SpServerError.SP_FILE_SIZE_QUOTA_EXCEEDED, TOO_MANY_REQUESTS);
             ERROR_TO_HTTP_STATUS.put(SpServerError.SP_STORAGE_QUOTA_EXCEEDED, TOO_MANY_REQUESTS);
@@ -181,27 +226,6 @@ public class RestConfiguration {
                 responseStatus = DEFAULT_RESPONSE_STATUS;
             }
             return new ResponseEntity<>(response, responseStatus);
-        }
-
-        /**
-         * Handles {@link ThrottledException} raised by the per-tenant throttle,
-         * including when the transaction manager wraps it while opening a connection (Spring matches
-         * {@code @ExceptionHandler} against the cause chain). Responds 429 so clients back off.
-         *
-         * @param request the Http request
-         * @param ex the throttling exception which occurred
-         * @return a 429 response
-         */
-        @ExceptionHandler(ThrottledException.class)
-        public ResponseEntity<ExceptionInfo> handleThrottledException(final HttpServletRequest request, final ThrottledException ex) {
-            log.warn("Throttled request from tenant '{}' to {} {}: {}",
-                    org.eclipse.hawkbit.context.AccessContext.tenant(),
-                    request.getMethod(),
-                    request.getRequestURI(),
-                    ex.getMessage());
-
-            return ResponseEntity.status(TOO_MANY_REQUESTS)
-                    .body(createExceptionInfo(ex));
         }
 
         /**
