@@ -26,7 +26,7 @@
     <properties>
         <spring-cloud-starter-openfeign.version>4.3.3</spring-cloud-starter-openfeign.version>
         <openfeign-hc5.version>13.15</openfeign-hc5.version>
-        <bouncycastle.version>1.85</bouncycastle.version>
+        <bouncycastle.version>1.86</bouncycastle.version>
         <java.version>${java.client.version}</java.version>
     </properties>
 
