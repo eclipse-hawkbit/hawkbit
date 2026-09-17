@@ -175,6 +175,8 @@ public class JpaSoftwareModule
     @Embeddable
     public static class JpaMetadataValue implements MetadataValue {
 
+        // Workaround : Explicitly include the key in mapping
+        // https://github.com/eclipse-ee4j/eclipselink/issues/2856
         @Column(name = "meta_key", length = SoftwareModule.METADATA_KEY_MAX_SIZE, updatable = false)
         private String key;
         @Column(name = "meta_value", length = SoftwareModule.METADATA_VALUE_MAX_SIZE)
