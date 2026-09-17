@@ -49,5 +49,13 @@
             <artifactId>protostuff-runtime</artifactId>
             <optional>true</optional>
         </dependency>
+
+        <!-- The throttle tests here drive a real pool to prove permits mirror borrowed connections; the rest of the
+             test stack resolves transitively, only the JDBC driver has to be declared. -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>
