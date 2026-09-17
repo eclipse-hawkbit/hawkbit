@@ -140,6 +140,10 @@ abstract class AbstractJpaRepositoryWithMetadataManagement<T extends AbstractJpa
     private boolean setMetadataValue(final String key, final MV newValue, final MVI existingValue, final Map<String, MVI> metadataValueMap) {
         if (useCopy) {
             final MVI jpaMetadataValue = existingValue == null ? metadataValueCreator.get() : existingValue;
+            if (jpaMetadataValue instanceof org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule.JpaMetadataValue smv) {
+                // Software Module Metadata case : make the map key part of the aggregate identity
+                smv.setKey(key);
+            }
             if (ObjectCopyUtil.copy(newValue, jpaMetadataValue, true, UnaryOperator.identity())) {
                 metadataValueMap.put(key, jpaMetadataValue);
                 return true;
