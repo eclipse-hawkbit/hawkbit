@@ -82,6 +82,7 @@ class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     private static final URI AMQP_URI = IpUtil.createAmqpUri("vHost", "mytest");
     private static final String TEST_TOKEN = "testToken";
     private static final String CONTROLLER_ID = "1";
+    private static final String EXTERNAL_REF = "external-system-reference";
 
     private AmqpMessageDispatcherService amqpMessageDispatcherService;
     private RabbitTemplate rabbitTemplate;
@@ -243,6 +244,7 @@ class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
         when(action.getId()).thenReturn(1L);
         when(action.getTenant()).thenReturn(TENANT);
         when(action.getTarget()).thenReturn(testTarget);
+        when(action.getExternalRef()).thenReturn(EXTERNAL_REF);
         final CancelTargetAssignmentEvent cancelTargetAssignmentDistributionSetEvent = new CancelTargetAssignmentEvent(action);
         final CancelTargetAssignmentServiceEvent serviceCancelTargetAssignmentDistributionSetEvent =
                 new CancelTargetAssignmentServiceEvent(cancelTargetAssignmentDistributionSetEvent);
@@ -322,6 +324,7 @@ class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
         assertThat(actionId.getActionId())
                 .as("Action ID should be 1")
                 .isOne();
+        assertThat(actionId.getExternalRef()).isEqualTo(EXTERNAL_REF);
         assertThat(sendMessage.getMessageProperties().getHeaders())
                 .as("The topc in the message should be a CANCEL_DOWNLOAD value")
                 .containsEntry(MessageHeaderKey.TOPIC, EventTopic.CANCEL_DOWNLOAD);

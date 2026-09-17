@@ -28,6 +28,7 @@ import java.util.concurrent.Callable;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionStatus;
 import org.eclipse.hawkbit.dmf.json.model.DmfBatchDownloadAndUpdateRequest;
+import org.eclipse.hawkbit.dmf.json.model.DmfDownloadAndUpdateRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfTarget;
 import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
@@ -45,6 +46,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TenantConfigurationCreatedEvent;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
+import org.eclipse.hawkbit.repository.model.DeploymentRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.RepositoryModelConstants;
@@ -84,10 +86,15 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
             @Expect(type = TargetPollEvent.class, count = 1) })
     void sendDownloadAndInstallStatus() {
         final String controllerId = TARGET_PREFIX + "sendDownloadAndInstallStatus";
-        registerTargetAndAssignDistributionSet(controllerId);
+        registerAndAssertTargetWithExistingTenant(controllerId);
+        final DistributionSet distributionSet = testdataFactory.createDistributionSet();
+        testdataFactory.addSoftwareModuleMetadata(distributionSet);
+        final String externalRef = "download-and-install-external-ref";
+        final DistributionSetAssignmentResult assignmentResult = assignDistributionSets(List.of(
+                DeploymentRequest.builder(controllerId, distributionSet.getId()).externalRef(externalRef).build())).get(0);
 
         waitUntilTargetHasStatus(controllerId, TargetUpdateStatus.PENDING);
-        assertDownloadAndInstallMessage(getDistributionSet().getModules(), controllerId);
+        assertDownloadAndInstallMessage(assignmentResult.getDistributionSet().getModules(), controllerId, externalRef);
     }
 
     /**
@@ -122,15 +129,15 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
      */
     @Test
     @ExpectEvents({
-            @Expect(type = TargetCreatedEvent.class, count = 1),
-            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
-            @Expect(type = ActionCreatedEvent.class, count = 1),
-            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
-            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
-            @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
-            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 9), // implicit lock
-            @Expect(type = TargetUpdatedEvent.class, count = 1),
-            @Expect(type = TargetPollEvent.class, count = 1) })
+        @Expect(type = TargetCreatedEvent.class, count = 1),
+        @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+        @Expect(type = ActionCreatedEvent.class, count = 1),
+        @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+        @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
+        @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
+        @Expect(type = SoftwareModuleUpdatedEvent.class, count = 9), // implicit lock
+        @Expect(type = TargetUpdatedEvent.class, count = 1),
+        @Expect(type = TargetPollEvent.class, count = 1) })
     void sendDownloadAndInstallStatusMessageDuringMaintenanceWindow() {
         final String controllerId = TARGET_PREFIX + "sendDAndIStatusMessageDuringWindow";
 
@@ -138,7 +145,7 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
         final DistributionSet distributionSet = testdataFactory.createDistributionSet();
         testdataFactory.addSoftwareModuleMetadata(distributionSet);
         assignDistributionSetWithMaintenanceWindow(distributionSet.getId(), controllerId, getTestSchedule(-5),
-                getTestDuration(10), getTestTimeZone());
+            getTestDuration(10), getTestTimeZone());
 
         waitUntilTargetHasStatus(controllerId, TargetUpdateStatus.PENDING);
         assertDownloadAndInstallMessage(distributionSet.getModules(), controllerId);
@@ -210,12 +217,20 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
             @Expect(type = TargetPollEvent.class, count = 2) })
     void sendCancelStatus() {
         final String controllerId = TARGET_PREFIX + "sendCancelStatus";
+        final String externalRef = "cancel-external-ref";
 
-        final Long actionId = registerTargetAndCancelActionId(controllerId);
+        registerAndAssertTargetWithExistingTenant(controllerId);
+        final DistributionSet distributionSet = testdataFactory.createDistributionSet();
+        testdataFactory.addSoftwareModuleMetadata(distributionSet);
+        final DistributionSetAssignmentResult assignmentResult = assignDistributionSets(List.of(
+                DeploymentRequest.builder(controllerId, distributionSet.getId()).externalRef(externalRef).build())).get(0);
+        final Long actionId = getFirstAssignedActionId(assignmentResult);
+        deploymentManagement.cancelAction(actionId);
+        assertCancelActionMessage(actionId, controllerId, externalRef);
 
         createAndSendThingCreated(controllerId);
         waitUntilTargetHasStatus(controllerId, TargetUpdateStatus.PENDING);
-        assertCancelActionMessage(actionId, controllerId);
+        assertCancelActionMessage(actionId, controllerId, externalRef);
     }
 
     /**
@@ -281,7 +296,13 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
             @Expect(type = TargetPollEvent.class, count = 1) })
     void downloadOnlyAssignmentSendsDownloadMessageTopic() {
         final String controllerId = TARGET_PREFIX + "registerTargets_1";
-        final DistributionSet distributionSet = createTargetAndDistributionSetAndAssign(controllerId, DOWNLOAD_ONLY);
+        registerAndAssertTargetWithExistingTenant(controllerId);
+        final DistributionSet distributionSet = testdataFactory.createDistributionSet();
+        testdataFactory.addSoftwareModuleMetadata(distributionSet);
+        final String externalRef = "download-only-external-ref";
+        assignDistributionSets(List.of(
+                DeploymentRequest.builder(controllerId, distributionSet.getId()).actionType(DOWNLOAD_ONLY)
+                        .externalRef(externalRef).build()));
 
         final Message message = assertReplyMessageHeader(EventTopic.DOWNLOAD, controllerId);
         Mockito.verifyNoInteractions(getDeadletterListener());
@@ -292,6 +313,10 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
                 .containsEntry("thingId", controllerId)
                 .containsEntry("type", EVENT.toString())
                 .containsEntry("topic", DOWNLOAD.toString());
+
+        final DmfDownloadAndUpdateRequest request =
+                (DmfDownloadAndUpdateRequest) getDmfClient().getMessageConverter().fromMessage(message);
+        assertThat(request.getExternalRef()).isEqualTo(externalRef);
 
         final Optional<Target> target = controllerManagement.findByControllerId(controllerId);
         assertThat(target).isPresent();
@@ -334,6 +359,7 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
         requestTargets.forEach(requestTarget -> {
             assertThat(requestTarget).isNotNull();
             assertThat(tokens.contains(requestTarget.getTargetSecurityToken()));
+            assertThat(requestTarget.getExternalRef()).isEqualTo("batch-external-ref-" + requestTarget.getControllerId());
         });
     }
 
@@ -369,7 +395,11 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
         final DistributionSet ds = testdataFactory.createDistributionSet();
         testdataFactory.addSoftwareModuleMetadata(ds);
 
-        assignDistributionSet(ds.getId(), targets, topic == BATCH_DOWNLOAD ? DOWNLOAD_ONLY : FORCED);
+        assignDistributionSets(targets.stream()
+                .map(controllerId -> DeploymentRequest.builder(controllerId, ds.getId())
+                        .actionType(topic == BATCH_DOWNLOAD ? DOWNLOAD_ONLY : FORCED)
+                        .externalRef("batch-external-ref-" + controllerId).build())
+                .toList());
 
         waitUntilEventMessagesAreDispatchedToTarget(topic);
 
@@ -403,11 +433,17 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
             @Expect(type = TenantConfigurationCreatedEvent.class, count = 1) })
     void sendConfirmStatus() {
         final String controllerId = TARGET_PREFIX + "sendConfirmStatus";
+        final String externalRef = "confirm-external-ref";
         enableConfirmationFlow();
-        registerTargetAndAssignDistributionSet(controllerId);
+        registerAndAssertTargetWithExistingTenant(controllerId);
+        final DistributionSet distributionSet = testdataFactory.createDistributionSet();
+        testdataFactory.addSoftwareModuleMetadata(distributionSet);
+        assignDistributionSets(List.of(
+                DeploymentRequest.builder(controllerId, distributionSet.getId()).confirmationRequired(true)
+                        .externalRef(externalRef).build()));
 
         waitUntilTargetHasStatus(controllerId, TargetUpdateStatus.PENDING);
-        assertConfirmMessage(getDistributionSet().getModules(), controllerId);
+        assertConfirmMessage(distributionSet.getModules(), controllerId, externalRef);
         assertEventMessageNotPresent(EventTopic.DOWNLOAD_AND_INSTALL);
     }
 
