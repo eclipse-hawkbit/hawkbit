@@ -25,9 +25,13 @@ import lombok.Data;
 public class DmfActionRequest {
 
     private final Long actionId;
+    private final String externalRef;
 
     @JsonCreator
-    public DmfActionRequest(@JsonProperty("actionId") final Long actionId) {
+    public DmfActionRequest(
+            @JsonProperty("actionId") final Long actionId,
+            @JsonProperty("externalRef") final String externalRef) {
         this.actionId = actionId;
+        this.externalRef = externalRef;
     }
 }
