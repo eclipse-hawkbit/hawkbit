@@ -87,7 +87,7 @@ public class JpaSoftwareModule
     @CollectionTable(
             name = "sp_sm_metadata",
             joinColumns = { @JoinColumn(name = "sm", nullable = false) })
-    @MapKeyColumn(name = "meta_key", length = SoftwareModule.METADATA_KEY_MAX_SIZE)
+    @MapKeyColumn(name = "meta_key", length = SoftwareModule.METADATA_KEY_MAX_SIZE, insertable = false, updatable = false)
     private Map<String, JpaMetadataValue> metadata;
 
     @Column(name = "locked")
@@ -175,6 +175,8 @@ public class JpaSoftwareModule
     @Embeddable
     public static class JpaMetadataValue implements MetadataValue {
 
+        @Column(name = "meta_key", length = SoftwareModule.METADATA_KEY_MAX_SIZE, updatable = false)
+        private String key;
         @Column(name = "meta_value", length = SoftwareModule.METADATA_VALUE_MAX_SIZE)
         @Size(max = METADATA_VALUE_MAX_SIZE)
         private String value;
