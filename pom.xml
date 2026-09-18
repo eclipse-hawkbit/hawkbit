@@ -63,11 +63,11 @@
         <spring-boot.version>4.1.1</spring-boot.version>
         <spring-cloud.version>2025.1.3</spring-cloud.version>
         <spring-ai.version>2.0.1</spring-ai.version>
-        <springdoc-openapi.version>3.1.0</springdoc-openapi.version>
+        <springdoc-openapi.version>3.1.1</springdoc-openapi.version>
 
         <!-- openfeign versions -->
         <spring-cloud-openfeign.version>5.0.3</spring-cloud-openfeign.version>
-        <openfeign-hc5.version>13.14</openfeign-hc5.version>
+        <openfeign-hc5.version>13.15</openfeign-hc5.version>
 
         <!-- Eclipselink - START -->
         <!--
@@ -89,7 +89,7 @@
 
         <!-- test -->
         <rabbitmq-http-client.version>5.7.0</rabbitmq-http-client.version>
-        <classgraph.version>4.8.194</classgraph.version>
+        <classgraph.version>4.8.195</classgraph.version>
         <awaitility.version>4.3.0</awaitility.version>
         <!-- Misc libraries versions - END -->
 
@@ -105,7 +105,7 @@
         <license-maven-plugin.version>5.1.2</license-maven-plugin.version>
         <central-publishing-maven-plugin.version>0.11.0</central-publishing-maven-plugin.version>
         <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
-        <spotless-maven-plugin.version>3.10.1</spotless-maven-plugin.version>
+        <spotless-maven-plugin.version>3.10.2</spotless-maven-plugin.version>
         <!-- Maven Plugin versions - END -->
 
         <!-- Test - START -->

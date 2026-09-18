@@ -138,6 +138,10 @@ public class HawkbitSecurityProperties {
          */
         private int maxRolloutGroupsPerRollout = 500;
         /**
+         * Maximum number of allowed distinct target groups.
+         */
+        private int maxTargetGroups = 100;
+        /**
          * Maximum number of messages per ActionStatus
          */
         private int maxMessagesPerActionStatus = 50;

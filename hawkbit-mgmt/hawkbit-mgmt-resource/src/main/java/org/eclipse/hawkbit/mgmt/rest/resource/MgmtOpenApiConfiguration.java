@@ -74,7 +74,7 @@ public class MgmtOpenApiConfiguration {
                     .bearerFormat("JWT")
                     .scheme("bearer"));
             if (!tokenUrl.isBlank()) {
-                securityRequirement.addList(BEARER_AUTH_SEC_SCHEME_NAME);
+                securityRequirement.addList(OAUTH2_AUTH_SEC_SCHEME_NAME);
                 securitySchemeMap.put(OAUTH2_AUTH_SEC_SCHEME_NAME, new SecurityScheme()
                         .description(OAUTH2_AUTH_SEC_SCHEME_NAME + DESCRIPTION_SUFFIX)
                         .type(SecurityScheme.Type.OAUTH2)

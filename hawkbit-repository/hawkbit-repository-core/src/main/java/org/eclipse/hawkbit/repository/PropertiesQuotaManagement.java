@@ -83,6 +83,11 @@ public class PropertiesQuotaManagement implements QuotaManagement {
     }
 
     @Override
+    public int getMaxTargetGroups() {
+        return securityProperties.getDos().getMaxTargetGroups();
+    }
+
+    @Override
     public int getMaxTargetDistributionSetAssignmentsPerManualAssignment() {
         return securityProperties.getDos().getMaxTargetDistributionSetAssignmentsPerManualAssignment();
     }

@@ -95,6 +95,9 @@ public enum SpServerError {
     SP_ARTIFACT_BINARY_DELETED(
             "hawkbit.server.error.artifact.binaryDeleted",
             "The artifact binary does not exist anymore."),
+    SP_THROTTLED(
+            "hawkbit.server.error.throttled",
+            "Too many requests are being processed. Please try again later."),
     SP_QUOTA_EXCEEDED(
             "hawkbit.server.error.quota.tooManyEntries",
             "Too many entries have been inserted."),

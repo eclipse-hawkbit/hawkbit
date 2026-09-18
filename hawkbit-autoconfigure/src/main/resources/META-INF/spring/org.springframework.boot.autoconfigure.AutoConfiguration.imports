@@ -5,3 +5,4 @@ org.eclipse.hawkbit.autoconfigure.scheduling.AsyncConfigurerAutoConfiguration
 org.eclipse.hawkbit.autoconfigure.scheduling.ExecutorAutoConfiguration
 org.eclipse.hawkbit.autoconfigure.security.SecurityAutoConfiguration
 org.eclipse.hawkbit.autoconfigure.security.StaticUserManagementAutoConfiguration
+org.eclipse.hawkbit.autoconfigure.throttle.ThrottleAutoConfiguration
