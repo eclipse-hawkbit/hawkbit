@@ -75,6 +75,20 @@ class SoftwareModuleManagementTest
     }
 
     /**
+     * Creating metadata entries with different keys but an identical value shall store all of them
+     */
+    @Test
+    void createMetadataWithSameValueForDifferentKeys() {
+        final SoftwareModule module = instance();
+
+        softwareModuleManagement.createMetadata(module.getId(), Map.of("test_125", new MetadataValueCreate("ACBTEST", false)));
+        assertThat(softwareModuleManagement.getMetadata(module.getId())).containsOnlyKeys("test_125");
+
+        softwareModuleManagement.createMetadata(module.getId(), Map.of("test_126", new MetadataValueCreate("ACBTEST", false)));
+        assertThat(softwareModuleManagement.getMetadata(module.getId())).containsOnlyKeys("test_125", "test_126");
+    }
+
+    /**
      * Deletes an artifact, which is not assigned to a Distribution Set
      */
     @Test

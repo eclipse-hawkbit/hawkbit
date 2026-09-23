@@ -43,6 +43,18 @@ See this [issue](https://github.com/eclipse-hawkbit/hawkbit/issues/952) for addi
 cancellation of updates.  
 To finally accept a cancellation, you must send a `closed` status.execution type.
 
+### Controller attributes
+
+Devices report configuration data (controller attributes) with:
+
+```
+PUT /{tenant}/controller/v1/{controllerId}/configData
+```
+
+Each attribute key and each attribute value is limited to 128 characters. Requests that exceed either limit are rejected.
+
+---
+
 ## REST Doc
 
 <div style="text-align: right; margin-bottom: 8px;">
