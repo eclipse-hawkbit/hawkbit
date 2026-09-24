@@ -192,4 +192,20 @@ class PropertyBasedArtifactUrlResolverTest {
                         "http://host.bumlux.net/" + TENANT + "/controller/v1/" +
                                 CONTROLLER_ID + "/softwaremodules/" + SOFTWARE_MODULE_ID + "/artifacts/" + FILENAME_ENCODED));
     }
+
+    /**
+     * Verifies that spaces in the file name are encoded as %20 (path encoding) and not as '+' (form encoding).
+     */
+    @Test
+    void urlGenerationWithSpaceAndPlusInFilename() {
+        properties.getProtocols().put("download-http", new UrlProtocol());
+
+        assertThat(urlHandlerUnderTest.getUrls(
+                new DownloadDescriptor(TENANT, CONTROLLER_ID, SOFTWARE_MODULE_ID, "asfinag provisioning+1.c2ximg", SHA1),
+                ArtifactUrlResolver.ApiType.DDI)).containsExactly(
+                new ArtifactUrl(
+                        "http".toUpperCase(), "download-http",
+                        HTTP_LOCALHOST + TENANT + "/controller/v1/" +
+                                CONTROLLER_ID + "/softwaremodules/" + SOFTWARE_MODULE_ID + "/artifacts/asfinag%20provisioning%2B1.c2ximg"));
+    }
 }
