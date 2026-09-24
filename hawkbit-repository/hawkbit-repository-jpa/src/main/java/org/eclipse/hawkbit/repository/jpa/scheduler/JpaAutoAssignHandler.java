@@ -48,8 +48,6 @@ import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Checks if targets need a new distribution set (DS) based on the auto assignments and assigns the new DS when necessary. First all active auto
@@ -94,7 +92,6 @@ public class JpaAutoAssignHandler implements AutoAssignHandler {
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void handleAll() {
         final long startNano = System.nanoTime();
 
@@ -263,7 +260,7 @@ public class JpaAutoAssignHandler implements AutoAssignHandler {
      */
     private int runTransactionalAssignment(final AutoAssignment autoAssignment, final List<String> controllerIds) {
         final String actionMessage = String.format(ACTION_MESSAGE, autoAssignment.getName());
-        return DeploymentHelper.runInNewTransaction(transactionManager, "autoAssignDSToTargets", Isolation.READ_COMMITTED.value(), status -> {
+        return DeploymentHelper.runInNewTransaction("autoAssignDSToTargets", Isolation.READ_COMMITTED.value(), status -> {
             final List<DeploymentRequest> deploymentRequests = mapToDeploymentRequests(controllerIds, autoAssignment);
             final int count = deploymentRequests.size();
             if (count > 0) {
@@ -272,7 +269,7 @@ public class JpaAutoAssignHandler implements AutoAssignHandler {
                         () -> deploymentManagement.assignDistributionSets(deploymentRequests, actionMessage));
             }
             return count;
-        });
+        }, transactionManager);
     }
 
     /**

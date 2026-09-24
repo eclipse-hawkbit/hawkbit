@@ -713,10 +713,10 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         }
 
         try {
-            events.stream().collect(Collectors.groupingBy(TargetPoll::getTenant))
+            events.stream()
+                    .collect(Collectors.groupingBy(TargetPoll::getTenant))
                     .forEach((tenant, polls) -> DeploymentHelper.runInNewTransaction(
-                            txManager, "flushUpdateQueue",
-                            status -> updateLastTargetQueries(tenant, polls)));
+                            "flushUpdateQueue", status -> updateLastTargetQueries(tenant, polls), txManager));
         } catch (final RuntimeException ex) {
             log.error("Failed to persist UpdateQueue content.", ex);
             return;
