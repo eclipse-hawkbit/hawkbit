@@ -66,7 +66,6 @@ import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionCancellationType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
@@ -559,16 +558,14 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         final long targetsInGroupFilter;
         if (!RolloutHelper.isRolloutRetried(rollout.getTargetFilterQuery())) { // default case
             targetsInGroupFilter = DeploymentHelper.runInNewTransaction(
-                    txManager,
-                    "countByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable",
-                    count -> countByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable(
-                            groupTargetFilter, readyGroups, rollout.getDistributionSet().getTypeId()));
+                    "countByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable", count -> countByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable(
+                            groupTargetFilter, readyGroups, rollout.getDistributionSet().getTypeId()), txManager
+            );
         } else { // if it is a rollout retry
             targetsInGroupFilter = DeploymentHelper.runInNewTransaction(
-                    txManager,
-                    "countByFailedRolloutAndNotInRolloutGroupsAndCompatible",
-                    count -> countByFailedRolloutAndNotInRolloutGroups(
-                            RolloutHelper.getIdFromRetriedTargetFilter(rollout.getTargetFilterQuery()), readyGroups));
+                    "countByFailedRolloutAndNotInRolloutGroupsAndCompatible", count -> countByFailedRolloutAndNotInRolloutGroups(
+                            RolloutHelper.getIdFromRetriedTargetFilter(rollout.getTargetFilterQuery()), readyGroups), txManager
+            );
         }
 
         final double percentFromTheRest;
@@ -580,9 +577,8 @@ public class JpaRolloutExecutor implements RolloutExecutor {
 
         final long expectedInGroup = Math.round(percentFromTheRest * targetsInGroupFilter / 100);
         long targetsLeftToAdd = expectedInGroup - DeploymentHelper.runInNewTransaction(
-                txManager,
-                "countRolloutTargetGroupByRolloutGroup",
-                count -> rolloutTargetGroupRepository.countByRolloutGroup(group));
+                "countRolloutTargetGroupByRolloutGroup", count -> rolloutTargetGroupRepository.countByRolloutGroup(group), txManager
+        );
         try {
             while (targetsLeftToAdd > 0) {
                 // Add up to TRANSACTION_TARGETS of the left targets. In case a TransactionException is thrown this loop aborts
@@ -606,7 +602,8 @@ public class JpaRolloutExecutor implements RolloutExecutor {
 
     private int assignTargetsToGroupInNewTransaction(
             final JpaRollout rollout, final RolloutGroup group, final String targetFilter, final long limit) {
-        return DeploymentHelper.runInNewTransaction(txManager, "assignTargetsToRolloutGroup", status -> {
+        // NB: new transaction in transaction
+        return DeploymentHelper.runInNewTransaction("assignTargetsToRolloutGroup", status -> {
             final PageRequest pageRequest = PageRequest.of(0, Math.toIntExact(limit));
             final List<Long> readyGroups = RolloutHelper.getGroupsByStatusIncludingGroup(
                     rollout.getRolloutGroups(), RolloutGroupStatus.READY, group);
@@ -622,7 +619,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
             rolloutTargetGroupRepository.saveAll(targets.stream().map(target -> new RolloutTargetGroup(group, target)).toList());
 
             return targets.getNumberOfElements();
-        });
+        }, txManager);
     }
 
     // return if group change is made
@@ -769,7 +766,8 @@ public class JpaRolloutExecutor implements RolloutExecutor {
     }
 
     private Long createActionsForTargetsInNewTransaction(final Rollout rollout, final RolloutGroup group) {
-        return DeploymentHelper.runInNewTransaction(txManager, "createActionsForTargets", status -> {
+        // NB: new transaction in transaction
+        return DeploymentHelper.runInNewTransaction("createActionsForTargets", status -> {
             final Slice<Target> targets = findByInRolloutGroupWithoutAction(
                     group.getId(), PageRequest.of(0, JpaRolloutExecutor.TRANSACTION_TARGETS));
 
@@ -782,7 +780,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
             }
 
             return Long.valueOf(targets.getNumberOfElements());
-        });
+        }, txManager);
     }
 
     /**

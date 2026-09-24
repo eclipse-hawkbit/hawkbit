@@ -461,17 +461,17 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     @Override
-    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void startScheduledActionsByRolloutGroupParent(final long rolloutId, final long distributionSetId, final Long rolloutGroupParentId) {
-        while (DeploymentHelper.runInNewTransaction(txManager, "startScheduledActions-" + rolloutId, status -> {
+        // NB: new transaction in transaction of caller
+        while (DeploymentHelper.runInNewTransaction("startScheduledActions-" + rolloutId, status -> {
             final PageRequest pageRequest = PageRequest.of(0, ACTION_PAGE_LIMIT);
             final Page<Action> groupScheduledActions;
             if (rolloutGroupParentId == null) {
                 groupScheduledActions = actionRepository.findByRolloutIdAndRolloutGroupParentIsNullAndStatus(
-                        pageRequest, rolloutId, Action.Status.SCHEDULED);
+                        pageRequest, rolloutId, Status.SCHEDULED);
             } else {
                 groupScheduledActions = actionRepository.findByRolloutIdAndRolloutGroupParentIdAndStatus(
-                        pageRequest, rolloutId, rolloutGroupParentId, Action.Status.SCHEDULED);
+                        pageRequest, rolloutId, rolloutGroupParentId, Status.SCHEDULED);
             }
 
             if (groupScheduledActions.getContent().isEmpty()) {
@@ -481,7 +481,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
                 startScheduledActions0(groupScheduledActions.getContent());
                 return groupScheduledActions.getTotalElements();
             }
-        }) > 0) ;
+        }, txManager) > 0) ;
     }
 
     @Override
@@ -830,15 +830,16 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         final JpaDistributionSet distributionSet;
         if (distributionSetManagement.shouldLockImplicitly(dsValidAndComplete)) {
             // implicitly lock, for some reason no update happen if lock in same transaction
+            // NB: new transaction in transaction
             distributionSet = DeploymentHelper.runInNewTransaction(
-                    txManager, "lockDistributionSet-" + dsId,
-                    status -> {
+                    "lockDistributionSet-" + dsId, status -> {
                         if (entityManager.contains(dsValidAndComplete)) {
                             return distributionSetManagement.lock(dsValidAndComplete);
                         } else {
                             return distributionSetManagement.lock(entityManager.merge(dsValidAndComplete));
                         }
-                    });
+                    }, txManager
+            );
         } else {
             distributionSet = dsValidAndComplete;
         }

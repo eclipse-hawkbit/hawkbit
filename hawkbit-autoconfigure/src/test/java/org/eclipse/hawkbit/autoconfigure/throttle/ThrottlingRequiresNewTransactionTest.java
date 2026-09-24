@@ -135,7 +135,7 @@ class ThrottlingRequiresNewTransactionTest {
     private static Throttle throttle(final int capacity, final Consumer<ThrottleConfig> customizer) {
         final ThrottleConfig config = new ThrottleConfig();
         config.setThreshold(0);
-        config.setSystemFloorPercent(0);
+        config.setSystemFloor(0);
         customizer.accept(config);
         return new Throttle(config.toPolicy(capacity));
     }

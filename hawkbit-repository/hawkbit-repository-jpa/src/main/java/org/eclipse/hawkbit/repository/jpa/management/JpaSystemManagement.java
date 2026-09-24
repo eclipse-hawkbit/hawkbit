@@ -193,7 +193,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
         }
 
         final String tenant = t.toUpperCase();
-        asTenant(tenant, () -> DeploymentHelper.runInNewTransaction(txManager, "deleteTenant", status -> {
+        asTenant(tenant, () -> DeploymentHelper.runInNewTransaction("deleteTenant", status -> {
             tenantMetaDataRepository.deleteByTenantIgnoreCase(tenant);
             tenantConfigurationRepository.deleteByTenant(tenant);
             targetRepository.deleteByTenant(tenant);
@@ -208,7 +208,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
             artifactStorage.deleteByTenant(tenant);
             softwareModuleTypeRepository.deleteByTenant(tenant);
             return null;
-        }));
+        }, txManager));
         EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new CacheEvictEvent.Default(tenant, null, null));
     }
 
@@ -286,9 +286,9 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
      * @return the initial created {@link TenantMetaData}
      */
     private TenantMetaData createInitialTenantMetaData(final String tenant) {
-        return asSystemAsTenant(tenant, () -> DeploymentHelper.runInNewTransaction(txManager, "initial-tenant-creation", status -> {
+        return asSystemAsTenant(tenant, () -> DeploymentHelper.runInNewTransaction("initial-tenant-creation", status -> {
             final DistributionSetType defaultDsType = createStandardSoftwareDataSetup();
             return tenantMetaDataRepository.save(new JpaTenantMetaData(defaultDsType, tenant));
-        }));
+        }, txManager));
     }
 }

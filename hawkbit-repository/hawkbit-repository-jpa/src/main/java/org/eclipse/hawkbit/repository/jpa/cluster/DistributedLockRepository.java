@@ -25,8 +25,6 @@ import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.integration.jdbc.lock.DefaultLockRepository;
 import org.springframework.integration.jdbc.lock.JdbcLockRegistry;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Repository for {@link JdbcLockRegistry}. This class is not thread safe.
@@ -63,7 +61,6 @@ public class DistributedLockRepository extends DefaultLockRepository {
         refreshAfterMillis = refreshAfterMS <= 0 ? null : refreshAfterMS;
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public boolean delete(final String lock) {
         synchronized (this) {

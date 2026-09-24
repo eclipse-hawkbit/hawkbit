@@ -60,7 +60,7 @@ class ThrottleTest {
         assertThat(throttle.stats().units()).isZero();
     }
 
-    // --- fair share ---
+    // --- ceilings ---
 
     @Test
     void rejectsOverCeilingImmediatelyWhenTimeoutZero() {
@@ -76,16 +76,30 @@ class ThrottleTest {
     }
 
     @Test
-    void dynamicShareShrinksAsMoreKeysCompete() {
-        final Throttle throttle = throttle(4);
+    void cappedKeyIsBoundedByItsLimitWhileOthersAreNot() {
+        // the point of a per-tenant override: one key is capped, every other key stays bounded only by the pool
+        final Throttle throttle = throttle(4, config -> config.getTenants().put("A", 2));
 
-        throttle.acquire("A", Duration.ZERO); // only A active => share 4
-        throttle.acquire("B", Duration.ZERO); // B active => share now ceil(4/2)=2
-        throttle.acquire("A", Duration.ZERO); // A=2, 1<2 ok
+        throttle.acquire("A", Duration.ZERO);
+        throttle.acquire("A", Duration.ZERO);
+        assertThat(throttle.stats().inUse("A")).isEqualTo(2); // at its ceiling
 
-        assertThat(throttle.stats().inUse("A")).isEqualTo(2);
-        // A is now at its fair share of 2 while B competes
         assertThatExceptionOfType(ThrottledException.class).isThrownBy(() -> throttle.acquire("A", Duration.ZERO));
+
+        // B opted out of any ceiling, so A's cap does not constrain it — it takes the rest of the pool
+        throttle.acquire("B", Duration.ZERO);
+        throttle.acquire("B", Duration.ZERO);
+        assertThat(throttle.stats().inUse("B")).isEqualTo(2);
+        assertThat(throttle.stats().inUse()).isEqualTo(4);
+    }
+
+    @Test
+    void tenantLimitMatchesConfiguredKeyRegardlessOfCase() {
+        // the configured key need not match the casing of the tenant id arriving from the security context
+        final Throttle throttle = throttle(4, config -> config.getTenants().put("acme", 1));
+
+        assertThat(throttle.acquire("ACME", Duration.ZERO)).isNotNull();
+        assertThatExceptionOfType(ThrottledException.class).isThrownBy(() -> throttle.acquire("ACME", Duration.ZERO));
     }
 
     @Test
@@ -167,7 +181,7 @@ class ThrottleTest {
 
     @Test
     void serviceRotatesAcrossKeysInsteadOfDrainingOneBacklog() throws Exception {
-        // cap 4 held entirely by X. A queues two waiters, B one. Fair share is ceil(4/3)=2, so A stays eligible for a
+        // cap 4 held entirely by X. A queues two waiters, B one. No key has a ceiling, so A stays eligible for a
         // second grant — only rotation stops it being served twice before B is looked at.
         final Throttle throttle = throttle(4);
         final List<Permit> held = new ArrayList<>();
@@ -205,8 +219,8 @@ class ThrottleTest {
 
     @Test
     void internalWorkIsServedAheadOfWaitingTenantsUpToItsFloor() throws Exception {
-        // cap 2, 50% => floor of 1 for the null key
-        final Throttle throttle = throttle(2, config -> config.setSystemFloorPercent(50));
+        // cap 2, floor of 1 slot for the null key
+        final Throttle throttle = throttle(2, config -> config.setSystemFloor(1));
         final Permit t1 = throttle.acquire("acme", Duration.ZERO);
         final Permit t2 = throttle.acquire("acme", Duration.ZERO);
         assertThat(throttle.stats().inUse()).isEqualTo(2); // full
@@ -238,9 +252,8 @@ class ThrottleTest {
 
     @Test
     void internalWorkLosesPriorityAboveItsFloor() throws Exception {
-        // cap 4, 25% => floor of 1, which internal work already holds, so it queues behind the earlier tenant.
-        // Distinct filler keys: with 4 active keys the fair share is 1 each, so all four slots fill.
-        final Throttle throttle = throttle(4, config -> config.setSystemFloorPercent(25));
+        // cap 4, floor of 1 slot, which internal work already holds, so it queues behind the earlier tenant
+        final Throttle throttle = throttle(4, config -> config.setSystemFloor(1));
         final Permit systemHeld = throttle.acquire(null, Duration.ZERO);
         final List<Permit> filler = new ArrayList<>();
         for (final String key : List.of("acme", "bosch", "ciena")) {
@@ -323,7 +336,7 @@ class ThrottleTest {
     }
 
     @Test
-    void childBypassesFairShare() {
+    void childBypassesCeiling() {
         // ceiling of 1 for every key, but a unit of work already inside must be able to finish
         final Throttle throttle = throttle(4, config -> config.setLimit(1));
 
@@ -384,8 +397,8 @@ class ThrottleTest {
 
     /**
      * Builds the engine through the production {@link ThrottleConfig#toPolicy} path rather than a hand-rolled policy,
-     * so the percent→slots conversion and the per-tenant limit lookup are covered too. Threshold 0 means always
-     * contended, i.e. fair share is enforced from the first permit — the interesting mode for every test here.
+     * so the per-tenant limit lookup is covered too. Threshold 0 means always contended, i.e. ceilings are enforced
+     * from the first permit — the interesting mode for every test here.
      */
     private static Throttle throttle(final int capacity) {
         return throttle(capacity, config -> { });
@@ -394,7 +407,7 @@ class ThrottleTest {
     private static Throttle throttle(final int capacity, final Consumer<ThrottleConfig> customizer) {
         final ThrottleConfig config = new ThrottleConfig();
         config.setThreshold(0);
-        config.setSystemFloorPercent(0); // priority off unless a test opts in; the property default is 50
+        config.setSystemFloor(0); // priority off unless a test opts in; the property default is 1
         customizer.accept(config);
         return new Throttle(config.toPolicy(capacity));
     }
