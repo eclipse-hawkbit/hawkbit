@@ -33,6 +33,11 @@ public class DmfConfirmRequest extends DmfActionRequest {
     private final String targetSecurityToken;
     private final List<DmfSoftwareModule> softwareModules;
 
+    public DmfConfirmRequest(
+            final Long actionId, final String targetSecurityToken, final List<DmfSoftwareModule> softwareModules) {
+        this(actionId, targetSecurityToken, softwareModules, null);
+    }
+
     @JsonCreator
     public DmfConfirmRequest(
             @JsonProperty("actionId") final Long actionId,

@@ -344,7 +344,7 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
 
     protected void assertDmfBatchDownloadAndUpdateRequest(final DmfBatchDownloadAndUpdateRequest request,
             final Set<SoftwareModule> softwareModules,
-            final List<String> controllerIds) {
+            final List<String> controllerIds, final Map<String, String> externalRefs) {
         assertSoftwareModules(softwareModules, request.getSoftwareModules());
 
         final List<String> tokens = controllerIds.stream().map(controllerId -> {
@@ -355,11 +355,11 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
 
         final List<DmfTarget> requestTargets = request.getTargets();
 
-        assertThat(requestTargets).hasSameSizeAs(controllerIds);
+        assertThat(requestTargets).extracting(DmfTarget::getControllerId).containsExactlyInAnyOrderElementsOf(controllerIds);
         requestTargets.forEach(requestTarget -> {
             assertThat(requestTarget).isNotNull();
-            assertThat(tokens.contains(requestTarget.getTargetSecurityToken()));
-            assertThat(requestTarget.getExternalRef()).isEqualTo("batch-external-ref-" + requestTarget.getControllerId());
+            assertThat(tokens).contains(requestTarget.getTargetSecurityToken());
+            assertThat(requestTarget.getExternalRef()).isEqualTo(externalRefs.get(requestTarget.getControllerId()));
         });
     }
 
@@ -395,10 +395,14 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
         final DistributionSet ds = testdataFactory.createDistributionSet();
         testdataFactory.addSoftwareModuleMetadata(ds);
 
+        // The third target intentionally has no external reference.
+        final Map<String, String> externalRefs = Map.of(
+                targets.get(0), "batch-external-ref-1",
+                targets.get(1), "batch-external-ref-2");
         final List<DeploymentRequest> requests = targets.stream()
                 .map(controllerId -> DeploymentRequest.builder(controllerId, ds.getId())
                         .actionType(topic == BATCH_DOWNLOAD ? DOWNLOAD_ONLY : FORCED)
-                        .externalRef("batch-external-ref-" + controllerId).build())
+                        .externalRef(externalRefs.get(controllerId)).build())
                 .toList();
         final List<DistributionSetAssignmentResult> results = deploymentManagement.assignDistributionSets(requests, null);
         assertThat(results).hasSize(1);
@@ -416,7 +420,7 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
                 .getMessageConverter().fromMessage(message);
 
         assertThat(batchRequest).isExactlyInstanceOf(DmfBatchDownloadAndUpdateRequest.class);
-        assertDmfBatchDownloadAndUpdateRequest(batchRequest, ds.getModules(), targets);
+        assertDmfBatchDownloadAndUpdateRequest(batchRequest, ds.getModules(), targets, externalRefs);
     }
 
     /**

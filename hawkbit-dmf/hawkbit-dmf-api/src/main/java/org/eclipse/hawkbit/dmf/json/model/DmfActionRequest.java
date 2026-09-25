@@ -27,6 +27,10 @@ public class DmfActionRequest {
     private final Long actionId;
     private final String externalRef;
 
+    public DmfActionRequest(final Long actionId) {
+        this(actionId, null);
+    }
+
     @JsonCreator
     public DmfActionRequest(
             @JsonProperty("actionId") final Long actionId,

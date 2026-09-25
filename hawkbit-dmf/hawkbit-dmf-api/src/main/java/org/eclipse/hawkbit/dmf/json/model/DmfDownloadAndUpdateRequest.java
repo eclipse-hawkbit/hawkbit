@@ -33,6 +33,11 @@ public class DmfDownloadAndUpdateRequest extends DmfActionRequest {
     private final String targetSecurityToken;
     private final List<DmfSoftwareModule> softwareModules;
 
+    public DmfDownloadAndUpdateRequest(
+            final Long actionId, final String targetSecurityToken, final List<DmfSoftwareModule> softwareModules) {
+        this(actionId, targetSecurityToken, softwareModules, null);
+    }
+
     @JsonCreator
     public DmfDownloadAndUpdateRequest(
             @JsonProperty("actionId") final Long actionId,

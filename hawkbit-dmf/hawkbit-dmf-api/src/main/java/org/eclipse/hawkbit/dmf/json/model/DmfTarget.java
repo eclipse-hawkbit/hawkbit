@@ -31,6 +31,10 @@ public class DmfTarget {
     private final String targetSecurityToken;
     private final String externalRef;
 
+    public DmfTarget(final Long actionId, final String controllerId, final String targetSecurityToken) {
+        this(actionId, controllerId, targetSecurityToken, null);
+    }
+
     @JsonCreator
     public DmfTarget(
             @JsonProperty("actionId") final Long actionId,
