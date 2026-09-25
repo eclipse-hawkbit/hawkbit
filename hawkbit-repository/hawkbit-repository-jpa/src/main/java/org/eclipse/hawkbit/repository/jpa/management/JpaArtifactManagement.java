@@ -195,7 +195,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
      * @param sha1Hash no longer needed
      */
     void clearArtifactBinary(final String sha1Hash) {
-        DeploymentHelper.runInNewTransaction(txManager, "clearArtifactBinary", status -> {
+        DeploymentHelper.runInNewTransaction("clearArtifactBinary", status -> {
             // countBySha1HashAndTenantAndSoftwareModuleDeletedIsFalse will skip ACM checks and will return total count as it should be
             if (artifactRepository.countBySha1HashAndTenantAndSoftwareModuleDeletedIsFalse(sha1Hash, AccessContext.tenant()) <= 0) {
                 // removes the real artifact ONLY AFTER the delete of artifact or software module
@@ -210,7 +210,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
                 });
             } // else there are still other artifacts that need the binary
             return null;
-        });
+        }, txManager);
     }
 
     private StoredArtifactInfo storeArtifact(final ArtifactUpload artifactUpload, final boolean isSmEncrypted) {

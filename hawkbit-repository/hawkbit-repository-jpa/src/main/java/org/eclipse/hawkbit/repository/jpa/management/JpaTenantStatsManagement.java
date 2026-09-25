@@ -17,7 +17,6 @@ import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
 import org.eclipse.hawkbit.repository.model.report.TenantUsage;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
@@ -41,7 +40,7 @@ public class JpaTenantStatsManagement implements TenantStatsManagement {
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional(readOnly = true)
     public TenantUsage getStatsOfTenant() {
         final String tenant = AccessContext.tenant();
 

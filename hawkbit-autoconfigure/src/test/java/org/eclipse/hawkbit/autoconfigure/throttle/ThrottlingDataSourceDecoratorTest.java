@@ -185,7 +185,7 @@ class ThrottlingDataSourceDecoratorTest {
     private static Throttle throttle(final int capacity, final Consumer<ThrottleConfig> customizer) {
         final ThrottleConfig config = new ThrottleConfig();
         config.setThreshold(0); // always contended: fair share enforced from the first permit
-        config.setSystemFloorPercent(0); // priority off unless a test opts in
+        config.setSystemFloor(0); // priority off unless a test opts in
         customizer.accept(config);
         return new Throttle(config.toPolicy(capacity));
     }

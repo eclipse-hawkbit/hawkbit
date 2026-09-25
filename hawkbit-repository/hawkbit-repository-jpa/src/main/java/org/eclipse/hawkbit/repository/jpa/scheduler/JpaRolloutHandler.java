@@ -104,13 +104,13 @@ public class JpaRolloutHandler implements RolloutHandler {
     // run in a tenant context, i.e. Security.getCurrentTenant() returns the tenant the rollout is made for
     private void handleRolloutInNewTransaction(final long rolloutId, final String handlerId) {
         final long startNano = System.nanoTime();
-
-        DeploymentHelper.runInNewTransaction(txManager, handlerId + "-" + rolloutId, status -> {
+        // NB: new transaction in transaction
+        DeploymentHelper.runInNewTransaction(handlerId + "-" + rolloutId, status -> {
             rolloutManagement.find(rolloutId).ifPresentOrElse(
                     rolloutExecutor::execute,
                     () -> log.error("Could not retrieve rollout with id {}. Will not continue with execution.", rolloutId));
             return 0L;
-        });
+        }, txManager);
 
         meterRegistry // handle single rollout
                 .map(mReg -> mReg.timer(

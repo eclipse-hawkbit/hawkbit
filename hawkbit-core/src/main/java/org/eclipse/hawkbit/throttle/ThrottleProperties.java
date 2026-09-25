@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.throttle;
 
 import java.time.Duration;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.function.ToIntFunction;
 
@@ -18,6 +19,7 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.throttle.Throttle.Policy;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.util.LinkedCaseInsensitiveMap;
 
 /**
  * Operator-owned per-tenant throttling configuration.  Caps how many of the shared object per domain (e.g. DB connection pool's slots)
@@ -69,21 +71,20 @@ public class ThrottleProperties {
 
         /**
          * Contention threshold (absolute slot count). When global in-use reaches this threshold, fairness
-         * enforcement activates: each tenant is capped at its dynamic fair share (capacity / activeTenants,
-         * clamped to its limit). Below the threshold, any tenant may burst freely up to pool capacity.
+         * enforcement activates: each tenant is served in round-robin, capped by its limit.
+         * Below the threshold, any tenant may burst freely up to pool capacity.
          * {@code -1} = no threshold (always enforce hard cap on tenant limit, 0 or any < -1 is essentially the same).
          * Default: -1 (hard cap mode).
          */
         private int threshold = -1;
 
         /**
-         * Global per-tenant ceiling on concurrent connection borrows. {@code -1} = no ceiling (bounded
-         * only by the dynamic fair share).
+         * Global per-tenant ceiling on concurrent connection borrows. {@code -1} = no ceiling.
          */
         private int limit = -1;
 
         /**
-         * Share of capacity (percent) that internal, non-tenant work is served ahead of the queue for. Internal work
+         * Capacity that internal, non-tenant work is served ahead of the queue for. Internal work
          * is charged to the {@code null} key — schedulers, migrations and health checks run without a tenant context.
          *
          * <p>A floor it cannot be starved below, not a cap: beyond it system work competes as an ordinary key, so it
@@ -91,7 +92,7 @@ public class ThrottleProperties {
          * use those slots freely whenever system work is not. {@code 0} disables the priority. Must resolve to fewer
          * slots than {@link #capacity}, or tenant work may never be reached; the policy warns if it does not.
          */
-        private int systemFloorPercent = PolicyImpl.DEFAULT_SYSTEM_FLOOR_PERCENT;
+        private int systemFloor = 1; // default - at least 1 slot with priority for internal work
 
         /**
          * Max wait for a permit before {@link ThrottledException} (→ HTTP 429). {@code 0} fast-rejects
@@ -102,23 +103,21 @@ public class ThrottleProperties {
         private Duration timeout = Duration.ZERO;
 
         /** Operator-only per-tenant limit overrides (tenant id → limit; {@code -1} = opt out). */
-        private final Map<String, Integer> tenants = new HashMap<>();
+        private final LinkedCaseInsensitiveMap<Integer> tenants = new LinkedCaseInsensitiveMap<>(Locale.ROOT);
 
         /**
          * Resolve the effective limit for a specific tenant.
          *
          * @param tenant the tenant identifier
          * @return the per-tenant ceiling: the tenant override if set in {@link #tenants}, else the global
-         *         {@link #limit}. {@code -1} = unlimited (bounded only by capacity and dynamic fair share).
+         *         {@link #limit}. {@code -1} = unlimited (bounded only by capacity).
          */
         public int limit(final String tenant) {
             return tenants.getOrDefault(tenant, limit);
         }
 
         public Policy toPolicy(final int capacity) {
-            return new PolicyImpl(
-                    capacity, getThreshold(), this::limit,
-                    Math.clamp(Math.round(capacity * (getSystemFloorPercent() / 100f)), 0, capacity));
+            return new PolicyImpl(capacity, getThreshold(), this::limit, Math.clamp(systemFloor, 0, capacity));
         }
     }
 
@@ -134,9 +133,6 @@ public class ThrottleProperties {
     @Slf4j
     private record PolicyImpl(int capacity, int burstThreshold, ToIntFunction<String> ceilings, int systemFloor) implements Policy {
 
-        /** Share of capacity internal work gets priority access to, when not configured otherwise. */
-        public static final int DEFAULT_SYSTEM_FLOOR_PERCENT = 50;
-
         public PolicyImpl {
             // Priority-floor admissions are served before the fair-share pass, so if the granted floor can cover the whole
             // resource there is no arrival order in which a non-priority key is reached. Warn rather than reject: the
@@ -144,7 +140,7 @@ public class ThrottleProperties {
             if (systemFloor >= capacity) {
                 log.warn("""
                                 Throttle system floor ({}) is not below capacity ({}): priority admissions can consume the whole \
-                                resource, so tenant work may never be served. Lower hawkbit.throttle.db.system-floor-percent.""",
+                                resource, so tenant work may never be served. Lower hawkbit.throttle.<resource>.system-floor.""",
                         systemFloor, capacity);
             }
         }

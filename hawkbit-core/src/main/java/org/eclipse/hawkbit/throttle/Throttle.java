@@ -14,10 +14,8 @@ import java.util.ArrayDeque;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -43,7 +41,7 @@ import lombok.extern.slf4j.Slf4j;
  *   <li>Keys below their {@link Policy#priorityFloor(String)} — a floor internal work cannot be starved below, costing no reserved capacity,
  *       since tenants use those slots freely whenever internal work is not.</li>
  *   <li>Below {@link Policy#burstThreshold()} — anyone may burst.</li>
- *   <li>At or above the threshold — dynamic fair share, {@code min(ceiling, capacity / activeKeys)}.</li>
+ *   <li>At or above the threshold — round-robin + ceiling bound share.</li>
  * </ol>
  *
  * <p><b>Fairness across keys is round-robin, not first-come-first-served by key.</b> Waiters queue per key, and the keys
@@ -223,28 +221,18 @@ public class Throttle {
             return waitersByKey.get(key).peekFirst();
         }
 
-        // tier 4: dynamic fair share
-        final int active = countActiveKeys();
-        final int dynamicShare = Math.ceilDiv(capacity, active);
+        // tier 4: up to ceiling share
         for (final String key : waitingKeys) {
             final int keyCeiling = ceiling(key);
-            final int fairShare = Math.min(keyCeiling, dynamicShare);
             final int keyCurrent = perKeyInUse.getOrDefault(key, 0);
-            final boolean admit = keyCurrent < fairShare;
-            log.debug("grantNextEligible[{}] → {} (current={}, fairShare=min({}, {})={}, global={}/{}, active={}, threshold={})",
-                    key, admit, keyCurrent, keyCeiling, dynamicShare, fairShare, global, capacity, active, threshold);
+            final boolean admit = keyCurrent < keyCeiling;
+            log.debug("grantNextEligible[{}] → {} (current={}, ceiling={}, global={}/{}, threshold={})",
+                    key, admit, keyCurrent, keyCeiling, global, capacity, threshold);
             if (admit) {
                 return waitersByKey.get(key).peekFirst();
             }
         }
         return null;
-    }
-
-    // Count total active keys (holding + waiting). Must be called under lock
-    private int countActiveKeys() {
-        final Set<String> all = new HashSet<>(perKeyInUse.keySet());
-        all.addAll(waitingKeys);
-        return all.size();
     }
 
     private int ceiling(final String key) {

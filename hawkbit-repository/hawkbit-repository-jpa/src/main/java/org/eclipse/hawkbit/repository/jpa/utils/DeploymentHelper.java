@@ -78,27 +78,28 @@ public final class DeploymentHelper {
     /**
      * Executes the modifying action in new transaction
      *
-     * @param txManager transaction manager interface
      * @param transactionName the name of the new transaction
      * @param action the callback to execute in new tranaction
+     * @param txManager transaction manager interface
      * @return the result of the action
      */
-    public static <T> T runInNewTransaction(@NotNull final PlatformTransactionManager txManager,
-            final String transactionName, @NotNull final TransactionCallback<T> action) {
-        return runInNewTransaction(txManager, transactionName, Isolation.DEFAULT.value(), action);
+    public static <T> T runInNewTransaction(
+            final String transactionName, @NotNull final TransactionCallback<T> action, @NotNull final PlatformTransactionManager txManager) {
+        return runInNewTransaction(transactionName, Isolation.DEFAULT.value(), action, txManager);
     }
 
     /**
      * Executes the modifying action in new transaction
      *
-     * @param txManager transaction manager interface
      * @param transactionName the name of the new transaction
      * @param isolationLevel isolation level of the new transaction
      * @param action the callback to execute in new tranaction
+     * @param txManager transaction manager interface
      * @return the result of the action
      */
-    public static <T> T runInNewTransaction(@NotNull final PlatformTransactionManager txManager,
-            final String transactionName, final int isolationLevel, @NotNull final TransactionCallback<T> action) {
+    public static <T> T runInNewTransaction(
+            final String transactionName, final int isolationLevel, @NotNull final TransactionCallback<T> action,
+            @NotNull final PlatformTransactionManager txManager) {
         final DefaultTransactionDefinition def = new DefaultTransactionDefinition();
         def.setName(transactionName);
         def.setReadOnly(false);
