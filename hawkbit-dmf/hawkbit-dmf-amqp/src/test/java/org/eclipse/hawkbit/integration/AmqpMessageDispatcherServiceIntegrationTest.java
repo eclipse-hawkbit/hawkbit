@@ -395,11 +395,14 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
         final DistributionSet ds = testdataFactory.createDistributionSet();
         testdataFactory.addSoftwareModuleMetadata(ds);
 
-        assignDistributionSets(targets.stream()
+        final List<DeploymentRequest> requests = targets.stream()
                 .map(controllerId -> DeploymentRequest.builder(controllerId, ds.getId())
                         .actionType(topic == BATCH_DOWNLOAD ? DOWNLOAD_ONLY : FORCED)
                         .externalRef("batch-external-ref-" + controllerId).build())
-                .toList());
+                .toList();
+        final List<DistributionSetAssignmentResult> results = deploymentManagement.assignDistributionSets(requests, null);
+        assertThat(results).hasSize(1);
+        assertThat(results.get(0).getAssignedEntity()).hasSize(targets.size());
 
         waitUntilEventMessagesAreDispatchedToTarget(topic);
 
