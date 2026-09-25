@@ -124,7 +124,7 @@ public class PropertyBasedArtifactUrlResolver implements ArtifactUrlResolver {
         replaceMap.put(TENANT_PLACEHOLDER, placeholder.tenant());
         replaceMap.put(CONTROLLER_ID_PLACEHOLDER, placeholder.controllerId());
         replaceMap.put(SOFTWARE_MODULE_ID_PLACEHOLDER, String.valueOf(placeholder.softwareModuleId()));
-        replaceMap.put(ARTIFACT_FILENAME_PLACEHOLDER, URLEncoder.encode(placeholder.filename(), StandardCharsets.UTF_8));
+        replaceMap.put(ARTIFACT_FILENAME_PLACEHOLDER, URLEncoder.encode(placeholder.filename(), StandardCharsets.UTF_8).replace("+", "%20"));
         replaceMap.put(ARTIFACT_SHA1_PLACEHOLDER, placeholder.sha1());
         return replaceMap;
     }

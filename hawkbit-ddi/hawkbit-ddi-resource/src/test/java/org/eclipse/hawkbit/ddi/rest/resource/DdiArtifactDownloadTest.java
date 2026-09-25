@@ -34,13 +34,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import com.jayway.jsonpath.JsonPath;
 import org.eclipse.hawkbit.auth.SpRole;
 import org.eclipse.hawkbit.ddi.rest.resource.DdiArtifactDownloadTest.DownloadTestConfiguration;
 import org.eclipse.hawkbit.repository.event.remote.DownloadProgressEvent;
@@ -59,6 +62,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
+import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MvcResult;
@@ -188,6 +192,40 @@ class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
         synchronized (DdiArtifactDownloadTest.class) {
             assertThat(downloadProgress).isEqualTo(10);
             assertThat(shippedBytes).isEqualTo(artifactSize);
+        }
+    }
+
+    /**
+     * Verifies that the download links provided in the deployment base are valid for file names with spaces and plus signs.
+     */
+    @Test
+    void downloadThroughGeneratedLinksWithSpecialCharactersInFileName() throws Exception {
+        final List<String> filenames = List.of("asfinag provisioning.c2ximg", "a+b c.bin");
+        for (int i = 0; i < filenames.size(); i++) {
+            final String filename = filenames.get(i);
+            final Target target = testdataFactory.createTarget("target" + i);
+            final DistributionSet ds = testdataFactory.createDistributionSet("ds" + i);
+            final Long moduleId = ds.getModules().iterator().next().getId();
+            final byte[] randomBytes = nextBytes(1024);
+            final Artifact artifact = artifactManagement.create(
+                    new ArtifactUpload(new ByteArrayInputStream(randomBytes), null, randomBytes.length, null, moduleId, filename, false));
+            final Long actionId = getFirstAssignedActionId(assignDistributionSet(ds, target));
+
+            final String deploymentBase = performGet(DEPLOYMENT_BASE, MediaTypes.HAL_JSON, status().isOk(),
+                    tenant(), target.getControllerId(), actionId.toString()).andReturn().getResponse().getContentAsString();
+            final String artifactPath = "$.deployment.chunks[*].artifacts[?(@.filename=='" + filename + "')]._links.";
+            final List<String> downloadLinks = JsonPath.read(deploymentBase, artifactPath + "download-http.href");
+            final List<String> md5Links = JsonPath.read(deploymentBase, artifactPath + "md5sum-http.href");
+            assertThat(downloadLinks).hasSize(1);
+            assertThat(md5Links).hasSize(1);
+
+            assertArrayEquals(randomBytes, mvc.perform(get(URI.create(downloadLinks.get(0))))
+                    .andExpect(status().isOk())
+                    .andReturn().getResponse().getContentAsByteArray());
+            assertThat(mvc.perform(get(URI.create(md5Links.get(0))))
+                    .andExpect(status().isOk())
+                    .andReturn().getResponse().getContentAsString())
+                    .isEqualTo(artifact.getMd5Hash() + "  " + filename);
         }
     }
 
