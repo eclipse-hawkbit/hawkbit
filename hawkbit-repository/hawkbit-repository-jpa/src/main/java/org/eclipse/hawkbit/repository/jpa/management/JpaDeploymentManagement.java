@@ -481,7 +481,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
                 startScheduledActions0(groupScheduledActions.getContent());
                 return groupScheduledActions.getTotalElements();
             }
-        }, txManager) > 0) ;
+        }, txManager) > 0);
     }
 
     @Override
@@ -838,8 +838,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
                         } else {
                             return distributionSetManagement.lock(entityManager.merge(dsValidAndComplete));
                         }
-                    }, txManager
-            );
+                    }, txManager);
         } else {
             distributionSet = dsValidAndComplete;
         }

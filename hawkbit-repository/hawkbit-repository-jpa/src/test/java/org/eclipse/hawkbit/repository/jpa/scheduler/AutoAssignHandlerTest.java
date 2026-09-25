@@ -55,7 +55,7 @@ class AutoAssignHandlerTest {
     @Mock
     private DeploymentManagement deploymentManagement;
     @Mock
-    private PlatformTransactionManager transactionManager;
+    private PlatformTransactionManager txManager;
 
     @Mock
     LockRegistry<Lock> lockRegistry;
@@ -65,7 +65,7 @@ class AutoAssignHandlerTest {
     @BeforeEach
     void before() {
         autoAssignHandler = new JpaAutoAssignHandler(
-                autoAssignmentManagement, targetManagement, deploymentManagement, transactionManager, lockRegistry, Optional.empty());
+                autoAssignmentManagement, targetManagement, deploymentManagement, txManager, lockRegistry, Optional.empty());
     }
 
     /**

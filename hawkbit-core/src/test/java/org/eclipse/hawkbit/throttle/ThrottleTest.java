@@ -15,13 +15,17 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
-import org.eclipse.hawkbit.throttle.ThrottleProperties.ThrottleConfig;
+import org.eclipse.hawkbit.throttle.Config.Policy;
+import org.eclipse.hawkbit.throttle.Config.Priority;
 import org.junit.jupiter.api.Test;
 
 class ThrottleTest {
@@ -396,9 +400,9 @@ class ThrottleTest {
     }
 
     /**
-     * Builds the engine through the production {@link ThrottleConfig#toPolicy} path rather than a hand-rolled policy,
-     * so the per-tenant limit lookup is covered too. Threshold 0 means always contended, i.e. ceilings are enforced
-     * from the first permit — the interesting mode for every test here.
+     * Builds the engine through the same key → {@link Policy} wiring the operator-facing configuration produces,
+     * so the per-tenant limit lookup is covered too rather than a hand-rolled policy. Threshold 0 means always
+     * contended, i.e. ceilings are enforced from the first permit — the interesting mode for every test here.
      */
     private static Throttle throttle(final int capacity) {
         return throttle(capacity, config -> { });
@@ -409,10 +413,62 @@ class ThrottleTest {
         config.setThreshold(0);
         config.setSystemFloor(0); // priority off unless a test opts in; the property default is 1
         customizer.accept(config);
-        return new Throttle(config.toPolicy(capacity));
+        return new Throttle(config.toConfig(capacity));
     }
 
     private static void settle() throws InterruptedException {
         Thread.sleep(SETTLE.toMillis());
+    }
+
+    /**
+     * The operator-facing knobs, mirroring what the autoconfigure properties bind — kept here because hawkbit-core
+     * cannot depend on that module, and because a hand-built {@link Config} would skip the key → policy resolution
+     * that is half of what these tests are about.
+     */
+    private static final class ThrottleConfig {
+
+        // tenant -> ceiling on concurrently held permits; -1 (and any tenant not listed) falls back to `limit`
+        private final Map<String, Integer> tenants = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+
+        private int threshold = -1;
+        private int limit = -1; // global per-tenant ceiling, -1 = unlimited (bounded only by capacity)
+        private int systemFloor;
+        // the engine gates waiting on the configured timeout as well as the per-call one; keep it out of the way
+        // so that, as in these tests, the value passed to acquire() is what decides
+        private Duration timeout = Duration.ofMinutes(1);
+
+        private Map<String, Integer> getTenants() {
+            return tenants;
+        }
+
+        private void setThreshold(final int threshold) {
+            this.threshold = threshold;
+        }
+
+        private void setLimit(final int limit) {
+            this.limit = limit;
+        }
+
+        private void setSystemFloor(final int systemFloor) {
+            this.systemFloor = systemFloor;
+        }
+
+        private void setTimeout(final Duration timeout) {
+            this.timeout = timeout;
+        }
+
+        private Config toConfig(final int capacity) {
+            // null key <=> internal, non-tenant work - the only key granted the priority floor
+            final Policy systemPolicy = Policy.builder().permits(capacity).timeout(timeout).priority(Priority.HIGH).build();
+            return Config.builder()
+                    .permits(capacity)
+                    .timeout(timeout)
+                    .keyPolicyThreshold(Math.min(threshold, capacity))
+                    .priorityToGranted(new EnumMap<>(Map.of(Priority.HIGH, Math.clamp(systemFloor, 0, capacity))))
+                    .keyPolicyFn(key -> key == null
+                            ? systemPolicy
+                            : Policy.builder().permits(tenants.getOrDefault(key, limit)).timeout(timeout).build())
+                    .build();
+        }
     }
 }

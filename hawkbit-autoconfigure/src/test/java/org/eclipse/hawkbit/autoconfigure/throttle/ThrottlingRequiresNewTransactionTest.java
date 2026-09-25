@@ -19,7 +19,6 @@ import java.util.function.Consumer;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.eclipse.hawkbit.throttle.Throttle;
-import org.eclipse.hawkbit.throttle.ThrottleProperties.ThrottleConfig;
 import org.eclipse.hawkbit.throttle.ThrottledException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,6 +40,8 @@ import org.springframework.transaction.support.TransactionTemplate;
  */
 @EnableTransactionManagement
 class ThrottlingRequiresNewTransactionTest {
+
+    private static final Duration TIMEOUT = Duration.ofSeconds(1);
 
     private HikariDataSource rawDataSource;
 
@@ -132,15 +133,17 @@ class ThrottlingRequiresNewTransactionTest {
         return template;
     }
 
-    private static Throttle throttle(final int capacity, final Consumer<ThrottleConfig> customizer) {
-        final ThrottleConfig config = new ThrottleConfig();
-        config.setThreshold(0);
-        config.setSystemFloor(0);
-        customizer.accept(config);
-        return new Throttle(config.toPolicy(capacity));
+    private static Throttle throttle(final int capacity, final Consumer<ThrottleProperties> customizer) {
+        final ThrottleProperties props = new ThrottleProperties();
+        props.setThreshold(0);
+        props.setSystemGranted(0);
+        // the engine gates waiting on the configured timeout too, so it must allow at least what txManager() passes
+        props.setTimeout(TIMEOUT);
+        customizer.accept(props);
+        return new Throttle(props.toConfig(capacity));
     }
 
     private PlatformTransactionManager txManager(final Throttle throttle) {
-        return new DataSourceTransactionManager(new ThrottlingDataSourceDecorator(rawDataSource, throttle, Duration.ofSeconds(1)));
+        return new DataSourceTransactionManager(new ThrottlingDataSourceDecorator(rawDataSource, throttle, TIMEOUT));
     }
 }
