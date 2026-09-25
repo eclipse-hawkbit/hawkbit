@@ -9,14 +9,13 @@
  */
 package org.eclipse.hawkbit.dmf.json.model;
 
-import java.util.Collections;
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.Collections;
+import java.util.List;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
@@ -34,12 +33,18 @@ public class DmfDownloadAndUpdateRequest extends DmfActionRequest {
     private final String targetSecurityToken;
     private final List<DmfSoftwareModule> softwareModules;
 
+    public DmfDownloadAndUpdateRequest(
+            final Long actionId, final String targetSecurityToken, final List<DmfSoftwareModule> softwareModules) {
+        this(actionId, targetSecurityToken, softwareModules, null);
+    }
+
     @JsonCreator
     public DmfDownloadAndUpdateRequest(
             @JsonProperty("actionId") final Long actionId,
             @JsonProperty("targetSecurityToken") final String targetSecurityToken,
-            @JsonProperty("softwareModules") final List<DmfSoftwareModule> softwareModules) {
-        super(actionId);
+            @JsonProperty("softwareModules") final List<DmfSoftwareModule> softwareModules,
+            @JsonProperty("externalRef") final String externalRef) {
+        super(actionId, externalRef);
         this.targetSecurityToken = targetSecurityToken;
         this.softwareModules = softwareModules == null ? Collections.emptyList() : Collections.unmodifiableList(softwareModules);
     }
