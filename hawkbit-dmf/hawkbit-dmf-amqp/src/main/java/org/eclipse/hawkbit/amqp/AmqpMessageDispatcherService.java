@@ -133,16 +133,15 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     }
 
     protected void sendUpdateMessageToTarget(
-            final ActionProperties actionsProps, final Target target,
-            final Map<SoftwareModule, Map<String, String>> softwareModules) {
+            final ActionProperties actionsProps, final Target target, final Map<SoftwareModule, Map<String, String>> softwareModules) {
         final Map<String, ActionProperties> actionProp = new HashMap<>();
         actionProp.put(target.getControllerId(), actionsProps);
         sendUpdateMessageToTargets(actionProp, Collections.singletonList(target), softwareModules);
     }
 
     protected DmfDownloadAndUpdateRequest createDownloadAndUpdateRequest(
-            final Target target, final Long actionId, final String externalRef,
-            final Map<SoftwareModule, Map<String, String>> softwareModules) {
+            final Target target, final Long actionId, final Map<SoftwareModule, Map<String, String>> softwareModules,
+            final String externalRef) {
         return new DmfDownloadAndUpdateRequest(
                 actionId, asSystem(target::getSecurityToken), convertToAmqpSoftwareModules(target, softwareModules), externalRef);
     }
@@ -160,8 +159,8 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         eventTargets.forEach(target ->
                 cancelEvent.getActionPropertiesForController(target.getControllerId())
                         .ifPresent(action -> sendCancelMessageToTarget(
-                                cancelEvent.getTenant(), target.getControllerId(), action.getId(), action.getExternalRef(),
-                                IpUtil.addressToUri(target.getAddress()))));
+                                cancelEvent.getTenant(), target.getControllerId(), action.getId(), IpUtil.addressToUri(target.getAddress()),
+                                action.getExternalRef())));
     }
 
     /**
@@ -198,7 +197,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     }
 
     protected void sendCancelMessageToTarget(
-            final String tenant, final String controllerId, final Long actionId, final String externalRef, final URI address) {
+            final String tenant, final String controllerId, final Long actionId, final URI address, final String externalRef) {
         if (!IpUtil.isAmqpUri(address)) {
             return;
         }
@@ -211,8 +210,8 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     }
 
     protected DmfConfirmRequest createConfirmRequest(
-            final Target target, final Long actionId, final String externalRef,
-            final Map<SoftwareModule, Map<String, String>> softwareModules) {
+            final Target target, final Long actionId, final Map<SoftwareModule, Map<String, String>> softwareModules,
+            final String externalRef) {
         return new DmfConfirmRequest(
                 actionId, asSystem(target::getSecurityToken), convertToAmqpSoftwareModules(target, softwareModules), externalRef);
     }
@@ -269,8 +268,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         return messageProperties;
     }
 
-    private static MessageProperties createConnectorMessagePropertiesDeleteThing(
-            final String tenant, final String controllerId) {
+    private static MessageProperties createConnectorMessagePropertiesDeleteThing(final String tenant, final String controllerId) {
         final MessageProperties messageProperties = createConnectorMessageProperties(tenant, controllerId);
         messageProperties.setHeader(MessageHeaderKey.TYPE, MessageType.THING_DELETED);
         return messageProperties;
@@ -349,9 +347,9 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         if (action.isWaitingConfirmation()) {
             // For the moment the confirmation request is the same as download and update request.
             // It can be modified not to expose all the software modules in the future.
-            request = createConfirmRequest(target, action.getId(), action.getExternalRef(), modules);
+            request = createConfirmRequest(target, action.getId(), modules, action.getExternalRef());
         } else {
-            request = createDownloadAndUpdateRequest(target, action.getId(), action.getExternalRef(), modules);
+            request = createDownloadAndUpdateRequest(target, action.getId(), modules, action.getExternalRef());
         }
 
         final Message message = getMessageConverter().toMessage(
@@ -450,15 +448,13 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     }
 
     private void sendBatchUpdateMessage(
-            final Map<String, ActionProperties> actions, final List<Target> targets,
-            final Map<SoftwareModule, Map<String, String>> modules) {
+            final Map<String, ActionProperties> actions, final List<Target> targets, final Map<SoftwareModule, Map<String, String>> modules) {
         final List<DmfTarget> dmfTargets = targets.stream()
                 .filter(target -> IpUtil.isAmqpUri(IpUtil.addressToUri(target.getAddress())))
                 // as system - the security token is sent to DMF receiver
                 .map(t -> {
                     final ActionProperties action = actions.get(t.getControllerId());
-                    return new DmfTarget(
-                            action.getId(), t.getControllerId(), asSystem(t::getSecurityToken), action.getExternalRef());
+                    return new DmfTarget(action.getId(), t.getControllerId(), asSystem(t::getSecurityToken), action.getExternalRef());
                 })
                 .toList();
 

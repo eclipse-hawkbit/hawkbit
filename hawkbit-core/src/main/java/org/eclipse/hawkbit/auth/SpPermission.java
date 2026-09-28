@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.auth;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import lombok.AccessLevel;
@@ -174,6 +175,7 @@ public final class SpPermission {
 
     @SuppressWarnings("java:S3776") // java:S3776 - better in one place for better readability
     public static boolean hasPermission(final String permission) {
+        Objects.requireNonNull(permission, "permission must not be null");
         final SecurityContext context = SecurityContextHolder.getContext();
         final Authentication authentication = context.getAuthentication();
         if (authentication != null) {
@@ -184,7 +186,7 @@ public final class SpPermission {
                     grantedAuthorities = roleHierarchy.getReachableGrantedAuthorities(grantedAuthorities);
                 }
                 for (final GrantedAuthority authority : grantedAuthorities) {
-                    if (authority.getAuthority().equals(permission)) {
+                    if (permission.equals(authority.getAuthority())) {
                         return true;
                     }
                 }

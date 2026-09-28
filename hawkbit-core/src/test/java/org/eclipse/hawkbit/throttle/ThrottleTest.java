@@ -42,13 +42,13 @@ class ThrottleTest {
 
         final Permit permit = throttle.acquire("A", Duration.ZERO);
         assertThat(permit).isNotNull();
-        assertThat(throttle.stats().inUse()).isEqualTo(1);
-        assertThat(throttle.stats().inUse("A")).isEqualTo(1);
+        assertThat(throttle.stats().globalGranted()).isEqualTo(1);
+        assertThat(throttle.stats().perKeyGranted("A")).isEqualTo(1);
         assertThat(throttle.stats().units()).isEqualTo(1);
 
         permit.close();
-        assertThat(throttle.stats().inUse()).isZero();
-        assertThat(throttle.stats().inUse("A")).isZero();
+        assertThat(throttle.stats().globalGranted()).isZero();
+        assertThat(throttle.stats().perKeyGranted("A")).isZero();
         assertThat(throttle.stats().units()).isZero();
     }
 
@@ -60,7 +60,7 @@ class ThrottleTest {
         permit.close();
         permit.close(); // must not double-release
 
-        assertThat(throttle.stats().inUse()).isZero();
+        assertThat(throttle.stats().globalGranted()).isZero();
         assertThat(throttle.stats().units()).isZero();
     }
 
@@ -76,7 +76,7 @@ class ThrottleTest {
         assertThatExceptionOfType(ThrottledException.class).isThrownBy(() -> throttle.acquire("A", Duration.ZERO));
 
         first.close();
-        assertThat(throttle.stats().inUse()).isZero();
+        assertThat(throttle.stats().globalGranted()).isZero();
     }
 
     @Test
@@ -86,15 +86,15 @@ class ThrottleTest {
 
         throttle.acquire("A", Duration.ZERO);
         throttle.acquire("A", Duration.ZERO);
-        assertThat(throttle.stats().inUse("A")).isEqualTo(2); // at its ceiling
+        assertThat(throttle.stats().perKeyGranted("A")).isEqualTo(2); // at its ceiling
 
         assertThatExceptionOfType(ThrottledException.class).isThrownBy(() -> throttle.acquire("A", Duration.ZERO));
 
         // B opted out of any ceiling, so A's cap does not constrain it — it takes the rest of the pool
         throttle.acquire("B", Duration.ZERO);
         throttle.acquire("B", Duration.ZERO);
-        assertThat(throttle.stats().inUse("B")).isEqualTo(2);
-        assertThat(throttle.stats().inUse()).isEqualTo(4);
+        assertThat(throttle.stats().perKeyGranted("B")).isEqualTo(2);
+        assertThat(throttle.stats().globalGranted()).isEqualTo(4);
     }
 
     @Test
@@ -113,7 +113,7 @@ class ThrottleTest {
         for (int i = 0; i < 4; i++) {
             assertThat(throttle.acquire("U", Duration.ZERO)).isNotNull();
         }
-        assertThat(throttle.stats().inUse("U")).isEqualTo(4);
+        assertThat(throttle.stats().perKeyGranted("U")).isEqualTo(4);
 
         assertThatExceptionOfType(ThrottledException.class).isThrownBy(() -> throttle.acquire("U", Duration.ZERO));
     }
@@ -135,7 +135,7 @@ class ThrottleTest {
         waiter.join(WAIT.toMillis());
 
         assertThat(granted.get()).isNotNull();
-        assertThat(throttle.stats().inUse("B")).isEqualTo(1);
+        assertThat(throttle.stats().perKeyGranted("B")).isEqualTo(1);
     }
 
     @Test
@@ -144,7 +144,8 @@ class ThrottleTest {
         throttle.acquire("A", Duration.ZERO); // takes the only slot, never released
 
         final long start = System.nanoTime();
-        assertThatExceptionOfType(ThrottledException.class).isThrownBy(() -> throttle.acquire("B", Duration.ofMillis(200)));
+        final Duration timeout = Duration.ofMillis(200);
+        assertThatExceptionOfType(ThrottledException.class).isThrownBy(() -> throttle.acquire("B", timeout));
 
         assertThat((System.nanoTime() - start) / 1_000_000).isGreaterThanOrEqualTo(150); // actually waited
     }
@@ -227,7 +228,7 @@ class ThrottleTest {
         final Throttle throttle = throttle(2, config -> config.setSystemFloor(1));
         final Permit t1 = throttle.acquire("acme", Duration.ZERO);
         final Permit t2 = throttle.acquire("acme", Duration.ZERO);
-        assertThat(throttle.stats().inUse()).isEqualTo(2); // full
+        assertThat(throttle.stats().globalGranted()).isEqualTo(2); // full
 
         final CountDownLatch tenantDone = new CountDownLatch(1);
         final CountDownLatch systemDone = new CountDownLatch(1);
@@ -248,7 +249,7 @@ class ThrottleTest {
         // despite arriving later, internal work wins while below its floor
         assertThat(systemDone.await(2, TimeUnit.SECONDS)).isTrue();
         assertThat(tenantDone.await(200, TimeUnit.MILLISECONDS)).isFalse();
-        assertThat(throttle.stats().inUse(null)).isEqualTo(1);
+        assertThat(throttle.stats().perKeyGranted(null)).isEqualTo(1);
 
         t2.close();
         assertThat(tenantDone.await(2, TimeUnit.SECONDS)).isTrue();
@@ -263,7 +264,7 @@ class ThrottleTest {
         for (final String key : List.of("acme", "bosch", "ciena")) {
             filler.add(throttle.acquire(key, Duration.ZERO));
         }
-        assertThat(throttle.stats().inUse()).isEqualTo(4); // full
+        assertThat(throttle.stats().globalGranted()).isEqualTo(4); // full
 
         final CountDownLatch tenantDone = new CountDownLatch(1);
         final CountDownLatch systemDone = new CountDownLatch(1);
@@ -300,14 +301,14 @@ class ThrottleTest {
         final Permit grandchild = child.acquire(Duration.ZERO);
 
         // every permit counted, so permits mirror real resource usage...
-        assertThat(throttle.stats().inUse()).isEqualTo(3);
-        assertThat(throttle.stats().inUse("acme")).isEqualTo(3); // children inherit the root's key
+        assertThat(throttle.stats().globalGranted()).isEqualTo(3);
+        assertThat(throttle.stats().perKeyGranted("acme")).isEqualTo(3); // children inherit the root's key
         // ...but nesting of any depth flattens onto one unit of work
         assertThat(throttle.stats().units()).isEqualTo(1);
 
         grandchild.close();
         child.close();
-        assertThat(throttle.stats().inUse()).isEqualTo(1);
+        assertThat(throttle.stats().globalGranted()).isEqualTo(1);
         assertThat(throttle.stats().units()).isEqualTo(1);
 
         root.close();
@@ -322,11 +323,11 @@ class ThrottleTest {
 
         parent.close(); // independent lifetimes: releases only its own slot
 
-        assertThat(throttle.stats().inUse()).isEqualTo(1);
+        assertThat(throttle.stats().globalGranted()).isEqualTo(1);
         assertThat(throttle.stats().units()).isEqualTo(1); // unit stays alive while the child holds a permit
 
         child.close();
-        assertThat(throttle.stats().inUse()).isZero();
+        assertThat(throttle.stats().globalGranted()).isZero();
         assertThat(throttle.stats().units()).isZero();
     }
 
@@ -345,13 +346,13 @@ class ThrottleTest {
         final Throttle throttle = throttle(4, config -> config.setLimit(1));
 
         final Permit parent = throttle.acquire("acme", Duration.ZERO);
-        assertThat(throttle.stats().inUse("acme")).isEqualTo(1); // at its ceiling
+        assertThat(throttle.stats().perKeyGranted("acme")).isEqualTo(1); // at its ceiling
 
         // a fresh unit of work is refused...
         assertThatExceptionOfType(ThrottledException.class).isThrownBy(() -> throttle.acquire("acme", Duration.ZERO));
         // ...but the existing one is admitted, since blocking it would pin the resource
         assertThat(parent.acquire(Duration.ZERO)).isNotNull();
-        assertThat(throttle.stats().inUse("acme")).isEqualTo(2);
+        assertThat(throttle.stats().perKeyGranted("acme")).isEqualTo(2);
     }
 
     @Test
@@ -416,6 +417,7 @@ class ThrottleTest {
         return new Throttle(config.toConfig(capacity));
     }
 
+    @SuppressWarnings("java:S2925")
     private static void settle() throws InterruptedException {
         Thread.sleep(SETTLE.toMillis());
     }
@@ -451,10 +453,6 @@ class ThrottleTest {
 
         private void setSystemFloor(final int systemFloor) {
             this.systemFloor = systemFloor;
-        }
-
-        private void setTimeout(final Duration timeout) {
-            this.timeout = timeout;
         }
 
         private Config toConfig(final int capacity) {
