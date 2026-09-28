@@ -9,10 +9,9 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.Serial;
 import java.io.Serializable;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -32,6 +31,7 @@ public class ActionProperties implements Serializable {
     private boolean maintenanceWindowAvailable;
 
     private Action.Status status;
+    private String externalRef;
 
     /**
      * Constructor
@@ -44,6 +44,7 @@ public class ActionProperties implements Serializable {
         this.tenant = action.getTenant();
         this.maintenanceWindowAvailable = action.isMaintenanceWindowAvailable();
         this.status = action.getStatus();
+        this.externalRef = action.getExternalRef();
     }
 
     @JsonIgnore

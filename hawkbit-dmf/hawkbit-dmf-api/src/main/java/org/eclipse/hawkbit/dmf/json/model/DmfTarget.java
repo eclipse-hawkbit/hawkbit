@@ -29,14 +29,21 @@ public class DmfTarget {
     private final String controllerId;
     @ToString.Exclude
     private final String targetSecurityToken;
+    private final String externalRef;
+
+    public DmfTarget(final Long actionId, final String controllerId, final String targetSecurityToken) {
+        this(actionId, controllerId, targetSecurityToken, null);
+    }
 
     @JsonCreator
     public DmfTarget(
             @JsonProperty("actionId") final Long actionId,
             @JsonProperty("controllerId") final String controllerId,
-            @JsonProperty("targetSecurityToken") final String targetSecurityToken) {
+            @JsonProperty("targetSecurityToken") final String targetSecurityToken,
+            @JsonProperty("externalRef") final String externalRef) {
         this.actionId = actionId;
         this.controllerId = controllerId;
         this.targetSecurityToken = targetSecurityToken;
+        this.externalRef = externalRef;
     }
 }

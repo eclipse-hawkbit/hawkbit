@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.cronutils.utils.StringUtils;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
@@ -20,8 +21,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
-
-import com.cronutils.utils.StringUtils;
 import org.assertj.core.api.HamcrestCondition;
 import org.eclipse.hawkbit.amqp.DmfApiConfiguration;
 import org.eclipse.hawkbit.dmf.amqp.api.AmqpSettings;
@@ -143,11 +142,16 @@ abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpIntegratio
     }
 
     protected void assertCancelActionMessage(final Long actionId, final String controllerId) {
+        assertCancelActionMessage(actionId, controllerId, null);
+    }
+
+    protected void assertCancelActionMessage(final Long actionId, final String controllerId, final String externalRef) {
         final Message replyMessage = assertReplyMessageHeader(EventTopic.CANCEL_DOWNLOAD, controllerId);
 
         final DmfActionRequest actionUpdateStatus = (DmfActionRequest) getDmfClient().getMessageConverter()
                 .fromMessage(replyMessage);
         assertThat(actionUpdateStatus.getActionId()).isEqualTo(actionId);
+        assertThat(actionUpdateStatus.getExternalRef()).isEqualTo(externalRef);
     }
 
     protected void assertDeleteMessage(final String target) {
@@ -186,19 +190,36 @@ abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpIntegratio
 
     protected void assertDmfDownloadAndUpdateRequest(
             final DmfDownloadAndUpdateRequest request, final Set<SoftwareModule> softwareModules, final String controllerId) {
+        assertDmfDownloadAndUpdateRequest(request, softwareModules, controllerId, null);
+    }
+
+    protected void assertDmfDownloadAndUpdateRequest(
+            final DmfDownloadAndUpdateRequest request, final Set<SoftwareModule> softwareModules,
+            final String controllerId, final String externalRef) {
         assertSoftwareModules(softwareModules, request.getSoftwareModules());
         final Target updatedTarget = waitUntilIsPresent(() -> targetManagement.findByControllerId(controllerId));
         assertThat(updatedTarget).isNotNull();
         assertThat(updatedTarget.getSecurityToken()).isEqualTo(request.getTargetSecurityToken());
+        assertThat(request.getExternalRef()).isEqualTo(externalRef);
     }
 
     protected void assertDownloadAndInstallMessage(final Set<SoftwareModule> softwareModules,
             final String controllerId) {
-        assertAssignmentMessage(softwareModules, controllerId, EventTopic.DOWNLOAD_AND_INSTALL);
+        assertDownloadAndInstallMessage(softwareModules, controllerId, null);
+    }
+
+    protected void assertDownloadAndInstallMessage(final Set<SoftwareModule> softwareModules,
+            final String controllerId, final String externalRef) {
+        assertAssignmentMessage(softwareModules, controllerId, EventTopic.DOWNLOAD_AND_INSTALL, externalRef);
     }
 
     protected void assertDownloadMessage(final Set<SoftwareModule> dsModules, final String controllerId) {
-        assertAssignmentMessage(dsModules, controllerId, EventTopic.DOWNLOAD);
+        assertDownloadMessage(dsModules, controllerId, null);
+    }
+
+    protected void assertDownloadMessage(final Set<SoftwareModule> dsModules,
+            final String controllerId, final String externalRef) {
+        assertAssignmentMessage(dsModules, controllerId, EventTopic.DOWNLOAD, externalRef);
     }
 
     protected void createAndSendThingCreated(final String controllerId) {
@@ -401,6 +422,11 @@ abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpIntegratio
     }
 
     protected void assertConfirmMessage(final Set<SoftwareModule> dsModules, final String controllerId) {
+        assertConfirmMessage(dsModules, controllerId, null);
+    }
+
+    protected void assertConfirmMessage(final Set<SoftwareModule> dsModules,
+            final String controllerId, final String externalRef) {
 
         final Message replyMessage = assertReplyMessageHeader(EventTopic.CONFIRM, controllerId);
         assertAllTargetsCount(1);
@@ -408,24 +434,27 @@ abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpIntegratio
         final DmfConfirmRequest confirmRequest = (DmfConfirmRequest) getDmfClient()
                 .getMessageConverter().fromMessage(replyMessage);
 
-        assertConfirmRequest(confirmRequest, dsModules, controllerId);
+        assertConfirmRequest(confirmRequest, dsModules, controllerId, externalRef);
     }
 
-    protected void assertConfirmRequest(final DmfConfirmRequest request, final Set<SoftwareModule> softwareModules, final String controllerId) {
+    protected void assertConfirmRequest(final DmfConfirmRequest request, final Set<SoftwareModule> softwareModules,
+            final String controllerId, final String externalRef) {
         assertSoftwareModules(softwareModules, request.getSoftwareModules());
         final Target updatedTarget = waitUntilIsPresent(() -> targetManagement.findByControllerId(controllerId));
         assertThat(updatedTarget).isNotNull();
         assertThat(updatedTarget.getSecurityToken()).isEqualTo(request.getTargetSecurityToken());
+        assertThat(request.getExternalRef()).isEqualTo(externalRef);
     }
 
-    private void assertAssignmentMessage(final Set<SoftwareModule> dsModules, final String controllerId, final EventTopic topic) {
+    private void assertAssignmentMessage(final Set<SoftwareModule> dsModules, final String controllerId,
+            final EventTopic topic, final String externalRef) {
         final Message replyMessage = assertReplyMessageHeader(topic, controllerId);
         assertAllTargetsCount(1);
 
         final DmfDownloadAndUpdateRequest downloadAndUpdateRequest = (DmfDownloadAndUpdateRequest) getDmfClient()
                 .getMessageConverter().fromMessage(replyMessage);
 
-        assertDmfDownloadAndUpdateRequest(downloadAndUpdateRequest, dsModules, controllerId);
+        assertDmfDownloadAndUpdateRequest(downloadAndUpdateRequest, dsModules, controllerId, externalRef);
     }
 
     private void registerAndAssertTargetWithExistingTenant(

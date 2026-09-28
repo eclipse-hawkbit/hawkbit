@@ -226,6 +226,22 @@ that can be sent by the client:
 
 ## Messages sent **by** hawkBit
 
+### External action references
+
+Action-related messages can include an optional `externalRef` string. Its value is the external reference set on the
+action when the assignment is created, allowing a DMF consumer to correlate the action with an external system.
+
+| Message topic | JSON location |
+|---------------|---------------|
+| `DOWNLOAD_AND_INSTALL`, `DOWNLOAD`, `CONFIRM`, `CANCEL_DOWNLOAD` | `externalRef` in the message payload |
+| `BATCH_DOWNLOAD_AND_INSTALL`, `BATCH_DOWNLOAD` | `externalRef` in each entry of `targets` |
+
+If an action has no external reference (`null`), the field is omitted rather than serialized as `null`. A batch can
+contain actions with different references as well as actions without a reference. Existing payloads without the field
+remain valid. Consumers should tolerate unknown JSON fields for forward compatibility.
+
+`externalRef` does not replace `actionId`: responses such as `UPDATE_ACTION_STATUS` still identify the action by `actionId`.
+
 ### CANCEL_DOWNLOAD
 
 Message to cancel an update task.
@@ -245,7 +261,8 @@ Payload template:
 
 ```json
 {
-    "actionId": long
+    "actionId": long,
+    "externalRef": "String"
 }
 ```
 
@@ -257,7 +274,8 @@ Example Headers and Payload:
 
 ```json
 {
-"actionId":137
+"actionId":137,
+"externalRef":"deployment-42"
 }
 ```
 
@@ -318,6 +336,7 @@ is [DmfDownloadAndUpdateRequest](https://github.com/eclipse-hawkbit/hawkbit/tree
 ```json
 {
 "actionId": long,
+"externalRef": "String",
 "targetSecurityToken": "String",
 "softwareModules":[
     {
@@ -356,6 +375,7 @@ Example header and payload:
 ```json
 {
 "actionId":137,
+"externalRef":"deployment-42",
 "targetSecurityToken":"bH7XXAprK1ChnLfKSdtlsp7NOlPnZAYY",
 "softwareModules":[
     {
@@ -382,6 +402,43 @@ Example header and payload:
         }
     ]
     }]
+}
+```
+
+### CONFIRM
+
+When an action is waiting for confirmation, hawkBit sends a message with topic `CONFIRM`. Its payload has the same
+structure as `DOWNLOAD_AND_INSTALL`, including the optional `externalRef` of the action.
+
+### BATCH_DOWNLOAD_AND_INSTALL or BATCH_DOWNLOAD
+
+When batch assignments are enabled, these messages carry a shared `softwareModules` list and a `targets` list.
+Each target entry contains its own `actionId`, `controllerId`, `targetSecurityToken`, and optional `externalRef`.
+There is no batch-level `externalRef`.
+
+The message headers include `type=EVENT`, `tenant`, and the batch `topic`; targets are identified by `controllerId`
+inside the payload rather than a single `thingId` header. The content type is `application/json`.
+
+The following simplified payload shows one action with a reference and another without one. The shared
+`softwareModules` list uses the same structure as in `DOWNLOAD_AND_INSTALL` and is empty here for brevity.
+
+```json
+{
+  "timestamp": 1704070800000,
+  "targets": [
+    {
+      "actionId": 137,
+      "controllerId": "device-1",
+      "targetSecurityToken": "token-1",
+      "externalRef": "deployment-42"
+    },
+    {
+      "actionId": 138,
+      "controllerId": "device-2",
+      "targetSecurityToken": "token-2"
+    }
+  ],
+  "softwareModules": []
 }
 ```
 
