@@ -558,14 +558,14 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         final long targetsInGroupFilter;
         if (!RolloutHelper.isRolloutRetried(rollout.getTargetFilterQuery())) { // default case
             targetsInGroupFilter = DeploymentHelper.runInNewTransaction(
-                    "countByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable", count -> countByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable(
-                            groupTargetFilter, readyGroups, rollout.getDistributionSet().getTypeId()), txManager
-            );
+                    "countByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable",
+                    count -> countByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable(
+                            groupTargetFilter, readyGroups, rollout.getDistributionSet().getTypeId()), txManager);
         } else { // if it is a rollout retry
             targetsInGroupFilter = DeploymentHelper.runInNewTransaction(
-                    "countByFailedRolloutAndNotInRolloutGroupsAndCompatible", count -> countByFailedRolloutAndNotInRolloutGroups(
-                            RolloutHelper.getIdFromRetriedTargetFilter(rollout.getTargetFilterQuery()), readyGroups), txManager
-            );
+                    "countByFailedRolloutAndNotInRolloutGroupsAndCompatible",
+                    count -> countByFailedRolloutAndNotInRolloutGroups(
+                            RolloutHelper.getIdFromRetriedTargetFilter(rollout.getTargetFilterQuery()), readyGroups), txManager);
         }
 
         final double percentFromTheRest;
@@ -577,8 +577,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
 
         final long expectedInGroup = Math.round(percentFromTheRest * targetsInGroupFilter / 100);
         long targetsLeftToAdd = expectedInGroup - DeploymentHelper.runInNewTransaction(
-                "countRolloutTargetGroupByRolloutGroup", count -> rolloutTargetGroupRepository.countByRolloutGroup(group), txManager
-        );
+                "countRolloutTargetGroupByRolloutGroup", count -> rolloutTargetGroupRepository.countByRolloutGroup(group), txManager);
         try {
             while (targetsLeftToAdd > 0) {
                 // Add up to TRANSACTION_TARGETS of the left targets. In case a TransactionException is thrown this loop aborts

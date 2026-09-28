@@ -74,19 +74,19 @@ public class JpaAutoAssignHandler implements AutoAssignHandler {
     private final AutoAssignmentManagement<? extends AutoAssignment> autoAssignmentManagement;
     private final TargetManagement<? extends Target> targetManagement;
     private final DeploymentManagement deploymentManagement;
-    private final PlatformTransactionManager transactionManager;
+    private final PlatformTransactionManager txManager;
     private final LockRegistry<? extends Lock> lockRegistry;
     private final Optional<MeterRegistry> meterRegistry;
 
     public JpaAutoAssignHandler(
             final AutoAssignmentManagement<? extends AutoAssignment> autoAssignmentManagement,
             final TargetManagement<? extends Target> targetManagement, final DeploymentManagement deploymentManagement,
-            final PlatformTransactionManager transactionManager, final LockRegistry<? extends Lock> lockRegistry,
+            final PlatformTransactionManager txManager, final LockRegistry<? extends Lock> lockRegistry,
             final Optional<MeterRegistry> meterRegistry) {
         this.autoAssignmentManagement = autoAssignmentManagement;
         this.targetManagement = targetManagement;
         this.deploymentManagement = deploymentManagement;
-        this.transactionManager = transactionManager;
+        this.txManager = txManager;
         this.lockRegistry = lockRegistry;
         this.meterRegistry = meterRegistry;
     }
@@ -269,7 +269,7 @@ public class JpaAutoAssignHandler implements AutoAssignHandler {
                         () -> deploymentManagement.assignDistributionSets(deploymentRequests, actionMessage));
             }
             return count;
-        }, transactionManager);
+        }, txManager);
     }
 
     /**

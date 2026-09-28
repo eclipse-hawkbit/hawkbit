@@ -24,7 +24,6 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.eclipse.hawkbit.throttle.Permit;
 import org.eclipse.hawkbit.throttle.Throttle;
-import org.eclipse.hawkbit.throttle.ThrottleProperties.ThrottleConfig;
 import org.eclipse.hawkbit.throttle.ThrottledException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -182,12 +181,12 @@ class ThrottlingDataSourceDecoratorTest {
         void run() throws Exception;
     }
 
-    private static Throttle throttle(final int capacity, final Consumer<ThrottleConfig> customizer) {
-        final ThrottleConfig config = new ThrottleConfig();
-        config.setThreshold(0); // always contended: fair share enforced from the first permit
-        config.setSystemFloor(0); // priority off unless a test opts in
-        customizer.accept(config);
-        return new Throttle(config.toPolicy(capacity));
+    private static Throttle throttle(final int capacity, final Consumer<ThrottleProperties> customizer) {
+        final ThrottleProperties props = new ThrottleProperties();
+        props.setThreshold(0); // always contended: fair share enforced from the first permit
+        props.setSystemGranted(0); // priority off unless a test opts in
+        customizer.accept(props);
+        return new Throttle(props.toConfig(capacity));
     }
 
     private ThrottlingDataSourceDecorator dataSource(final Throttle throttle) {
