@@ -43,7 +43,7 @@
     <properties>
         <!-- Overrides START - to be reviewed regularly current overrides against spring-boot 4.1.1-->
         <!-- Override logback version since 1.5.38 from spring-boot 4.1.1 is vulnerable -->
-        <logback.version>1.6.3</logback.version>
+        <logback.version>1.6.4</logback.version>
         <!-- Override commons-lang3 version since 3.17 is vulnerable -->
         <commons-lang.version>3.20.0</commons-lang.version>
         <!-- Override rabbit-amqp-client version since 5.30.0 is vulnerable -->
