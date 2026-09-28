@@ -315,8 +315,8 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         final Action action = actionOptional.get();
         if (action.isCancelingOrCanceled()) {
             amqpMessageDispatcherService.sendCancelMessageToTarget(
-                    target.getTenant(), target.getControllerId(), action.getId(), action.getExternalRef(),
-                    IpUtil.addressToUri(target.getAddress()));
+                    target.getTenant(), target.getControllerId(), action.getId(), IpUtil.addressToUri(target.getAddress()), action.getExternalRef()
+            );
         } else {
             amqpMessageDispatcherService.sendUpdateMessageToTarget(
                     new ActionProperties(action), action.getTarget(), getSoftwareModulesWithMetadata(action.getDistributionSet()));

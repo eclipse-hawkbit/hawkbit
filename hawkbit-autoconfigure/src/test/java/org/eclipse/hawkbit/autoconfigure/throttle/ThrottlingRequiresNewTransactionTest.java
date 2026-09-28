@@ -64,22 +64,22 @@ class ThrottlingRequiresNewTransactionTest {
         final PlatformTransactionManager txManager = txManager(throttle);
 
         asTenant("acme", () -> outer(txManager).executeWithoutResult(status -> {
-            assertThat(throttle.stats().inUse("acme")).isEqualTo(1);
+            assertThat(throttle.stats().perKeyGranted("acme")).isEqualTo(1);
             assertThat(activeConnections()).isEqualTo(1);
 
             requiresNew(txManager).executeWithoutResult(innerStatus -> {
                 // two real connections AND two permits — the throttle no longer under-counts the pool
                 assertThat(activeConnections()).isEqualTo(2);
-                assertThat(throttle.stats().inUse("acme")).isEqualTo(2);
+                assertThat(throttle.stats().perKeyGranted("acme")).isEqualTo(2);
                 assertThat(throttle.stats().units()).isEqualTo(1); // still one unit of work
             });
 
             // inner closed independently of the outer
             assertThat(activeConnections()).isEqualTo(1);
-            assertThat(throttle.stats().inUse("acme")).isEqualTo(1);
+            assertThat(throttle.stats().perKeyGranted("acme")).isEqualTo(1);
         }));
 
-        assertThat(throttle.stats().inUse()).isZero();
+        assertThat(throttle.stats().globalGranted()).isZero();
         assertThat(throttle.stats().units()).isZero();
     }
 
@@ -90,10 +90,10 @@ class ThrottlingRequiresNewTransactionTest {
         final PlatformTransactionManager txManager = txManager(throttle);
 
         asTenant("acme", () -> outer(txManager).executeWithoutResult(status -> {
-            assertThat(throttle.stats().inUse("acme")).isEqualTo(1); // at its ceiling
+            assertThat(throttle.stats().perKeyGranted("acme")).isEqualTo(1); // at its ceiling
 
             requiresNew(txManager).executeWithoutResult(
-                    innerStatus -> assertThat(throttle.stats().inUse("acme")).isEqualTo(2));
+                    innerStatus -> assertThat(throttle.stats().perKeyGranted("acme")).isEqualTo(2));
         }));
     }
 
@@ -104,17 +104,18 @@ class ThrottlingRequiresNewTransactionTest {
         final PlatformTransactionManager txManager = txManager(throttle);
 
         asTenant("acme", () -> outer(txManager).executeWithoutResult(status -> {
-            assertThat(throttle.stats().inUse("acme")).isEqualTo(1);
+            assertThat(throttle.stats().perKeyGranted("acme")).isEqualTo(1);
 
             // Spring wraps the refusal; what matters is that it returns instead of parking on a wedged pool
+            final TransactionTemplate transactionTemplate = requiresNew(txManager);
             assertThatExceptionOfType(CannotCreateTransactionException.class)
-                    .isThrownBy(() -> requiresNew(txManager).executeWithoutResult(innerStatus -> { }))
+                    .isThrownBy(() -> transactionTemplate.executeWithoutResult(innerStatus -> { }))
                     .havingRootCause()
                     .isInstanceOf(ThrottledException.class)
                     .withMessageContaining("deadlock");
         }));
 
-        assertThat(throttle.stats().inUse()).isZero(); // outer rolled back and released
+        assertThat(throttle.stats().globalGranted()).isZero(); // outer rolled back and released
     }
 
     private int activeConnections() {

@@ -62,12 +62,12 @@ class ThrottlingDataSourceDecoratorTest {
                     final ResultSet resultSet = statement.executeQuery("SELECT 1")) {
                 assertThat(resultSet.next()).isTrue();
                 assertThat(resultSet.getInt(1)).isEqualTo(1); // real query ran through the proxied connection
-                assertThat(throttle.stats().inUse("acme")).isEqualTo(1);
+                assertThat(throttle.stats().perKeyGranted("acme")).isEqualTo(1);
             } catch (final SQLException e) {
                 throw new IllegalStateException(e);
             }
 
-            assertThat(throttle.stats().inUse("acme")).isZero(); // released when the connection returned to the pool
+            assertThat(throttle.stats().perKeyGranted("acme")).isZero(); // released when the connection returned to the pool
         });
     }
 
@@ -79,9 +79,9 @@ class ThrottlingDataSourceDecoratorTest {
         // no tenant context → counted as internal work rather than waved through, so permits mirror pool usage
         try (final Connection connection = dataSource.getConnection()) {
             assertThat(connection.isValid(1)).isTrue();
-            assertThat(throttle.stats().inUse(null)).isEqualTo(1);
+            assertThat(throttle.stats().perKeyGranted(null)).isEqualTo(1);
         }
-        assertThat(throttle.stats().inUse()).isZero();
+        assertThat(throttle.stats().globalGranted()).isZero();
     }
 
     @Test
@@ -94,16 +94,16 @@ class ThrottlingDataSourceDecoratorTest {
         final Connection outer = dataSource.getConnection();
         for (int i = 0; i < 3; i++) {
             final Connection nested = dataSource.getConnection(); // outer still open → child permit
-            assertThat(throttle.stats().inUse()).isEqualTo(2);
+            assertThat(throttle.stats().globalGranted()).isEqualTo(2);
             assertThat(activeConnections()).isEqualTo(2); // permits and real connections agree
             assertThat(throttle.stats().units()).isEqualTo(1); // still one unit of work
 
             nested.close();
-            assertThat(throttle.stats().inUse()).isEqualTo(1); // outer unaffected
+            assertThat(throttle.stats().globalGranted()).isEqualTo(1); // outer unaffected
         }
 
         outer.close();
-        assertThat(throttle.stats().inUse()).isZero();
+        assertThat(throttle.stats().globalGranted()).isZero();
         assertThat(throttle.stats().units()).isZero();
     }
 
@@ -119,7 +119,7 @@ class ThrottlingDataSourceDecoratorTest {
                 onCleanThread(() -> {
                     try (Connection systemConnection = dataSource.getConnection()) {
                         assertThat(systemConnection.isValid(1)).isTrue();
-                        assertThat(throttle.stats().inUse(null)).isEqualTo(1);
+                        assertThat(throttle.stats().perKeyGranted(null)).isEqualTo(1);
                         assertThat(throttle.stats().units()).isEqualTo(2); // two units, not one nested unit
                     }
                 });
@@ -127,7 +127,7 @@ class ThrottlingDataSourceDecoratorTest {
                 throw new IllegalStateException(e);
             }
         });
-        assertThat(throttle.stats().inUse()).isZero();
+        assertThat(throttle.stats().globalGranted()).isZero();
     }
 
     @Test
@@ -150,7 +150,7 @@ class ThrottlingDataSourceDecoratorTest {
 
         asTenant("acme", () -> {
             assertThatExceptionOfType(SQLException.class).isThrownBy(dataSource::getConnection);
-            assertThat(throttle.stats().inUse()).isZero(); // permit not leaked
+            assertThat(throttle.stats().globalGranted()).isZero(); // permit not leaked
             assertThat(throttle.stats().units()).isZero();
         });
 

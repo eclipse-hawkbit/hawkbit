@@ -321,16 +321,16 @@ public class Throttle {
     /**
      * A consistent snapshot of resource usage, taken under the engine's lock.
      *
-     * @param inUse total permits held
-     * @param perKey permits held per key; keys with none are absent. The {@code null} key is internal, non-tenant work
+     * @param globalGranted total permits held
+     * @param perKeyGranted permits held per key; keys with none are absent. The {@code null} key is internal, non-tenant work
      * @param units distinct units of work holding at least one permit — fewer than {@code inUse} when nesting is in play
      * @param pending waiters parked over all keys together; the value bounded by the global max pending
      */
-    public record Stats(int inUse, Map<String, Integer> perKey, int units, int pending) {
+    public record Stats(int globalGranted, Map<String, Integer> perKeyGranted, int units, int pending) {
 
         /** Permits held by {@code key}; {@code null} for internal, non-tenant work. */
-        public int inUse(final String key) {
-            return perKey.getOrDefault(key, 0);
+        public int perKeyGranted(final String key) {
+            return perKeyGranted.getOrDefault(key, 0);
         }
     }
 
