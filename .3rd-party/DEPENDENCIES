@@ -2,11 +2,11 @@ maven/mavencentral/ch.qos.logback/logback-classic/1.6.4, EPL-1.0 AND LGPL-2.1-on
 maven/mavencentral/ch.qos.logback/logback-core/1.6.4, EPL-1.0 AND LGPL-2.1-only, approved, #29897
 maven/mavencentral/com.cronutils/cron-utils/9.2.1, Apache-2.0, approved, clearlydefined
 maven/mavencentral/com.ethlo.time/itu/1.14.0, Apache-2.0, approved, #19505
-maven/mavencentral/com.fasterxml.jackson.core/jackson-annotations/2.21, Apache-2.0, approved, #25587
-maven/mavencentral/com.fasterxml.jackson.core/jackson-core/2.21.5, Apache-2.0 AND MIT, approved, #25590
-maven/mavencentral/com.fasterxml.jackson.core/jackson-databind/2.21.5, Apache-2.0, approved, #25591
-maven/mavencentral/com.fasterxml.jackson.dataformat/jackson-dataformat-yaml/2.21.5, Apache-2.0, approved, #25589
-maven/mavencentral/com.fasterxml.jackson.datatype/jackson-datatype-jsr310/2.21.5, Apache-2.0, approved, #26441
+maven/mavencentral/com.fasterxml.jackson.core/jackson-annotations/2.22, Apache-2.0, approved, #28540
+maven/mavencentral/com.fasterxml.jackson.core/jackson-core/2.22.3, MIT AND BSD-2-Clause AND BSL-1.0 AND Apache-2.0, approved, #28625
+maven/mavencentral/com.fasterxml.jackson.core/jackson-databind/2.22.3, Apache-2.0, approved, #28621
+maven/mavencentral/com.fasterxml.jackson.dataformat/jackson-dataformat-yaml/2.22.3, Apache-2.0, approved, #28622
+maven/mavencentral/com.fasterxml.jackson.datatype/jackson-datatype-jsr310/2.22.3, Apache-2.0, approved, #29010
 maven/mavencentral/com.fasterxml/classmate/1.7.3, Apache-2.0, approved, #24482
 maven/mavencentral/com.github.ben-manes.caffeine/caffeine/3.2.4, Apache-2.0 AND (Apache-2.0 AND CC0-1.0), approved, #18889
 maven/mavencentral/com.github.stephenc.jcip/jcip-annotations/1.0-1, Apache-2.0, approved, CQ21949
@@ -107,25 +107,25 @@ maven/mavencentral/io.micrometer/micrometer-observation/1.17.1, Apache-2.0, appr
 maven/mavencentral/io.modelcontextprotocol.sdk/mcp-core/2.0.0, MIT, approved, #28872
 maven/mavencentral/io.modelcontextprotocol.sdk/mcp-json-jackson3/2.0.0, MIT, approved, #28874
 maven/mavencentral/io.modelcontextprotocol.sdk/mcp/2.0.0, MIT AND Apache-2.0, approved, #28862
-maven/mavencentral/io.netty/netty-buffer/4.2.17.Final, Apache-2.0, approved, #16116
-maven/mavencentral/io.netty/netty-codec-base/4.2.17.Final, Apache-2.0, approved, #21322
-maven/mavencentral/io.netty/netty-codec-classes-quic/4.2.17.Final, Apache-2.0, approved, #21311
-maven/mavencentral/io.netty/netty-codec-compression/4.2.17.Final, Apache-2.0, approved, #16109
-maven/mavencentral/io.netty/netty-codec-dns/4.2.17.Final, Apache-2.0, approved, #16112
-maven/mavencentral/io.netty/netty-codec-http/4.2.17.Final, Apache-2.0 AND (Apache-2.0 AND MIT) AND (Apache-2.0 AND BSD-3-Clause), approved, #16121
-maven/mavencentral/io.netty/netty-codec-http2/4.2.17.Final, Apache-2.0, approved, #16125
-maven/mavencentral/io.netty/netty-codec-http3/4.2.17.Final, Apache-2.0, approved, #25607
-maven/mavencentral/io.netty/netty-codec-marshalling/4.2.17.Final, Apache-2.0, approved, #21321
-maven/mavencentral/io.netty/netty-codec-protobuf/4.2.17.Final, Apache-2.0, approved, #21326
-maven/mavencentral/io.netty/netty-codec-socks/4.2.17.Final, Apache-2.0, approved, #16117
-maven/mavencentral/io.netty/netty-codec/4.2.17.Final, Apache-2.0 AND (Apache-2.0 AND CC-PDDC), approved, #16119
-maven/mavencentral/io.netty/netty-common/4.2.17.Final, Apache-2.0 AND (Apache-2.0 AND CC0-1.0) AND (Apache-2.0 AND MIT), approved, #16124
-maven/mavencentral/io.netty/netty-handler-proxy/4.2.17.Final, Apache-2.0, approved, #16111
-maven/mavencentral/io.netty/netty-handler/4.2.17.Final, Apache-2.0, approved, #16123
-maven/mavencentral/io.netty/netty-resolver-dns/4.2.17.Final, Apache-2.0, approved, #16110
-maven/mavencentral/io.netty/netty-resolver/4.2.17.Final, Apache-2.0, approved, #16126
-maven/mavencentral/io.netty/netty-transport-native-unix-common/4.2.17.Final, Apache-2.0, approved, #21329
-maven/mavencentral/io.netty/netty-transport/4.2.17.Final, Apache-2.0, approved, #16113
+maven/mavencentral/io.netty/netty-buffer/4.2.18.Final, Apache-2.0, approved, #16116
+maven/mavencentral/io.netty/netty-codec-base/4.2.18.Final, Apache-2.0, approved, #21322
+maven/mavencentral/io.netty/netty-codec-classes-quic/4.2.18.Final, Apache-2.0, approved, #21311
+maven/mavencentral/io.netty/netty-codec-compression/4.2.18.Final, Apache-2.0, approved, #16109
+maven/mavencentral/io.netty/netty-codec-dns/4.2.18.Final, Apache-2.0, approved, #16112
+maven/mavencentral/io.netty/netty-codec-http/4.2.18.Final, Apache-2.0 AND (Apache-2.0 AND MIT) AND (Apache-2.0 AND BSD-3-Clause), approved, #16121
+maven/mavencentral/io.netty/netty-codec-http2/4.2.18.Final, Apache-2.0, approved, #16125
+maven/mavencentral/io.netty/netty-codec-http3/4.2.18.Final, Apache-2.0, approved, #25607
+maven/mavencentral/io.netty/netty-codec-marshalling/4.2.18.Final, Apache-2.0, approved, #21321
+maven/mavencentral/io.netty/netty-codec-protobuf/4.2.18.Final, Apache-2.0, approved, #21326
+maven/mavencentral/io.netty/netty-codec-socks/4.2.18.Final, Apache-2.0, approved, #16117
+maven/mavencentral/io.netty/netty-codec/4.2.18.Final, Apache-2.0 AND (Apache-2.0 AND CC-PDDC), approved, #16119
+maven/mavencentral/io.netty/netty-common/4.2.18.Final, Apache-2.0 AND (Apache-2.0 AND CC0-1.0) AND (Apache-2.0 AND MIT), approved, #16124
+maven/mavencentral/io.netty/netty-handler-proxy/4.2.18.Final, Apache-2.0, approved, #16111
+maven/mavencentral/io.netty/netty-handler/4.2.18.Final, Apache-2.0, approved, #16123
+maven/mavencentral/io.netty/netty-resolver-dns/4.2.18.Final, Apache-2.0, approved, #16110
+maven/mavencentral/io.netty/netty-resolver/4.2.18.Final, Apache-2.0, approved, #16126
+maven/mavencentral/io.netty/netty-transport-native-unix-common/4.2.18.Final, Apache-2.0, approved, #21329
+maven/mavencentral/io.netty/netty-transport/4.2.18.Final, Apache-2.0, approved, #16113
 maven/mavencentral/io.projectreactor.netty/reactor-netty-core/1.3.7, Apache-2.0, approved, #25603
 maven/mavencentral/io.projectreactor.netty/reactor-netty-http/1.3.7, Apache-2.0, approved, #25597
 maven/mavencentral/io.projectreactor/reactor-core/3.8.7, Apache-2.0, approved, #25635
@@ -146,7 +146,7 @@ maven/mavencentral/jakarta.servlet/jakarta.servlet-api/6.1.0, EPL-2.0 OR GPL-2.0
 maven/mavencentral/jakarta.transaction/jakarta.transaction-api/2.0.1, EPL-2.0 OR GPL-2.0-only WITH Classpath-exception-2.0, approved, #7697
 maven/mavencentral/jakarta.validation/jakarta.validation-api/3.1.1, Apache-2.0, approved, ee4j.validation
 maven/mavencentral/jakarta.xml.bind/jakarta.xml.bind-api/4.0.5, BSD-3-Clause, approved, #8016
-maven/mavencentral/joda-time/joda-time/2.12.7, Apache-2.0, approved, #12739
+maven/mavencentral/joda-time/joda-time/2.14.1, , restricted, clearlydefined
 maven/mavencentral/net.bytebuddy/byte-buddy-agent/1.18.11, Apache-2.0, approved, #24657
 maven/mavencentral/net.bytebuddy/byte-buddy/1.18.11, Apache-2.0 AND BSD-3-Clause, approved, #24658
 maven/mavencentral/net.minidev/accessors-smart/2.6.0, Apache-2.0, approved, #24380
@@ -161,9 +161,9 @@ maven/mavencentral/org.apache.commons/commons-text/1.13.0, Apache-2.0, approved,
 maven/mavencentral/org.apache.httpcomponents.client5/httpclient5/5.6.4, Apache-2.0 AND MPL-2.0, approved, #28182
 maven/mavencentral/org.apache.httpcomponents.core5/httpcore5-h2/5.4.3, Apache-2.0, approved, #27052
 maven/mavencentral/org.apache.httpcomponents.core5/httpcore5/5.4.3, Apache-2.0, approved, #29518
-maven/mavencentral/org.apache.tomcat.embed/tomcat-embed-core/11.0.25, Apache-2.0 AND (EPL-2.0 OR GPL-2.0-only WITH Classpath-exception-2.0) AND (CDDL-1.0 OR GPL-2.0-or-later), approved, #19217
-maven/mavencentral/org.apache.tomcat.embed/tomcat-embed-el/11.0.25, Apache-2.0, approved, #22421
-maven/mavencentral/org.apache.tomcat.embed/tomcat-embed-websocket/11.0.25, Apache-2.0, approved, #21065
+maven/mavencentral/org.apache.tomcat.embed/tomcat-embed-core/11.0.26, Apache-2.0 AND (EPL-2.0 OR GPL-2.0-only WITH Classpath-exception-2.0) AND (CDDL-1.0 OR GPL-2.0-or-later), approved, #19217
+maven/mavencentral/org.apache.tomcat.embed/tomcat-embed-el/11.0.26, Apache-2.0, approved, #22421
+maven/mavencentral/org.apache.tomcat.embed/tomcat-embed-websocket/11.0.26, Apache-2.0, approved, #21065
 maven/mavencentral/org.apiguardian/apiguardian-api/1.1.2, Apache-2.0, approved, #17641
 maven/mavencentral/org.aspectj/aspectjrt/1.9.25.1, Apache-2.0 AND BSD-3-Clause AND EPL-1.0, approved, #13740
 maven/mavencentral/org.aspectj/aspectjweaver/1.9.25.1, Apache-2.0 AND BSD-3-Clause AND EPL-1.0 AND BSD-3-Clause AND Apache-1.1, approved, #15252
@@ -192,9 +192,9 @@ maven/mavencentral/org.mariadb.jdbc/mariadb-java-client/3.5.10, LGPL-2.1-or-late
 maven/mavencentral/org.mockito/mockito-core/5.23.0, MIT AND (Apache-2.0 AND MIT) AND Apache-2.0, approved, #26529
 maven/mavencentral/org.mockito/mockito-junit-jupiter/5.23.0, MIT, approved, #26528
 maven/mavencentral/org.opentest4j/opentest4j/1.3.0, Apache-2.0, approved, #9713
-maven/mavencentral/org.ow2.asm/asm-commons/9.10, BSD-3-Clause, approved, #28174
-maven/mavencentral/org.ow2.asm/asm-tree/9.10, BSD-3-Clause, approved, #28171
-maven/mavencentral/org.ow2.asm/asm/9.10, BSD-3-Clause, approved, #28168
+maven/mavencentral/org.ow2.asm/asm-commons/9.10.1, BSD-3-Clause, approved, #28390
+maven/mavencentral/org.ow2.asm/asm-tree/9.10.1, BSD-3-Clause, approved, #28389
+maven/mavencentral/org.ow2.asm/asm/9.10.1, BSD-3-Clause, approved, #28386
 maven/mavencentral/org.ow2.asm/asm/9.7.1, BSD-3-Clause, approved, #16464
 maven/mavencentral/org.postgresql/postgresql/42.7.13, BSD-2-Clause AND Apache-2.0, approved, #11681
 maven/mavencentral/org.projectlombok/lombok/1.18.46, MIT, approved, #15192
@@ -335,8 +335,8 @@ maven/mavencentral/org.webjars/swagger-ui/5.32.14, Apache-2.0 AND (Apache-2.0 AN
 maven/mavencentral/org.webjars/webjars-locator-lite/1.1.4, MIT, approved, #24484
 maven/mavencentral/org.xmlunit/xmlunit-core/2.11.0, Apache-2.0, approved, #24661
 maven/mavencentral/org.yaml/snakeyaml/2.6, Apache-2.0, approved, #26233
-maven/mavencentral/tools.jackson.core/jackson-core/3.1.5, Apache-2.0 AND MIT, approved, #26415
-maven/mavencentral/tools.jackson.core/jackson-databind/3.1.5, Apache-2.0, approved, #26439
-maven/mavencentral/tools.jackson.dataformat/jackson-dataformat-cbor/3.1.5, Apache-2.0, approved, #27649
-maven/mavencentral/tools.jackson.dataformat/jackson-dataformat-yaml/3.1.5, Apache-2.0, approved, #26517
-maven/mavencentral/tools.jackson.datatype/jackson-datatype-joda/3.1.5, Apache-2.0, approved, #27621
+maven/mavencentral/tools.jackson.core/jackson-core/3.2.3, BSD-2-Clause AND MIT AND BSL-1.0 AND Apache-2.0, approved, #30552
+maven/mavencentral/tools.jackson.core/jackson-databind/3.2.3, Apache-2.0, approved, #30563
+maven/mavencentral/tools.jackson.dataformat/jackson-dataformat-cbor/3.2.3, , restricted, clearlydefined
+maven/mavencentral/tools.jackson.dataformat/jackson-dataformat-yaml/3.2.3, Apache-2.0, approved, #29717
+maven/mavencentral/tools.jackson.datatype/jackson-datatype-joda/3.2.3, , restricted, clearlydefined
