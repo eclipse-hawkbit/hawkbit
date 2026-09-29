@@ -139,12 +139,12 @@ public final class TargetActionsHistory extends Grid<TargetActionsHistory.Action
             final Icon icon;
             if (isActive()) {
                 if (isCancelingOrCanceled()) {
-                    icon = Utils.tooltip(VaadinIcon.ADJUST.create(), "Pending Cancellation");
+                    icon = Utils.tooltip(VaadinIcon.CONTRAST.create(), "Pending Cancellation");
                     icon.setColor("red");
                 } else {
-                    icon = Utils.tooltip(VaadinIcon.ADJUST.create(), "Pending Update");
+                    icon = Utils.tooltip(VaadinIcon.CONTRAST.create(), "Pending Update");
                     icon.setColor("orange");
-                }// todo getDetailStatus should return an enum from src/main/java/org/eclipse/hawkbit/repository/model/Action.java
+                } // TODO getDetailStatus should return an enum from src/main/java/org/eclipse/hawkbit/repository/model/Action.java
             } else if (action.getType().equals(MgmtAction.ACTION_UPDATE) && action.getStatus().equals("finished")) {
                 icon = Utils.tooltip(VaadinIcon.CHECK_CIRCLE.create(), "Updated");
                 icon.setColor("green");

@@ -74,6 +74,7 @@ public class TableView<T, ID> extends Div implements Constants, BeforeEnterObser
                 SplitLayout.Orientation.HORIZONTAL);
     }
 
+    @SuppressWarnings("java:S107")
     public TableView(
             final Filter.Rsql rsql, final Filter.Rsql alternativeRsql,
             final SelectionGrid.EntityRepresentation<T, ID> entityRepresentation,
@@ -86,6 +87,7 @@ public class TableView<T, ID> extends Div implements Constants, BeforeEnterObser
                 detailsOrientation, null);
     }
 
+    @SuppressWarnings("java:S107")
     public TableView(
             final Filter.Rsql rsql, final Filter.Rsql alternativeRsql,
             final SelectionGrid.EntityRepresentation<T, ID> entityRepresentation,
@@ -175,7 +177,7 @@ public class TableView<T, ID> extends Div implements Constants, BeforeEnterObser
         return selectedItem -> {
             // derive the icon from the open/closed state so it stays correct across row re-renders
             final boolean open = selectionGrid.isHighlighted(selectedItem);
-            final Button button = new Button((open ? VaadinIcon.CLOSE_SMALL : VaadinIcon.EYE).create());
+            final Button button = new Button((open ? VaadinIcon.CLOSE : VaadinIcon.EYE).create());
             button.getStyle().set(COLOR, open ? VAR_LUMO_PRIMARY_COLOR : VAR_LUMO_SECONDARY_TEXT_COLOR);
 
             button.addClickListener(event -> {

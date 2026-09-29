@@ -195,11 +195,11 @@ public final class TargetView extends TableView<TargetView.TargetWithDs, String>
             final List<Component> components = new LinkedList<>();
             components.add(textFilter);
             type.setItems(hawkbitClient.getTargetTypeRestApi().getTargetTypes(null, 0, 20, Constants.NAME_ASC).getBody().getContent());
-            if (!((ListDataProvider) type.getDataProvider()).getItems().isEmpty()) {
+            if (!((ListDataProvider<MgmtTargetType>) type.getDataProvider()).getItems().isEmpty()) {
                 components.add(type);
             }
             tag.setItems(hawkbitClient.getTargetTagRestApi().getTargetTags(null, 0, 20, Constants.NAME_ASC).getBody().getContent());
-            if (!((ListDataProvider) tag.getDataProvider()).getItems().isEmpty()) {
+            if (!((ListDataProvider<MgmtTag>) tag.getDataProvider()).getItems().isEmpty()) {
                 components.add(tag);
             }
             return components;
@@ -603,7 +603,7 @@ public final class TargetView extends TableView<TargetView.TargetWithDs, String>
         }
 
         private Span buildTargetTagBadge(MgmtTag tag, String controllerId) {
-            Button clearButton = new Button(VaadinIcon.CLOSE_SMALL.create());
+            Button clearButton = new Button(VaadinIcon.CLOSE.create());
             clearButton.addThemeVariants(ButtonVariant.LUMO_CONTRAST, ButtonVariant.LUMO_TERTIARY_INLINE);
             clearButton.getStyle().set("margin-inline-start", "var(--lumo-space-xs)");
             clearButton.getElement().setAttribute("aria-label", "Clear filter: " + tag.getName());
@@ -807,14 +807,14 @@ public final class TargetView extends TableView<TargetView.TargetWithDs, String>
                         case FINISHED -> icon = Utils.iconColored(VaadinIcon.CHECK_CIRCLE, "Finished", GREEN);
                         case ERROR -> icon = Utils.iconColored(VaadinIcon.CLOSE_CIRCLE, "Error", RED);
                         case WARNING -> icon = Utils.iconColored(VaadinIcon.WARNING, "Warning", ORANGE);
-                        case RUNNING -> icon = Utils.iconColored(VaadinIcon.ADJUST, "Running", GREEN);
-                        case RETRIEVED -> icon = Utils.iconColored(VaadinIcon.CIRCLE_THIN, "Retrieved", GREEN);
-                        case CANCELED -> icon = Utils.iconColored(VaadinIcon.CLOSE_CIRCLE_O, "Canceled", GRAY);
-                        case CANCELING -> icon = Utils.iconColored(VaadinIcon.CLOSE_CIRCLE, "Cancelling", BROWN);
-                        case DOWNLOAD -> icon = Utils.iconColored(VaadinIcon.CLOUD_DOWNLOAD_O, "Download", TEAL);
+                        case RUNNING -> icon = Utils.iconColored(VaadinIcon.CONTRAST, "Running", GREEN);
+                        case RETRIEVED -> icon = Utils.iconColored(VaadinIcon.CIRCLE, "Retrieved", GREEN);
+                        case CANCELING -> icon = Utils.iconColored(VaadinIcon.CLOSE, "Cancelling", BROWN);
+                        case CANCELED -> icon = Utils.iconColored(VaadinIcon.CLOSE_CIRCLE, "Canceled", GRAY);
+                        case DOWNLOAD -> icon = Utils.iconColored(VaadinIcon.DOWNLOAD_ALT, "Download", TEAL);
                         case DOWNLOADED -> icon = Utils.iconColored(VaadinIcon.CLOUD_DOWNLOAD, "Downloaded", PURPLE);
                         case WAIT_FOR_CONFIRMATION -> icon = Utils.iconColored(VaadinIcon.QUESTION_CIRCLE, "Wait for confirmation", CORAL);
-                        default -> icon = Utils.iconColored(VaadinIcon.CIRCLE_THIN, status.getType().getName().toLowerCase(), BLACK);
+                        default -> icon = Utils.iconColored(VaadinIcon.CIRCLE, status.getType().getName().toLowerCase(), BLACK);
                     }
 
                     icon.addClassNames(LumoUtility.IconSize.SMALL);
@@ -1221,7 +1221,7 @@ public final class TargetView extends TableView<TargetView.TargetWithDs, String>
             final VaadinIcon icon = switch (targetUpdateStatus) {
                 case "error" -> VaadinIcon.EXCLAMATION_CIRCLE;
                 case "in_sync" -> VaadinIcon.CHECK_CIRCLE;
-                case "pending" -> VaadinIcon.ADJUST;
+                case "pending" -> VaadinIcon.CONTRAST;
                 case "registered" -> VaadinIcon.DOT_CIRCLE;
                 default -> VaadinIcon.QUESTION_CIRCLE;
             };
@@ -1241,7 +1241,7 @@ public final class TargetView extends TableView<TargetView.TargetWithDs, String>
         }
     }
 
-    // todo change /targets api to reduce api calls ?
+    // TODO change /targets api to reduce api calls ?
     @EqualsAndHashCode(callSuper = true)
     public static class TargetWithDs extends MgmtTarget {
 

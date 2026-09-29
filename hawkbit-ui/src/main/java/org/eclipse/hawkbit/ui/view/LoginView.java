@@ -36,7 +36,7 @@ public final class LoginView extends LoginOverlay implements BeforeEnterObserver
         this.authenticatedUser = authenticatedUser;
         setAction(RouteUtil.getRoutePath(VaadinService.getCurrent().getContext(), getClass()));
 
-        final LoginI18n i18n = LoginI18n.createDefault();
+        final LoginI18n i18n = new LoginI18n();
         i18n.setHeader(new LoginI18n.Header());
         i18n.getHeader().setTitle("hawkBit");
         i18n.getHeader().setDescription("Login in hawkBit");
