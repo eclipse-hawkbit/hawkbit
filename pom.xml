@@ -42,14 +42,14 @@
 
     <properties>
         <!-- Overrides START - to be reviewed regularly current overrides against spring-boot 4.1.1-->
-        <!-- Override logback version since 1.5.38 from spring-boot 4.1.1 is vulnerable -->
-        <logback.version>1.6.4</logback.version>
-        <!-- Override commons-lang3 version since 3.17 is vulnerable -->
         <commons-lang.version>3.20.0</commons-lang.version>
-        <!-- Override rabbit-amqp-client version since 5.30.0 is vulnerable -->
+        <freemarker.version>2.3.35</freemarker.version>
+        <jackson-2-bom.version>2.22.3</jackson-2-bom.version>
+        <jackson-bom.version>3.2.3</jackson-bom.version>
+        <logback.version>1.6.4</logback.version>
+        <netty.version>4.2.18.Final</netty.version>
         <rabbit-amqp-client.version>5.35.0</rabbit-amqp-client.version>
-        <!-- Override tomcat version since 11.0.24 from spring-boot 4.1.1 is vulnerable -->
-        <tomcat.version>11.0.25</tomcat.version>
+        <tomcat.version>11.0.26</tomcat.version>
         <!-- Overrides END -->
 
         <revision>0-SNAPSHOT</revision>
