@@ -45,7 +45,7 @@
         <!-- Override vulnerable commons-fileupload used by feign-form-spring (via spring-cloud-starter-openfeign) -->
         <commons-fileupload.version>1.6.0</commons-fileupload.version>
         <!-- Override commons-lang3 version since 3.17 is vulnerable -->
-        <commons-lang-version>3.20.0</commons-lang-version>
+        <commons-lang-version>3.21.0</commons-lang-version>
         <!-- Overrides END -->
 
         <revision>0-SNAPSHOT</revision>
