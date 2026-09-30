@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.throttle.Config;
 import org.eclipse.hawkbit.throttle.Config.Policy;
 import org.eclipse.hawkbit.throttle.ThrottledException;
@@ -164,8 +165,13 @@ public class ThrottleProperties {
                 // we want to remove the first pending - best chance to have been already expired on caller
                 .pendingRemoveStrategy(FIFO)
                 .keyPolicyThreshold(Math.min(threshold, capacity))
-                // tenant null <=> system. It still could be a tenant work, but we still don't know it
-                .keyPolicyFn(tenant -> tenant == null ? systemPolicy : tenantToPolicy.getOrDefault(tenant, defaultTenantPolicy))
+                // System work: no tenant context OR running as system code with tenant context
+                .keyPolicyFn(tenant -> {
+                    if (tenant == null || AccessContext.isCurrentThreadSystemCode()) {
+                        return systemPolicy;
+                    }
+                    return tenantToPolicy.getOrDefault(tenant, defaultTenantPolicy);
+                })
                 .build();
     }
 }
