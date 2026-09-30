@@ -65,7 +65,8 @@
         <spring-ai.version>2.0.1</spring-ai.version>
         <springdoc-openapi.version>3.1.1</springdoc-openapi.version>
 
-        <!-- openfeign versions -->
+        <!-- spring cloud versions - rabbit and openfeign -->
+        <spring-cloud-stream.version>5.0.3</spring-cloud-stream.version>
         <spring-cloud-openfeign.version>5.0.3</spring-cloud-openfeign.version>
         <openfeign-hc5.version>13.15</openfeign-hc5.version>
 
@@ -249,8 +250,15 @@
             <!-- Spring -->
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
-                <artifactId>spring-cloud-dependencies</artifactId>
-                <version>${spring-cloud.version}</version>
+                <artifactId>spring-cloud-stream-dependencies</artifactId>
+                <version>${spring-cloud-stream.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-openfeign-dependencies</artifactId>
+                <version>${spring-cloud-openfeign.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
