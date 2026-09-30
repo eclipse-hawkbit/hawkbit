@@ -42,7 +42,7 @@
 
     <properties>
         <!-- Overrides START - to be reviewed regularly current overrides against spring-boot 4.1.1-->
-        <commons-lang.version>3.20.0</commons-lang.version>
+        <commons-lang.version>3.21.0</commons-lang.version>
         <freemarker.version>2.3.35</freemarker.version>
         <jackson-2-bom.version>2.22.3</jackson-2-bom.version>
         <jackson-bom.version>3.2.3</jackson-bom.version>
