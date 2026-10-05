@@ -250,6 +250,53 @@ public class AccessContext {
         }
     }
 
+    // Marks system background (scheduler) work, so it could be prioritized (e.g. by the db throttle). Independent of the
+    // security context - survives security context switches (e.g. withSecurityContext) and is never serialized
+    private static final ThreadLocal<Boolean> SYSTEM_BACKGROUND_TASK = new ThreadLocal<>();
+
+    /**
+     * Runs a given {@link Runnable} marked as system background task (e.g. scheduler work). Doesn't change the security context.
+     *
+     * @param runnable the runnable to run as system background task
+     */
+    public static void asSystemBackgroundTask(final Runnable runnable) {
+        asSystemBackgroundTask(() -> {
+            runnable.run();
+            return null;
+        });
+    }
+
+    /**
+     * Runs a given {@link Supplier} marked as system background task (e.g. scheduler work). Doesn't change the security context.
+     *
+     * @param supplier the supplier to call as system background task
+     * @return the return value of the {@link Supplier#get()} method.
+     */
+    public static <T> T asSystemBackgroundTask(final Supplier<T> supplier) {
+        final Boolean current = SYSTEM_BACKGROUND_TASK.get();
+        try {
+            setSystemBackgroundTask(Boolean.TRUE);
+            return supplier.get();
+        } finally {
+            setSystemBackgroundTask(current);
+        }
+    }
+
+    /**
+     * @return {@code true} if the current running code is running as system background task block.
+     */
+    public static boolean isSystemBackgroundTask() {
+        return Boolean.TRUE.equals(SYSTEM_BACKGROUND_TASK.get());
+    }
+
+    private static void setSystemBackgroundTask(final Boolean systemBackgroundTask) {
+        if (systemBackgroundTask == null) {
+            SYSTEM_BACKGROUND_TASK.remove();
+        } else {
+            SYSTEM_BACKGROUND_TASK.set(systemBackgroundTask);
+        }
+    }
+
     private static void setActor(final String currentAuditor) {
         if (currentAuditor == null) {
             ACTOR_OVERRIDE.remove();
