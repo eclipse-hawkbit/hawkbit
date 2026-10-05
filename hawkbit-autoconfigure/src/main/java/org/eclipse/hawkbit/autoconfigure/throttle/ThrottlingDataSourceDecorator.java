@@ -29,6 +29,8 @@ import org.eclipse.hawkbit.throttle.Permit;
 import org.springframework.jdbc.datasource.DelegatingDataSource;
 
 /**
+ * TODO: Still in implementation. Not finished. Don't use it
+ *
  * Layer-2 enforcement point: thin {@link DelegatingDataSource} that routes every connection acquisition throttling.
  * All logic (system keying, reentrancy, permit acquire/release tied to {@link Connection#close()}) lives in the gate and is unit-tested
  * in hawkbit-core; this class is only the Spring/JDBC glue.
@@ -85,7 +87,7 @@ class ThrottlingDataSourceDecorator extends DelegatingDataSource {
         try {
             if (root == null) {
                 // AccessContext.tenant() is null for internal work, which is exactly the throttle's key for it
-                permit = throttle.acquire(AccessContext.tenant(), timeout);
+                permit = throttle.acquire(AccessContext.isCurrentThreadSystemCode() ? null : AccessContext.tenant(), timeout);
                 rootPermit.set(permit);
             } else {
                 permit = root.acquire(timeout);
