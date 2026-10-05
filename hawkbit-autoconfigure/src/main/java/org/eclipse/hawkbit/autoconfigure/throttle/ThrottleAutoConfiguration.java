@@ -25,6 +25,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 
 /**
+ * TODO: Still in implementation. Not finished. Don't use it
+ *
  * Wires the DB connection throttle only if explicitly enabled.
  *
  * <p>A {@link BeanPostProcessor} wraps the application {@link DataSource} in a {@link ThrottlingDataSourceDecorator}, mirroring the proven

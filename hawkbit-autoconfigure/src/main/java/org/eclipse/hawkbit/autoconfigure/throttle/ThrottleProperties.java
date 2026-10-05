@@ -28,6 +28,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 
 /**
+ * TODO: Still in implementation. Not finished. Don't use it
+ * 
  * Operator-owned per-tenant throttling configuration. Caps how many of the shared db connection a single tenant may hold at once.
  * Per-tenant overrides live in the {@link #tenants} map.
  *
