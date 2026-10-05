@@ -46,7 +46,7 @@
         <freemarker.version>2.3.35</freemarker.version>
         <jackson-2-bom.version>2.22.3</jackson-2-bom.version>
         <jackson-bom.version>3.2.3</jackson-bom.version>
-        <logback.version>1.6.4</logback.version>
+        <logback.version>1.6.5</logback.version>
         <netty.version>4.2.18.Final</netty.version>
         <rabbit-amqp-client.version>5.35.0</rabbit-amqp-client.version>
         <tomcat.version>11.0.26</tomcat.version>
