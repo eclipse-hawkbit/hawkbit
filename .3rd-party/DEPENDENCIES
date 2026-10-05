@@ -1,5 +1,5 @@
-maven/mavencentral/ch.qos.logback/logback-classic/1.6.4, EPL-1.0 AND LGPL-2.1-only, approved, #29898
-maven/mavencentral/ch.qos.logback/logback-core/1.6.4, EPL-1.0 AND LGPL-2.1-only, approved, #29897
+maven/mavencentral/ch.qos.logback/logback-classic/1.6.5, EPL-1.0 AND LGPL-2.1-only, approved, #29898
+maven/mavencentral/ch.qos.logback/logback-core/1.6.5, EPL-1.0 AND LGPL-2.1-only, approved, #29897
 maven/mavencentral/com.cronutils/cron-utils/9.2.1, Apache-2.0, approved, clearlydefined
 maven/mavencentral/com.ethlo.time/itu/1.14.0, Apache-2.0, approved, #19505
 maven/mavencentral/com.fasterxml.jackson.core/jackson-annotations/2.22, Apache-2.0, approved, #28540
