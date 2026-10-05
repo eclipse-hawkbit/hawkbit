@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.repository.jpa.scheduler;
 
 import static org.eclipse.hawkbit.context.AccessContext.asSystem;
 import static org.eclipse.hawkbit.context.AccessContext.asSystemAsTenant;
-import static org.eclipse.hawkbit.context.AccessContext.asSystemBackgroundTask;
+import static org.eclipse.hawkbit.context.AccessContext.asSystemTask;
 
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -78,7 +78,7 @@ public class RolloutScheduler {
     private void handleAll(final String tenant) {
         log.trace("Handling rollouts for tenant: {}", tenant);
         try {
-            asSystemBackgroundTask(rolloutHandler::handleAll);
+            asSystemTask(rolloutHandler::handleAll);
         } catch (final Exception e) {
             log.error("Error processing rollout for tenant {}", tenant, e);
         }

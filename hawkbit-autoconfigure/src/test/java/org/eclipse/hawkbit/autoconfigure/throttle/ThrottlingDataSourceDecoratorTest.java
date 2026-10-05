@@ -11,6 +11,8 @@ package org.eclipse.hawkbit.autoconfigure.throttle;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.eclipse.hawkbit.context.AccessContext.asSystemAsTenant;
+import static org.eclipse.hawkbit.context.AccessContext.asSystemTask;
 import static org.eclipse.hawkbit.context.AccessContext.asTenant;
 
 import java.sql.Connection;
@@ -81,6 +83,42 @@ class ThrottlingDataSourceDecoratorTest {
             assertThat(connection.isValid(1)).isTrue();
             assertThat(throttle.stats().perKeyGranted(null)).isEqualTo(1);
         }
+        assertThat(throttle.stats().globalGranted()).isZero();
+    }
+
+    @Test
+    void systemTaskAsTenantIsChargedToTheNullKey() {
+        final Throttle throttle = throttle(2, config -> { });
+        final ThrottlingDataSourceDecorator dataSource = dataSource(throttle);
+
+        // schedulers run as tenant, but marked as system task → charged to the system key
+        asSystemTask(() -> asSystemAsTenant("acme", () -> {
+            try (final Connection connection = dataSource.getConnection()) {
+                assertThat(connection.isValid(1)).isTrue();
+                assertThat(throttle.stats().perKeyGranted(null)).isEqualTo(1);
+                assertThat(throttle.stats().perKeyGranted("acme")).isZero();
+            } catch (final SQLException e) {
+                throw new IllegalStateException(e);
+            }
+        }));
+        assertThat(throttle.stats().globalGranted()).isZero();
+    }
+
+    @Test
+    void systemCodeAsTenantIsChargedToTheTenant() {
+        final Throttle throttle = throttle(2, config -> { });
+        final ThrottlingDataSourceDecorator dataSource = dataSource(throttle);
+
+        // system code in request paths (e.g. DDI authentication) is not a background task → stays on the tenant key
+        asSystemAsTenant("acme", () -> {
+            try (final Connection connection = dataSource.getConnection()) {
+                assertThat(connection.isValid(1)).isTrue();
+                assertThat(throttle.stats().perKeyGranted("acme")).isEqualTo(1);
+                assertThat(throttle.stats().perKeyGranted(null)).isZero();
+            } catch (final SQLException e) {
+                throw new IllegalStateException(e);
+            }
+        });
         assertThat(throttle.stats().globalGranted()).isZero();
     }
 

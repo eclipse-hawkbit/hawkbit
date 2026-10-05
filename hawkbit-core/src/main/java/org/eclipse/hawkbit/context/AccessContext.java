@@ -250,50 +250,53 @@ public class AccessContext {
         }
     }
 
-    // Marks system background (scheduler) work, so it could be prioritized (e.g. by the db throttle). Independent of the
-    // security context - survives security context switches (e.g. withSecurityContext) and is never serialized
-    private static final ThreadLocal<Boolean> SYSTEM_BACKGROUND_TASK = new ThreadLocal<>();
+    // Marks system task - work initiated by the server itself (e.g. schedulers, background tasks), not by a client request,
+    // so it could be prioritized (e.g. by the db throttle). Unlike system code (elevated permissions, also used in client request
+    // paths) it doesn't change the security context - survives its switches (e.g. withSecurityContext) and is never serialized
+    private static final ThreadLocal<Boolean> SYSTEM_TASK = new ThreadLocal<>();
 
     /**
-     * Runs a given {@link Runnable} marked as system background task (e.g. scheduler work). Doesn't change the security context.
+     * Runs a given {@link Runnable} marked as system task - initiated by the server (e.g. scheduler), not by a client request.
+     * Doesn't change the security context.
      *
-     * @param runnable the runnable to run as system background task
+     * @param runnable the runnable to run as system task
      */
-    public static void asSystemBackgroundTask(final Runnable runnable) {
-        asSystemBackgroundTask(() -> {
+    public static void asSystemTask(final Runnable runnable) {
+        asSystemTask(() -> {
             runnable.run();
             return null;
         });
     }
 
     /**
-     * Runs a given {@link Supplier} marked as system background task (e.g. scheduler work). Doesn't change the security context.
+     * Runs a given {@link Supplier} marked as system task - initiated by the server (e.g. scheduler), not by a client request.
+     * Doesn't change the security context.
      *
-     * @param supplier the supplier to call as system background task
+     * @param supplier the supplier to call as system task
      * @return the return value of the {@link Supplier#get()} method.
      */
-    public static <T> T asSystemBackgroundTask(final Supplier<T> supplier) {
-        final Boolean current = SYSTEM_BACKGROUND_TASK.get();
+    public static <T> T asSystemTask(final Supplier<T> supplier) {
+        final Boolean current = SYSTEM_TASK.get();
         try {
-            setSystemBackgroundTask(Boolean.TRUE);
+            setSystemTask(Boolean.TRUE);
             return supplier.get();
         } finally {
-            setSystemBackgroundTask(current);
+            setSystemTask(current);
         }
     }
 
     /**
-     * @return {@code true} if the current running code is running as system background task block.
+     * @return {@code true} if the current running code is running as system task block.
      */
-    public static boolean isSystemBackgroundTask() {
-        return Boolean.TRUE.equals(SYSTEM_BACKGROUND_TASK.get());
+    public static boolean isSystemTask() {
+        return Boolean.TRUE.equals(SYSTEM_TASK.get());
     }
 
-    private static void setSystemBackgroundTask(final Boolean systemBackgroundTask) {
-        if (systemBackgroundTask == null) {
-            SYSTEM_BACKGROUND_TASK.remove();
+    private static void setSystemTask(final Boolean systemTask) {
+        if (systemTask == null) {
+            SYSTEM_TASK.remove();
         } else {
-            SYSTEM_BACKGROUND_TASK.set(systemBackgroundTask);
+            SYSTEM_TASK.set(systemTask);
         }
     }
 
