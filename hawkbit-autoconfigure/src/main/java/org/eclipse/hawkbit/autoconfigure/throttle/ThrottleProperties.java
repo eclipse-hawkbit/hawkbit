@@ -17,6 +17,7 @@ import java.time.Duration;
 import java.util.EnumMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import lombok.Data;
@@ -125,6 +126,17 @@ public class ThrottleProperties {
         private int limit = -1;
         private Duration timeout;
         private int maxPending = -1;
+    }
+
+    /**
+     * The longest configured wait - to be used as the per call bound, so a tenant timeout longer than the global one is honored too
+     * (the throttle waits up to the shorter of the per call bound and the per tenant timeout).
+     */
+    public Duration maxTimeout() {
+        return tenants.values().stream()
+                .map(TenantConfig::getTimeout)
+                .filter(Objects::nonNull)
+                .reduce(timeout, (max, tenantTimeout) -> tenantTimeout.compareTo(max) > 0 ? tenantTimeout : max);
     }
 
     public Config toConfig(final int capacity) {

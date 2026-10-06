@@ -10,16 +10,23 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import java.io.Serial;
+import java.lang.reflect.UndeclaredThrowableException;
+import java.sql.Connection;
 import java.sql.SQLException;
 
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceException;
 
 import org.eclipse.hawkbit.repository.jpa.utils.JpaExceptionTranslator;
+import org.eclipse.persistence.sessions.UnitOfWork;
 import org.jspecify.annotations.NonNull;
 import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.datasource.ConnectionProxy;
+import org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy;
 import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.orm.jpa.vendor.EclipseLinkJpaDialect;
+import org.springframework.transaction.TransactionDefinition;
 
 /**
  * {@link EclipseLinkJpaDialect} with additional exception translation mechanisms based on {@link SQLStateSQLExceptionTranslator}.
@@ -44,6 +51,34 @@ class HawkbitEclipseLinkJpaDialect extends EclipseLinkJpaDialect {
 
     @Serial
     private static final long serialVersionUID = 1L;
+
+    /**
+     * Begins the transaction as {@link EclipseLinkJpaDialect#beginTransaction} does and then acquires the physical JDBC connection.
+     * <p/>
+     * The super class holds a dialect wide lock while EclipseLink acquires the JDBC connection of an early transaction. So any wait for
+     * a connection - exhausted pool or connection throttle - inside of it stalls the transaction begin of every other thread, whatever
+     * its tenant. With the {@link LazyConnectionDataSourceProxy} (see {@link JpaConfiguration}) EclipseLink gets just a connection handle
+     * under the lock - the isolation level and auto-commit are recorded on it. The physical connection is acquired here, after the lock
+     * is released, but still at transaction begin - so a refused connection fails the begin, as without the proxy.
+     */
+    @Override
+    public Object beginTransaction(final EntityManager entityManager, final TransactionDefinition definition) throws SQLException {
+        final Object transactionData = super.beginTransaction(entityManager, definition);
+        // early transaction - connection handle acquired (same check as EclipseLinkJpaDialect.EclipseLinkConnectionHandle)
+        if (entityManager.unwrap(UnitOfWork.class).getParent().isInTransaction()
+                && entityManager.unwrap(Connection.class) instanceof ConnectionProxy connectionProxy) {
+            try {
+                connectionProxy.getTargetConnection();
+            } catch (final UndeclaredThrowableException e) {
+                // getTargetConnection doesn't declare the SQLException of the target data source
+                if (e.getCause() instanceof SQLException sqlException) {
+                    throw sqlException;
+                }
+                throw e;
+            }
+        }
+        return transactionData;
+    }
 
     @Override
     public DataAccessException translateExceptionIfPossible(@NonNull final RuntimeException ex) {

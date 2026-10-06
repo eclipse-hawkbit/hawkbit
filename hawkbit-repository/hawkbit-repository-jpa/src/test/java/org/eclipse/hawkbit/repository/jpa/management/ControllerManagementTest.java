@@ -202,6 +202,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
         final Long actionId = getFirstAssignedActionId(assignDistributionSet(testDs, testTarget));
 
+        waitNextMillis(); // ordered by timestamp - must not tie with the assignment status
         controllerManagement.addUpdateActionStatus(ActionStatusCreate.builder().actionId(actionId)
                 .status(Action.Status.RUNNING).timestamp(System.currentTimeMillis()).messages(List.of("proceeding message 1"))
                 .build());

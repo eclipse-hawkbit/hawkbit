@@ -211,21 +211,14 @@ public class RestConfiguration {
          * method for handling exception of type AbstractServerRtException. Called by the Spring-Framework for exception handling.
          *
          * @param request the Http request
-         * @param ex the exception which occurred
+         * @param ex the exception which occurred - typed, so if the handler matched a cause (e.g. a {@code ThrottledException} wrapped
+         *         by a {@code CannotCreateTransactionException}) Spring passes that cause, not the wrapper
          * @return the entity to be responded containing the exception information as entity.
          */
         @ExceptionHandler(AbstractServerRtException.class)
-        public ResponseEntity<ExceptionInfo> handleSpServerRtExceptions(final HttpServletRequest request, final Exception ex) {
+        public ResponseEntity<ExceptionInfo> handleSpServerRtExceptions(final HttpServletRequest request, final AbstractServerRtException ex) {
             logRequest(request, ex);
-
-            final ExceptionInfo response = createExceptionInfo(ex);
-            final HttpStatus responseStatus;
-            if (ex instanceof AbstractServerRtException abstractServerRtException) {
-                responseStatus = getStatusOrDefault(abstractServerRtException.getError());
-            } else {
-                responseStatus = DEFAULT_RESPONSE_STATUS;
-            }
-            return new ResponseEntity<>(response, responseStatus);
+            return new ResponseEntity<>(createExceptionInfo(ex), getStatusOrDefault(ex.getError()));
         }
 
         /**
