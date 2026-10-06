@@ -399,20 +399,17 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         final String distributionsetHrefPrefix = "http://localhost" + MgmtDistributionSetRestApi.DISTRIBUTIONSETS_V1;
 
         final String dsQuery = "?q=name==" + set.getName() + ";" + "version==" + set.getVersion() + "&offset=0&limit=50";
-        mvc.perform(
-                        post(MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1 + "/" + filterQuery.getId() + "/autoAssignDS")
-                                .content("{\"id\":" + set.getId() + "}").contentType(MediaType.APPLICATION_JSON))
+        mvc.perform(post(MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1 + "/" + filterQuery.getId() + "/autoAssignDS")
+                        .content("{\"id\":" + set.getId() + "}").contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk());
 
-        final String result = mvc.perform(
-                        get(MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1 + "/" + filterQuery.getId()))
+        final String result = mvc.perform(get(MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1 + "/" + filterQuery.getId()))
                 .andExpect(jsonPath("$._links.autoAssignDS.href", equalTo(hrefPrefix + "/autoAssignDS")))
                 .andExpect(jsonPath("$._links.DS.href", startsWith(distributionsetHrefPrefix)))
                 .andReturn().getResponse().getContentAsString();
 
-        final String multipleResult = mvc.perform(
-                        get(MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1 + "?representation=full"))
+        final String multipleResult = mvc.perform(get(MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1 + "?representation=full"))
                 .andExpect(jsonPath("$.content", hasSize(1)))
                 .andExpect(jsonPath("$.total", equalTo(1)))
                 .andExpect(jsonPath("$.content[0]._links.DS.href", startsWith(distributionsetHrefPrefix)))
@@ -564,13 +561,11 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         final DistributionSet set = testdataFactory.createDistributionSet();
         final TargetFilterQuery filterQuery = createSingleTargetFilterQuery("1", "controllerId==target*");
 
-        mvc.perform(
-                        post(MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1 + "/" + filterQuery.getId() + "/autoAssignDS")
-                                .content("{\"id\":" + set.getId() + "}").contentType(MediaType.APPLICATION_JSON))
+        mvc.perform(post(MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1 + "/" + filterQuery.getId() + "/autoAssignDS")
+                        .content("{\"id\":" + set.getId() + "}").contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isTooManyRequests())
-                .andExpect(
-                        jsonPath(JSON_PATH_EXCEPTION_CLASS, equalTo(AssignmentQuotaExceededException.class.getName())))
+                .andExpect(jsonPath(JSON_PATH_EXCEPTION_CLASS, equalTo(AssignmentQuotaExceededException.class.getName())))
                 .andExpect(jsonPath(JSON_PATH_ERROR_CODE, equalTo(SpServerError.SP_QUOTA_EXCEEDED.getKey())));
     }
 
@@ -579,16 +574,13 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
      */
     @ParameterizedTest
     @MethodSource("confirmationOptions")
-    public void setAutoAssignDistributionSetToTargetFilterQuery(final boolean confirmationFlowActive,
-            final Boolean confirmationRequired) throws Exception {
-        final String knownQuery = "name==test05";
-        final String knownName = "filter05";
-
+    public void setAutoAssignDistributionSetToTargetFilterQuery(final boolean confirmationFlowActive, final Boolean confirmationRequired)
+            throws Exception {
         if (confirmationFlowActive) {
             enableConfirmationFlow();
         }
 
-        final TargetFilterQuery tfq = createSingleTargetFilterQuery(knownName, knownQuery);
+        final TargetFilterQuery tfq = createSingleTargetFilterQuery("filter05", "name==test05");
 
         // set will be locked after first assignment
         final DistributionSet set = testdataFactory.createDistributionSet();
@@ -748,25 +740,25 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
                 Arguments.of(true, null), Arguments.of(false, null));
     }
 
-    private void verifyAutoAssignmentWithoutActionType(final TargetFilterQuery tfq, final DistributionSet set,
-            final Boolean confirmationRequired) throws Exception {
+    private void verifyAutoAssignmentWithoutActionType(
+            final TargetFilterQuery tfq, final DistributionSet set, final Boolean confirmationRequired) throws Exception {
         verifyAutoAssignmentByActionType(tfq, set, null, confirmationRequired);
     }
 
-    private void verifyAutoAssignmentWithForcedActionType(final TargetFilterQuery tfq, final DistributionSet set,
-            final Boolean confirmationRequired) throws Exception {
+    private void verifyAutoAssignmentWithForcedActionType(
+            final TargetFilterQuery tfq, final DistributionSet set, final Boolean confirmationRequired) throws Exception {
         verifyAutoAssignmentByActionType(tfq, set, MgmtActionType.FORCED, confirmationRequired);
     }
 
-    private void verifyAutoAssignmentWithSoftActionType(final TargetFilterQuery tfq, final DistributionSet set,
-            final Boolean confirmationRequired) throws Exception {
+    private void verifyAutoAssignmentWithSoftActionType(
+            final TargetFilterQuery tfq, final DistributionSet set, final Boolean confirmationRequired) throws Exception {
         verifyAutoAssignmentByActionType(tfq, set, MgmtActionType.SOFT, confirmationRequired);
     }
 
-    private void verifyAutoAssignmentByActionType(final TargetFilterQuery tfq, final DistributionSet set,
-            final MgmtActionType actionType, final Boolean confirmationRequired) throws Exception {
-        final String hrefPrefix = "http://localhost" + MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1 + "/"
-                + tfq.getId();
+    private void verifyAutoAssignmentByActionType(
+            final TargetFilterQuery tfq, final DistributionSet set, final MgmtActionType actionType, final Boolean confirmationRequired)
+            throws Exception {
+        final String hrefPrefix = "http://localhost" + MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1 + "/" + tfq.getId();
 
         final JSONObject jsonObject = new JSONObject();
         jsonObject.put("id", set.getId());
@@ -787,8 +779,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         final MgmtActionType expectedActionType = actionType != null ? actionType : MgmtActionType.FORCED;
 
         assertThat(autoAssignment.getDistributionSet()).isEqualTo(set);
-        assertThat(autoAssignment.getActionType())
-                .isEqualTo(MgmtRestModelMapper.convertActionType(expectedActionType));
+        assertThat(autoAssignment.getActionType()).isEqualTo(MgmtRestModelMapper.convertActionType(expectedActionType));
 
         mvc.perform(get(MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1 + "/" + tfq.getId()))
                 .andDo(print())

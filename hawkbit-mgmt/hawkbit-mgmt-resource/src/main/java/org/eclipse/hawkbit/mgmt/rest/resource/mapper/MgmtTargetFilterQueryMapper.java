@@ -46,30 +46,26 @@ public final class MgmtTargetFilterQueryMapper {
         targetRest.setCreatedAt(filter.getCreatedAt());
         targetRest.setLastModifiedAt(filter.getLastModifiedAt());
 
-        final DistributionSet distributionSet = autoAssignment.map(AutoAssignment::getDistributionSet).orElse(null);
-        if (distributionSet != null) {
+        autoAssignment.ifPresent(aa -> {
+            final DistributionSet distributionSet = aa.getDistributionSet();
             targetRest.setAutoAssignDistributionSet(distributionSet.getId());
+            targetRest.setAutoAssignActionType(MgmtRestModelMapper.convertActionType(aa.getActionType()));
+            aa.getWeight().ifPresent(targetRest::setAutoAssignWeight);
 
-            if (autoAssignment.isPresent()) {
-                targetRest.setAutoAssignActionType(MgmtRestModelMapper.convertActionType(autoAssignment.get().getActionType()));
-                autoAssignment.get().getWeight().ifPresent(targetRest::setAutoAssignWeight);
-
-                if (confirmationFlowEnabled) {
-                    targetRest.setConfirmationRequired(autoAssignment.get().isConfirmationRequired());
-                }
+            if (confirmationFlowEnabled) {
+                targetRest.setConfirmationRequired(aa.isConfirmationRequired());
             }
-        }
 
-        targetRest.add(
-                linkTo(methodOn(MgmtTargetFilterQueryRestApi.class).getFilter(filter.getId())).withSelfRel().expand());
-        if (isRepresentationFull && distributionSet != null) {
-            targetRest.add(
-                    linkTo(methodOn(MgmtDistributionSetRestApi.class).getDistributionSets(
-                            "name==" + distributionSet.getName() + ";version==" + distributionSet.getVersion(),
-                            Integer.parseInt(MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET),
-                            Integer.parseInt(MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT), null, null
-                    )).withRel("DS").expand());
-        }
+            if (isRepresentationFull) {
+                targetRest.add(linkTo(methodOn(MgmtDistributionSetRestApi.class).getDistributionSets(
+                        "name==" + distributionSet.getName() + ";version==" + distributionSet.getVersion(),
+                        Integer.parseInt(MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET),
+                        Integer.parseInt(MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT), null, null
+                )).withRel("DS").expand());
+            }
+        });
+
+        targetRest.add(linkTo(methodOn(MgmtTargetFilterQueryRestApi.class).getFilter(filter.getId())).withSelfRel().expand());
 
         return targetRest;
     }

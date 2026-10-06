@@ -36,9 +36,9 @@ import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.mgmt.json.model.autoassignment.MgmtAutoAssignmentResponseBody;
 import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtRestModelMapper;
 import org.eclipse.hawkbit.repository.AutoAssignmentManagement;
-import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
+import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.AutoAssignment;
@@ -122,7 +122,7 @@ class MgmtAutoAssignmentResourceTest extends AbstractManagementApiIntegrationTes
     @Test
     void createAutoAssignmentInvalid() throws Exception {
         mvc.perform(post("/rest/v1/autoassignments").content("invalid body").contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
+                        .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("errorCode", equalTo("hawkbit.server.error.rest.body.notReadable")));
@@ -137,7 +137,7 @@ class MgmtAutoAssignmentResourceTest extends AbstractManagementApiIntegrationTes
         final String body = "{\"name\":\"missingDs\",\"targetFilterQuery\":\"name==*\"}";
 
         mvc.perform(post("/rest/v1/autoassignments").content(body).contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
+                        .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());
     }
@@ -156,7 +156,7 @@ class MgmtAutoAssignmentResourceTest extends AbstractManagementApiIntegrationTes
                 "exceedsQuota", "controllerId==target*", ds.getId(), null, null, null, false);
 
         mvc.perform(post("/rest/v1/autoassignments").content(body).contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
+                        .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isTooManyRequests())
                 .andExpect(jsonPath("exceptionClass", equalTo(AssignmentQuotaExceededException.class.getName())))
@@ -474,14 +474,12 @@ class MgmtAutoAssignmentResourceTest extends AbstractManagementApiIntegrationTes
     private long postAutoAssignment(final String name, final String query, final long distributionSetId,
             final Long startAt, final ActionType actionType, final Integer weight, final Boolean confirmationRequired, final int expectedStatus)
             throws Exception {
-
         final String type = actionType != null ? MgmtRestModelMapper.convertActionType(actionType).getName() : null;
-        final String autoAssignment = JsonBuilder.autoAssignment(name, query, distributionSetId,
-                startAt, type, weight, confirmationRequired);
-
-        final ResultActions response = mvc.perform(post("/rest/v1/autoassignments").content(autoAssignment).contentType(
-                MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
+        final String autoAssignment = JsonBuilder.autoAssignment(name, query, distributionSetId, startAt, type, weight, confirmationRequired);
+        final ResultActions response = mvc.perform(post("/rest/v1/autoassignments")
+                        .content(autoAssignment)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().is(expectedStatus));
 
@@ -508,7 +506,7 @@ class MgmtAutoAssignmentResourceTest extends AbstractManagementApiIntegrationTes
 
     private void getAutoAssignments(final List<AutoAssignment> autoAssignments, final int expectedStatus) throws Exception {
         final ResultActions response = mvc.perform(get("/rest/v1/autoassignments")
-                .accept(MediaType.APPLICATION_JSON))
+                        .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().is(expectedStatus));
 
@@ -535,7 +533,7 @@ class MgmtAutoAssignmentResourceTest extends AbstractManagementApiIntegrationTes
 
     private void getAutoAssignment(final Long autoAssignmentId, final int expectedStatus) throws Exception {
         final ResultActions response = mvc.perform(get("/rest/v1/autoassignments/" + autoAssignmentId)
-                .accept(MediaType.APPLICATION_JSON))
+                        .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().is(expectedStatus));
 

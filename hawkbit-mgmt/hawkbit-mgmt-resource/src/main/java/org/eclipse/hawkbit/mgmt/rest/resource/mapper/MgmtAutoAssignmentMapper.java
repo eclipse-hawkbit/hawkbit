@@ -10,6 +10,7 @@
 
 package org.eclipse.hawkbit.mgmt.rest.resource.mapper;
 
+import static org.eclipse.hawkbit.repository.helper.TenantConfigHelper.isUserConfirmationFlowEnabled;
 import static org.eclipse.hawkbit.repository.model.Action.ActionType.FORCED;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -46,7 +47,6 @@ public class MgmtAutoAssignmentMapper {
     }
 
     public static MgmtAutoAssignmentResponseBody toResponseAutoAssignment(final AutoAssignment autoAssignment) {
-
         final MgmtAutoAssignmentResponseBody body = new MgmtAutoAssignmentResponseBody();
         MgmtRestModelMapper.mapNamedToNamed(body, autoAssignment);
         body.setId(autoAssignment.getId());
@@ -79,18 +79,15 @@ public class MgmtAutoAssignmentMapper {
         return body;
     }
 
-    public static Create fromRequest(final MgmtAutoAssignmentRestRequestBodyPost restRequest,
-            final DistributionSet distributionSet) {
+    public static Create fromRequest(final MgmtAutoAssignmentRestRequestBodyPost restRequest, final DistributionSet distributionSet) {
         return Create.builder()
                 .distributionSet(distributionSet)
                 .targetFilterQuery(restRequest.getTargetFilterQuery())
                 .name(restRequest.getName())
                 .description(restRequest.getDescription())
                 .startAt(restRequest.getStartAt())
-                .actionType(Optional.ofNullable(MgmtRestModelMapper.convertActionType(restRequest.getActionType())).orElse(
-                        FORCED))
-                .confirmationRequired(Optional.ofNullable(restRequest.getConfirmationRequired()).orElse(TenantConfigHelper
-                        .isUserConfirmationFlowEnabled()))
+                .actionType(Optional.ofNullable(MgmtRestModelMapper.convertActionType(restRequest.getActionType())).orElse(FORCED))
+                .confirmationRequired(Optional.ofNullable(restRequest.getConfirmationRequired()).orElse(isUserConfirmationFlowEnabled()))
                 .weight(restRequest.getWeight()).build();
     }
 
