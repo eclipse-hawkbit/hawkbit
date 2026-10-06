@@ -21,6 +21,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.ql.jpa.QLSupport;
 import org.eclipse.hawkbit.repository.AutoAssignmentManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
+import org.eclipse.hawkbit.repository.TargetFilterQueryManagement.Update;
+import org.eclipse.hawkbit.repository.TargetFilterQueryManagement.UpdateCreate;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
@@ -45,10 +47,10 @@ import org.springframework.validation.annotation.Validated;
 @ConditionalOnBooleanProperty(prefix = "hawkbit.jpa", name = { "enabled", "target-filter-management" }, matchIfMissing = true)
 class JpaTargetFilterQueryManagement
         extends
-        AbstractJpaRepositoryManagement<JpaTargetFilterQuery, TargetFilterQueryManagement.UpdateCreate, TargetFilterQueryManagement.Update, TargetFilterQueryRepository, TargetFilterQueryFields>
+        AbstractJpaRepositoryManagement<JpaTargetFilterQuery, UpdateCreate, Update, TargetFilterQueryRepository, TargetFilterQueryFields>
         implements TargetFilterQueryManagement<JpaTargetFilterQuery> {
 
-    private AutoAssignmentManagement<? extends AutoAssignment> autoAssignmentManagement;
+    private final AutoAssignmentManagement<? extends AutoAssignment> autoAssignmentManagement;
 
     protected JpaTargetFilterQueryManagement(
             final TargetFilterQueryRepository targetFilterQueryRepository, final EntityManager entityManager,
@@ -97,7 +99,7 @@ class JpaTargetFilterQueryManagement
     @Override
     @Transactional
     public void delete(final long id) {
-        findLinkedAutoAssignment(id).ifPresent(autoAssignment -> {
+        findLinkedAutoAssignment0(id).ifPresent(autoAssignment -> {
             unlinkAutoAssignment(id);
             autoAssignmentManagement.delete(autoAssignment.getId());
         });
@@ -107,7 +109,7 @@ class JpaTargetFilterQueryManagement
     @Override
     @Transactional
     public void delete(final Collection<Long> ids) {
-        ids.forEach(id -> findLinkedAutoAssignment(id).ifPresent(autoAssignment -> {
+        ids.forEach(id -> findLinkedAutoAssignment0(id).ifPresent(autoAssignment -> {
             unlinkAutoAssignment(id);
             autoAssignmentManagement.delete(autoAssignment.getId());
         }));
@@ -118,11 +120,10 @@ class JpaTargetFilterQueryManagement
     @Transactional
     public AutoAssignment createLinkedAutoAssignment(final long id, final AutoAssignmentManagement.Create create) {
         unlinkAutoAssignment(id);
-        findLinkedAutoAssignment(id).ifPresent(autoAssignment -> autoAssignmentManagement.delete(autoAssignment.getId()));
+        findLinkedAutoAssignment0(id).ifPresent(autoAssignment -> autoAssignmentManagement.delete(autoAssignment.getId()));
         entityManager.flush();
 
-        final AutoAssignment created = autoAssignmentManagement.create(create);
-        return created;
+        return autoAssignmentManagement.create(create);
     }
 
     @Override
@@ -140,13 +141,7 @@ class JpaTargetFilterQueryManagement
 
     @Override
     public Optional<AutoAssignment> findLinkedAutoAssignment(final long id) {
-        final TargetFilterQuery targetFilterQuery = get(id);
-        Optional<AutoAssignment> searchResult = autoAssignmentManagement.findByName(targetFilterQuery.getName());
-        if (searchResult.isPresent() && !searchResult.get().getTargetFilterQuery().equals(targetFilterQuery.getQuery())) {
-            searchResult = Optional.empty();
-        }
-
-        return searchResult;
+        return findLinkedAutoAssignment0(id);
     }
 
     @Override
@@ -159,29 +154,39 @@ class JpaTargetFilterQueryManagement
         }
     }
 
+    private Optional<AutoAssignment> findLinkedAutoAssignment0(final long id) {
+        final TargetFilterQuery targetFilterQuery = get(id);
+        final Optional<AutoAssignment> searchResult = autoAssignmentManagement.findByName(targetFilterQuery.getName());
+        // when auto assignment is created by a target filter query with a query having leading or trailing white space chars
+        // the resulting auto assignment query is trimmed by ObjectCopyUtil. So we trim the target filter query's query while comparing
+        if (searchResult.isPresent() && !searchResult.get().getTargetFilterQuery().equals(targetFilterQuery.getQuery().trim())) {
+            return Optional.empty(); // present but filter doesn't match
+        } else {
+            return searchResult;
+        }
+    }
+
     private void validate(final UpdateCreate create) {
-        Optional.ofNullable(create.getQuery()).ifPresent(query -> {
-            // validate the RSQL query syntax
-            QLSupport.getInstance().validate(query, TargetFields.class, JpaTarget.class);
-        });
+        Optional.ofNullable(create.getQuery())
+                // if present validate the RSQL query syntax
+                .ifPresent(query -> QLSupport.getInstance().validate(query, TargetFields.class, JpaTarget.class));
     }
 
     private void updateAutoAssignment(final Update update) {
-        findLinkedAutoAssignment(update.getId()).ifPresent(autoAssignment -> {
+        findLinkedAutoAssignment0(update.getId()).ifPresent(autoAssignment -> {
             if (update.getQuery() != null && !update.getQuery().equals(get(update.getId()).getQuery())) {
-                AutoAssignment assignment = autoAssignment;
-                AutoAssignmentManagement.Create create = AutoAssignmentManagement.Create.builder()
-                        .name(update.getName() != null ? update.getName() : assignment.getName())
-                        .description(assignment.getDescription())
+                final AutoAssignmentManagement.Create create = AutoAssignmentManagement.Create.builder()
+                        .name(update.getName() != null ? update.getName() : autoAssignment.getName())
+                        .description(autoAssignment.getDescription())
                         .targetFilterQuery(update.getQuery())
-                        .distributionSet(assignment.getDistributionSet())
-                        .actionType(assignment.getActionType())
-                        .confirmationRequired(assignment.isConfirmationRequired())
-                        .weight(assignment.getWeight().orElse(null))
-                        .startAt(assignment.getStartAt())
+                        .distributionSet(autoAssignment.getDistributionSet())
+                        .actionType(autoAssignment.getActionType())
+                        .confirmationRequired(autoAssignment.isConfirmationRequired())
+                        .weight(autoAssignment.getWeight().orElse(null))
+                        .startAt(autoAssignment.getStartAt())
                         .build();
                 unlinkAutoAssignment(update.getId());
-                autoAssignmentManagement.delete(assignment.getId());
+                autoAssignmentManagement.delete(autoAssignment.getId());
                 entityManager.flush();
                 autoAssignmentManagement.create(create);
             } else if (update.getName() != null && !update.getName().equals(autoAssignment.getName())) {
@@ -195,8 +200,8 @@ class JpaTargetFilterQueryManagement
 
     /**
      * Clears the in-memory link from the target filter query to its (read-only mapped) auto assignment.
-     * <p>
-     * The auto assignment is an independent entity linked to the filter only by matching name and query. When it is
+     *
+     * <p>The auto assignment is an independent entity linked to the filter only by matching name and query. When it is
      * removed or replaced within the same transaction, the still-managed target filter query would otherwise keep a
      * reference to the no-longer-persistent auto assignment, which Hibernate rejects on flush. Callers that delete or
      * replace the linked auto assignment must call this first.
