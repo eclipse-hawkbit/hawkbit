@@ -12,19 +12,21 @@ package org.eclipse.hawkbit.repository.jpa;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.sql.Connection;
-import java.sql.SQLException;
+
+import javax.sql.DataSource;
 
 import jakarta.persistence.EntityManager;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
 
 /**
- * Transaction isolation handling against the real persistence stack - the JPA dialect applies custom isolation levels on the transaction's
- * own connection and a following transaction starts with the default isolation again.
+ * Transaction isolation handling against the real persistence stack - custom isolation levels are applied on the transaction's own
+ * connection and a following transaction starts with the default isolation again.
  */
 class TransactionIsolationTest extends AbstractJpaIntegrationTest {
 
@@ -32,6 +34,8 @@ class TransactionIsolationTest extends AbstractJpaIntegrationTest {
     private EntityManager entityManager;
     @Autowired
     private PlatformTransactionManager txManager;
+    @Autowired
+    private DataSource dataSource;
 
     @Test
     void customIsolationIsAppliedAndNotLeakedToFollowingTransactions() {
@@ -44,9 +48,9 @@ class TransactionIsolationTest extends AbstractJpaIntegrationTest {
     }
 
     /**
-     * The isolation level is applied after EclipseLink's early transaction begin (auto-commit already off, no statement executed yet) -
-     * verifies the database really runs the transaction with it: a commit of a concurrent transaction is visible to a re-read with
-     * READ_COMMITTED and is not with REPEATABLE_READ. The level tested is the one the database does not use by default.
+     * Verifies the database really runs the transaction with the requested isolation level: a commit of a concurrent transaction is
+     * visible to a re-read with READ_COMMITTED and is not with REPEATABLE_READ. The level tested is the one the database does not use by
+     * default.
      */
     @Test
     void customIsolationIsEnforcedByTheDatabase() {
@@ -83,13 +87,8 @@ class TransactionIsolationTest extends AbstractJpaIntegrationTest {
     private int isolationIn(final int isolationLevel) {
         final TransactionTemplate template = new TransactionTemplate(txManager);
         template.setIsolationLevel(isolationLevel);
-        final Integer isolation = template.execute(status -> {
-            try {
-                return entityManager.unwrap(Connection.class).getTransactionIsolation();
-            } catch (final SQLException e) {
-                throw new IllegalStateException(e);
-            }
-        });
+        // the transaction's own connection - JdbcTemplate joins it (provider independent, EntityManager#unwrap(Connection) is EclipseLink only)
+        final Integer isolation = template.execute(status -> new JdbcTemplate(dataSource).execute(Connection::getTransactionIsolation));
         assertThat(isolation).isNotNull();
         return isolation;
     }

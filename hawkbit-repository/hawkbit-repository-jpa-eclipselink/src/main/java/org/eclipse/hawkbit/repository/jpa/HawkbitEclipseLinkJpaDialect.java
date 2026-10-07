@@ -46,6 +46,7 @@ import org.springframework.transaction.TransactionDefinition;
  *         </ol>
  *     </li>
  * </ol>
+ * Additionally, it acquires the physical JDBC connection of a transaction outside the dialect wide lock - see {@link #beginTransaction}.
  */
 class HawkbitEclipseLinkJpaDialect extends EclipseLinkJpaDialect {
 

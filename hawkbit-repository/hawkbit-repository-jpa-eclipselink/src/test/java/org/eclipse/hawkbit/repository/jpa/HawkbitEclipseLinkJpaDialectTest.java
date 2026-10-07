@@ -14,6 +14,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.sql.SQLException;
+
 import jakarta.persistence.OptimisticLockException;
 import jakarta.persistence.PersistenceException;
 

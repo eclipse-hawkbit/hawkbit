@@ -45,7 +45,6 @@ public class JpaConfiguration extends JpaBaseConfiguration {
         private final Map<String, String> eclipselink = new HashMap<>();
     }
 
-    private final DataSource dataSource;
     // only for testing purposes ddl generation may be enabled
     private final Map<String, String> eclipselinkProperties;
 
@@ -53,10 +52,7 @@ public class JpaConfiguration extends JpaBaseConfiguration {
             final DataSource dataSource, final JpaProperties properties,
             final ObjectProvider<JtaTransactionManager> jtaTransactionManagerProvider,
             final Properties eclipselinkProperties) {
-        // EclipseLink gets lazy connection handles - the physical connection is acquired by HawkbitEclipseLinkJpaDialect outside the lock
-        // of the EclipseLinkJpaDialect. See HawkbitEclipseLinkJpaDialect#beginTransaction
-        super(new LazyConnectionDataSourceProxy(dataSource), properties, jtaTransactionManagerProvider);
-        this.dataSource = dataSource;
+        super(dataSource, properties, jtaTransactionManagerProvider);
         this.eclipselinkProperties = eclipselinkProperties.getEclipselink();
     }
 
@@ -67,11 +63,7 @@ public class JpaConfiguration extends JpaBaseConfiguration {
     @Override
     @Bean
     public PlatformTransactionManager transactionManager(final ObjectProvider<TransactionManagerCustomizers> transactionManagerCustomizers) {
-        final TransactionManager transactionManager = new TransactionManager();
-        // key under which the transaction's JDBC connection is exposed (e.g. to JdbcTemplate) - the injected data source bean
-        // (throttled, if enabled), as JdbcTemplate users get it; not the lazy proxy of the entity manager factory (auto-detected otherwise)
-        transactionManager.setDataSource(dataSource);
-        return transactionManager;
+        return new TransactionManager();
     }
 
     @Override
@@ -89,7 +81,11 @@ public class JpaConfiguration extends JpaBaseConfiguration {
 
     @Override
     protected Map<String, Object> getVendorProperties(final DataSource dataSource) {
-        final Map<String, Object> properties = HashMap.newHashMap(7);
+        final Map<String, Object> properties = HashMap.newHashMap(8);
+        // EclipseLink (only) gets lazy connection handles - the physical connection is acquired by HawkbitEclipseLinkJpaDialect outside the
+        // lock of the EclipseLinkJpaDialect, see HawkbitEclipseLinkJpaDialect#beginTransaction. Spring (transaction manager, JdbcTemplate)
+        // keeps using the data source itself
+        properties.put(PersistenceUnitProperties.NON_JTA_DATASOURCE, new LazyConnectionDataSourceProxy(dataSource));
         // Turn off dynamic weaving to disable LTW lookup in static weaving mode
         properties.put(PersistenceUnitProperties.WEAVING, "false");
         // needed for reports
