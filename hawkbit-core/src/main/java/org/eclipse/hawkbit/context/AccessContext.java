@@ -250,6 +250,56 @@ public class AccessContext {
         }
     }
 
+    // Marks system task - work initiated by the server itself (e.g. schedulers, background tasks), not by a client request,
+    // so it could be prioritized (e.g. by the db throttle). Unlike system code (elevated permissions, also used in client request
+    // paths) it doesn't change the security context - survives its switches (e.g. withSecurityContext) and is never serialized
+    private static final ThreadLocal<Boolean> SYSTEM_TASK = new ThreadLocal<>();
+
+    /**
+     * Runs a given {@link Runnable} marked as system task - initiated by the server (e.g. scheduler), not by a client request.
+     * Doesn't change the security context.
+     *
+     * @param runnable the runnable to run as system task
+     */
+    public static void asSystemTask(final Runnable runnable) {
+        asSystemTask(() -> {
+            runnable.run();
+            return null;
+        });
+    }
+
+    /**
+     * Runs a given {@link Supplier} marked as system task - initiated by the server (e.g. scheduler), not by a client request.
+     * Doesn't change the security context.
+     *
+     * @param supplier the supplier to call as system task
+     * @return the return value of the {@link Supplier#get()} method.
+     */
+    public static <T> T asSystemTask(final Supplier<T> supplier) {
+        final Boolean current = SYSTEM_TASK.get();
+        try {
+            setSystemTask(Boolean.TRUE);
+            return supplier.get();
+        } finally {
+            setSystemTask(current);
+        }
+    }
+
+    /**
+     * @return {@code true} if the current running code is running as system task block.
+     */
+    public static boolean isSystemTask() {
+        return Boolean.TRUE.equals(SYSTEM_TASK.get());
+    }
+
+    private static void setSystemTask(final Boolean systemTask) {
+        if (systemTask == null) {
+            SYSTEM_TASK.remove();
+        } else {
+            SYSTEM_TASK.set(systemTask);
+        }
+    }
+
     private static void setActor(final String currentAuditor) {
         if (currentAuditor == null) {
             ACTOR_OVERRIDE.remove();

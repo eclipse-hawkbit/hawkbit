@@ -86,8 +86,9 @@ class ThrottlingDataSourceDecorator extends DelegatingDataSource {
         final Permit permit;
         try {
             if (root == null) {
-                // AccessContext.tenant() is null for internal work, which is exactly the throttle's key for it
-                permit = throttle.acquire(AccessContext.isCurrentThreadSystemCode() ? null : AccessContext.tenant(), timeout);
+                // internal work (no tenant) and system tasks (e.g. schedulers) are charged to the null (system) key
+                // the throttle is tenant-aware, so the key is either the current tenant or null for system work
+                permit = throttle.acquire(AccessContext.isSystemTask() ? null : AccessContext.tenant(), timeout);
                 rootPermit.set(permit);
             } else {
                 permit = root.acquire(timeout);
