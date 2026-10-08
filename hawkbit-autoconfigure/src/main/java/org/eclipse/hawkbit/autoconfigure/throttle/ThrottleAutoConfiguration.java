@@ -62,7 +62,7 @@ public class ThrottleAutoConfiguration {
                 final Config config = props.toConfig(resolveCapacity(props.getCapacity(), dataSource));
                 log.info("hawkBit connection throttle enabled (bean '{}'): props: {}, config: {}", beanName, props, config);
                 return new ThrottlingDataSourceDecorator(
-                        dataSource, new Throttle(config), props.getTimeout(),
+                        dataSource, new Throttle(config), props.maxTimeout(),
                         () -> meterRegistry(meterRegistryProvider));
             }
         };

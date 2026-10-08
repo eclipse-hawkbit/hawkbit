@@ -10,16 +10,23 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import java.io.Serial;
+import java.lang.reflect.UndeclaredThrowableException;
+import java.sql.Connection;
 import java.sql.SQLException;
 
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceException;
 
 import org.eclipse.hawkbit.repository.jpa.utils.JpaExceptionTranslator;
+import org.eclipse.persistence.sessions.UnitOfWork;
 import org.jspecify.annotations.NonNull;
 import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.datasource.ConnectionProxy;
+import org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy;
 import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.orm.jpa.vendor.EclipseLinkJpaDialect;
+import org.springframework.transaction.TransactionDefinition;
 
 /**
  * {@link EclipseLinkJpaDialect} with additional exception translation mechanisms based on {@link SQLStateSQLExceptionTranslator}.
@@ -39,11 +46,47 @@ import org.springframework.orm.jpa.vendor.EclipseLinkJpaDialect;
  *         </ol>
  *     </li>
  * </ol>
+ * Additionally, it acquires the physical JDBC connection of a transaction outside the dialect wide lock - see {@link #beginTransaction}.
  */
 class HawkbitEclipseLinkJpaDialect extends EclipseLinkJpaDialect {
 
     @Serial
     private static final long serialVersionUID = 1L;
+
+    /**
+     * Workaround for the dialect wide lock of {@link EclipseLinkJpaDialect#beginTransaction}.
+     * <p/>
+     * <b>Problem:</b> for write and custom isolation transactions the super class begins the database transaction early, holding a dialect
+     * wide lock while EclipseLink acquires the JDBC connection. So any blocking connection acquisition - waiting for a free pool (Hikari)
+     * connection or for a throttle permit - stalls the transaction begin of every other thread, whatever its tenant.
+     * <p/>
+     * <b>Workaround:</b>
+     * <ol>
+     * <li>EclipseLink gets a {@link LazyConnectionDataSourceProxy} as data source (see {@link JpaConfiguration}) - so under the lock it
+     * acquires just a connection handle, the isolation level and auto-commit are only recorded on it. No blocking under the lock.</li>
+     * <li>Right after the lock is released, the physical connection is acquired eagerly here. That keeps the behaviour without the
+     * workaround - connection acquired (blocking for pool / throttle) at transaction begin and a refused connection fails the begin
+     * (fail fast), before any transactional code runs. Otherwise it would be acquired lazily, on the first statement.</li>
+     * </ol>
+     */
+    @Override
+    public Object beginTransaction(final EntityManager entityManager, final TransactionDefinition definition) throws SQLException {
+        final Object transactionData = super.beginTransaction(entityManager, definition);
+        // early transaction - connection handle acquired (same check as EclipseLinkJpaDialect.EclipseLinkConnectionHandle)
+        if (entityManager.unwrap(UnitOfWork.class).getParent().isInTransaction()
+                && entityManager.unwrap(Connection.class) instanceof ConnectionProxy connectionProxy) {
+            try {
+                connectionProxy.getTargetConnection();
+            } catch (final UndeclaredThrowableException e) {
+                // getTargetConnection doesn't declare the SQLException of the target data source
+                if (e.getCause() instanceof SQLException sqlException) {
+                    throw sqlException;
+                }
+                throw e;
+            }
+        }
+        return transactionData;
+    }
 
     @Override
     public DataAccessException translateExceptionIfPossible(@NonNull final RuntimeException ex) {

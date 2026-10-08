@@ -24,6 +24,7 @@ import org.springframework.boot.transaction.autoconfigure.TransactionManagerCust
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy;
 import org.springframework.orm.jpa.vendor.AbstractJpaVendorAdapter;
 import org.springframework.orm.jpa.vendor.EclipseLinkJpaDialect;
 import org.springframework.orm.jpa.vendor.EclipseLinkJpaVendorAdapter;
@@ -80,7 +81,9 @@ public class JpaConfiguration extends JpaBaseConfiguration {
 
     @Override
     protected Map<String, Object> getVendorProperties(final DataSource dataSource) {
-        final Map<String, Object> properties = HashMap.newHashMap(7);
+        final Map<String, Object> properties = HashMap.newHashMap(8);
+        // workaround for the EclipseLinkJpaDialect lock, see HawkbitEclipseLinkJpaDialect#beginTransaction
+        properties.put(PersistenceUnitProperties.NON_JTA_DATASOURCE, new LazyConnectionDataSourceProxy(dataSource));
         // Turn off dynamic weaving to disable LTW lookup in static weaving mode
         properties.put(PersistenceUnitProperties.WEAVING, "false");
         // needed for reports
