@@ -54,13 +54,20 @@ class HawkbitEclipseLinkJpaDialect extends EclipseLinkJpaDialect {
     private static final long serialVersionUID = 1L;
 
     /**
-     * Begins the transaction as {@link EclipseLinkJpaDialect#beginTransaction} does and then acquires the physical JDBC connection.
+     * Workaround for the dialect wide lock of {@link EclipseLinkJpaDialect#beginTransaction}.
      * <p/>
-     * The super class holds a dialect wide lock while EclipseLink acquires the JDBC connection of an early transaction. So any wait for
-     * a connection - exhausted pool or connection throttle - inside of it stalls the transaction begin of every other thread, whatever
-     * its tenant. With the {@link LazyConnectionDataSourceProxy} (see {@link JpaConfiguration}) EclipseLink gets just a connection handle
-     * under the lock - the isolation level and auto-commit are recorded on it. The physical connection is acquired here, after the lock
-     * is released, but still at transaction begin - so a refused connection fails the begin, as without the proxy.
+     * <b>Problem:</b> for write and custom isolation transactions the super class begins the database transaction early, holding a dialect
+     * wide lock while EclipseLink acquires the JDBC connection. So any blocking connection acquisition - waiting for a free pool (Hikari)
+     * connection or for a throttle permit - stalls the transaction begin of every other thread, whatever its tenant.
+     * <p/>
+     * <b>Workaround:</b>
+     * <ol>
+     * <li>EclipseLink gets a {@link LazyConnectionDataSourceProxy} as data source (see {@link JpaConfiguration}) - so under the lock it
+     * acquires just a connection handle, the isolation level and auto-commit are only recorded on it. No blocking under the lock.</li>
+     * <li>Right after the lock is released, the physical connection is acquired eagerly here. That keeps the behaviour without the
+     * workaround - connection acquired (blocking for pool / throttle) at transaction begin and a refused connection fails the begin
+     * (fail fast), before any transactional code runs. Otherwise it would be acquired lazily, on the first statement.</li>
+     * </ol>
      */
     @Override
     public Object beginTransaction(final EntityManager entityManager, final TransactionDefinition definition) throws SQLException {

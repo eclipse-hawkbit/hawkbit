@@ -82,9 +82,7 @@ public class JpaConfiguration extends JpaBaseConfiguration {
     @Override
     protected Map<String, Object> getVendorProperties(final DataSource dataSource) {
         final Map<String, Object> properties = HashMap.newHashMap(8);
-        // EclipseLink (only) gets lazy connection handles - the physical connection is acquired by HawkbitEclipseLinkJpaDialect outside the
-        // lock of the EclipseLinkJpaDialect, see HawkbitEclipseLinkJpaDialect#beginTransaction. Spring (transaction manager, JdbcTemplate)
-        // keeps using the data source itself
+        // workaround for the EclipseLinkJpaDialect lock, see HawkbitEclipseLinkJpaDialect#beginTransaction
         properties.put(PersistenceUnitProperties.NON_JTA_DATASOURCE, new LazyConnectionDataSourceProxy(dataSource));
         // Turn off dynamic weaving to disable LTW lookup in static weaving mode
         properties.put(PersistenceUnitProperties.WEAVING, "false");
