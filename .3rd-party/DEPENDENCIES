@@ -96,7 +96,7 @@ maven/mavencentral/cz.jirutka.rsql/rsql-parser/2.1.0, MIT, approved, CQ12964
 maven/mavencentral/io.github.openfeign/feign-core/13.6.1, Apache-2.0, approved, clearlydefined
 maven/mavencentral/io.github.openfeign/feign-form-spring/13.6.1, Apache-2.0, approved, clearlydefined
 maven/mavencentral/io.github.openfeign/feign-form/13.6.1, Apache-2.0, approved, clearlydefined
-maven/mavencentral/io.github.openfeign/feign-hc5/13.16, , restricted, clearlydefined
+maven/mavencentral/io.github.openfeign/feign-hc5/13.16, Apache-2.0, approved, #32352
 maven/mavencentral/io.github.openfeign/feign-jackson/13.6.1, Apache-2.0, approved, #28700
 maven/mavencentral/io.github.openfeign/feign-slf4j/13.6.1, Apache-2.0, approved, clearlydefined
 maven/mavencentral/io.micrometer/context-propagation/1.2.1, Apache-2.0, approved, clearlydefined
