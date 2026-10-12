@@ -19,10 +19,13 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Supplier;
 
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.hawkbit.throttle.Config.Priority;
 import org.eclipse.hawkbit.throttle.ThrottledException.Reason;
 
 /**
@@ -32,7 +35,17 @@ import org.eclipse.hawkbit.throttle.ThrottledException.Reason;
  * of resource usage, which in turn lets this engine be the <em>only</em> queue in front of the resource:
  * if {@link org.eclipse.hawkbit.throttle.Config.Policy#permits()} equals the real resource size, the resource itself never has to block.
  *
- * <p>A permit is charged to a <b>key</b> — e.g. a tenant id, or {@code null} for internal, non-tenant work (schedulers, health checks).
+ * <p>A permit is charged to a <b>key</b> — e.g. a tenant id, or {@code null} for internal, non-tenant work (health checks, tenant
+ * iteration) and for system tasks (e.g. schedulers working for a tenant, see {@link #asSystemTask(Supplier)}).
+ *
+ * <p>Two independent properties could be declared, per thread, by the code that uses the resource:
+ * <ul>
+ *   <li><b>System task</b> ({@link #asSystemTask(Supplier)}) — <em>whose budget</em>: work the server itself initiated (e.g. a
+ *       scheduler working for a tenant) is charged to the {@code null} key, so it is not bound by the key (tenant) limit.</li>
+ *   <li><b>Priority</b> ({@link #withPriority(Priority, Supplier)}) — <em>who is next</em>: higher priority waiters are served
+ *       first within the key. It never lifts the key limit, nor serves the key ahead of other keys. If not set, the priority of the
+ *       key policy applies.</li>
+ * </ul>
  *
  * <p>Permits form a tree per unit of work: {@link #acquire(String, Duration)} starts one, {@link Permit#acquire(Duration)} joins it.
  * A child request comes from a caller that already holds part of the resource, which is the only way this engine can deadlock — see
@@ -50,7 +63,8 @@ import org.eclipse.hawkbit.throttle.ThrottledException.Reason;
  *
  * <p><b>Fairness across keys is round-robin, not first-come-first-served by key.</b> Waiters queue per key, and the keys
  * themselves are ordered; whenever a key is served it rotates to the back. So with tenants A and B waiting, service goes
- * A, B, A, B — rather than draining A's whole backlog because A arrived first. Within a key, waiters are strict FIFO.
+ * A, B, A, B — rather than draining A's whole backlog because A arrived first. Within a key, waiters are ordered by priority
+ * (higher first) and are strict FIFO within the same priority.
  * Only <em>service</em> rotates a key: a waiter that times out, and a key skipped for being at its fair share, both
  * leave the order untouched, so neither is penalised.
  *
@@ -71,6 +85,10 @@ import org.eclipse.hawkbit.throttle.ThrottledException.Reason;
 @Slf4j
 public class Throttle {
 
+    // system task / priority declared for the current thread - read on acquire, i.e. in the caller thread
+    private static final ThreadLocal<Boolean> SYSTEM_TASK = new ThreadLocal<>();
+    private static final ThreadLocal<Priority> PRIORITY = new ThreadLocal<>();
+
     private final Config config;
 
     private final ReentrantLock lock = new ReentrantLock();
@@ -83,7 +101,7 @@ public class Throttle {
     private final Map<PermitImpl, Integer> permitsByRoot = new HashMap<>();
 
     private int globalPending;
-    // wait state: per-key FIFO of pending + the keys themselves in service order (rotated on every admission).
+    // wait state: per-key pending (by priority, FIFO within the same priority) + the keys themselves in service order (rotated on every admission).
     private final Map<String, Deque<PermitImpl>> perKeyPending = new HashMap<>();
     // LinkedList, not ArrayDeque: the system key is null and ArrayDeque rejects null elements.
     private final Deque<String> pendingKeys = new LinkedList<>();
@@ -99,16 +117,113 @@ public class Throttle {
     }
 
     /**
+     * Runs a given {@link Runnable} as system task. See {@link #asSystemTask(Supplier)}.
+     *
+     * @param runnable the runnable to run as system task
+     */
+    public static void asSystemTask(final Runnable runnable) {
+        asSystemTask(() -> {
+            runnable.run();
+            return null;
+        });
+    }
+
+    /**
+     * Runs a given {@link Supplier} as system task - work initiated by the server itself (e.g. a scheduler, a background task),
+     * not by a client request. All permits acquired (by the current thread) within the supplier are charged to the {@code null}
+     * (system) key, whatever key is requested, so:
+     * <ul>
+     *   <li>they are not bound by the limit (or other policy) of the requested key (e.g. a tenant which has reached its limit) —
+     *       the system key policy applies instead</li>
+     *   <li>they are served with the system key priority, unless a priority is set by {@link #withPriority(Priority, Supplier)}</li>
+     * </ul>
+     * Applies to root permits only: a permit joining an already held one (see {@link Permit#acquire(Duration)}) is charged to the key
+     * of its root - e.g. a connection taken within a transaction started out of the block stays charged to that transaction key.
+     * <p>The state is thread bound - it applies to all {@link Throttle} instances and it is not propagated to other threads, so work
+     * handed over to an executor shall be wrapped within the executed task.
+     * <p>Doesn't change anything else (e.g. the security context or tenant). Could be nested; the previous state is restored after the call.
+     *
+     * @param supplier the supplier to call as system task
+     * @return the return value of the {@link Supplier#get()} method.
+     */
+    public static <T> T asSystemTask(final Supplier<T> supplier) {
+        final Boolean current = SYSTEM_TASK.get();
+        try {
+            setSystemTask(Boolean.TRUE);
+            return supplier.get();
+        } finally {
+            setSystemTask(current);
+        }
+    }
+
+    /**
+     * @return {@code true} if the current running code is running within a {@link #asSystemTask(Supplier)} block.
+     */
+    public static boolean isSystemTask() {
+        return Boolean.TRUE.equals(SYSTEM_TASK.get());
+    }
+
+    /**
+     * Runs a given {@link Runnable} with the given priority. See {@link #withPriority(Priority, Supplier)}.
+     *
+     * @param priority the priority to acquire the permits with
+     * @param runnable the runnable to run with the priority
+     */
+    public static void withPriority(final Priority priority, final Runnable runnable) {
+        withPriority(priority, () -> {
+            runnable.run();
+            return null;
+        });
+    }
+
+    /**
+     * Runs a given {@link Supplier} with the given priority. All permits acquired (by the current thread) within the supplier are
+     * served with that priority, overriding the priority of the key policy. The priority orders the waiters <em>within</em> a key:
+     * <ul>
+     *   <li>a waiter is served before the waiters of the same key with lower priority</li>
+     *   <li>on pending queue overflow the lowest priority waiters are evicted first</li>
+     * </ul>
+     * The priority decides only <em>who is next</em> within the key - it neither lifts the key limit nor serves the key ahead of the
+     * other keys (the {@link Config#priorityGranted(String) priority granted} floor is per key policy). For work that shall not be
+     * bound by the key see {@link #asSystemTask(Supplier)}.
+     * Applies to root permits only - a permit joining an already held one inherits the priority of its root.
+     * <p>The priority is thread bound - it applies to all {@link Throttle} instances and it is not propagated to other threads.
+     * Could be nested; the previous priority is restored after the call.
+     *
+     * @param priority the priority to acquire the permits with
+     * @param supplier the supplier to call with the priority
+     * @return the return value of the {@link Supplier#get()} method.
+     */
+    public static <T> T withPriority(final Priority priority, final Supplier<T> supplier) {
+        final Priority current = PRIORITY.get();
+        try {
+            setPriority(priority);
+            return supplier.get();
+        } finally {
+            setPriority(current);
+        }
+    }
+
+    /**
+     * @return the priority set by {@link #withPriority(Priority, Supplier)} for the current running code, empty if not set (then the
+     *         priority of the key policy applies)
+     */
+    public static Optional<Priority> priority() {
+        return Optional.ofNullable(PRIORITY.get());
+    }
+
+    /**
      * Acquire a permit for a new unit of work, blocking up to {@code timeout} while not admissible.
      *
-     * @param key the key to charge the permit to; {@code null} for internal, non-tenant work
+     * @param key the key to charge the permit to; {@code null} for internal, non-tenant work. Within {@link #asSystemTask(Supplier)}
+     *         the permit is charged to {@code null} whatever the key is
      * @param timeout maximum time to wait; {@link Duration#ZERO} (or negative) fast-rejects instead of blocking
      * @return a root {@link Permit}; call {@link Permit#close()} to release the slot, or {@link Permit#acquire(Duration)} to take more of
      *         the resource for the same unit of work
      * @throws ThrottledException if no slot became available within the timeout
      */
     public Permit acquire(final String key, final Duration timeout) {
-        return acquire(key, null, timeout);
+        return acquire(isSystemTask() ? null : key, null, timeout);
     }
 
     /**
@@ -142,7 +257,9 @@ public class Throttle {
                 throw new IllegalStateException("cannot acquire from a stale permit (key '%s')".formatted(key));
             }
 
-            final PermitImpl permit = new PermitImpl(key, parent, lock.newCondition());
+            // read in the caller thread; a child inherits the priority of its root, so a unit of work has a single priority
+            final Priority priority = parent == null ? priority().orElseGet(() -> config.priority(key)) : parent.root.priority;
+            final PermitImpl permit = new PermitImpl(key, priority, parent, lock.newCondition());
             permit.enqueue();
             try {
                 grantNextEligible(); // may grant this permit immediately if a slot is free
@@ -211,22 +328,30 @@ public class Throttle {
     }
 
     /**
-     * Frees one slot in {@code queue} following {@code strategy}, skipping children - a child is a caller that already
-     * holds part of the resource, so dropping it throws away work that is about to release rather than relieving
-     * pressure. When every waiter is a child the first one scanned is taken anyway, since the bound must hold.
+     * Frees one slot in {@code queue}, taking a waiter of the lowest priority and, within it, following {@code strategy}.
+     * Skips children - a child is a caller that already holds part of the resource, so dropping it throws away work that
+     * is about to release rather than relieving pressure. When every waiter is a child the first one by {@code strategy}
+     * is taken anyway, since the bound must hold.
      *
      * @return {@code true} when the arriving permit is itself the victim and the caller must reject it
      */
     // must be called under lock
     private boolean evictOrReject(final Deque<PermitImpl> queue, final PermitImpl permit, final Config.PendingRemoveStrategy strategy) {
-        final Iterator<PermitImpl> it = strategy == LIFO ? queue.descendingIterator() : queue.iterator();
-        PermitImpl victim = it.next(); // may be child, must have at least one - this has been just enqueued
-        while (victim.isChild() && it.hasNext()) { // try to find first non-child victim
+        // the queue is ordered by priority (higher first), so scan from the tail - the lowest priority, newest first
+        PermitImpl victim = null;
+        for (final Iterator<PermitImpl> it = queue.descendingIterator(); it.hasNext(); ) {
             final PermitImpl next = it.next();
-            if (!next.isChild()) {
-                victim = next;
+            if (next.isChild()) {
+                continue;
+            }
+            if (victim == null || (strategy != LIFO && next.priority == victim.priority)) {
+                victim = next; // FIFO - move on to the older ones of the same priority
+            } else {
                 break;
             }
+        }
+        if (victim == null) { // all children - must have at least one, this has been just enqueued
+            victim = strategy == LIFO ? queue.peekLast() : queue.peekFirst();
         }
         if (victim == permit) {
             return true;
@@ -318,6 +443,22 @@ public class Throttle {
         return null;
     }
 
+    private static void setSystemTask(final Boolean systemTask) {
+        if (systemTask == null) {
+            SYSTEM_TASK.remove();
+        } else {
+            SYSTEM_TASK.set(systemTask);
+        }
+    }
+
+    private static void setPriority(final Priority priority) {
+        if (priority == null) {
+            PRIORITY.remove();
+        } else {
+            PRIORITY.set(priority);
+        }
+    }
+
     /**
      * A consistent snapshot of resource usage, taken under the engine's lock.
      *
@@ -341,12 +482,14 @@ public class Throttle {
         }
 
         private final String key;
+        private final Priority priority;
         private final PermitImpl root; // this, for a root permit
         private final Condition condition;
         private State state = State.WAITING;
 
-        private PermitImpl(final String key, final PermitImpl parent, final Condition condition) {
+        private PermitImpl(final String key, final Priority priority, final PermitImpl parent, final Condition condition) {
             this.key = key;
+            this.priority = priority;
             // flatten arbitrary nesting depth onto the tree root, so one unit of work is one entry in permitsByRoot
             this.root = parent == null ? this : parent.root;
             this.condition = condition;
@@ -408,7 +551,15 @@ public class Throttle {
             if (queue.isEmpty()) {
                 pendingKeys.addLast(key);
             }
+            // ordered by priority - ahead of the lower priority waiters, behind the same (FIFO) or higher priority ones
+            final Deque<PermitImpl> lower = new ArrayDeque<>();
+            while (!queue.isEmpty() && queue.peekLast().priority.compareTo(priority) > 0) {
+                lower.push(queue.pollLast());
+            }
             queue.addLast(this);
+            while (!lower.isEmpty()) {
+                queue.addLast(lower.pop());
+            }
             globalPending++;
             if (isChild()) {
                 pendingChildren.addLast(this);

@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.repository.jpa.scheduler;
 
 import static org.eclipse.hawkbit.context.AccessContext.asSystem;
 import static org.eclipse.hawkbit.context.AccessContext.asSystemAsTenant;
-import static org.eclipse.hawkbit.context.AccessContext.asSystemTask;
+import static org.eclipse.hawkbit.throttle.Throttle.asSystemTask;
 
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;

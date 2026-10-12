@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.repository.jpa.autocleanup;
 
 import static org.eclipse.hawkbit.context.AccessContext.asSystem;
+import static org.eclipse.hawkbit.throttle.Throttle.asSystemTask;
 
 import java.util.List;
 import java.util.concurrent.locks.Lock;
@@ -55,8 +56,9 @@ public class AutoCleanupScheduler {
     public void run() {
         log.debug("Auto cleanup scheduler has been triggered.");
         // run this code in system code privileged to have the necessary permission to query and create entities
+        // as throttle system task - the per tenant locks and tasks are not bound by the tenant limits
         if (!cleanupTasks.isEmpty()) {
-            asSystem(this::executeAutoCleanup);
+            asSystem(() -> asSystemTask(this::executeAutoCleanup));
         }
     }
 

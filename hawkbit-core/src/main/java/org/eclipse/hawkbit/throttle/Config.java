@@ -46,11 +46,15 @@ public class Config {
     Function<String, Policy> keyPolicyFn = key -> null; // function to get the policy for a given key
 
     public int priorityGranted(final String key) {
-        final Policy keyPolicy = keyPolicyFn.apply(key);
-        return Optional.ofNullable(priorityToGranted.get(keyPolicy == null ? Priority.NORMAL : keyPolicy.priority())).orElse(0);
+        return Optional.ofNullable(priorityToGranted.get(priority(key))).orElse(0);
     }
 
     //--- per key ---
+
+    // priority of the key policy - used when no priority is explicitly requested (see Throttle#withPriority)
+    public Priority priority(final String key) {
+        return Optional.ofNullable(keyPolicyFn.apply(key)).map(Policy::priority).orElse(Priority.NORMAL);
+    }
 
     public int permits(final String key) {
         final Policy keyPolicy = keyPolicyFn.apply(key);
@@ -101,6 +105,6 @@ public class Config {
         @Builder.Default
         PendingRemoveStrategy pendingRemoveStrategy = PendingRemoveStrategy.FIFO; // strategy to remove pending requests when maxPending is reached
         @Builder.Default
-        Priority priority = Priority.NORMAL; // priority of the policy, default is MEDIUM
+        Priority priority = Priority.NORMAL; // priority of the policy, default is NORMAL
     }
 }

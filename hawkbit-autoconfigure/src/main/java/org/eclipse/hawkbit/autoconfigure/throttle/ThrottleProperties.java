@@ -105,7 +105,8 @@ public class ThrottleProperties {
 
     /**
      * Capacity that internal, non-tenant work is served ahead of the queue for ({@link Config.Priority#HIGH}.
-     * Internal work is charged to the {@code null} key — schedulers, migrations and health checks run without a tenant context.
+     * Internal work is charged to the {@code null} key — migrations and health checks run without a tenant context, and the schedulers
+     * run their per tenant work as {@link org.eclipse.hawkbit.throttle.Throttle#asSystemTask(java.util.function.Supplier) system task}.
      *
      * <p>A floor it cannot be starved below, not a cap: beyond it system work competes as an ordinary key, so it
      * can neither be crowded out by tenant load nor crowd tenants out itself. Costs no reserved capacity — tenants
