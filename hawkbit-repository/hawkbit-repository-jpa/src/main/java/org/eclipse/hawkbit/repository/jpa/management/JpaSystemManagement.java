@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.repository.jpa.management;
 import static org.eclipse.hawkbit.context.AccessContext.asSystemAsTenant;
 import static org.eclipse.hawkbit.context.AccessContext.asTenant;
 
+import java.util.Locale;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -23,6 +24,7 @@ import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
+import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.CurrentTenantCacheKeyGenerator;
 import org.eclipse.hawkbit.repository.jpa.SystemManagementCacheKeyGenerator;
@@ -168,12 +170,19 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
 
     @Override
     public TenantMetaData createTenantMetadata(final String tenant) {
-        final TenantMetaData result = tenantMetaDataRepository.findByTenantIgnoreCase(tenant);
+        // the tenant identity is the trimmed upper case name - " acme" and "ACME" are the same tenant
+        final String normalizedTenant = normalizeTenant(tenant);
+        final String storedTenant = tenantMetaDataRepository.findStoredTenantIgnoreCase(normalizedTenant);
         // Create if it does not exist
-        if (result == null) {
-            return createTenantMetadata0(tenant);
+        if (storedTenant == null) {
+            return createTenantMetadata0(normalizedTenant);
         }
-        return result;
+        // an existing (legacy) tenant stored not normalized (another case / surrounding spaces) is a conflict
+        if (!storedTenant.equals(normalizedTenant)) {
+            throw new EntityAlreadyExistsException("Tenant `" + normalizedTenant + "` conflicts with existing tenant `" + storedTenant + "`");
+        }
+        // return existing
+        return tenantMetaDataRepository.findByTenantIgnoreCase(normalizedTenant);
     }
 
     @Override
@@ -187,29 +196,37 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
 
     @Override
     @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
-    public void deleteTenant(final String t) {
+    public void deleteTenant(final String tenant) {
         if (artifactStorage == null) {
             throw new IllegalStateException("Artifact repository is not available. Can't delete tenant.");
         }
 
-        final String tenant = t.toUpperCase();
-        asTenant(tenant, () -> DeploymentHelper.runInNewTransaction("deleteTenant", status -> {
-            tenantMetaDataRepository.deleteByTenantIgnoreCase(tenant);
-            tenantConfigurationRepository.deleteByTenant(tenant);
-            targetRepository.deleteByTenant(tenant);
-            targetFilterQueryRepository.deleteByTenant(tenant);
-            rolloutRepository.deleteByTenant(tenant);
-            targetTypeRepository.deleteByTenant(tenant);
-            targetTagRepository.deleteByTenant(tenant);
-            distributionSetTagRepository.deleteByTenant(tenant);
-            distributionSetRepository.deleteByTenant(tenant);
-            distributionSetTypeRepository.deleteByTenant(tenant);
-            softwareModuleRepository.deleteByTenant(tenant);
-            artifactStorage.deleteByTenant(tenant);
-            softwareModuleTypeRepository.deleteByTenant(tenant);
+        final String normalizedTenant = normalizeTenant(tenant);
+        asTenant(normalizedTenant, () -> DeploymentHelper.runInNewTransaction("deleteTenant", status -> {
+            tenantMetaDataRepository.deleteByTenantIgnoreCase(normalizedTenant);
+            tenantConfigurationRepository.deleteByTenant(normalizedTenant);
+            targetRepository.deleteByTenant(normalizedTenant);
+            targetFilterQueryRepository.deleteByTenant(normalizedTenant);
+            rolloutRepository.deleteByTenant(normalizedTenant);
+            targetTypeRepository.deleteByTenant(normalizedTenant);
+            targetTagRepository.deleteByTenant(normalizedTenant);
+            distributionSetTagRepository.deleteByTenant(normalizedTenant);
+            distributionSetRepository.deleteByTenant(normalizedTenant);
+            distributionSetTypeRepository.deleteByTenant(normalizedTenant);
+            softwareModuleRepository.deleteByTenant(normalizedTenant);
+            artifactStorage.deleteByTenant(normalizedTenant);
+            softwareModuleTypeRepository.deleteByTenant(normalizedTenant);
             return null;
         }, txManager));
-        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new CacheEvictEvent.Default(tenant, null, null));
+        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new CacheEvictEvent.Default(normalizedTenant, null, null));
+    }
+
+    public static String normalizeTenant(final String tenant) {
+        final String normalizedTenant = tenant.trim().toUpperCase(Locale.ROOT);
+        if (normalizedTenant.isEmpty()) {
+            throw new IllegalArgumentException("Tenant must not be empty or blank");
+        }
+        return normalizedTenant;
     }
 
     private TenantMetaData getTenantMetadata0(final boolean withDetails) {
@@ -288,7 +305,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     private TenantMetaData createInitialTenantMetaData(final String tenant) {
         return asSystemAsTenant(tenant, () -> DeploymentHelper.runInNewTransaction("initial-tenant-creation", status -> {
             final DistributionSetType defaultDsType = createStandardSoftwareDataSetup();
-            return tenantMetaDataRepository.save(new JpaTenantMetaData(defaultDsType, tenant));
+            return tenantMetaDataRepository.save(new JpaTenantMetaData(tenant, defaultDsType));
         }, txManager));
     }
 }

@@ -81,7 +81,7 @@ class TransactionManager extends JpaTransactionManager {
         if (currentTenant == null) {
             cleanupTenant(em);
         } else {
-            em.setProperty(PersistenceUnitProperties.MULTITENANT_PROPERTY_DEFAULT, currentTenant.toUpperCase());
+            em.setProperty(PersistenceUnitProperties.MULTITENANT_PROPERTY_DEFAULT, currentTenant);
         }
     }
 

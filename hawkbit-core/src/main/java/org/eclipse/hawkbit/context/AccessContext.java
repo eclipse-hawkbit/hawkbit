@@ -61,7 +61,7 @@ public class AccessContext {
     /**
      * Implementation might retrieve the current tenant from a session or thread-local.
      *
-     * @return the current tenant
+     * @return the current tenant, trimmed and upper-cased (normalized) by {@link Principal}
      */
     public static String tenant() {
         final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

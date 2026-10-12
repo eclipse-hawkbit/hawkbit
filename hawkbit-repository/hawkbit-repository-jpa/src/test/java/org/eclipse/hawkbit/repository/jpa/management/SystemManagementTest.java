@@ -10,22 +10,30 @@
 package org.eclipse.hawkbit.repository.jpa.management;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.eclipse.hawkbit.context.AccessContext.asSystem;
 import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.withTenantAndUser;
 
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.sql.DataSource;
+
 import org.eclipse.hawkbit.auth.SpRole;
+import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.ArtifactUpload;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TenantMetaData;
 import org.eclipse.hawkbit.repository.test.util.DisposableSqlTestDatabaseExtension;
 import org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
  * Feature: Component Tests - Repository<br/>
@@ -33,6 +41,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
  */
 @ExtendWith(DisposableSqlTestDatabaseExtension.class)
 class SystemManagementTest extends AbstractJpaIntegrationTest {
+
+    @Autowired
+    private DataSource dataSource;
 
     /**
      * Ensures that findTenants returns all tenants and not only restricted to the tenant which currently is logged in
@@ -42,6 +53,50 @@ class SystemManagementTest extends AbstractJpaIntegrationTest {
         assertThat(listTenants()).hasSize(1);
         createTestTenantsForSystemStatistics(2, 0, 0, 0);
         assertThat(listTenants()).hasSize(3);
+    }
+
+    /**
+     * Verifies that tenant names equal after trim and upper case are the same tenant - creating a variant returns the existing one.
+     */
+    @Test
+    void createTenantMetadataTrimmedCaseVariantReturnsExisting() {
+        final TenantMetaData created = asSystem(() -> systemManagement.createTenantMetadata("acme"));
+
+        assertThat(created.getTenant()).isEqualTo("ACME");
+        assertThat(asSystem(() -> systemManagement.createTenantMetadata(" Acme ")).getId()).isEqualTo(created.getId());
+        assertThat(listTenants()).containsOnlyOnce("ACME");
+    }
+
+    /**
+     * Verifies that a legacy tenant stored with surrounding spaces is resolved by the trimmed upper case runtime tenant and that
+     * a variant of it can't be created.
+     */
+    @Test
+    void legacyTenantWithSpacesIsResolvedAndNotCreatedAgain() {
+        final long id = asSystem(() -> systemManagement.createTenantMetadata("legacy")).getId();
+        // simulates a legacy tenant - JpaTenantMetaData always normalizes the tenant, so the raw value is set with native SQL
+        new JdbcTemplate(dataSource).update("UPDATE sp_tenant SET tenant = ? WHERE id = ?", " legacy ", id);
+
+        final TenantMetaData metaData = SecurityContextSwitch.getAs(
+                withTenantAndUser("LEGACY", "bumlux", new String[] { SpRole.SYSTEM_ROLE }, false, false),
+                systemManagement::getTenantMetadataWithoutDetails);
+        assertThat(metaData.getId()).isEqualTo(id);
+        assertThat(metaData.getTenant()).isEqualTo("LEGACY");
+        assertThat(listTenants()).containsOnlyOnce("LEGACY");
+        assertThatExceptionOfType(EntityAlreadyExistsException.class)
+                .isThrownBy(() -> asSystem(() -> systemManagement.createTenantMetadata("LEGACY")));
+    }
+
+    /**
+     * Verifies that deleting a tenant by a trimmed / case variant deletes it.
+     */
+    @Test
+    void deleteTenantByTrimmedCaseVariant() {
+        asSystem(() -> systemManagement.createTenantMetadata("todelete"));
+
+        asSystem(() -> systemManagement.deleteTenant(" ToDelete "));
+
+        assertThat(listTenants()).doesNotContain("TODELETE");
     }
 
     private List<String> listTenants() {

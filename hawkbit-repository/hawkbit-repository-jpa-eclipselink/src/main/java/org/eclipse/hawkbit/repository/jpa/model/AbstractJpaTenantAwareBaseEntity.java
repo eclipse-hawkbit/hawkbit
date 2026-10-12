@@ -88,6 +88,6 @@ public abstract class AbstractJpaTenantAwareBaseEntity extends AbstractJpaBaseEn
             throw new TenantNotExistException(
                     String.format("Tenant not found in the context, cannot create entity %s with id %d", getClass(), getId()));
         }
-        setTenant(currentTenant.toUpperCase());
+        setTenant(currentTenant);
     }
 }

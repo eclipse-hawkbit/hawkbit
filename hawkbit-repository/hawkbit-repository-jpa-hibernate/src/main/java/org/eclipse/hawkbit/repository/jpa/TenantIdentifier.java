@@ -23,7 +23,7 @@ class TenantIdentifier implements CurrentTenantIdentifierResolver<String> {
     @Override
     public String resolveCurrentTenantIdentifier() {
         // on bootstrapping hibernate requests tenant and want to be non-null
-        return Optional.ofNullable(AccessContext.tenant()).map(String::toUpperCase).orElse("");
+        return Optional.ofNullable(AccessContext.tenant()).orElse("");
     }
 
     @Override

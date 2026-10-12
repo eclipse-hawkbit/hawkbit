@@ -27,18 +27,27 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public interface TenantMetaDataRepository extends PagingAndSortingRepository<JpaTenantMetaData, Long>, CrudRepository<JpaTenantMetaData, Long> {
 
+    // The tenant identity is the trimmed upper case name (as the runtime tenant and JpaTenantMetaData#getTenant) - legacy tenants
+    // could be stored in another case / with surrounding spaces, so all lookups compare trimmed upper case values.
+
     // find without details
-    TenantMetaData findByTenantIgnoreCase(String tenant);
+    @Query("SELECT t FROM JpaTenantMetaData t WHERE UPPER(TRIM(t.tenant)) = UPPER(TRIM(:tenant))")
+    TenantMetaData findByTenantIgnoreCase(@Param("tenant") String tenant);
 
     // find with details
     @EntityGraph(value = "TenantMetaData.withDetails", type = EntityGraph.EntityGraphType.LOAD)
-    TenantMetaData findWitDetailsByTenantIgnoreCase(String tenant);
+    @Query("SELECT t FROM JpaTenantMetaData t WHERE UPPER(TRIM(t.tenant)) = UPPER(TRIM(:tenant))")
+    TenantMetaData findWitDetailsByTenantIgnoreCase(@Param("tenant") String tenant);
 
-    @Query("SELECT  t.tenant FROM JpaTenantMetaData t")
+    @Query("SELECT UPPER(TRIM(t.tenant)) FROM JpaTenantMetaData t")
     Page<String> findTenants(final Pageable pageable);
+
+    // the tenant as stored (JpaTenantMetaData#getTenant returns it normalized), null if there is no such tenant
+    @Query("SELECT t.tenant FROM JpaTenantMetaData t WHERE UPPER(TRIM(t.tenant)) = UPPER(TRIM(:tenant))")
+    String findStoredTenantIgnoreCase(@Param("tenant") String tenant);
 
     @Transactional
     @Modifying
-    @Query("DELETE FROM JpaTenantMetaData t WHERE UPPER(t.tenant) = UPPER(:tenant)")
+    @Query("DELETE FROM JpaTenantMetaData t WHERE UPPER(TRIM(t.tenant)) = UPPER(TRIM(:tenant))")
     void deleteByTenantIgnoreCase(@Param("tenant") String tenant);
 }
