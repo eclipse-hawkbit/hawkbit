@@ -11,8 +11,6 @@ package org.eclipse.hawkbit.throttle;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.eclipse.hawkbit.throttle.Config.Priority.HIGH;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -28,7 +26,6 @@ import java.util.function.Consumer;
 
 import org.eclipse.hawkbit.throttle.Config.Policy;
 import org.eclipse.hawkbit.throttle.Config.Priority;
-import org.eclipse.hawkbit.throttle.ThrottledException.Reason;
 import org.junit.jupiter.api.Test;
 
 class ThrottleTest {
@@ -293,141 +290,6 @@ class ThrottleTest {
         assertThat(systemDone.await(2, TimeUnit.SECONDS)).isTrue();
     }
 
-    // --- system task and explicit priority ---
-
-    @Test
-    void systemTaskIsChargedToTheSystemKeyAndNotBoundByTheKeyLimit() {
-        final Throttle throttle = throttle(3, config -> config.setLimit(1));
-        final Permit held = throttle.acquire("acme", Duration.ZERO); // acme at its limit
-        assertThatExceptionOfType(ThrottledException.class).isThrownBy(() -> throttle.acquire("acme", Duration.ZERO));
-
-        final Permit systemTask = Throttle.asSystemTask(() -> throttle.acquire("acme", Duration.ZERO));
-        assertThat(throttle.stats().perKeyGranted(null)).isEqualTo(1);
-        assertThat(throttle.stats().perKeyGranted("acme")).isEqualTo(1);
-
-        // out of the block - charged to the key again
-        assertThatExceptionOfType(ThrottledException.class).isThrownBy(() -> throttle.acquire("acme", Duration.ZERO));
-        systemTask.close();
-        held.close();
-    }
-
-    @Test
-    void highPriorityDoesNotLiftTheKeyLimit() {
-        final Throttle throttle = throttle(3, config -> {
-            config.setLimit(1);
-            config.setSystemFloor(1); // priority granted for HIGH
-        });
-        try (final Permit held = throttle.acquire("acme", Duration.ZERO)) { // acme at its limit
-            Throttle.withPriority(HIGH, () -> assertThatExceptionOfType(ThrottledException.class)
-                    .isThrownBy(() -> throttle.acquire("acme", Duration.ZERO)));
-        }
-    }
-
-    @Test
-    void highPriorityIsServedAheadOfTheSameKeyBacklog() throws Exception {
-        final Throttle throttle = throttle(2);
-        final Permit x1 = throttle.acquire("X", Duration.ZERO);
-        final Permit x2 = throttle.acquire("X", Duration.ZERO); // full
-
-        final List<String> servedOrder = Collections.synchronizedList(new ArrayList<>());
-        final CountDownLatch allServed = new CountDownLatch(2);
-        waiter(throttle, "acme", "normal", servedOrder, allServed).start();
-        settle(); // normal parks first
-        new Thread(() -> Throttle.withPriority(HIGH, () -> waiter(throttle, "acme", "high", servedOrder, allServed).run())).start();
-        settle();
-
-        x1.close();
-        settle();
-        x2.close();
-        assertThat(allServed.await(2, TimeUnit.SECONDS)).isTrue();
-        // without the priority order within the key this would be normal, high
-        assertThat(servedOrder).containsExactly("high", "normal");
-    }
-
-    @Test
-    void highPriorityIsNotServedAheadOfOtherKeys() throws Exception {
-        final Throttle throttle = throttle(2, config -> config.setSystemFloor(1)); // priority granted for HIGH
-        final Permit x1 = throttle.acquire("X", Duration.ZERO);
-        final Permit x2 = throttle.acquire("X", Duration.ZERO); // full
-
-        final List<String> servedOrder = Collections.synchronizedList(new ArrayList<>());
-        final CountDownLatch allServed = new CountDownLatch(2);
-        waiter(throttle, "B", "B", servedOrder, allServed).start();
-        settle(); // B parks first
-        new Thread(() -> Throttle.withPriority(HIGH, () -> waiter(throttle, "acme", "acme-high", servedOrder, allServed).run())).start();
-        settle();
-
-        x1.close();
-        settle();
-        x2.close();
-        assertThat(allServed.await(2, TimeUnit.SECONDS)).isTrue();
-        // the priority granted floor is per key policy (system) - the waiter priority doesn't jump over the other keys
-        assertThat(servedOrder).containsExactly("B", "acme-high");
-    }
-
-    @Test
-    void lowestPriorityWaiterIsEvictedFirstOnOverflow() throws Exception {
-        final Throttle throttle = throttle(1, config -> config.setMaxPending(1));
-        final Permit held = throttle.acquire("X", Duration.ZERO); // full
-
-        final AtomicReference<Reason> normalRejected = new AtomicReference<>();
-        final Thread normal = new Thread(() -> {
-            try {
-                throttle.acquire("acme", WAIT).close();
-            } catch (final ThrottledException e) {
-                normalRejected.set(e.getReason());
-            }
-        });
-        normal.start();
-        settle(); // normal parks first, the pending queue is full
-
-        final List<String> servedOrder = Collections.synchronizedList(new ArrayList<>());
-        final CountDownLatch highServed = new CountDownLatch(1);
-        new Thread(() -> Throttle.withPriority(HIGH, () -> waiter(throttle, "acme", "high", servedOrder, highServed).run())).start();
-        normal.join(2000);
-        // FIFO would evict the oldest (the high priority head of the queue), but the lowest priority goes first
-        assertThat(normalRejected.get()).isEqualTo(Reason.EVICTED);
-
-        held.close();
-        assertThat(highServed.await(2, TimeUnit.SECONDS)).isTrue();
-        assertThat(servedOrder).containsExactly("high");
-    }
-
-    @Test
-    void sameKeyArrivalIsRejectedOnOverflowIfItHasTheLowestPriority() throws Exception {
-        final Throttle throttle = throttle(1, config -> config.setMaxPending(1));
-        final Permit held = throttle.acquire("X", Duration.ZERO); // full
-
-        final List<String> servedOrder = Collections.synchronizedList(new ArrayList<>());
-        final CountDownLatch highServed = new CountDownLatch(1);
-        new Thread(() -> Throttle.withPriority(HIGH, () -> waiter(throttle, "acme", "high", servedOrder, highServed).run())).start();
-        settle(); // high parks first, the pending queue is full
-
-        // FIFO would evict the oldest (the high priority one), but the lowest priority - the arrival itself - is rejected
-        assertThatExceptionOfType(ThrottledException.class).isThrownBy(() -> throttle.acquire("acme", WAIT))
-                .extracting(ThrottledException::getReason).isEqualTo(Reason.KEY_QUEUE_FULL); // key bound falls back to the global one
-
-        held.close();
-        assertThat(highServed.await(2, TimeUnit.SECONDS)).isTrue();
-    }
-
-    @Test
-    void systemTaskAndPriorityAreRestoredAfterTheBlock() {
-        assertThat(Throttle.isSystemTask()).isFalse();
-        assertThat(Throttle.priority()).isEmpty();
-        Throttle.asSystemTask(() -> Throttle.withPriority(HIGH, () -> {
-            assertThat(Throttle.isSystemTask()).isTrue();
-            assertThat(Throttle.priority()).contains(HIGH);
-            Throttle.withPriority(Priority.LOW, () -> assertThat(Throttle.priority()).contains(Priority.LOW)); // nested
-            assertThat(Throttle.priority()).contains(HIGH);
-        }));
-        assertThatIllegalStateException().isThrownBy(() -> Throttle.asSystemTask(() -> Throttle.withPriority(HIGH, () -> {
-            throw new IllegalStateException("expected");
-        })));
-        assertThat(Throttle.isSystemTask()).isFalse();
-        assertThat(Throttle.priority()).isEmpty();
-    }
-
     // --- parent / child permits ---
 
     @Test
@@ -573,7 +435,6 @@ class ThrottleTest {
         private int threshold = -1;
         private int limit = -1; // global per-tenant ceiling, -1 = unlimited (bounded only by capacity)
         private int systemFloor;
-        private int maxPending = -1; // pending over all keys together, -1 = unbounded
         // the engine gates waiting on the configured timeout as well as the per-call one; keep it out of the way
         // so that, as in these tests, the value passed to acquire() is what decides
         private Duration timeout = Duration.ofMinutes(1);
@@ -594,17 +455,12 @@ class ThrottleTest {
             this.systemFloor = systemFloor;
         }
 
-        private void setMaxPending(final int maxPending) {
-            this.maxPending = maxPending;
-        }
-
         private Config toConfig(final int capacity) {
             // null key <=> internal, non-tenant work - the only key granted the priority floor
             final Policy systemPolicy = Policy.builder().permits(capacity).timeout(timeout).priority(Priority.HIGH).build();
             return Config.builder()
                     .permits(capacity)
                     .timeout(timeout)
-                    .maxPending(maxPending)
                     .keyPolicyThreshold(Math.min(threshold, capacity))
                     .priorityToGranted(new EnumMap<>(Map.of(Priority.HIGH, Math.clamp(systemFloor, 0, capacity))))
                     .keyPolicyFn(key -> key == null
