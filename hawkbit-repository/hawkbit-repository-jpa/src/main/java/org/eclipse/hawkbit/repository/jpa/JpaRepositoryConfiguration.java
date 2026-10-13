@@ -73,6 +73,7 @@ import org.eclipse.hawkbit.repository.jpa.repository.SoftwareModuleRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.SoftwareModuleTypeRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetTypeRepository;
+import org.eclipse.hawkbit.repository.jpa.repository.TenantMetaDataRepository;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.PauseRolloutGroupErrorAction;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.PauseRolloutGroupSuccessAction;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.RolloutGroupActionEvaluator;
@@ -84,6 +85,7 @@ import org.eclipse.hawkbit.repository.jpa.rollout.condition.ThresholdRolloutGrou
 import org.eclipse.hawkbit.repository.jpa.scheduler.AutoAssignScheduler;
 import org.eclipse.hawkbit.repository.jpa.scheduler.JpaRolloutHandler;
 import org.eclipse.hawkbit.repository.jpa.scheduler.RolloutScheduler;
+import org.eclipse.hawkbit.repository.jpa.scheduler.TenantHardDeleteScheduler;
 import org.eclipse.hawkbit.repository.jpa.utils.ExceptionMapper;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -383,6 +385,27 @@ public class JpaRepositoryConfiguration {
             final List<AutoCleanupScheduler.CleanupTask> cleanupTasks,
             final SystemManagement systemManagement, final LockRegistry<? extends Lock> lockRegistry) {
         return new AutoCleanupScheduler(cleanupTasks, systemManagement, lockRegistry);
+    }
+
+    /**
+     * {@link TenantHardDeleteScheduler} bean - hard deletes the soft deleted tenants whose hard delete time passed.
+     * <p/>
+     * Properties:
+     * <ul>
+     *     <li>{@code hawkbit.tenant-hard-delete.scheduler.enabled} - enables the scheduler, default {@code true}</li>
+     *     <li>{@code hawkbit.tenant-hard-delete.scheduler.fixedDelay} - delay between the runs in millis, default
+     *     {@code 3600000} (1h)</li>
+     * </ul>
+     * Note: does not activate in test profile, otherwise it is hard to test the tenant soft delete functionality.
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    @Profile("!test")
+    @ConditionalOnProperty(prefix = "hawkbit.tenant-hard-delete.scheduler", name = "enabled", matchIfMissing = true)
+    TenantHardDeleteScheduler tenantHardDeleteScheduler(
+            final SystemManagement systemManagement, final TenantMetaDataRepository tenantMetaDataRepository,
+            final LockRegistry<? extends Lock> lockRegistry) {
+        return new TenantHardDeleteScheduler(systemManagement, tenantMetaDataRepository, lockRegistry);
     }
 
     /**

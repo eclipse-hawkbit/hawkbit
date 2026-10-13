@@ -17,7 +17,9 @@ import java.util.Optional;
 
 import org.eclipse.hawkbit.context.Principal;
 import org.eclipse.hawkbit.repository.ControllerManagement;
+import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.repository.helper.SystemManagementHolder;
 import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
@@ -49,11 +51,14 @@ class SecurityTokenAuthenticatorTest {
     @Mock
     private TenantConfigurationManagement tenantConfigurationManagementMock;
     @Mock
+    private SystemManagement systemManagementMock;
+    @Mock
     private ControllerManagement controllerManagementMock;
 
     @BeforeEach
     void before() {
         TenantConfigHelper.setTenantConfigurationManagement(tenantConfigurationManagementMock);
+        SystemManagementHolder.setInstance(systemManagementMock);
         authenticator = new SecurityTokenAuthenticator(controllerManagementMock);
     }
 
@@ -104,6 +109,17 @@ class SecurityTokenAuthenticatorTest {
         final ControllerSecurityToken securityToken = prepareSecurityToken(SECURITY_TOKEN);
         when(tenantConfigurationManagementMock.getConfigurationValue(AUTHENTICATION_TARGET_SECURITY_TOKEN_ENABLED, Boolean.class))
                 .thenReturn(CONFIG_VALUE_DISABLED);
+
+        assertThat(authenticator.authenticate(securityToken)).isNull();
+    }
+
+    /**
+     * Tests that for a soft deleted tenant the authentication fails
+     */
+    @Test
+    void testWithSecTokenButTenantSoftDeleted() {
+        final ControllerSecurityToken securityToken = prepareSecurityToken(SECURITY_TOKEN);
+        when(systemManagementMock.isTenantSoftDeleted()).thenReturn(true);
 
         assertThat(authenticator.authenticate(securityToken)).isNull();
     }

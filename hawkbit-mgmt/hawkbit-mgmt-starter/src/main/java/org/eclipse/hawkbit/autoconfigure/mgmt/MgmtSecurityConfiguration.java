@@ -19,6 +19,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+import jakarta.servlet.http.HttpServletResponse;
+
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +30,7 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.oidc.OidcProperties;
 import org.eclipse.hawkbit.oidc.OidcProperties.Oauth2.ResourceServer.Jwt.Claim;
 import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.exception.TenantSoftDeletedException;
 import org.eclipse.hawkbit.rest.SecurityManagedConfiguration;
 import org.eclipse.hawkbit.rest.security.DosFilter;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
@@ -119,7 +122,14 @@ public class MgmtSecurityConfiguration {
                         (request, response, chain) -> {
                             final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
                             if (authentication != null && authentication.isAuthenticated()) {
-                                asSystem(systemManagement::getTenantMetadataWithoutDetails);
+                                try {
+                                    asSystem(systemManagement::getTenantMetadataWithoutDetails);
+                                } catch (final TenantSoftDeletedException e) {
+                                    // the filter runs before the ExceptionTranslationFilter - answer directly, otherwise it ends as 500
+                                    log.warn("Soft deleted tenant access attempted via MGMT");
+                                    ((HttpServletResponse) response).sendError(HttpServletResponse.SC_UNAUTHORIZED);
+                                    return;
+                                }
                             }
                             chain.doFilter(request, response);
                         },

@@ -57,6 +57,18 @@ public class JpaTenantMetaData extends AbstractJpaBaseEntity implements TenantMe
     @JoinColumn(name = "default_ds_type", nullable = false)
     private JpaDistributionSetType defaultDsType;
 
+    // soft delete time (epoch millis), may be in the future (scheduled soft delete) - the tenant is soft deleted iff
+    // deletedAt != null && deletedAt <= now
+    @Column(name = "deleted_at")
+    private Long deletedAt;
+
+    @Column(name = "deleted_by", length = USERNAME_FIELD_LENGTH)
+    private String deletedBy;
+
+    // time (epoch millis) after which a soft deleted tenant is hard deleted
+    @Column(name = "hard_delete_at")
+    private Long hardDeleteAt;
+
     public JpaTenantMetaData(final String tenant, final DistributionSetType defaultDsType) {
         this.defaultDsType = (JpaDistributionSetType) defaultDsType;
         this.tenant = JpaSystemManagement.normalizeTenant(tenant);

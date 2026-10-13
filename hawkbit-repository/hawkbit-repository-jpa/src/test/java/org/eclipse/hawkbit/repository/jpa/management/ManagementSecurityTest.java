@@ -20,6 +20,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URI;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -358,6 +359,9 @@ class ManagementSecurityTest extends AbstractJpaIntegrationTest {
             return new ByteArrayInputStream(new byte[1]);
         } else if (clazz == URI.class) {
             return new URI("http://localhost");
+        } else if (clazz == Instant.class) {
+            // java.time is not open for reflection, so the generic constructor based instantiation below doesn't work
+            return Instant.now();
         } else if (clazz == Class.class) {
             return String.class;
         } else {
