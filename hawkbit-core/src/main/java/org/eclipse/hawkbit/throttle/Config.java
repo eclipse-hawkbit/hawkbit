@@ -45,12 +45,15 @@ public class Config {
     @Getter(AccessLevel.PRIVATE)
     Function<String, Policy> keyPolicyFn = key -> null; // function to get the policy for a given key
 
-    public int priorityGranted(final String key) {
-        final Policy keyPolicy = keyPolicyFn.apply(key);
-        return Optional.ofNullable(priorityToGranted.get(keyPolicy == null ? Priority.NORMAL : keyPolicy.priority())).orElse(0);
+    public int priorityGranted(final Priority priority) {
+        return Optional.ofNullable(priorityToGranted.get(priority)).orElse(0);
     }
 
     //--- per key ---
+
+    public Priority priority(final String key) {
+        return Optional.ofNullable(keyPolicyFn.apply(key)).map(Policy::priority).orElse(Priority.NORMAL);
+    }
 
     public int permits(final String key) {
         final Policy keyPolicy = keyPolicyFn.apply(key);

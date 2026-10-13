@@ -249,7 +249,7 @@ class ThrottleTest {
         // despite arriving later, internal work wins while below its floor
         assertThat(systemDone.await(2, TimeUnit.SECONDS)).isTrue();
         assertThat(tenantDone.await(200, TimeUnit.MILLISECONDS)).isFalse();
-        assertThat(throttle.stats().perKeyGranted(null)).isEqualTo(1);
+        assertThat(throttle.stats().highGranted()).isEqualTo(1);
 
         t2.close();
         assertThat(tenantDone.await(2, TimeUnit.SECONDS)).isTrue();

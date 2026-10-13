@@ -104,14 +104,13 @@ public class ThrottleProperties {
     private int threshold = -1;
 
     /**
-     * Capacity that internal, non-tenant work is served ahead of the queue for ({@link Config.Priority#HIGH}.
-     * Internal work is charged to the {@code null} key — migrations and health checks run without a tenant context, and the schedulers
-     * run their per tenant work with {@link org.eclipse.hawkbit.throttle.Throttle#withPriority(Config.Priority, java.util.function.Supplier)
-     * high priority}.
+     * Capacity of the {@link Config.Priority#HIGH high priority} work, of any key: internal, non-tenant work ({@code null} key —
+     * migrations and health checks run without a tenant context), and the schedulers running their per tenant work with
+     * {@link org.eclipse.hawkbit.throttle.Throttle#withPriority(Config.Priority, java.util.function.Supplier) high priority}.
      *
-     * <p>A floor it cannot be starved below, not a cap: beyond it system work competes as an ordinary key, so it
-     * can neither be crowded out by tenant load nor crowd tenants out itself. Costs no reserved capacity — tenants
-     * use those slots freely whenever system work is not. {@code 0} disables the priority. Must resolve to fewer
+     * <p>High priority work is served ahead of the queue and waits for these slots only — it is not counted to, nor waits for, the
+     * tenant limit. Costs no reserved capacity — tenants use those slots freely whenever high priority work is not.
+     * {@code 0} disables the priority. Must resolve to fewer
      * slots than {@link #capacity}, or tenant work may never be reached; the policy warns if it does not.
      *
      * <p>Default: {@code 4}, system work is served ahead of the queue for 4 slots
