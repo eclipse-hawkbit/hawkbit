@@ -532,7 +532,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
                 String.format(getQueryForDeleteActionsByStatusAndLastModifiedBeforeString(database),
                         Jpa.formatNativeQueryInClause("status", statusList)));
 
-        deleteQuery.setParameter("tenant", AccessContext.tenant().toUpperCase());
+        deleteQuery.setParameter("tenant", AccessContext.tenant());
         Jpa.setNativeQueryInParameter(deleteQuery, "status", statusList);
         deleteQuery.setParameter("last_modified_at", lastModified);
 

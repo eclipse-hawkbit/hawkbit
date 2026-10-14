@@ -21,9 +21,11 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.eclipse.hawkbit.repository.jpa.management.JpaSystemManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
@@ -45,6 +47,7 @@ import org.eclipse.hawkbit.repository.model.TenantMetaData;
 @SuppressWarnings("squid:S2160")
 public class JpaTenantMetaData extends AbstractJpaBaseEntity implements TenantMetaData {
 
+    @Setter(AccessLevel.NONE)
     @Column(name = "tenant", nullable = false, updatable = false, length = 40)
     @Size(min = 1, max = 40)
     @NotNull
@@ -54,8 +57,13 @@ public class JpaTenantMetaData extends AbstractJpaBaseEntity implements TenantMe
     @JoinColumn(name = "default_ds_type", nullable = false)
     private JpaDistributionSetType defaultDsType;
 
-    public JpaTenantMetaData(final DistributionSetType defaultDsType, final String tenant) {
+    public JpaTenantMetaData(final String tenant, final DistributionSetType defaultDsType) {
         this.defaultDsType = (JpaDistributionSetType) defaultDsType;
-        this.tenant = tenant;
+        this.tenant = JpaSystemManagement.normalizeTenant(tenant);
+    }
+
+    @Override
+    public String getTenant() {
+        return JpaSystemManagement.normalizeTenant(tenant);
     }
 }

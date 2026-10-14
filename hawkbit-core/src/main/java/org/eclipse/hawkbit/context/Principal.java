@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.context;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.Locale;
 
 import lombok.Value;
 import lombok.experimental.NonFinal;
@@ -25,6 +26,13 @@ public class Principal implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
+    // always trimmed and upper case
     String tenant;
     String actor;
+
+    // Creates a principal, normalizing the tenant to upper case.
+    public Principal(final String tenant, final String actor) {
+        this.tenant = tenant == null ? null : tenant.trim().toUpperCase(Locale.ROOT);
+        this.actor = actor;
+    }
 }

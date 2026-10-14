@@ -36,6 +36,8 @@ import org.junit.jupiter.api.Test;
  */
 class ThrottlingDataSourceDecoratorTest {
 
+    private static final String TENANT_ACME = "ACME";
+
     private HikariDataSource target;
 
     @BeforeEach
@@ -56,18 +58,18 @@ class ThrottlingDataSourceDecoratorTest {
         final Throttle throttle = throttle(5, config -> { });
         final ThrottlingDataSourceDecorator dataSource = dataSource(throttle);
 
-        asTenant("acme", () -> {
+        asTenant(TENANT_ACME, () -> {
             try (final Connection connection = dataSource.getConnection();
                     final Statement statement = connection.createStatement();
                     final ResultSet resultSet = statement.executeQuery("SELECT 1")) {
                 assertThat(resultSet.next()).isTrue();
                 assertThat(resultSet.getInt(1)).isEqualTo(1); // real query ran through the proxied connection
-                assertThat(throttle.stats().perKeyGranted("acme")).isEqualTo(1);
+                assertThat(throttle.stats().perKeyGranted(TENANT_ACME)).isEqualTo(1);
             } catch (final SQLException e) {
                 throw new IllegalStateException(e);
             }
 
-            assertThat(throttle.stats().perKeyGranted("acme")).isZero(); // released when the connection returned to the pool
+            assertThat(throttle.stats().perKeyGranted(TENANT_ACME)).isZero(); // released when the connection returned to the pool
         });
     }
 
@@ -108,7 +110,7 @@ class ThrottlingDataSourceDecoratorTest {
     }
 
     @Test
-    void borrowsOnDifferentThreadsAreIndependentUnitsOfWork() throws Exception {
+    void borrowsOnDifferentThreadsAreIndependentUnitsOfWork() {
         // the root permit is tracked per thread, so a concurrent borrow elsewhere must not be mistaken for a child
         final Throttle throttle = throttle(2, config -> { });
         final ThrottlingDataSourceDecorator dataSource = dataSource(throttle);

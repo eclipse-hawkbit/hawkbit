@@ -24,9 +24,6 @@ public class TenantKeyGenerator implements KeyGenerator {
 
     @Override
     public Object generate(final Object target, final Method method, final Object... params) {
-        return Objects.requireNonNull(
-                        AccessContext.tenant(),
-                        "TenantKeyGenerator.generate called not in tenant context")
-                .toUpperCase();
+        return Objects.requireNonNull(AccessContext.tenant(), "TenantKeyGenerator.generate called not in tenant context");
     }
 }
