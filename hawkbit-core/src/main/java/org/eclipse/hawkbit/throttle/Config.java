@@ -83,8 +83,7 @@ public class Config {
 
     public enum Priority {
         HIGH,
-        NORMAL,
-        LOW
+        NORMAL
     }
 
     public enum PendingRemoveStrategy {
@@ -104,6 +103,6 @@ public class Config {
         @Builder.Default
         PendingRemoveStrategy pendingRemoveStrategy = PendingRemoveStrategy.FIFO; // strategy to remove pending requests when maxPending is reached
         @Builder.Default
-        Priority priority = Priority.NORMAL; // priority of the policy, default is MEDIUM
+        Priority priority = Priority.NORMAL; // priority of the policy, default is NORMAL
     }
 }

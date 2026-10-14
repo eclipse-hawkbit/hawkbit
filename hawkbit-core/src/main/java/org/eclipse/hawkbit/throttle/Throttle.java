@@ -46,10 +46,12 @@ import org.eclipse.hawkbit.throttle.ThrottledException.Reason;
  *   <li><b>Children</b> — bypass fair share entirely. A caller blocked while holding part of the resource is what deadlocks it, so unblocking
  *       work already in flight always outranks admitting new work.</li>
  *   <li>High priority waiters (of any key) while below the high priority ({@link Config#priorityGranted(Priority)} granted — high
- *       priority work waits for these slots only, apart from the other work of its key. Costs no reserved capacity, since the others
- *       use those slots freely whenever high priority work is not.</li>
+ *       priority work never queues with the other work of its key, so no key backlog can block it. Costs no reserved capacity, since
+ *       the others use those slots freely whenever high priority work is not.</li>
  *   <li>Below {@link Config#keyPolicyThreshold()} — anyone may burst.</li>
  *   <li>At or above the threshold — round-robin + per key max permit bound share.</li>
+ *   <li>High priority waiters above the high priority granted — the idle capacity only, i.e. what no other waiter is admissible
+ *       for.</li>
  * </ol>
  *
  * <p><b>Fairness across keys is round-robin, not first-come-first-served by key.</b> Waiters queue per key, and the keys
@@ -97,7 +99,7 @@ public class Throttle {
     private final Deque<String> pendingKeys = new LinkedList<>();
     // pending children across all keys, in arrival order; drives both admission tier 1 and the cycle check
     private final Deque<PermitImpl> pendingChildren = new ArrayDeque<>();
-    // pending high priority permits across all keys, in arrival order; admitted only by tier 2
+    // pending high priority permits across all keys, in arrival order; admitted only by tiers 2 and 5
     private final Deque<PermitImpl> highPending = new ArrayDeque<>();
 
     // contention tracking for WARN-on-transition logging
@@ -124,9 +126,9 @@ public class Throttle {
     /**
      * Runs a given {@link Supplier} with the given priority. Root permits acquired (by the current thread) within the supplier with
      * {@link Priority#HIGH} are charged to the requested key but are not counted to its limit, and are served ahead of the other waiters
-     * up to the {@link Config#priorityGranted(Priority) high priority granted} - for work the server itself initiated (e.g.
-     * schedulers working for a tenant), never for client requests. Other priorities have no effect. A permit joining an already held one
-     * inherits the priority of its root.
+     * up to the {@link Config#priorityGranted(Priority) high priority granted}, above it on the idle capacity only - for work the server
+     * itself initiated (e.g. schedulers working for a tenant), never for client requests. Other priorities have no effect. A permit
+     * joining an already held one inherits the priority of its root.
      * <p>The priority is thread bound - it applies to all {@link Throttle} instances and it is not propagated to other threads.
      * Could be nested; the previous priority is restored after the call.
      *
@@ -369,6 +371,12 @@ public class Throttle {
             if (grant) {
                 return perKeyPending.get(key).peekFirst();
             }
+        }
+
+        // tier 5: high priority waiters above the priority granted take the idle capacity - only when no other waiter is admissible
+        if (!highPending.isEmpty()) {
+            log.debug("grantNextEligible[high] → admit (idle capacity, {}/{})", global, capacity);
+            return highPending.peekFirst();
         }
         return null;
     }

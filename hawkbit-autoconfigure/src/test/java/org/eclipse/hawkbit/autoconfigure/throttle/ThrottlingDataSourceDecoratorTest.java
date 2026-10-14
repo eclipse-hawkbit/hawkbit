@@ -184,7 +184,7 @@ class ThrottlingDataSourceDecoratorTest {
     private static Throttle throttle(final int capacity, final Consumer<ThrottleProperties> customizer) {
         final ThrottleProperties props = new ThrottleProperties();
         props.setThreshold(0); // always contended: fair share enforced from the first permit
-        props.setSystemGranted(0); // priority off unless a test opts in
+        props.setHighPriorityGranted(0); // priority off unless a test opts in
         customizer.accept(props);
         return new Throttle(props.toConfig(capacity));
     }

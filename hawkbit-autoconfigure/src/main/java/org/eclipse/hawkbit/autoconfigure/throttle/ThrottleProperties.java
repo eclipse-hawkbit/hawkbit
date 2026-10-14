@@ -108,14 +108,15 @@ public class ThrottleProperties {
      * migrations and health checks run without a tenant context), and the schedulers running their per tenant work with
      * {@link org.eclipse.hawkbit.throttle.Throttle#withPriority(Config.Priority, java.util.function.Supplier) high priority}.
      *
-     * <p>High priority work is served ahead of the queue and waits for these slots only — it is not counted to, nor waits for, the
-     * tenant limit. Costs no reserved capacity — tenants use those slots freely whenever high priority work is not.
-     * {@code 0} disables the priority. Must resolve to fewer
+     * <p>High priority work is served ahead of the queue for these slots, beyond them it takes the idle capacity only — never a slot
+     * an admissible tenant request could take. It is not counted to, nor waits for, the tenant limit. Costs no reserved capacity —
+     * tenants use those slots freely whenever high priority work is not.
+     * {@code 0} disables the priority - high priority work is then bound by the tenant limit as any other. Must resolve to fewer
      * slots than {@link #capacity}, or tenant work may never be reached; the policy warns if it does not.
      *
-     * <p>Default: {@code 4}, system work is served ahead of the queue for 4 slots
+     * <p>Default: {@code 4}, high priority work is served ahead of the queue for 4 slots
      */
-    private int systemGranted = 4;
+    private int highPriorityGranted = 4;
 
     /** Per-tenant limit overrides */
     private final LinkedCaseInsensitiveMap<TenantConfig> tenants = new LinkedCaseInsensitiveMap<>(Locale.ROOT);
@@ -129,11 +130,11 @@ public class ThrottleProperties {
     }
 
     public Config toConfig(final int capacity) {
-        if (systemGranted >= capacity) {
+        if (highPriorityGranted >= capacity) {
             log.warn("""
-                            Throttle system granted ({}) is not below capacity ({}): priority admissions can consume the whole \
-                            resource, so tenant work may never be served. Lower `hawkbit.throttle.system-granted`.""",
-                    systemGranted, capacity);
+                            Throttle high priority granted ({}) is not below capacity ({}): priority admissions can consume the whole \
+                            resource, so tenant work may never be served. Lower `hawkbit.throttle.high-priority-granted`.""",
+                    highPriorityGranted, capacity);
         }
         // pre init system and per tenant policy overrides in order to do not build for avery key (tenant)
         final Policy systemPolicy = Policy.builder()
@@ -160,7 +161,7 @@ public class ThrottleProperties {
                             .build();
                 }, (policy, duplicate) -> policy, () -> new LinkedCaseInsensitiveMap<>(Locale.ROOT))); // case-insensitive map
         return Config.builder()
-                .priorityToGranted(new EnumMap<>(Map.of(HIGH, systemGranted))) // reserve system priority granted
+                .priorityToGranted(new EnumMap<>(Map.of(HIGH, highPriorityGranted))) // high priority granted
                 .permits(capacity)
                 .timeout(timeout)
                 .maxPending(maxPending)
