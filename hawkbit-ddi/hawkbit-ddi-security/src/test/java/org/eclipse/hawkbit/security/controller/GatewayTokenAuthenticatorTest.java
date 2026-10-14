@@ -16,7 +16,9 @@ import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationPrope
 import static org.mockito.Mockito.when;
 
 import org.eclipse.hawkbit.context.Principal;
+import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.repository.helper.SystemManagementHolder;
 import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,10 +49,13 @@ class GatewayTokenAuthenticatorTest {
 
     @Mock
     private TenantConfigurationManagement tenantConfigurationManagementMock;
+    @Mock
+    private SystemManagement systemManagementMock;
 
     @BeforeEach
     void before() {
         TenantConfigHelper.setTenantConfigurationManagement(tenantConfigurationManagementMock);
+        SystemManagementHolder.setInstance(systemManagementMock);
         authenticator = new GatewayTokenAuthenticator();
     }
 

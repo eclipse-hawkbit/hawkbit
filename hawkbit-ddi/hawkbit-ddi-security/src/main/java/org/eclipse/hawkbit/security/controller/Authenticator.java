@@ -9,7 +9,8 @@
  */
 package org.eclipse.hawkbit.security.controller;
 
-import static org.eclipse.hawkbit.context.AccessContext.asTenant;
+import static org.eclipse.hawkbit.context.AccessContext.asSystemAsTenant;
+import static org.eclipse.hawkbit.repository.helper.TenantConfigHelper.getTenantConfigurationManagement;
 
 import java.io.Serial;
 import java.util.Objects;
@@ -17,7 +18,7 @@ import java.util.Objects;
 import lombok.EqualsAndHashCode;
 import org.eclipse.hawkbit.auth.SpRole;
 import org.eclipse.hawkbit.context.Principal;
-import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
+import org.eclipse.hawkbit.repository.helper.SystemManagementHolder;
 import org.slf4j.Logger;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -44,7 +45,14 @@ public interface Authenticator {
     abstract class AbstractAuthenticator implements Authenticator {
 
         protected boolean isEnabled(final ControllerSecurityToken securityToken) {
-            return asTenant(securityToken.getTenant(), () -> TenantConfigHelper.getAsSystem(getTenantConfigurationKey(), Boolean.class));
+            return asSystemAsTenant(securityToken.getTenant(), () -> {
+                if (SystemManagementHolder.getInstance().isTenantSoftDeleted()) {
+                    // no authenticator is enabled for a soft deleted tenant -> the request ends unauthenticated (401) on every DDI chain
+                    log().warn("Soft deleted tenant access attempted via DDI");
+                    return false;
+                }
+                return getTenantConfigurationManagement().getConfigurationValue(getTenantConfigurationKey(), Boolean.class).getValue();
+            });
         }
 
         protected abstract String getTenantConfigurationKey();

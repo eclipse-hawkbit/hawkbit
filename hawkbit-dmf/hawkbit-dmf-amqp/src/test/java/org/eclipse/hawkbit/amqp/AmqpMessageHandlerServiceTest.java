@@ -16,6 +16,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -36,9 +37,11 @@ import org.eclipse.hawkbit.dmf.json.model.DmfCreateThing;
 import org.eclipse.hawkbit.dmf.json.model.DmfUpdateMode;
 import org.eclipse.hawkbit.repository.ConfirmationManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
+import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.UpdateMode;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
+import org.eclipse.hawkbit.repository.helper.SystemManagementHolder;
 import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.ActionProperties;
@@ -57,12 +60,14 @@ import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.MessageConversionException;
 import org.springframework.amqp.support.converter.MessageConverter;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 
 /**
  * Feature: Component Tests - Device Management Federation API<br/>
  * Story: AmqpMessage Handler Service Test
  */
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({ MockitoExtension.class, OutputCaptureExtension.class })
 class AmqpMessageHandlerServiceTest {
 
     private static final String FAIL_MESSAGE_AMQP_REJECT_REASON = AmqpRejectAndDontRequeueException.class.getSimpleName() + " was expected, ";
@@ -84,6 +89,8 @@ class AmqpMessageHandlerServiceTest {
     private ConfirmationManagement confirmationManagementMock;
     @Mock
     private TenantConfigurationManagement tenantConfigurationManagement;
+    @Mock
+    private SystemManagement systemManagementMock;
     @Mock
     private RabbitTemplate rabbitTemplate;
 
@@ -108,6 +115,7 @@ class AmqpMessageHandlerServiceTest {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     void before() {
         TenantConfigHelper.setTenantConfigurationManagement(tenantConfigurationManagement);
+        SystemManagementHolder.setInstance(systemManagementMock);
         messageConverter = new DmfMessageConverter();
         lenient().when(rabbitTemplate.getMessageConverter()).thenReturn(messageConverter);
 
@@ -558,6 +566,42 @@ class AmqpMessageHandlerServiceTest {
         verify(controllerManagementMock, times(0)).activateAutoConfirmation(anyString(), anyString(), anyString());
 
         assertThingIdCapturedField(knownThingId);
+    }
+
+    /**
+     * Tests that device registration for a soft deleted tenant is rejected without registering the target and the access
+     * attempt is logged.
+     */
+    @Test
+    void createThingForSoftDeletedTenantIsRejected(final CapturedOutput output) {
+        when(systemManagementMock.isTenantSoftDeleted()).thenReturn(true);
+        final Message message = createMessage(new byte[0], getThingCreatedMessageProperties("softDeleted"));
+        final String type = MessageType.THING_CREATED.name();
+
+        assertThatExceptionOfType(AmqpRejectAndDontRequeueException.class)
+                .as(FAIL_MESSAGE_AMQP_REJECT_REASON + "since the tenant is soft deleted")
+                .isThrownBy(() -> amqpMessageHandlerService.onMessage(message, type, TENANT, VIRTUAL_HOST));
+
+        verifyNoInteractions(controllerManagementMock);
+        assertThat(output).contains("Soft deleted tenant access attempted via DMF");
+    }
+
+    /**
+     * Tests that a ping for a soft deleted tenant is rejected without sending a ping response.
+     */
+    @Test
+    void pingForSoftDeletedTenantIsRejected() {
+        when(systemManagementMock.isTenantSoftDeleted()).thenReturn(true);
+        final MessageProperties messageProperties = createMessageProperties(MessageType.PING);
+        messageProperties.setCorrelationId("softDeletedPing");
+        final Message message = createMessage(new byte[0], messageProperties);
+        final String type = MessageType.PING.name();
+
+        assertThatExceptionOfType(AmqpRejectAndDontRequeueException.class)
+                .as(FAIL_MESSAGE_AMQP_REJECT_REASON + "since the tenant is soft deleted")
+                .isThrownBy(() -> amqpMessageHandlerService.onMessage(message, type, TENANT, VIRTUAL_HOST));
+
+        verifyNoInteractions(amqpMessageDispatcherServiceMock);
     }
 
     private void processThingCreatedMessage(final String thingId, final DmfCreateThing payload) {

@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.repository;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -78,4 +79,19 @@ public class RepositoryProperties {
      * new targets
      */
     private long dynamicRolloutsMinInvolvePeriodMS = 60_000;
+
+    /**
+     * Default delay after which a tenant soft deleted via {@link SystemManagement#softDeleteTenant(String)} becomes soft
+     * deleted (inaccessible), counted from the delete request time. Until then the tenant stays fully usable. If not positive the
+     * tenant becomes soft deleted immediately.
+     */
+    private Duration tenantSoftDeleteAfter = Duration.ofDays(7);
+
+    /**
+     * Delay after which a tenant soft deleted via {@link SystemManagement#softDeleteTenant(String)} is hard deleted (with all
+     * its data), counted from the delete request time (not from the soft delete time). Until then the tenant could be restored.
+     * If not positive soft deletes are disabled. If positive, it must not be less than {@link #tenantSoftDeleteAfter} - otherwise
+     * the application fails to start.
+     */
+    private Duration tenantHardDeleteAfter = Duration.ofDays(30);
 }

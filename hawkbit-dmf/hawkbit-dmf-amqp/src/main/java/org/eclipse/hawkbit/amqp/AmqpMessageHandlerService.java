@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.amqp;
 
+import static org.eclipse.hawkbit.context.AccessContext.asSystemAsTenant;
+
 import jakarta.validation.constraints.NotNull;
 import java.net.URI;
 import java.util.ArrayList;
@@ -38,6 +40,7 @@ import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.UpdateMode;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
+import org.eclipse.hawkbit.repository.helper.SystemManagementHolder;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.model.Action.ActionStatusCreate.ActionStatusCreateBuilder;
@@ -114,6 +117,17 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     public Message onMessage(final Message message, final String type, final String tenant, final String virtualHost) {
         if (ObjectUtils.isEmpty(type) || ObjectUtils.isEmpty(tenant)) {
             throw new AmqpRejectAndDontRequeueException("Invalid message! tenant and type header are mandatory!");
+        }
+        // checked before any message type handling - so PING is rejected too
+        if (asSystemAsTenant(tenant, () -> { // return if soft deleted
+            if (SystemManagementHolder.getInstance().isTenantSoftDeleted()) {
+                log.warn("Soft deleted tenant access attempted via DMF");
+                return true;
+            } else {
+                return false;
+            }
+        })) {
+            throw new AmqpRejectAndDontRequeueException("Tenant " + tenant + " is soft deleted!");
         }
 
         final SecurityContext oldContext = SecurityContextHolder.getContext();

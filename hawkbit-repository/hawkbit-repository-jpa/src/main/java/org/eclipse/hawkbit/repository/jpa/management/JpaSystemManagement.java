@@ -13,11 +13,14 @@ import static org.eclipse.hawkbit.context.AccessContext.asSystemAsTenant;
 import static org.eclipse.hawkbit.context.AccessContext.asTenant;
 
 import java.util.Locale;
+import java.time.Instant;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 
 import jakarta.persistence.EntityManager;
 
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.artifact.ArtifactStorage;
 import org.eclipse.hawkbit.context.AccessContext;
@@ -26,6 +29,8 @@ import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.exception.TenantSoftDeletedException;
+import org.eclipse.hawkbit.repository.helper.SystemManagementHolder;
 import org.eclipse.hawkbit.repository.jpa.CurrentTenantCacheKeyGenerator;
 import org.eclipse.hawkbit.repository.jpa.SystemManagementCacheKeyGenerator;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
@@ -48,12 +53,15 @@ import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
+import org.eclipse.hawkbit.tenancy.TenantAwareCacheManager;
 import org.eclipse.hawkbit.tenancy.TenantAwareCacheManager.CacheEvictEvent;
 import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.boot.jpa.autoconfigure.JpaProperties;
 import org.springframework.cache.interceptor.KeyGenerator;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -73,9 +81,10 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 @Service
 @ConditionalOnBooleanProperty(prefix = "hawkbit.jpa", name = { "enabled", "system-management" }, matchIfMissing = true)
-public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, SystemManagement {
+public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, SystemManagement, ApplicationListener<ContextRefreshedEvent> {
 
     private static final int MAX_TENANTS_QUERY = 1000;
+    private static final String CACHE_TENANT_SOFT_DELETED = "tenant-soft-deleted";
 
     private final TargetRepository targetRepository;
     private final TargetTypeRepository targetTypeRepository;
@@ -125,11 +134,25 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
         this.txManager = txManager;
         this.entityManager = entityManager;
         this.repositoryProperties = repositoryProperties;
+        // fail fast (the application doesn't boot)
+        if (repositoryProperties.getTenantHardDeleteAfter().isPositive()
+                && repositoryProperties.getTenantSoftDeleteAfter().compareTo(repositoryProperties.getTenantHardDeleteAfter()) > 0) {
+            throw new IllegalStateException(String.format(
+                    "Invalid tenant soft delete configuration: soft delete after (%s) must not be greater than hard delete after (%s)",
+                    repositoryProperties.getTenantSoftDeleteAfter(), repositoryProperties.getTenantHardDeleteAfter()));
+        }
     }
 
     @Autowired(required = false) // it's not required on dmf/ddi only instances
     public void setArtifactStorage(final ArtifactStorage artifactStorage) {
         this.artifactStorage = artifactStorage;
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.SUPPORTS)
+    public void onApplicationEvent(@NonNull final ContextRefreshedEvent event) {
+        // sets the proxy / bean from the context in order to be used via proxy and honor things like @PreAuthorize and @Transactional
+        SystemManagementHolder.setInstance(event.getApplicationContext().getBean(JpaSystemManagement.class));
     }
 
     @Override
@@ -140,13 +163,22 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
 
     @Override
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    public void forEachTenantAsSystem(final Consumer<String> consumer) {
+        forEachTenantAsSystem(false, consumer);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     // Exception squid:S2229 - calling findTenants without transaction is intended in this case
     @SuppressWarnings("squid:S2229")
-    public void forEachTenantAsSystem(final Consumer<String> consumer) {
+    public void forEachTenantAsSystem(final boolean includeSoftDeleted, final Consumer<String> consumer) {
         Page<String> tenants;
         Pageable query = PageRequest.of(0, MAX_TENANTS_QUERY);
+        // same time for all pages - consistent paging
+        final long now = System.currentTimeMillis();
         do {
-            tenants = tenantMetaDataRepository.findTenants(query); // with IS_SYSTEM_CODE so we could find all tenants
+            // with IS_SYSTEM_CODE so we could find all tenants
+            tenants = includeSoftDeleted ? tenantMetaDataRepository.findAllTenants(query) : tenantMetaDataRepository.findActiveTenants(now, query);
             tenants.forEach(tenant -> asSystemAsTenant(tenant, () -> {
                 try {
                     consumer.accept(tenant);
@@ -169,20 +201,24 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     }
 
     @Override
-    public TenantMetaData createTenantMetadata(final String tenant) {
+    public TenantMetaData createTenantMetadata(final String t) {
         // the tenant identity is the trimmed upper case name - " acme" and "ACME" are the same tenant
-        final String normalizedTenant = normalizeTenant(tenant);
-        final String storedTenant = tenantMetaDataRepository.findStoredTenantIgnoreCase(normalizedTenant);
+        final String tenant = normalizeTenant(t);
+        final String storedExactTenant = tenantMetaDataRepository.findStoredTenantIgnoreCase(tenant);
         // Create if it does not exist
-        if (storedTenant == null) {
-            return createTenantMetadata0(normalizedTenant);
+        if (storedExactTenant == null) {
+            return createTenantMetadata0(tenant);
         }
         // an existing (legacy) tenant stored not normalized (another case / surrounding spaces) is a conflict
-        if (!storedTenant.equals(normalizedTenant)) {
-            throw new EntityAlreadyExistsException("Tenant `" + normalizedTenant + "` conflicts with existing tenant `" + storedTenant + "`");
+        if (!storedExactTenant.equals(tenant)) {
+            throw new EntityAlreadyExistsException("Tenant `" + tenant + "` conflicts with existing tenant `" + storedExactTenant + "`");
         }
-        // return existing
-        return tenantMetaDataRepository.findByTenantIgnoreCase(normalizedTenant);
+        // return existing - unless soft deleted
+        final JpaTenantMetaData existing = (JpaTenantMetaData) tenantMetaDataRepository.findByTenantIgnoreCase(tenant);
+        if (isSoftDeleted(existing.getDeletedAt(), System.currentTimeMillis())) {
+            throw new EntityAlreadyExistsException("Tenant {" + tenant + "} exists and is soft deleted.");
+        }
+        return existing;
     }
 
     @Override
@@ -195,30 +231,115 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     }
 
     @Override
+    public boolean isTenantSoftDeleted() {
+        final String tenant = AccessContext.tenant();
+        if (tenant == null) {
+            throw new IllegalStateException("AccessContext not set");
+        }
+
+        // caches the deletedAt (not the result) - so a scheduled soft delete takes effect on time even with a warm cache.
+        // Optional since the tenant aware cache doesn't cache null values
+        final Optional<Long> deletedAt = TenantAwareCacheManager.getInstance()
+                .getCache(CACHE_TENANT_SOFT_DELETED)
+                .get(tenant, () -> Optional.ofNullable((JpaTenantMetaData) tenantMetaDataRepository.findByTenantIgnoreCase(tenant))
+                        .map(JpaTenantMetaData::getDeletedAt));
+        return isSoftDeleted(deletedAt.orElse(null), System.currentTimeMillis());
+    }
+
+    @Override
     @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
-    public void deleteTenant(final String tenant) {
+    public void deleteTenant(final String t) {
         if (artifactStorage == null) {
             throw new IllegalStateException("Artifact repository is not available. Can't delete tenant.");
         }
 
-        final String normalizedTenant = normalizeTenant(tenant);
-        asTenant(normalizedTenant, () -> DeploymentHelper.runInNewTransaction("deleteTenant", status -> {
-            tenantMetaDataRepository.deleteByTenantIgnoreCase(normalizedTenant);
-            tenantConfigurationRepository.deleteByTenant(normalizedTenant);
-            targetRepository.deleteByTenant(normalizedTenant);
-            targetFilterQueryRepository.deleteByTenant(normalizedTenant);
-            rolloutRepository.deleteByTenant(normalizedTenant);
-            targetTypeRepository.deleteByTenant(normalizedTenant);
-            targetTagRepository.deleteByTenant(normalizedTenant);
-            distributionSetTagRepository.deleteByTenant(normalizedTenant);
-            distributionSetRepository.deleteByTenant(normalizedTenant);
-            distributionSetTypeRepository.deleteByTenant(normalizedTenant);
-            softwareModuleRepository.deleteByTenant(normalizedTenant);
-            artifactStorage.deleteByTenant(normalizedTenant);
-            softwareModuleTypeRepository.deleteByTenant(normalizedTenant);
+        final String tenant = normalizeTenant(t);
+        asTenant(tenant, () -> DeploymentHelper.runInNewTransaction("deleteTenant", status -> {
+            tenantMetaDataRepository.deleteByTenantIgnoreCase(tenant);
+            tenantConfigurationRepository.deleteByTenant(tenant);
+            targetRepository.deleteByTenant(tenant);
+            targetFilterQueryRepository.deleteByTenant(tenant);
+            rolloutRepository.deleteByTenant(tenant);
+            targetTypeRepository.deleteByTenant(tenant);
+            targetTagRepository.deleteByTenant(tenant);
+            distributionSetTagRepository.deleteByTenant(tenant);
+            distributionSetRepository.deleteByTenant(tenant);
+            distributionSetTypeRepository.deleteByTenant(tenant);
+            softwareModuleRepository.deleteByTenant(tenant);
+            artifactStorage.deleteByTenant(tenant);
+            softwareModuleTypeRepository.deleteByTenant(tenant);
             return null;
         }, txManager));
-        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new CacheEvictEvent.Default(normalizedTenant, null, null));
+        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new CacheEvictEvent.Default(tenant, null, null));
+    }
+
+    @Override
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
+    public void softDeleteTenant(final String t) {
+        if (!repositoryProperties.getTenantHardDeleteAfter().isPositive()) {
+            throw new IllegalStateException("Soft deletes are not enabled - hard delete after is not positive!");
+        }
+        // both soft and hard delete times are counted from now (the request time)
+        final Instant now = Instant.now();
+        softDeleteTenant(
+                t,
+                repositoryProperties.getTenantSoftDeleteAfter().isPositive()
+                        ? now.plusMillis(repositoryProperties.getTenantSoftDeleteAfter().toMillis())
+                        : now,
+                now.plusMillis(repositoryProperties.getTenantHardDeleteAfter().toMillis()));
+    }
+
+    @Override
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
+    public void softDeleteTenant(final String t, final Instant softDeleteAt, final Instant hardDeleteAt) {
+        // keeps the invariant hardDeleteAt >= deletedAt - the hard delete scheduler relies on it to never pick a pending soft delete
+        if (hardDeleteAt.isBefore(softDeleteAt)) {
+            throw new IllegalArgumentException(
+                    "Hard delete time " + hardDeleteAt + " must not be before the soft delete time " + softDeleteAt + "!");
+        }
+        final String tenant = normalizeTenant(t);
+        final String actor = AccessContext.actor();
+        // runs in the tenant context (as the hard delete) - the persistence context needs a tenant, e.g. when called as system
+        asTenant(tenant, () -> DeploymentHelper.runInNewTransaction("softDeleteTenant", status -> {
+            final JpaTenantMetaData metaData = findTenantMetaData(tenant);
+            final long now = System.currentTimeMillis();
+            // an already soft deleted tenant can't be soft deleted again (keeps its marks), an active or pending one is (re)scheduled
+            if (isSoftDeleted(metaData.getDeletedAt(), now)) {
+                throw new IllegalStateException("Tenant {" + tenant + "} is softDeleted.");
+            }
+            metaData.setDeletedAt(softDeleteAt.toEpochMilli());
+            metaData.setDeletedBy(actor);
+            metaData.setHardDeleteAt(hardDeleteAt.toEpochMilli());
+            tenantMetaDataRepository.save(metaData);
+            return null;
+        }, txManager));
+        evictTenantCachesLocally(tenant);
+    }
+
+    @Override
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
+    public void restoreTenant(final String t) {
+        final String tenant = normalizeTenant(t);
+        // runs in the tenant context (as the hard delete) - the persistence context needs a tenant, e.g. when called as system
+        asTenant(tenant, () -> DeploymentHelper.runInNewTransaction("restoreTenant", status -> {
+            final JpaTenantMetaData metaData = findTenantMetaData(tenant);
+            // active tenant - nothing to change
+            if (metaData.getDeletedAt() != null || metaData.getDeletedBy() != null || metaData.getHardDeleteAt() != null) {
+                metaData.setDeletedAt(null);
+                metaData.setDeletedBy(null);
+                metaData.setHardDeleteAt(null);
+                tenantMetaDataRepository.save(metaData);
+            }
+            return null;
+        }, txManager));
+        evictTenantCachesLocally(tenant);
+    }
+
+    // Evicts the tenant's caches on this node synchronously (after the commit), so the own node sees a soft delete / restore at
+    // once. Publishing the CacheEvictEvent is not enough for that - the application event multicaster dispatches listeners
+    // asynchronously, so a check right after the call could still read the stale cached value.
+    private static void evictTenantCachesLocally(final String tenant) {
+        TenantAwareCacheManager.getInstance().onCacheEvictEvent(new CacheEvictEvent.Default(tenant, null, null));
     }
 
     public static String normalizeTenant(final String tenant) {
@@ -227,6 +348,18 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
             throw new IllegalArgumentException("Tenant must not be empty or blank");
         }
         return normalizedTenant;
+    }
+
+    private static boolean isSoftDeleted(final Long deletedAt, final long now) {
+        return deletedAt != null && deletedAt <= now;
+    }
+
+    private JpaTenantMetaData findTenantMetaData(final String tenant) {
+        final JpaTenantMetaData metaData = (JpaTenantMetaData) tenantMetaDataRepository.findByTenantIgnoreCase(tenant);
+        if (metaData == null) {
+            throw new EntityNotFoundException(TenantMetaData.class, tenant);
+        }
+        return metaData;
     }
 
     private TenantMetaData getTenantMetadata0(final boolean withDetails) {
@@ -238,7 +371,10 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
         final TenantMetaData metaData = withDetails
                 ? tenantMetaDataRepository.findWitDetailsByTenantIgnoreCase(tenant)
                 : tenantMetaDataRepository.findByTenantIgnoreCase(tenant);
-        if (metaData == null) {
+        if (metaData != null && isSoftDeleted(((JpaTenantMetaData) metaData).getDeletedAt(), System.currentTimeMillis())) {
+            // checked before the implicit creation, so a soft deleted tenant is never re-created
+            throw new TenantSoftDeletedException(tenant);
+        } else if (metaData == null) {
             if (repositoryProperties.isImplicitTenantCreateAllowed()) {
                 log.info("AccessContext {} doesn't exist create metadata", tenant, new Exception("Thread dump"));
                 return createTenantMetadata0(tenant);

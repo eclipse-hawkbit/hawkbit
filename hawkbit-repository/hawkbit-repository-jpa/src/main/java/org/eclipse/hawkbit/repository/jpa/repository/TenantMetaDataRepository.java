@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa.repository;
 
+import java.util.List;
+
 import org.eclipse.hawkbit.repository.jpa.model.JpaTenantMetaData;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
 import org.springframework.data.domain.Page;
@@ -39,8 +41,18 @@ public interface TenantMetaDataRepository extends PagingAndSortingRepository<Jpa
     @Query("SELECT t FROM JpaTenantMetaData t WHERE UPPER(TRIM(t.tenant)) = UPPER(TRIM(:tenant))")
     TenantMetaData findWitDetailsByTenantIgnoreCase(@Param("tenant") String tenant);
 
+    // all tenants, including the soft deleted ones
     @Query("SELECT UPPER(TRIM(t.tenant)) FROM JpaTenantMetaData t")
-    Page<String> findTenants(final Pageable pageable);
+    Page<String> findAllTenants(Pageable pageable);
+
+    // tenants not soft deleted at the given time - active or with a pending (future) soft delete
+    @Query("SELECT UPPER(TRIM(t.tenant)) FROM JpaTenantMetaData t WHERE t.deletedAt IS NULL OR t.deletedAt > :now")
+    Page<String> findActiveTenants(@Param("now") long now, Pageable pageable);
+
+    // soft deleted tenants due for hard delete at the given time - only soft deleted tenants have a hard delete time and it is
+    // never before the soft delete time (enforced on soft delete), so a tenant with a pending soft delete is never returned
+    @Query("SELECT UPPER(TRIM(t.tenant)) FROM JpaTenantMetaData t WHERE t.hardDeleteAt <= :now")
+    List<String> findTenantsToHardDelete(@Param("now") long now);
 
     // the tenant as stored (JpaTenantMetaData#getTenant returns it normalized), null if there is no such tenant
     @Query("SELECT t.tenant FROM JpaTenantMetaData t WHERE UPPER(TRIM(t.tenant)) = UPPER(TRIM(:tenant))")
