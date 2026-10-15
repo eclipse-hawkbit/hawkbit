@@ -25,11 +25,10 @@ import lombok.experimental.Accessors;
 @Accessors(fluent = true)
 public class Config {
 
-    int highPriorityGranted; // free permits are granted to high priority first, up to that number. 0 disables the high priority
+    int highPriorityGranted; // free permits are granted to high priority first, up to that number. 0 disables serving ahead
 
     int permits; // capacity, max permits to be granted
     @Builder.Default
-    @Getter(AccessLevel.PRIVATE)
     Duration timeout = Duration.ZERO; // non-positive timeout means direct reject. In this case maxPending is ignored
     @Builder.Default
     int maxPending = -1; // max pending requests over all keys together, -1 means no limit

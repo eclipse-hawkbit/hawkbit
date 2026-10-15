@@ -17,8 +17,9 @@ import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.SequencedMap;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
@@ -47,9 +48,8 @@ import org.eclipse.hawkbit.throttle.ThrottledException.Reason;
  *       priority work never queues with the other work of its key, so no key backlog can block it. Costs no reserved capacity, since
  *       the others use those slots freely whenever high priority work is not.</li>
  *   <li>Below {@link Config#keyPolicyThreshold()} — anyone may burst.</li>
- *   <li>At or above the threshold — round-robin + per key max permit bound share.</li>
- *   <li>High priority waiters above the high priority granted — the idle capacity only, i.e. what no other waiter is admissible
- *       for.</li>
+ *   <li>At or above the threshold — round-robin + per key max permit bound share. High priority waiters above the high priority
+ *       granted take their turn too, as one more key with no key limit.</li>
  * </ol>
  *
  * <p><b>Fairness across keys is round-robin, not first-come-first-served by key.</b> Waiters queue per key, and the keys
@@ -84,21 +84,18 @@ public class Throttle {
 
     private int globalGranted;
     private final Map<String, Integer> perKeyGranted = new HashMap<>(); // not high priority - counted to the key limit
-    private int highGranted; // high priority, of any key - counted to the high priority granted, not to the key limit
+    private int highPriorityGranted; // high priority, of any key - counted to the high priority granted, not to the key limit
     // permits held per unit of work, keyed on the tree's root permit; entry removed at zero. Self-bounding: every unit
     // owns at least one permit, so this can never exceed capacity entries — it cannot leak the way a caller-side
     // thread registry can, because an entry only exists while a permit does.
     private final Map<PermitImpl, Integer> permitsByRoot = new HashMap<>();
 
     private int globalPending;
-    // wait state: per-key FIFO of pending + the keys themselves in service order (rotated on every admission).
-    private final Map<String, Deque<PermitImpl>> perKeyPending = new HashMap<>();
-    // LinkedList, not ArrayDeque: the system key is null and ArrayDeque rejects null elements.
-    private final Deque<String> pendingKeys = new LinkedList<>();
+    // wait state: FIFO of pending per queue - a key's own, or the single high priority one of all keys - with the queues themselves in
+    // service order (rotated on every admission). Only non-empty queues are present.
+    private final SequencedMap<QueueKey, Deque<PermitImpl>> pending = new LinkedHashMap<>();
     // pending children across all keys, in arrival order; drives both admission tier 1 and the cycle check
     private final Deque<PermitImpl> pendingChildren = new ArrayDeque<>();
-    // pending high priority permits across all keys, in arrival order; admitted only by tiers 2 and 5
-    private final Deque<PermitImpl> highPending = new ArrayDeque<>();
 
     // contention tracking for WARN-on-transition logging
     private boolean wasAboveThreshold;
@@ -123,7 +120,7 @@ public class Throttle {
     /**
      * Runs a given {@link Supplier} with high priority. Root permits acquired (by the current thread) within the supplier are charged to
      * the requested key but are not counted to its limit, and are served ahead of the other waiters up to the
-     * {@link Config#highPriorityGranted() high priority granted}, above it on the idle capacity only - for work the server itself
+     * {@link Config#highPriorityGranted() high priority granted}, above it on their turn as one more key - for work the server itself
      * initiated (e.g. schedulers working for a tenant), never for client requests. A permit joining an already held one inherits the
      * priority of its root.
      * <p>The priority is thread bound - it applies to all {@link Throttle} instances and it is not propagated to other threads.
@@ -175,8 +172,8 @@ public class Throttle {
         lock.lock();
         try {
             // HashMap copy, not Map.copyOf: the system key is null, which Map.copyOf rejects
-            return new Stats(globalGranted, Collections.unmodifiableMap(new HashMap<>(perKeyGranted)), highGranted, permitsByRoot.size(),
-                    globalPending);
+            return new Stats(globalGranted, Collections.unmodifiableMap(new HashMap<>(perKeyGranted)), highPriorityGranted,
+                    permitsByRoot.size(), globalPending);
         } finally {
             lock.unlock();
         }
@@ -195,11 +192,9 @@ public class Throttle {
                 throw new IllegalStateException("cannot acquire from a stale permit (key '%s')".formatted(key));
             }
 
-            // a child inherits it from its root, so a unit of work is either high priority or not. Served apart from the key work only
-            // if high priority is granted (configured), otherwise the priority is ignored
-            final boolean highPriority = parent == null
-                    ? config.highPriorityGranted() > 0 && (isHighPriorityThread() || config.highPriority(key))
-                    : parent.root.isHighPriority();
+            // a child inherits it from its root, so a unit of work is either high priority or not. Served apart from the key work even
+            // with no high priority granted - then it is not served ahead, but still takes its turn not bound by the key
+            final boolean highPriority = parent == null ? isHighPriorityThread() || config.highPriority(key) : parent.root.isHighPriority();
             final PermitImpl permit = new PermitImpl(key, highPriority, parent, lock.newCondition());
             // handle blocked - high priority is not bound by the key
             if (parent == null && !permit.isHighPriority() && config.permits(key) == 0) {
@@ -214,7 +209,8 @@ public class Throttle {
                         throw new ThrottledException(Reason.LIMIT, "'%s' is throttled (limit)".formatted(key));
                     }
 
-                    final Duration keyTimeout = config.timeout(key);
+                    // high priority is not bound by the key - waits by the global (system) timeout
+                    final Duration keyTimeout = permit.isHighPriority() ? config.timeout() : config.timeout(key);
                     if (!keyTimeout.isPositive()) { // no wait is allowed, fast-reject
                         throw new ThrottledException(Reason.FAST_REJECT, "'%s' is throttled (limit, fast-reject)".formatted(key));
                     } // else eligible to wait
@@ -305,8 +301,8 @@ public class Throttle {
      */
     private Deque<PermitImpl> longestPending(final Deque<PermitImpl> preferred) {
         Deque<PermitImpl> longest = preferred;
-        for (final Deque<PermitImpl> queue : perKeyPending.values()) {
-            if (queue.size() > longest.size()) {
+        for (final Deque<PermitImpl> queue : pending.values()) {
+            if (!queue.peekFirst().isHighPriority() && queue.size() > longest.size()) { // high priority is not evicted by the others
                 longest = queue;
             }
         }
@@ -321,7 +317,7 @@ public class Throttle {
             log.debug("grantNextEligible() → no admit (resource full: {}/{})", global, capacity);
             return;
         }
-        if (pendingKeys.isEmpty() && highPending.isEmpty()) {
+        if (pending.isEmpty()) {
             return;
         }
 
@@ -333,7 +329,7 @@ public class Throttle {
             return;
         }
 
-        // Pick first, admit after: admit() rotates the served key, which mutates waitingKeys — doing that while an
+        // Pick first, admit after: admit() rotates the served queue, which mutates pending — doing that while an
         // iterator over it is still live would be a ConcurrentModificationException waiting to happen.
         final PermitImpl selected = selectPending(global, capacity);
         if (selected != null) {
@@ -343,42 +339,42 @@ public class Throttle {
 
     /**
      * The waiter to serve, or {@code null} if nobody is admissible. Returns the waiter rather than its key because
-     * {@code null} is itself a valid key. Scans {@link #pendingKeys} in service order, so a key rotated to the back by
+     * {@code null} is itself a valid key. Scans {@link #pending} in service order, so a queue rotated to the back by
      * an earlier grant is considered last. Must be called under lock.
      */
     private PermitImpl selectPending(final int global, final int capacity) {
         // tier 2: high priority waiters (of any key) while below the priority granted
         final int granted = config.highPriorityGranted();
-        if (highGranted < granted && !highPending.isEmpty()) {
+        final Deque<PermitImpl> highPriorityPending = pending.get(QueueKey.HIGH_PRIORITY);
+        if (highPriorityGranted < granted && highPriorityPending != null) {
             log.debug("grantNextEligible[high] → admit (priority granted {}, {}/{})", granted, global, capacity);
-            return highPending.peekFirst();
+            return highPriorityPending.peekFirst();
         }
 
         // tier 3: below the contention threshold everyone may burst.
         // threshold <= 0 means always enforce the fair share (no burst allowance)
         final int threshold = config.keyPolicyThreshold();
-        if (threshold > 0 && global < threshold && !pendingKeys.isEmpty()) {
-            final String key = pendingKeys.peekFirst();
-            log.debug("grantNextEligible[{}] → admit (burst: {}/{}, threshold={})", key, global, capacity, threshold);
-            return perKeyPending.get(key).peekFirst();
+        if (threshold > 0 && global < threshold) {
+            final PermitImpl first = pending.firstEntry().getValue().peekFirst();
+            log.debug("grantNextEligible[{}] → admit (burst: {}/{}, threshold={})", first.key, global, capacity, threshold);
+            return first;
         }
 
-        // tier 4: up to ceiling share
-        for (final String key : pendingKeys) {
-            final int keyPermits = config.permits(key);
-            final int keyCurrent = perKeyGranted.getOrDefault(key, 0);
+        // tier 4: up to ceiling share - the high priority queue (above its granted) takes its turn too, with no key limit
+        for (final Deque<PermitImpl> queue : pending.values()) {
+            final PermitImpl first = queue.peekFirst();
+            if (first.isHighPriority()) {
+                log.debug("grantNextEligible[high] → admit (turn, {}/{})", global, capacity);
+                return first;
+            }
+            final int keyPermits = config.permits(first.key);
+            final int keyCurrent = perKeyGranted.getOrDefault(first.key, 0);
             final boolean grant = keyCurrent < keyPermits;
             log.debug("grantNextEligible[{}] → {} (current={}, permits={}, global={}/{}, threshold={})",
-                    key, grant, keyCurrent, keyPermits, global, capacity, threshold);
+                    first.key, grant, keyCurrent, keyPermits, global, capacity, threshold);
             if (grant) {
-                return perKeyPending.get(key).peekFirst();
+                return first;
             }
-        }
-
-        // tier 5: high priority waiters above the priority granted take the idle capacity - only when no other waiter is admissible
-        if (!highPending.isEmpty()) {
-            log.debug("grantNextEligible[high] → admit (idle capacity, {}/{})", global, capacity);
-            return highPending.peekFirst();
         }
         return null;
     }
@@ -401,6 +397,16 @@ public class Throttle {
         }
     }
 
+    /**
+     * Identifies a pending queue: a key's own queue, or the single {@link #HIGH_PRIORITY} queue shared by the high priority work of
+     * all keys. The flag keeps the two apart, since {@code null} is a valid key too - the {@code null} of {@link #HIGH_PRIORITY} means
+     * "no single key", not the {@code null} key.
+     */
+    private record QueueKey(String key, boolean highPriority) {
+
+        private static final QueueKey HIGH_PRIORITY = new QueueKey(null, true);
+    }
+
     private final class PermitImpl implements Permit {
 
         private enum State {
@@ -409,6 +415,7 @@ public class Throttle {
 
         private final String key;
         private final boolean highPriority;
+        private final QueueKey queueKey; // the queue it waits in - the high priority one is shared, this.key stays the charged key
         private final PermitImpl root;
         private final Condition condition;
         private State state = State.WAITING;
@@ -416,6 +423,7 @@ public class Throttle {
         private PermitImpl(final String key, final boolean highPriority, final PermitImpl parent, final Condition condition) {
             this.key = key;
             this.highPriority = highPriority;
+            this.queueKey = highPriority ? QueueKey.HIGH_PRIORITY : new QueueKey(key, false);
             // flatten arbitrary nesting depth onto the tree root, so one unit of work is one entry in permitsByRoot
             this.root = parent == null ? this : parent.root;
             this.condition = condition;
@@ -446,7 +454,7 @@ public class Throttle {
 
         // the queue this permit waits in, null if not pending
         private Deque<PermitImpl> queue() {
-            return isHighPriority() ? highPending : perKeyPending.get(key);
+            return pending.get(queueKey);
         }
 
         @Override
@@ -460,7 +468,7 @@ public class Throttle {
                 state = State.CLOSED;
                 globalGranted--;
                 if (isHighPriority()) {
-                    highGranted--;
+                    highPriorityGranted--;
                 } else {
                     perKeyGranted.compute(key, (k, count) -> (count == null || count <= 1) ? null : count - 1);
                 }
@@ -486,11 +494,8 @@ public class Throttle {
 
         // must be called just after construction, under lock
         private void enqueue() {
-            final Deque<PermitImpl> queue = isHighPriority() ? highPending : perKeyPending.computeIfAbsent(key, k -> new ArrayDeque<>());
-            if (!isHighPriority() && queue.isEmpty()) {
-                pendingKeys.addLast(key);
-            }
-            queue.addLast(this);
+            // a new queue goes last in the service order
+            pending.computeIfAbsent(queueKey, k -> new ArrayDeque<>()).addLast(this);
             globalPending++;
             if (isChild()) {
                 pendingChildren.addLast(this);
@@ -509,22 +514,22 @@ public class Throttle {
             if (isChild()) {
                 pendingChildren.remove(this);
             }
-            if (!isHighPriority() && queue.isEmpty()) {
-                perKeyPending.remove(key);
-                pendingKeys.remove(key);
+            if (queue.isEmpty()) {
+                pending.remove(queueKey);
             }
         }
 
         // must be called under lock
         private void grant() {
             dequeue(); // remove now so it cannot be granted twice
-            // served -> behind every other waiting key
-            if (!isHighPriority() && perKeyPending.containsKey(key) && pendingKeys.remove(key)) {
-                pendingKeys.addLast(key);
+            // served -> behind every other waiting queue, if still waiting
+            final Deque<PermitImpl> queue = queue();
+            if (queue != null) {
+                pending.putLast(queueKey, queue);
             }
             globalGranted++;
             if (isHighPriority()) {
-                highGranted++;
+                highPriorityGranted++;
             } else {
                 perKeyGranted.merge(key, 1, Integer::sum);
             }

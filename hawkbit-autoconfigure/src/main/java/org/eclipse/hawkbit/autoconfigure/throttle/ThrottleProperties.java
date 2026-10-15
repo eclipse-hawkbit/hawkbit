@@ -105,10 +105,10 @@ public class ThrottleProperties {
      * without a tenant context), and the schedulers running their per tenant work with
      * {@link org.eclipse.hawkbit.throttle.Throttle#withHighPriority(java.util.function.Supplier) high priority}.
      *
-     * <p>High priority work is served ahead of the queue for these slots, beyond them it takes the idle capacity only — never a slot
-     * an admissible tenant request could take. It is not counted to, nor waits for, the tenant limit. Costs no reserved capacity —
-     * tenants use those slots freely whenever high priority work is not.
-     * {@code 0} disables the priority - high priority work is then bound by the tenant limit as any other. Must resolve to fewer
+     * <p>High priority work is served ahead of the queue for these slots, beyond them it waits for its turn — as one more key in the
+     * round-robin. It is not counted to, nor waits for, the tenant limit, and it waits by the global {@link #timeout}, not the tenant
+     * one. Costs no reserved capacity — tenants use those slots freely whenever high priority work is not.
+     * {@code 0} disables serving ahead - high priority work then only takes its turn, still not bound by the tenant limit. Must resolve to fewer
      * slots than {@link #capacity}, or tenant work may never be reached; the policy warns if it does not.
      *
      * <p>Default: {@code 4}, high priority work is served ahead of the queue for 4 slots
