@@ -10,7 +10,6 @@
 package org.eclipse.hawkbit.throttle;
 
 import java.time.Duration;
-import java.util.EnumMap;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -26,10 +25,7 @@ import lombok.experimental.Accessors;
 @Accessors(fluent = true)
 public class Config {
 
-    // free permits are granted by priority, up to the granted. after granted the priority is not considered
-    @Builder.Default
-    @Getter(AccessLevel.PRIVATE)
-    EnumMap<Priority, Integer> priorityToGranted = new EnumMap<>(Priority.class);
+    int highPriorityGranted; // free permits are granted to high priority first, up to that number. 0 disables the high priority
 
     int permits; // capacity, max permits to be granted
     @Builder.Default
@@ -45,14 +41,10 @@ public class Config {
     @Getter(AccessLevel.PRIVATE)
     Function<String, Policy> keyPolicyFn = key -> null; // function to get the policy for a given key
 
-    public int priorityGranted(final Priority priority) {
-        return Optional.ofNullable(priorityToGranted.get(priority)).orElse(0);
-    }
-
     //--- per key ---
 
-    public Priority priority(final String key) {
-        return Optional.ofNullable(keyPolicyFn.apply(key)).map(Policy::priority).orElse(Priority.NORMAL);
+    public boolean highPriority(final String key) {
+        return Optional.ofNullable(keyPolicyFn.apply(key)).map(Policy::highPriority).orElse(false);
     }
 
     public int permits(final String key) {
@@ -81,11 +73,6 @@ public class Config {
         return Optional.ofNullable(keyPolicyFn.apply(key)).map(Policy::pendingRemoveStrategy).orElse(pendingRemoveStrategy);
     }
 
-    public enum Priority {
-        HIGH,
-        NORMAL
-    }
-
     public enum PendingRemoveStrategy {
         LIFO, // last in first out
         FIFO // fist in first out
@@ -102,7 +89,6 @@ public class Config {
         int maxPending = -1; // max pending requests for this key, -1 means no key bound (only Config#maxPending), 0 - no pending
         @Builder.Default
         PendingRemoveStrategy pendingRemoveStrategy = PendingRemoveStrategy.FIFO; // strategy to remove pending requests when maxPending is reached
-        @Builder.Default
-        Priority priority = Priority.NORMAL; // priority of the policy, default is NORMAL
+        boolean highPriority; // if the key work is high priority, e.g. the internal work
     }
 }

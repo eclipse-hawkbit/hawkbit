@@ -10,8 +10,7 @@
 package org.eclipse.hawkbit.repository.jpa.autocleanup;
 
 import static org.eclipse.hawkbit.context.AccessContext.asSystem;
-import static org.eclipse.hawkbit.throttle.Config.Priority.HIGH;
-import static org.eclipse.hawkbit.throttle.Throttle.withPriority;
+import static org.eclipse.hawkbit.throttle.Throttle.withHighPriority;
 
 import java.util.List;
 import java.util.concurrent.locks.Lock;
@@ -58,7 +57,7 @@ public class AutoCleanupScheduler {
         log.debug("Auto cleanup scheduler has been triggered.");
         // run this code in system code privileged to have the necessary permission to query and create entities
         if (!cleanupTasks.isEmpty()) {
-            asSystem(() -> withPriority(HIGH, this::executeAutoCleanup));
+            asSystem(() -> withHighPriority(this::executeAutoCleanup));
         }
     }
 

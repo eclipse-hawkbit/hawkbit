@@ -11,8 +11,7 @@ package org.eclipse.hawkbit.repository.jpa.scheduler;
 
 import static org.eclipse.hawkbit.context.AccessContext.asSystem;
 import static org.eclipse.hawkbit.context.AccessContext.asSystemAsTenant;
-import static org.eclipse.hawkbit.throttle.Config.Priority.HIGH;
-import static org.eclipse.hawkbit.throttle.Throttle.withPriority;
+import static org.eclipse.hawkbit.throttle.Throttle.withHighPriority;
 
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -76,7 +75,7 @@ public class AutoAssignScheduler {
     private void handleAll(final String tenant) {
         log.trace("Handling auto-assignments for tenant: {}", tenant);
         try {
-            withPriority(HIGH, autoAssignHandler::handleAll);
+            withHighPriority(autoAssignHandler::handleAll);
         } catch (final Exception e) {
             log.error("Error auto-assignments rollout for tenant {}", tenant, e);
         }

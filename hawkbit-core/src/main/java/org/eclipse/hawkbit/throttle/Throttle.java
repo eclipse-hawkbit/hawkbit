@@ -19,13 +19,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.throttle.Config.Priority;
 import org.eclipse.hawkbit.throttle.ThrottledException.Reason;
 
 /**
@@ -45,7 +43,7 @@ import org.eclipse.hawkbit.throttle.ThrottledException.Reason;
  * <ol>
  *   <li><b>Children</b> — bypass fair share entirely. A caller blocked while holding part of the resource is what deadlocks it, so unblocking
  *       work already in flight always outranks admitting new work.</li>
- *   <li>High priority waiters (of any key) while below the high priority ({@link Config#priorityGranted(Priority)} granted — high
+ *   <li>High priority waiters (of any key) while below the {@link Config#highPriorityGranted() high priority granted} — high
  *       priority work never queues with the other work of its key, so no key backlog can block it. Costs no reserved capacity, since
  *       the others use those slots freely whenever high priority work is not.</li>
  *   <li>Below {@link Config#keyPolicyThreshold()} — anyone may burst.</li>
@@ -77,8 +75,8 @@ import org.eclipse.hawkbit.throttle.ThrottledException.Reason;
 @Slf4j
 public class Throttle {
 
-    // priority declared for the current thread - read on acquire, i.e. in the caller thread
-    private static final ThreadLocal<Priority> PRIORITY = new ThreadLocal<>();
+    // high priority declared for the current thread - read on acquire, i.e. in the caller thread
+    private static final ThreadLocal<Boolean> HIGH_PRIORITY = new ThreadLocal<>();
 
     private final Config config;
 
@@ -111,46 +109,48 @@ public class Throttle {
     }
 
     /**
-     * Runs a given {@link Runnable} with the given priority. See {@link #withPriority(Priority, Supplier)}.
+     * Runs a given {@link Runnable} with high priority. See {@link #withHighPriority(Supplier)}.
      *
-     * @param priority the priority to acquire the permits with
-     * @param runnable the runnable to run with the priority
+     * @param runnable the runnable to run with high priority
      */
-    public static void withPriority(final Priority priority, final Runnable runnable) {
-        withPriority(priority, () -> {
+    public static void withHighPriority(final Runnable runnable) {
+        withHighPriority(() -> {
             runnable.run();
             return null;
         });
     }
 
     /**
-     * Runs a given {@link Supplier} with the given priority. Root permits acquired (by the current thread) within the supplier with
-     * {@link Priority#HIGH} are charged to the requested key but are not counted to its limit, and are served ahead of the other waiters
-     * up to the {@link Config#priorityGranted(Priority) high priority granted}, above it on the idle capacity only - for work the server
-     * itself initiated (e.g. schedulers working for a tenant), never for client requests. Other priorities have no effect. A permit
-     * joining an already held one inherits the priority of its root.
+     * Runs a given {@link Supplier} with high priority. Root permits acquired (by the current thread) within the supplier are charged to
+     * the requested key but are not counted to its limit, and are served ahead of the other waiters up to the
+     * {@link Config#highPriorityGranted() high priority granted}, above it on the idle capacity only - for work the server itself
+     * initiated (e.g. schedulers working for a tenant), never for client requests. A permit joining an already held one inherits the
+     * priority of its root.
      * <p>The priority is thread bound - it applies to all {@link Throttle} instances and it is not propagated to other threads.
-     * Could be nested; the previous priority is restored after the call.
+     * Could be nested; the previous state is restored after the call.
      *
-     * @param priority the priority to acquire the permits with
-     * @param supplier the supplier to call with the priority
+     * @param supplier the supplier to call with high priority
      * @return the return value of the {@link Supplier#get()} method.
      */
-    public static <T> T withPriority(final Priority priority, final Supplier<T> supplier) {
-        final Priority current = PRIORITY.get();
+    public static <T> T withHighPriority(final Supplier<T> supplier) {
+        final Boolean current = HIGH_PRIORITY.get();
         try {
-            setPriority(priority);
+            HIGH_PRIORITY.set(Boolean.TRUE);
             return supplier.get();
         } finally {
-            setPriority(current);
+            if (current == null) {
+                HIGH_PRIORITY.remove();
+            } else {
+                HIGH_PRIORITY.set(current);
+            }
         }
     }
 
     /**
-     * @return the priority set by {@link #withPriority(Priority, Supplier)} for the current running code, empty if not set
+     * @return {@code true} if the current thread runs within {@link #withHighPriority(Supplier)}
      */
-    public static Optional<Priority> priority() {
-        return Optional.ofNullable(PRIORITY.get());
+    public static boolean isHighPriorityThread() {
+        return Boolean.TRUE.equals(HIGH_PRIORITY.get());
     }
 
     /**
@@ -195,9 +195,12 @@ public class Throttle {
                 throw new IllegalStateException("cannot acquire from a stale permit (key '%s')".formatted(key));
             }
 
-            // a child inherits it from its root, so a unit of work is either high priority or not
-            final Priority priority = parent == null ? priorityOf(key) : parent.root.priority;
-            final PermitImpl permit = new PermitImpl(key, priority, parent, lock.newCondition());
+            // a child inherits it from its root, so a unit of work is either high priority or not. Served apart from the key work only
+            // if high priority is granted (configured), otherwise the priority is ignored
+            final boolean highPriority = parent == null
+                    ? config.highPriorityGranted() > 0 && (isHighPriorityThread() || config.highPriority(key))
+                    : parent.root.isHighPriority();
+            final PermitImpl permit = new PermitImpl(key, highPriority, parent, lock.newCondition());
             // handle blocked - high priority is not bound by the key
             if (parent == null && !permit.isHighPriority() && config.permits(key) == 0) {
                 throw new ThrottledException(Reason.BLOCKED, "'%s' is throttled (blocked)".formatted(key));
@@ -225,10 +228,9 @@ public class Throttle {
 
                     // handle max pending, per key first - an eviction there also relieves the global bound,
                     // since the evicted permit is counted by both
-                    final Deque<PermitImpl> keyPending = permit.isHighPriority() ? highPending : perKeyPending.get(key);
                     final int keyMaxPending = config.maxPending(key);
-                    if (!permit.isHighPriority() && keyMaxPending >= 0 && keyPending.size() > keyMaxPending
-                            && evictOrReject(keyPending, permit, config.pendingRemoveStrategy(key))) {
+                    if (!permit.isHighPriority() && keyMaxPending >= 0 && permit.queue().size() > keyMaxPending
+                            && evictOrReject(permit.queue(), permit, config.pendingRemoveStrategy(key))) {
                         log.trace("{} is throttled: key pending queue full, this", key);
                         // throw, finally deque will remove it
                         throw new ThrottledException(Reason.KEY_QUEUE_FULL, "'%s' is throttled (key pending queue full, this)".formatted(key));
@@ -236,7 +238,7 @@ public class Throttle {
 
                     final int maxPending = config.maxPending();
                     if (maxPending >= 0 && globalPending > maxPending
-                            && evictOrReject(longestPending(keyPending), permit, config.pendingRemoveStrategy())) {
+                            && evictOrReject(longestPending(permit.queue()), permit, config.pendingRemoveStrategy())) {
                         log.trace("{} is throttled: pending queue full, this", key);
                         // throw, finally deque will remove it
                         throw new ThrottledException(Reason.QUEUE_FULL, "'%s' is throttled (pending queue full, this)".formatted(key));
@@ -346,7 +348,7 @@ public class Throttle {
      */
     private PermitImpl selectPending(final int global, final int capacity) {
         // tier 2: high priority waiters (of any key) while below the priority granted
-        final int granted = config.priorityGranted(Priority.HIGH);
+        final int granted = config.highPriorityGranted();
         if (highGranted < granted && !highPending.isEmpty()) {
             log.debug("grantNextEligible[high] → admit (priority granted {}, {}/{})", granted, global, capacity);
             return highPending.peekFirst();
@@ -381,19 +383,6 @@ public class Throttle {
         return null;
     }
 
-    // read in the caller thread. The thread priority (e.g. schedulers working for a tenant), else the key policy one (e.g. the null key)
-    private Priority priorityOf(final String key) {
-        return PRIORITY.get() == Priority.HIGH ? Priority.HIGH : config.priority(key);
-    }
-
-    private static void setPriority(final Priority priority) {
-        if (priority == null) {
-            PRIORITY.remove();
-        } else {
-            PRIORITY.set(priority);
-        }
-    }
-
     /**
      * A consistent snapshot of resource usage, taken under the engine's lock.
      *
@@ -419,14 +408,14 @@ public class Throttle {
         }
 
         private final String key;
-        private final Priority priority;
+        private final boolean highPriority;
         private final PermitImpl root;
         private final Condition condition;
         private State state = State.WAITING;
 
-        private PermitImpl(final String key, final Priority priority, final PermitImpl parent, final Condition condition) {
+        private PermitImpl(final String key, final boolean highPriority, final PermitImpl parent, final Condition condition) {
             this.key = key;
-            this.priority = priority;
+            this.highPriority = highPriority;
             // flatten arbitrary nesting depth onto the tree root, so one unit of work is one entry in permitsByRoot
             this.root = parent == null ? this : parent.root;
             this.condition = condition;
@@ -451,9 +440,13 @@ public class Throttle {
             return root != this;
         }
 
-        // served apart from the key work only if high priority is granted, otherwise the priority is ignored
         private boolean isHighPriority() {
-            return priority == Priority.HIGH && config.priorityGranted(Priority.HIGH) > 0;
+            return highPriority;
+        }
+
+        // the queue this permit waits in, null if not pending
+        private Deque<PermitImpl> queue() {
+            return isHighPriority() ? highPending : perKeyPending.get(key);
         }
 
         @Override
@@ -507,7 +500,7 @@ public class Throttle {
         // must be called under lock; idempotent - the removal from the key queue is what decides whether this
         // permit was still pending, so every other bit of wait state is unwound exactly once with it
         private void dequeue() {
-            final Deque<PermitImpl> queue = isHighPriority() ? highPending : perKeyPending.get(key);
+            final Deque<PermitImpl> queue = queue();
             if (queue == null || !queue.remove(this)) {
                 return; // already dequeued by grant() or interrupt()
             }

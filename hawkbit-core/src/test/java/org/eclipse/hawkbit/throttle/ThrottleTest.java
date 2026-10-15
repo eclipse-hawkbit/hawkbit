@@ -15,7 +15,6 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -25,7 +24,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 import org.eclipse.hawkbit.throttle.Config.Policy;
-import org.eclipse.hawkbit.throttle.Config.Priority;
 import org.junit.jupiter.api.Test;
 
 class ThrottleTest {
@@ -456,13 +454,13 @@ class ThrottleTest {
         }
 
         private Config toConfig(final int capacity) {
-            // null key <=> internal, non-tenant work - the only key granted the priority floor
-            final Policy systemPolicy = Policy.builder().permits(capacity).timeout(timeout).priority(Priority.HIGH).build();
+            // null key <=> internal, non-tenant work - high priority by its policy, the others only by Throttle#withHighPriority
+            final Policy systemPolicy = Policy.builder().permits(capacity).timeout(timeout).highPriority(true).build();
             return Config.builder()
                     .permits(capacity)
                     .timeout(timeout)
                     .keyPolicyThreshold(Math.min(threshold, capacity))
-                    .priorityToGranted(new EnumMap<>(Map.of(Priority.HIGH, Math.clamp(systemFloor, 0, capacity))))
+                    .highPriorityGranted(Math.clamp(systemFloor, 0, capacity))
                     .keyPolicyFn(key -> key == null
                             ? systemPolicy
                             : Policy.builder().permits(tenants.getOrDefault(key, limit)).timeout(timeout).build())
