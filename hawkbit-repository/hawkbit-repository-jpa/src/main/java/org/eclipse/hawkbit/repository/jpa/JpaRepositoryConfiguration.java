@@ -358,7 +358,7 @@ public class JpaRepositoryConfiguration {
     @ConditionalOnMissingBean
     // don't active the auto assign scheduler in test, otherwise it is hard to test
     @Profile("!test")
-    @ConditionalOnProperty(prefix = "hawkbit.autoassign.scheduler", name = "enabled", matchIfMissing = true)
+    @ConditionalOnProperty(prefix = "hawkbit.autoassign.scheduler", name = "enabled")
     AutoAssignScheduler autoAssignScheduler(
             final SystemManagement systemManagement, final AutoAssignHandler autoAssignHandler,
             @Value("${hawkbit.autoassign.executor.thread-pool.size:1}") final int threadPoolSize,
@@ -382,7 +382,7 @@ public class JpaRepositoryConfiguration {
     @Bean
     @ConditionalOnMissingBean
     @Profile("!test")
-    @ConditionalOnProperty(prefix = "hawkbit.autocleanup.scheduler", name = "enabled", matchIfMissing = true)
+    @ConditionalOnProperty(prefix = "hawkbit.autocleanup.scheduler", name = "enabled")
     AutoCleanupScheduler autoCleanupScheduler(
             final List<AutoCleanupScheduler.CleanupTask> cleanupTasks,
             final SystemManagement systemManagement, final LockRegistry<? extends Lock> lockRegistry) {
@@ -394,8 +394,8 @@ public class JpaRepositoryConfiguration {
      * <p/>
      * Properties:
      * <ul>
-     *     <li>{@code hawkbit.tenant-hard-delete.scheduler.enabled} - enables the scheduler, default {@code true}</li>
-     *     <li>{@code hawkbit.tenant-hard-delete.scheduler.fixedDelay} - delay between the runs in millis, default
+     *     <li>{@code hawkbit.tenant.hard-delete.scheduler.enabled} - enables the scheduler, default {@code false}</li>
+     *     <li>{@code hawkbit.tenant.hard-delete.scheduler.fixedDelay} - delay between the runs in millis, default
      *     {@code 3600000} (1h)</li>
      * </ul>
      * Note: does not activate in test profile, otherwise it is hard to test the tenant soft delete functionality.
@@ -403,7 +403,7 @@ public class JpaRepositoryConfiguration {
     @Bean
     @ConditionalOnMissingBean
     @Profile("!test")
-    @ConditionalOnProperty(prefix = "hawkbit.tenant-hard-delete.scheduler", name = "enabled", matchIfMissing = true)
+    @ConditionalOnProperty(prefix = "hawkbit.tenant.hard-delete.scheduler", name = "enabled")
     TenantHardDeleteScheduler tenantHardDeleteScheduler(
             final SystemManagement systemManagement, final TenantMetaDataRepository tenantMetaDataRepository,
             final LockRegistry<? extends Lock> lockRegistry) {
@@ -418,7 +418,7 @@ public class JpaRepositoryConfiguration {
     @Bean
     @ConditionalOnMissingBean
     @Profile("!test")
-    @ConditionalOnProperty(prefix = "hawkbit.rollout.scheduler", name = "enabled", matchIfMissing = true)
+    @ConditionalOnProperty(prefix = "hawkbit.rollout.scheduler", name = "enabled")
     RolloutScheduler rolloutScheduler(
             final SystemManagement systemManagement, final RolloutHandler rolloutHandler,
             @Value("${hawkbit.rollout.executor.thread-pool.size:1}") final int threadPoolSize, final Optional<MeterRegistry> meterRegistry) {

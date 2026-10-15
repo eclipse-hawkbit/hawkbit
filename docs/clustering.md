@@ -94,8 +94,15 @@ To enable the TTL just set the property `hawkbit.cache.global.ttl` (value in dDh
 
 ### Schedulers
 
-Every node has multiple schedulers which run after a defined period of time.  
-All schedulers always run on every node.
+hawkBit has multiple schedulers which run after a defined period of time.  
+They are disabled by default and enabled only on the nodes which explicitly set the properties (as the mgmt server and
+the monolith do in their default configuration):
+- `hawkbit.autoassign.scheduler.enabled`
+- `hawkbit.rollout.scheduler.enabled`
+- `hawkbit.autocleanup.scheduler.enabled`
+- `hawkbit.tenant.hard-delete.scheduler.enabled`
+
+All enabled schedulers run on every node they are enabled on.
 
 This has to be kept in mind e.g. if the scheduler executes critical code which has to be executed only once.
 
