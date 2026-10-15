@@ -22,13 +22,13 @@ import org.springframework.scheduling.annotation.Scheduled;
 
 /**
  * Scheduler that hard deletes the soft deleted tenants whose hard delete time passed. The delay between the runs is configured
- * via {@code hawkbit.tenant-hard-delete.scheduler.fixedDelay} (millis, default 1h).
+ * via {@code hawkbit.tenant.hard-delete.scheduler.fixedDelay} (millis, default 1h).
  */
 @Slf4j
 public class TenantHardDeleteScheduler {
 
-    private static final String LOCK_PREFIX = "tenant-hard-delete.";
-    private static final String PROP_SCHEDULER_DELAY_PLACEHOLDER = "${hawkbit.tenant-hard-delete.scheduler.fixedDelay:3600000}";
+    private static final String LOCK_PREFIX = "tenant.hard-delete.";
+    private static final String PROP_SCHEDULER_DELAY_PLACEHOLDER = "${hawkbit.tenant.hard-delete.scheduler.fixedDelay:3600000}";
 
     private final SystemManagement systemManagement;
     private final TenantMetaDataRepository tenantMetaDataRepository;

@@ -37,9 +37,6 @@ available. The _hawkbit Update Server_ uses RabbitMQ binder.
 You can run multiple instances of any micro-service, including those consuming events.
 However, the `hawkbit-mgmt-server` should typically be run as a single instance, as it schedules time-sensitive jobs
 such as auto-assignment checking and rollout execution.
-If multiple management server instances are needed, you must extend hawkBit to ensure that scheduled tasks do not run
-concurrently.
-Alternatively, configure all but one instance to disable scheduler execution.
 
 ## Event Channel Types in Spring Cloud Stream
 
