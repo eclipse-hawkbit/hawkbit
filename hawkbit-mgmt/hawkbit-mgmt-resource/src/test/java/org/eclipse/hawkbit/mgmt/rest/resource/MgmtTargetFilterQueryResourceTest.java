@@ -389,7 +389,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
     }
 
     @Test
-    public void checkIfFullRepresentationInTargetFilterReturnsDistributionSetHrefWithFilter() throws Exception {
+    void checkIfFullRepresentationInTargetFilterReturnsDistributionSetHrefWithFilter() throws Exception {
         final String testQuery = "name==test";
 
         final DistributionSet set = testdataFactory.createDistributionSet();
@@ -551,7 +551,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
      * if the (existing) query addresses too many targets.
      */
     @Test
-    public void setAutoAssignDistributionSetOnFilterQueryThatExceedsQuota() throws Exception {
+    void setAutoAssignDistributionSetOnFilterQueryThatExceedsQuota() throws Exception {
 
         // create targets
         final int maxTargets = quotaManagement.getMaxTargetsPerAutoAssignment();
@@ -574,7 +574,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
      */
     @ParameterizedTest
     @MethodSource("confirmationOptions")
-    public void setAutoAssignDistributionSetToTargetFilterQuery(final boolean confirmationFlowActive, final Boolean confirmationRequired)
+    void setAutoAssignDistributionSetToTargetFilterQuery(final boolean confirmationFlowActive, final Boolean confirmationRequired)
             throws Exception {
         if (confirmationFlowActive) {
             enableConfirmationFlow();

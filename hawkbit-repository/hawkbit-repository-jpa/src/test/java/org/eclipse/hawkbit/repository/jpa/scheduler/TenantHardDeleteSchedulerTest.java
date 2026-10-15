@@ -128,6 +128,6 @@ class TenantHardDeleteSchedulerTest extends AbstractJpaIntegrationTest {
     }
 
     private JpaTenantMetaData findTenantMetaData(final String tenant) {
-        return (JpaTenantMetaData) tenantMetaDataRepository.findByTenantIgnoreCase(tenant);
+        return (JpaTenantMetaData) tenantMetaDataRepository.findByTenant(tenant);
     }
 }

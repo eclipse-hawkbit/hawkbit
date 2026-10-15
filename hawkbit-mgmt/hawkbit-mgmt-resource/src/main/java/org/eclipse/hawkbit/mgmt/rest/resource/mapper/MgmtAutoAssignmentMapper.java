@@ -28,7 +28,6 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtAutoAssignmentRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetRestApi;
 import org.eclipse.hawkbit.repository.AutoAssignmentManagement.Create;
 import org.eclipse.hawkbit.repository.AutoAssignmentManagement.Update;
-import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.eclipse.hawkbit.repository.model.AutoAssignment;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 

@@ -119,14 +119,14 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
             throw new AmqpRejectAndDontRequeueException("Invalid message! tenant and type header are mandatory!");
         }
         // checked before any message type handling - so PING is rejected too
-        if (asSystemAsTenant(tenant, () -> { // return if soft deleted
+        if (Boolean.TRUE.equals(asSystemAsTenant(tenant, () -> { // return if soft deleted
             if (SystemManagementHolder.getInstance().isTenantSoftDeleted()) {
                 log.warn("Soft deleted tenant access attempted via DMF");
-                return true;
+                return Boolean.TRUE;
             } else {
-                return false;
+                return Boolean.FALSE;
             }
-        })) {
+        }))) {
             throw new AmqpRejectAndDontRequeueException("Tenant " + tenant + " is soft deleted!");
         }
 

@@ -21,6 +21,7 @@ import org.eclipse.hawkbit.repository.SystemManagement;
 @SuppressWarnings("java:S6548") // singleton holder ensures static access to spring resources in some places
 public final class SystemManagementHolder {
 
+    @SuppressWarnings("java:S3077") // we want to have just thread-safe ref
     private static volatile SystemManagement instance;
 
     // to be initialized by the SystemManagement creator with the fully initialized bean (proxy) in order to honor

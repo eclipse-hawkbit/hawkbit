@@ -27,7 +27,8 @@ import org.eclipse.hawkbit.repository.model.Target;
 @NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 public final class TenantConfigHelper {
 
-    private static TenantConfigurationManagement tenantConfigurationManagement;
+    @SuppressWarnings("java:S3077") // we want to have just thread-safe ref
+    private static volatile TenantConfigurationManagement tenantConfigurationManagement;
 
     // method to be initialized by the TenantConfigurationManagement or TenantConfigurationManagement creator
     // it will be accessed directly and used so shall be fully initialized instance, i.e. a bean in order to onore things

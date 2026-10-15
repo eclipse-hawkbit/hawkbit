@@ -39,6 +39,11 @@ import org.springframework.core.env.Environment;
  *     <li>If a tenant is resolved by the {@link AccessContext}, a dedicated cache manager for that tenant is used/created.</li>
  *     <li>If no tenant is resolved, a global cache manager is used.</li>
  * </ul>
+ * Caches are configured by name (tenant and cache specific config overrides the cache specific one):
+ * <ul>
+ *     <li>{@code hawkbit.cache.[<tenant>.]<name>.spec} - caffeine spec, default {@code hawkbit.cache.spec}</li>
+ *     <li>{@code hawkbit.cache.[<tenant>.]<name>.cache-null} - if null values are cached, default {@code false}</li>
+ * </ul>
  */
 @Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -47,6 +52,7 @@ public class TenantAwareCacheManager implements CacheManager {
 
     private static final String CONFIG_PREFIX = "hawkbit.cache.";
     private static final String CONFIG_SPEC = "spec";
+    private static final String CONFIG_CACHE_NULL = "cache-null";
 
     private static final TenantAwareCacheManager SINGLETON = new TenantAwareCacheManager();
     private CacheManager globalCacheManager;
@@ -174,32 +180,43 @@ public class TenantAwareCacheManager implements CacheManager {
         @Override
         public Cache getCache(@NonNull final String name) {
             return caches.computeIfAbsent(name, n -> {
-                // try tenant and cache specific config first
-                String spec = env.getProperty(CONFIG_PREFIX + (tenant == null ? "" : tenant + ".") + name + "." + CONFIG_SPEC);
-                if (spec == null) {
-                    // try cache specific config next
-                    spec = env.getProperty(CONFIG_PREFIX + name + "." + CONFIG_SPEC);
-                    if (spec == null) {
-                        spec = defaultSpec;
-                    }
-                }
+                final String spec = Optional.ofNullable(getProperty(name, CONFIG_SPEC)).orElse(defaultSpec);
                 // it seems that setting maximumSize=0 doesn't filly disables the Caffeine cache, so we explicitly check for Nop cache
                 if (isNop(spec)) {
                     log.info("Using NOP cache for tenant '{}' and cache '{}'", tenant, name);
                     return new Nop(name);
                 }
                 try {
-                    return new CaffeineCache(n, Caffeine.from(spec).build(), false) {
+                    if (Boolean.parseBoolean(getProperty(name, CONFIG_CACHE_NULL))) {
+                        // null values are cached (as NullValue) - e.g. "not found" / "not set" results are cached too
+                        return new CaffeineCache(n, Caffeine.from(spec).build(), true);
+                    } else {
+                        return new CaffeineCache(n, Caffeine.from(spec).build(), false) {
 
-                        @Nullable
-                        @Override
-                        @SuppressWarnings("java:S2638") // used internally in hawkbit and want to return null instead of error
-                        protected Object toStoreValue(@Nullable Object userValue) {
-                            // we want to return pure null to caffeine when null, in order to do not cache
-                            // we want to allow null results but not to be cached!
-                            return userValue;
-                        }
-                    };
+                            @Override
+                            public void put(@NonNull final Object key, @Nullable final Object value) {
+                                // null results are not cached - also for @Cacheable (puts the result), caffeine doesn't accept nulls
+                                if (value != null) {
+                                    super.put(key, value);
+                                }
+                            }
+
+                            @Nullable
+                            @Override
+                            public ValueWrapper putIfAbsent(@NonNull final Object key, @Nullable final Object value) {
+                                return value == null ? get(key) : super.putIfAbsent(key, value);
+                            }
+
+                            @Nullable
+                            @Override
+                            @SuppressWarnings("java:S2638") // used internally in hawkbit and want to return null instead of error
+                            protected Object toStoreValue(@Nullable Object userValue) {
+                                // we want to return pure null to caffeine when null, in order to do not cache
+                                // we want to allow null results but not to be cached!
+                                return userValue;
+                            }
+                        };
+                    }
                 } catch (final IllegalArgumentException e) {
                     log.error("Invalid cache spec: {}", spec, e);
                     throw new IllegalStateException("Invalid cache spec: " + spec, e);
@@ -211,6 +228,13 @@ public class TenantAwareCacheManager implements CacheManager {
         @Override
         public Collection<String> getCacheNames() {
             return caches.keySet();
+        }
+
+        // tenant and cache specific config first, then cache specific config
+        @Nullable
+        private String getProperty(final String name, final String key) {
+            final String value = tenant == null ? null : env.getProperty(CONFIG_PREFIX + tenant + "." + name + "." + key);
+            return value == null ? env.getProperty(CONFIG_PREFIX + name + "." + key) : value;
         }
     }
 

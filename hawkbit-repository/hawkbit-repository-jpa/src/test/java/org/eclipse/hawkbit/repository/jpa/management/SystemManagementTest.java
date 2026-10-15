@@ -63,7 +63,6 @@ class SystemManagementTest extends AbstractJpaIntegrationTest {
     @Autowired
     private RepositoryProperties repositoryProperties;
 
-
     /**
      * Ensures that findTenants returns all tenants and not only restricted to the tenant which currently is logged in
      */
@@ -223,8 +222,10 @@ class SystemManagementTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void softDeleteOfUnknownTenantFails() {
+        final Instant softDeleteAt = Instant.now().minusSeconds(1);
+        final Instant hardDeleteAt = Instant.now().plus(2, HOURS);
         assertThatExceptionOfType(EntityNotFoundException.class)
-                .isThrownBy(() -> systemManagement.softDeleteTenant("GHOST", Instant.now().minusSeconds(1), Instant.now().plus(2, HOURS)));
+                .isThrownBy(() -> systemManagement.softDeleteTenant("GHOST", softDeleteAt, hardDeleteAt));
     }
 
     /**
@@ -259,9 +260,11 @@ class SystemManagementTest extends AbstractJpaIntegrationTest {
         systemManagement.softDeleteTenant(tenant, Instant.now().minusSeconds(1), Instant.now().plus(2, HOURS));
         final JpaTenantMetaData before = findTenantMetaData(tenant);
 
+        final Instant softDeleteAt = Instant.now().plus(1, HOURS);
+        final Instant hardDeleteAt = Instant.now().plus(2, HOURS);
         SecurityContextSwitch.runAs(withUser("repeater", SpRole.SYSTEM_ROLE), () -> {
-            assertThatExceptionOfType(IllegalStateException.class).isThrownBy(
-                    () -> systemManagement.softDeleteTenant(tenant, Instant.now().plus(1, HOURS), Instant.now().plus(2, HOURS)));
+            assertThatExceptionOfType(IllegalStateException.class)
+                    .isThrownBy(() -> systemManagement.softDeleteTenant(tenant, softDeleteAt, hardDeleteAt));
             assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> systemManagement.softDeleteTenant(tenant));
         });
 
@@ -482,7 +485,7 @@ class SystemManagementTest extends AbstractJpaIntegrationTest {
     }
 
     private JpaTenantMetaData findTenantMetaData(final String tenant) {
-        return (JpaTenantMetaData) tenantMetaDataRepository.findByTenantIgnoreCase(tenant);
+        return (JpaTenantMetaData) tenantMetaDataRepository.findByTenant(tenant);
     }
 
     private List<String> listTenants() {
