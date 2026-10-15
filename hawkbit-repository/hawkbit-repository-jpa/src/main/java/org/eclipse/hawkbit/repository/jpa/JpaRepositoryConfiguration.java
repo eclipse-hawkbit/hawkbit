@@ -102,6 +102,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration;
 import org.springframework.boot.persistence.autoconfigure.EntityScan;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -130,6 +131,7 @@ import org.springframework.validation.beanvalidation.MethodValidationPostProcess
  */
 @EnableJpaRepositories(value = "org.eclipse.hawkbit.repository.jpa.repository", repositoryFactoryBeanClass = HawkbitBaseRepositoryFactoryBean.class)
 @EnableTransactionManagement
+@EnableCaching // enables the @Cacheable / @CacheEvict annotations (served by the TenantAwareCacheManager)
 @EnableJpaAuditing
 @EnableAspectJAutoProxy
 @Configuration

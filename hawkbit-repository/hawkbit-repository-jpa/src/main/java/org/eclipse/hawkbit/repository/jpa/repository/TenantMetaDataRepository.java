@@ -13,6 +13,7 @@ import java.util.List;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaTenantMetaData;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -29,17 +30,19 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public interface TenantMetaDataRepository extends PagingAndSortingRepository<JpaTenantMetaData, Long>, CrudRepository<JpaTenantMetaData, Long> {
 
+    String CACHE_TENANT_SOFT_DELETED = "tenantSoftDeleted";
+
     // The tenant identity is the trimmed upper case name (as the runtime tenant and JpaTenantMetaData#getTenant) - legacy tenants
     // could be stored in another case / with surrounding spaces, so all lookups compare trimmed upper case values.
 
     // find without details
     @Query("SELECT t FROM JpaTenantMetaData t WHERE UPPER(TRIM(t.tenant)) = UPPER(TRIM(:tenant))")
-    TenantMetaData findByTenantIgnoreCase(@Param("tenant") String tenant);
+    TenantMetaData findByTenant(@Param("tenant") String tenant);
 
     // find with details
     @EntityGraph(value = "TenantMetaData.withDetails", type = EntityGraph.EntityGraphType.LOAD)
     @Query("SELECT t FROM JpaTenantMetaData t WHERE UPPER(TRIM(t.tenant)) = UPPER(TRIM(:tenant))")
-    TenantMetaData findWitDetailsByTenantIgnoreCase(@Param("tenant") String tenant);
+    TenantMetaData findWitDetailsByTenant(@Param("tenant") String tenant);
 
     // all tenants, including the soft deleted ones
     @Query("SELECT UPPER(TRIM(t.tenant)) FROM JpaTenantMetaData t")
@@ -49,17 +52,23 @@ public interface TenantMetaDataRepository extends PagingAndSortingRepository<Jpa
     @Query("SELECT UPPER(TRIM(t.tenant)) FROM JpaTenantMetaData t WHERE t.deletedAt IS NULL OR t.deletedAt > :now")
     Page<String> findActiveTenants(@Param("now") long now, Pageable pageable);
 
-    // soft deleted tenants due for hard delete at the given time - only soft deleted tenants have a hard delete time and it is
-    // never before the soft delete time (enforced on soft delete), so a tenant with a pending soft delete is never returned
-    @Query("SELECT UPPER(TRIM(t.tenant)) FROM JpaTenantMetaData t WHERE t.hardDeleteAt <= :now")
-    List<String> findTenantsToHardDelete(@Param("now") long now);
-
     // the tenant as stored (JpaTenantMetaData#getTenant returns it normalized), null if there is no such tenant
     @Query("SELECT t.tenant FROM JpaTenantMetaData t WHERE UPPER(TRIM(t.tenant)) = UPPER(TRIM(:tenant))")
-    String findStoredTenantIgnoreCase(@Param("tenant") String tenant);
+    String findStoredTenant(@Param("tenant") String tenant);
 
     @Transactional
     @Modifying
     @Query("DELETE FROM JpaTenantMetaData t WHERE UPPER(TRIM(t.tenant)) = UPPER(TRIM(:tenant))")
-    void deleteByTenantIgnoreCase(@Param("tenant") String tenant);
+    void deleteByTenant(@Param("tenant") String tenant);
+
+    // the soft delete time of the tenant, null if not soft deleted or there is no such tenant.
+    // Null is cached too (hawkbit.cache.tenantSoftDeleted.cache-null=true).
+    @Cacheable(value = CACHE_TENANT_SOFT_DELETED, key = "#tenant")
+    @Query("SELECT t.deletedAt FROM JpaTenantMetaData t WHERE UPPER(TRIM(t.tenant)) = UPPER(TRIM(:tenant))")
+    Long getDeletedAt(@Param("tenant") String tenant);
+
+    // soft deleted tenants due for hard delete at the given time - only soft deleted tenants have a hard delete time and it is
+    // never before the soft delete time (enforced on soft delete), so a tenant with a pending soft delete is never returned
+    @Query("SELECT UPPER(TRIM(t.tenant)) FROM JpaTenantMetaData t WHERE t.hardDeleteAt <= :now")
+    List<String> findTenantsToHardDelete(@Param("now") long now);
 }

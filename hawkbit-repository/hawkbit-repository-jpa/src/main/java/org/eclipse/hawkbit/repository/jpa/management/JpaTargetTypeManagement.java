@@ -17,6 +17,9 @@ import jakarta.persistence.EntityManager;
 
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
+import org.eclipse.hawkbit.repository.event.TenantAwareEvent;
+import org.eclipse.hawkbit.repository.event.remote.TargetTypeDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetTypeUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.TargetTypeInUseException;
@@ -31,11 +34,15 @@ import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.qfields.TargetTypeFields;
+import org.eclipse.hawkbit.tenancy.TenantAwareCacheManager;
+import org.eclipse.hawkbit.tenancy.TenantAwareCacheManager.CacheEvictEvent;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.event.EventListener;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.resilience.annotation.Retryable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
@@ -81,6 +88,14 @@ public class JpaTargetTypeManagement
     @Cacheable(value = CACHE_TARGET_TYPE_NAME, key = "#key")
     public Optional<TargetType> findByKey(final String key) {
         return jpaRepository.findOne(TargetTypeSpecification.hasKey(key)).map(TargetType.class::cast);
+    }
+
+    // The update / delete remote events are delivered on all nodes, but they evict (as CacheEvictEvent) the by-id cache only.
+    // So the by-key cache is evicted here - cluster wide. All the tenant's keys are evicted since the delete event has no key.
+    @EventListener({ TargetTypeUpdatedEvent.class, TargetTypeDeletedEvent.class })
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    public void evictByKeyCache(final TenantAwareEvent event) {
+        TenantAwareCacheManager.getInstance().onCacheEvictEvent(new CacheEvictEvent.Default(event.getTenant(), CACHE_TARGET_TYPE_NAME, null));
     }
 
     @Override

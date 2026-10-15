@@ -76,7 +76,7 @@ public class TenantHardDeleteScheduler {
     }
 
     private boolean isDueForHardDelete(final String tenant) {
-        final JpaTenantMetaData metaData = (JpaTenantMetaData) tenantMetaDataRepository.findByTenantIgnoreCase(tenant);
+        final JpaTenantMetaData metaData = (JpaTenantMetaData) tenantMetaDataRepository.findByTenant(tenant);
         final long now = System.currentTimeMillis();
         return metaData != null
                 && metaData.getDeletedAt() != null && metaData.getDeletedAt() <= now
