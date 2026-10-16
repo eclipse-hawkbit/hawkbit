@@ -29,8 +29,6 @@ import org.eclipse.hawkbit.throttle.Permit;
 import org.springframework.jdbc.datasource.DelegatingDataSource;
 
 /**
- * TODO: Still in implementation. Not finished. Don't use it
- *
  * Layer-2 enforcement point: thin {@link DelegatingDataSource} that routes every connection acquisition throttling.
  * All logic (system keying, reentrancy, permit acquire/release tied to {@link Connection#close()}) lives in the gate and is unit-tested
  * in hawkbit-core; this class is only the Spring/JDBC glue.

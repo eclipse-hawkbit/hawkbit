@@ -68,12 +68,38 @@ maven.properties
 *.tmp
 spring-shell.log
 
+# Logs, JVM crash dumps, local env
+*.log
+hs_err_pid*
+.env
+.env.*
+
 # Documentation
 .gitmodules
 
-# AI
-.claude
+# --- AI agent-specific files (agent-agnostic config lives in AGENTS.md) ---
+# Un-ignore selectively with: !<path>
 CLAUDE.md
+**/CLAUDE.md
+CLAUDE.local.md
+**/CLAUDE.local.md
+.claude/*
+.mcp.json
+GEMINI.md
+**/GEMINI.md
+.gemini/*
+.cursor/*
+.cursorrules
+.cursorignore
+.windsurf/*
+.windsurfrules
+.github/copilot-instructions.md
+.github/instructions/*
+.codex/*
+.aider*
+.continue/*
+.clinerules
+.roo/*
 .superpowers
 docs/superpowers
 graphify-out

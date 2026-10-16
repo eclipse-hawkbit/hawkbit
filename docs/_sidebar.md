@@ -10,6 +10,10 @@
     - [SDK](hawkbit-sdk.md)
     - [Feign Client](feign-client.md)
     - [Clustering](clustering.md)
+    - [Database Setup](database-setup.md)
+    - [UI](ui.md)
+    - [MCP Server](mcp-server.md)
+    - [Throttling & DoS Protection](throttling.md)
 
 - Concepts
     - [Architecture](architecture.md)
@@ -24,6 +28,7 @@
     - [Management API](management-api.md)
     - [Direct Device Integration API](direct-device-integration-api.md)
     - [Device Management Federation API](device-management-federation-api.md)
+    - [Query Parameters](query-parameters.md)
 
 - [Release notes](release-notes.md)
 

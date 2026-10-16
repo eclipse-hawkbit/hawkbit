@@ -9,16 +9,15 @@ Please read this if you intend to contribute to the project.
 ### Code Style
 
 * Java files:
-    * we follow the standard eclipse IDE (built in) code formatter with the following changes:
-        * Tab policy: spaces only: 4
-    * We recommend using at least Eclipse [Mars](https://www.eclipse.org/mars/) IDE release. It seems that the Java code
-      formatter line break handling has been changed between [Luna](https://www.eclipse.org/luna/) and Mars.
+    * the formatter is [eclipse_codeformatter.xml](eclipse_codeformatter.xml) (Eclipse formatter, spaces only, 4),
+      enforced by [Spotless](https://github.com/diffplug/spotless)
+    * format your changes with `mvn spotless:apply`, verify with `mvn spotless:check`. Spotless only checks files
+      changed against `origin/master` (`ratchetFrom`)
+    * the CI `style_check` workflow runs `mvn spotless:check` on every pull request
+    * for IntelliJ IDEA import [intellij_codeformatter.xml](intellij_codeformatter.xml)
 * XML files:
     * we follow the standard eclipse IDE XML formatter with the following changes:
-        * Indent using spaces only: 3
-* SCSS files:
-    * we follow the standard [scss-lint](https://github.com/brigade/scss-lint/) rules with the following exception:
-        * disabled rules: ImportantRule, PropertySortOrder
+        * Indent using spaces only: 4
 * Sonarqube:
     * Our rule set can be found [here](https://sonarcloud.io/organizations/bosch-iot-rollouts/rules)
     * Sonarqube reports can be
@@ -42,7 +41,7 @@ So we kindly ask contributors:
 
 ### Test documentation
 
-You could document the test cases using the following format:
+Test classes are documented with a class level Javadoc in the following format:
 
 ```java
 /**
@@ -56,7 +55,7 @@ Test types are:
 * Unit Tests - for single units tests with a mocked environment
 * Component Tests - for complete components including lower layers, e.g. Spring MVC test on rest API including
   repository and database.
-* Integration Tests - including clients, e.g. Selenium UI tests with various browsers.
+* Integration Tests - including clients or the full security / server setup.
 * System Tests - on target environments, e.g. Cloud Foundry.
 
 Examples for hawkBit components:
@@ -104,6 +103,9 @@ Please make sure newly created files contain a proper license header like this:
  * SPDX-License-Identifier: EPL-2.0
  */
 ```
+
+The template is [licenses/LICENSE_HEADER_TEMPLATE.txt](licenses/LICENSE_HEADER_TEMPLATE.txt). Check headers with
+`mvn license:check -PcheckLicense` (also run by CI).
 
 ## Making your changes
 

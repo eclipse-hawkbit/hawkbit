@@ -14,7 +14,7 @@ sets, software modules etc.
 
 Note, in order to build correctly in your IDE, you have to add ./target/generated-sources/apt to your build path.
 
-#Concepts
+# Concepts
 
 ## Rollout
 
@@ -38,8 +38,8 @@ to a created or running rollout is currently not supported.
 
 ### Rollout Starting
 
-The rollout is using the same concept based on _deployment acionts_ per target. All necessary _deployment acionts_ will
-be created at starting point but not all _deployment acionts_ will be set to running. Only the _deployment acionts_ of
+The rollout is using the same concept based on _deployment actions_ per target. All necessary _deployment actions_ will
+be created at starting point but not all _deployment actions_ will be set to running. Only the _deployment actions_ of
 the first _deployment group_ is set to running, all other actions are created in _scheduled_ state.   
 If targets having not finished _deployment actions_ at rollout starting time, these action are tried to cancel (state:
 canceling). Scheduled actions from another rollout are canceled directly on server side because they were never running
@@ -68,9 +68,15 @@ whole rollout is available, a paused rollout can be resumed by a user.
 
 ### Rollout Scheduler
 
-The rollout is managed by a scheduler task which is checking for rollouts in _running_ state. This is done atomic by
-updating the row in the database, so only the rollouts are checked and processed for the current instance to avoid that
-multiple instances are processing a rollout.
+The rollout is managed by a scheduler task (`RolloutScheduler`) which periodically (`hawkbit.rollout.scheduler.fixedDelay`,
+default 2000 ms) checks, per tenant, the rollouts in an active state. The scheduler is disabled by default and is enabled by
+`hawkbit.rollout.scheduler.enabled=true` (set in the default configuration of the mgmt server and the monolith).
+
+To avoid that multiple instances process the rollouts of the same tenant at the same time, `JpaRolloutHandler` obtains a
+per-tenant lock (`<tenant>-rollout`) from the Spring Integration `LockRegistry` and skips the run if the lock is held by
+another instance. By default (`hawkbit.lock=distributed`) this is a `JdbcLockRegistry` backed by
+`DistributedLockRepository` (database lock table, TTL and renew configurable via `hawkbit.repository.cluster.lock.*`);
+with `hawkbit.lock=inMemory` an in-JVM `DefaultLockRegistry` is used (single instance only).
 
 > Due the scheduler, it might take some time until a rollouts is processed and switching is state or starting the next
 > deployment group.

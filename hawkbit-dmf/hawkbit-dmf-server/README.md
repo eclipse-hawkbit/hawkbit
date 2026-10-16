@@ -23,4 +23,4 @@ run org.eclipse.hawkbit.app.dmf.DmfStart
 
 ## Remote Events between micro-services
 
-[See more information](../../docs/content/guides/clustering.md)
+[See more information](../../docs/clustering.md)

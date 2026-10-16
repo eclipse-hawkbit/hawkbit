@@ -8,7 +8,7 @@ Server via HTTP.
 #### Build hawkbit-mgmt-resource
 
 ```
-$ cd hawkbit/hawkbit-mgmt-resource
+$ cd hawkbit-mgmt/hawkbit-mgmt-resource
 $ mvn clean install
 ```
 

@@ -23,6 +23,10 @@ different [binder implementations](https://docs.spring.io/spring-cloud-stream/do
 available. The hawkbit Update Server uses **RabbitMQ binder**.
 Every node gets its own queue to receive cluster events, the default payload is JSON.
 
+Remote events are controlled by `hawkbit.events.remote.enabled` (default `true`). The update server (monolith) disables
+them, together with RabbitMQ, in its default configuration (`hawkbit.events.remote.enabled=false` and
+`RabbitAutoConfiguration` excluded) - enable both when running it in a cluster (see [Base Setup](base-setup.md)).
+
 
 <p>
   <img src="images/eventing-within-cluster.png" alt="Clustering Diagram" width="1100"/>
@@ -88,7 +92,12 @@ So there is no globally shared/synchronized cache instance within the cluster.
 
 In order to keep nodes in sync, a **TTL (time to live)** can be set for all caches to ensure that after some time the
 cache is refreshed from the database.  
-To enable the TTL just set the property `hawkbit.cache.global.ttl` (value in dDhHmMsS format).
+The TTL is set by the property `hawkbit.cache.ttl` (default `10s`, the monolith sets `0s` - no expiration, since it is
+expected to run as a single instance).  
+Caches are [Caffeine](https://github.com/ben-manes/caffeine) caches and could be fine-tuned with a Caffeine spec
+via `hawkbit.cache.spec` (all caches, default `expireAfterWrite=${hawkbit.cache.ttl}`) or
+`hawkbit.cache.[<tenant>.]<name>.spec` (cache / tenant specific).  
+See [TenantAwareCacheManager](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-core/src/main/java/org/eclipse/hawkbit/tenancy/TenantAwareCacheManager.java).
 
 ---
 
@@ -121,5 +130,5 @@ different node.
 
 The same constraint exists with the validator to check if a user tried too many logins within a defined period of
 time.  
-See [DosFilter](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-rest-core/src/main/java/org/eclipse/hawkbit/rest/security/DosFilter.java).
+See [DosFilter](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-rest/hawkbit-rest-core/src/main/java/org/eclipse/hawkbit/rest/security/DosFilter.java).
  

@@ -532,9 +532,6 @@ hawkbit.server.ddi.security.authentication.targettoken.enabled=true
 
 # Gateway Token (shared token)
 hawkbit.server.ddi.security.authentication.gatewaytoken.enabled=true
-
-# Anonymous downloads (not recommended for production)
-hawkbit.server.ddi.security.authentication.anonymous.enabled=false
 ```
 
 ---
