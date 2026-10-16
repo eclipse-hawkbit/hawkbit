@@ -150,6 +150,9 @@ hawkbit.throttle.tenants.big-tenant.limit=20
 
 With Micrometer available:
 
-- `hawkbit.throttle.connection` (timer, tag `tenant`) - time to get a connection, including waiting for a permit
-- `hawkbit.throttle.rejected` (counter, tags `tenant`, `reason`) - rejected requests; `reason` is one of `BLOCKED`,
+- `hawkbit.throttle.connections.acquire` (timer, tag `tenant`) - time to get a connection, including waiting for a permit
+- `hawkbit.throttle.connections.rejected` (counter, tags `tenant`, `reason`, `priority`) - rejected requests; `reason` is one of `BLOCKED`,
   `LIMIT`, `FAST_REJECT`, `DEADLOCK`, `KEY_QUEUE_FULL`, `QUEUE_FULL`, `EVICTED`, `TIMEOUT`
+- `hawkbit.throttle.connections.usage` (timer, tags `tenant`, `priority`) - how long a connection was held
+- `hawkbit.throttle.connections.active` (gauge, tag `priority`) / `hawkbit.throttle.connections.pending` (gauge) - connections held / requests
+  waiting for a permit

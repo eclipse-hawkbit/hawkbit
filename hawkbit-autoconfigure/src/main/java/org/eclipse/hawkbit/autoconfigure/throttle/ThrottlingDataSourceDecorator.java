@@ -20,6 +20,7 @@ import java.util.function.Supplier;
 
 import javax.sql.DataSource;
 
+import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.experimental.Delegate;
 import org.eclipse.hawkbit.context.AccessContext;
@@ -39,10 +40,16 @@ class ThrottlingDataSourceDecorator extends DelegatingDataSource {
 
     // how long a caller waited to actually get a connection - the throttle queue plus the pool itself, which is the
     // latency the request pays. Only successful acquisitions are recorded; refusals are counted by REJECTED_METER
-    private static final String CONNECTION_METER = "hawkbit.throttle.connection";
+    private static final String ACQUIRE_METER = "hawkbit.throttle.connections.acquire";
     // refused acquisitions, split by why - see ThrottledException.Reason
-    private static final String REJECTED_METER = "hawkbit.throttle.rejected";
+    private static final String REJECTED_METER = "hawkbit.throttle.connections.rejected";
     private static final String REASON_TAG = "reason";
+    // how long a connection was held, borrow to close - hikaricp.connections.usage split per tenant, shows who holds the pool
+    private static final String USAGE_METER = "hawkbit.throttle.connections.usage";
+    private static final String PRIORITY_TAG = "priority";
+    // throttle state, evaluated on scrape only - with the throttle in front, hikaricp.connections.pending stays ~0 by design
+    private static final String ACTIVE_METER = "hawkbit.throttle.connections.active"; // permits mirror connections 1:1
+    private static final String PENDING_METER = "hawkbit.throttle.connections.pending";
 
     // per instance - for every data source
     private final ThreadLocal<Permit> rootPermit = new ThreadLocal<>();
@@ -109,15 +116,27 @@ class ThrottlingDataSourceDecorator extends DelegatingDataSource {
     private void countRejected(final ThrottledException e) {
         final MeterRegistry registry = meterRegistry();
         if (registry != null) {
-            registry.counter(REJECTED_METER, TENANT_TAG, TENANT_TAG_VALUE_PROVIDER.get(), REASON_TAG, e.getReason().name()).increment();
+            registry.counter(REJECTED_METER, TENANT_TAG, TENANT_TAG_VALUE_PROVIDER.get(), REASON_TAG, e.getReason().name(), PRIORITY_TAG, priority()).increment();
         }
     }
 
     private void recordConnectionTime(final long nanos) {
         final MeterRegistry registry = meterRegistry();
         if (registry != null) {
-            registry.timer(CONNECTION_METER, TENANT_TAG, TENANT_TAG_VALUE_PROVIDER.get()).record(nanos, TimeUnit.NANOSECONDS);
+            registry.timer(ACQUIRE_METER, TENANT_TAG, TENANT_TAG_VALUE_PROVIDER.get()).record(nanos, TimeUnit.NANOSECONDS);
         }
+    }
+
+    private void recordUsageTime(final String tenant, final long nanos) {
+        final MeterRegistry registry = meterRegistry();
+        if (registry != null) {
+            registry.timer(USAGE_METER, TENANT_TAG, tenant, PRIORITY_TAG, priority()).record(nanos, TimeUnit.NANOSECONDS);
+        }
+    }
+
+    // as declared by the thread - close runs on the borrowing thread, see class doc
+    private static String priority() {
+        return Throttle.isHighPriorityThread() ? "high" : "normal";
     }
 
     // resolved once, on the first acquisition after the registry bean exists; before that every call re-asks, which
@@ -126,9 +145,21 @@ class ThrottlingDataSourceDecorator extends DelegatingDataSource {
         MeterRegistry registry = meterRegistry;
         if (registry == null) {
             registry = meterRegistrySupplier.get();
+            if (registry != null) {
+                registerGauges(registry);
+            }
             meterRegistry = registry;
         }
         return registry;
+    }
+
+    private void registerGauges(final MeterRegistry registry) {
+        Gauge.builder(ACTIVE_METER, throttle, t -> t.stats().highGranted()).tag(PRIORITY_TAG, "high").register(registry);
+        Gauge.builder(ACTIVE_METER, throttle, t -> {
+            final Throttle.Stats stats = t.stats();
+            return stats.globalGranted() - stats.highGranted();
+        }).tag(PRIORITY_TAG, "normal").register(registry);
+        Gauge.builder(PENDING_METER, throttle, t -> t.stats().pending()).register(registry);
     }
 
     private void release(final Permit permit) {
@@ -157,6 +188,8 @@ class ThrottlingDataSourceDecorator extends DelegatingDataSource {
         @Delegate(excludes = Excludes.class) // don't delegate close() to the underlying connection
         private final Connection delegate;
         private final Permit permit;
+        private final String tenant = TENANT_TAG_VALUE_PROVIDER.get(); // captured at borrow - the tenant context may differ at close
+        private final long borrowNano = System.nanoTime();
         private boolean closed;
 
         ThrottledConnection(final Connection delegate, final Permit permit) {
@@ -174,6 +207,7 @@ class ThrottlingDataSourceDecorator extends DelegatingDataSource {
                 delegate.close();
             } finally {
                 release(permit);
+                recordUsageTime(tenant, System.nanoTime() - borrowNano);
             }
         }
     }
