@@ -10,11 +10,8 @@
 package org.eclipse.hawkbit.autoconfigure.throttle;
 
 import static org.eclipse.hawkbit.throttle.Config.PendingRemoveStrategy.FIFO;
-import static org.eclipse.hawkbit.throttle.Config.Priority.HIGH;
-import static org.eclipse.hawkbit.throttle.Config.Priority.NORMAL;
 
 import java.time.Duration;
-import java.util.EnumMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
@@ -105,17 +102,19 @@ public class ThrottleProperties {
     private int threshold = -1;
 
     /**
-     * Capacity that internal, non-tenant work is served ahead of the queue for ({@link Config.Priority#HIGH}.
-     * Internal work is charged to the {@code null} key — schedulers, migrations and health checks run without a tenant context.
+     * Capacity of the high priority work, of any key: internal, non-tenant work ({@code null} key — migrations and health checks run
+     * without a tenant context), and the schedulers running their per tenant work with
+     * {@link org.eclipse.hawkbit.throttle.Throttle#withHighPriority(java.util.function.Supplier) high priority}.
      *
-     * <p>A floor it cannot be starved below, not a cap: beyond it system work competes as an ordinary key, so it
-     * can neither be crowded out by tenant load nor crowd tenants out itself. Costs no reserved capacity — tenants
-     * use those slots freely whenever system work is not. {@code 0} disables the priority. Must resolve to fewer
+     * <p>High priority work is served ahead of the queue for these slots, beyond them it waits for its turn — as one more key in the
+     * round-robin. It is not counted to, nor waits for, the tenant limit, and it waits by the global {@link #timeout}, not the tenant
+     * one. Costs no reserved capacity — tenants use those slots freely whenever high priority work is not.
+     * {@code 0} disables serving ahead - high priority work then only takes its turn, still not bound by the tenant limit. Must resolve to fewer
      * slots than {@link #capacity}, or tenant work may never be reached; the policy warns if it does not.
      *
-     * <p>Default: {@code 4}, system work is served ahead of the queue for 4 slots
+     * <p>Default: {@code 4}, high priority work is served ahead of the queue for 4 slots
      */
-    private int systemGranted = 4;
+    private int highPriorityGranted = 4;
 
     /** Per-tenant limit overrides */
     private final LinkedCaseInsensitiveMap<TenantConfig> tenants = new LinkedCaseInsensitiveMap<>(Locale.ROOT);
@@ -140,24 +139,23 @@ public class ThrottleProperties {
     }
 
     public Config toConfig(final int capacity) {
-        if (systemGranted >= capacity) {
+        if (highPriorityGranted >= capacity) {
             log.warn("""
-                            Throttle system granted ({}) is not below capacity ({}): priority admissions can consume the whole \
-                            resource, so tenant work may never be served. Lower `hawkbit.throttle.system-granted`.""",
-                    systemGranted, capacity);
+                            Throttle high priority granted ({}) is not below capacity ({}): priority admissions can consume the whole \
+                            resource, so tenant work may never be served. Lower `hawkbit.throttle.high-priority-granted`.""",
+                    highPriorityGranted, capacity);
         }
         // pre init system and per tenant policy overrides in order to do not build for avery key (tenant)
         final Policy systemPolicy = Policy.builder()
                 .permits(capacity)
                 .timeout(timeout)
                 .pendingRemoveStrategy(FIFO)
-                .priority(HIGH) // set high priority to use high priority granted
+                .highPriority(true) // to use high priority granted
                 .build();
         final Policy defaultTenantPolicy = Policy.builder() // policy if not explicitly overridden
                 .permits(limit < 0 ? capacity : limit)
                 .timeout(timeout)
                 .pendingRemoveStrategy(FIFO)
-                .priority(NORMAL)
                 .build();
         final Map<String, Policy> tenantToPolicy = tenants.entrySet().stream() // overrides
                 .collect(Collectors.toMap(Map.Entry::getKey, e -> {
@@ -167,11 +165,10 @@ public class ThrottleProperties {
                             .timeout(tenantConfig.timeout == null ? timeout : tenantConfig.timeout)
                             .maxPending(tenantConfig.maxPending)
                             .pendingRemoveStrategy(FIFO)
-                            .priority(NORMAL)
                             .build();
                 }, (policy, duplicate) -> policy, () -> new LinkedCaseInsensitiveMap<>(Locale.ROOT))); // case-insensitive map
         return Config.builder()
-                .priorityToGranted(new EnumMap<>(Map.of(HIGH, systemGranted))) // reserve system priority granted
+                .highPriorityGranted(highPriorityGranted)
                 .permits(capacity)
                 .timeout(timeout)
                 .maxPending(maxPending)

@@ -138,7 +138,7 @@ class ThrottlingRequiresNewTransactionTest {
     private static Throttle throttle(final int capacity, final Consumer<ThrottleProperties> customizer) {
         final ThrottleProperties props = new ThrottleProperties();
         props.setThreshold(0);
-        props.setSystemGranted(0);
+        props.setHighPriorityGranted(0);
         // the engine gates waiting on the configured timeout too, so it must allow at least what txManager() passes
         props.setTimeout(TIMEOUT);
         customizer.accept(props);

@@ -81,7 +81,7 @@ class ThrottlingDataSourceDecoratorTest {
         // no tenant context → counted as internal work rather than waved through, so permits mirror pool usage
         try (final Connection connection = dataSource.getConnection()) {
             assertThat(connection.isValid(1)).isTrue();
-            assertThat(throttle.stats().perKeyGranted(null)).isEqualTo(1);
+            assertThat(throttle.stats().highGranted()).isEqualTo(1); // null key is internal work - high priority by its policy
         }
         assertThat(throttle.stats().globalGranted()).isZero();
     }
@@ -121,7 +121,7 @@ class ThrottlingDataSourceDecoratorTest {
                 onCleanThread(() -> {
                     try (Connection systemConnection = dataSource.getConnection()) {
                         assertThat(systemConnection.isValid(1)).isTrue();
-                        assertThat(throttle.stats().perKeyGranted(null)).isEqualTo(1);
+                        assertThat(throttle.stats().highGranted()).isEqualTo(1); // null key is internal work - high priority by its policy
                         assertThat(throttle.stats().units()).isEqualTo(2); // two units, not one nested unit
                     }
                 });
@@ -162,18 +162,20 @@ class ThrottlingDataSourceDecoratorTest {
 
     /** Run on a fresh thread, so it has no tenant context and no root permit of its own. */
     private static void onCleanThread(final ThrowingRunnable body) throws Exception {
-        final Exception[] failure = new Exception[1];
+        final Throwable[] failure = new Throwable[1];
         final Thread thread = new Thread(() -> {
             try {
                 body.run();
-            } catch (final Exception e) {
+            } catch (final Exception | AssertionError e) { // an assertion failing on this thread must fail the test too
                 failure[0] = e;
             }
         });
         thread.start();
         thread.join();
-        if (failure[0] != null) {
-            throw failure[0];
+        if (failure[0] instanceof AssertionError e) {
+            throw e;
+        } else if (failure[0] != null) {
+            throw (Exception) failure[0];
         }
     }
 
@@ -186,7 +188,7 @@ class ThrottlingDataSourceDecoratorTest {
     private static Throttle throttle(final int capacity, final Consumer<ThrottleProperties> customizer) {
         final ThrottleProperties props = new ThrottleProperties();
         props.setThreshold(0); // always contended: fair share enforced from the first permit
-        props.setSystemGranted(0); // priority off unless a test opts in
+        props.setHighPriorityGranted(0); // priority off unless a test opts in
         customizer.accept(props);
         return new Throttle(props.toConfig(capacity));
     }
