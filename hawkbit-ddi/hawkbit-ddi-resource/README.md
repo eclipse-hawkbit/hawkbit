@@ -8,7 +8,7 @@ for communicating with the HawkBit Update Server through HTTP.
 #### Build hawkbit-ddi-resource
 
 ```
-$ cd hawkbit/hawkbit-ddi-resource
+$ cd hawkbit-ddi/hawkbit-ddi-resource
 $ mvn clean install
 ```
 

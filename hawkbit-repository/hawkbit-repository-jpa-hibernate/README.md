@@ -2,25 +2,21 @@
 
 Implementation of [Hibernate](https://hibernate.org/) JPA vendor.
 
-To use this vendor you could exclude the org.eclipse.hawkbit:hawkbit.repository-jpa-eclipselink and include this module.
-For instance if you use org.eclipse.hawkbit:hawkbit-repository-jpa via org.eclipse.hawkbit:hawkbit-starter you could do
-it like this:
+Contains the vendor specific `JpaConfiguration`, `Jpa` helpers, `Statistics`, the tenant resolution (`TenantIdentifier`)
+and the base entity classes (`model.AbstractJpaBaseEntity`, `model.AbstractJpaTenantAwareBaseEntity`,
+`model.EntityPropertyChangeListener`). `JpaConfiguration`, `Jpa`, `Statistics` and the base entity classes exist with
+the same names in `hawkbit-repository-jpa-eclipselink`, so exactly one of the two vendor modules must be on the classpath.
 
-```xml
-<dependency>
-    <groupId>org.eclipse.hawkbit</groupId>
-    <artifactId>hawkbit-starter</artifactId>
-    <version>${project.version}</version>
-    <exclusions>
-        <exclusion>
-            <groupId>org.eclipse.hawkbit</groupId>
-            <artifactId>hawkbit-repository-jpa-eclipselink</artifactId>
-        </exclusion>
-    </exclusions>
-</dependency>
-<dependency>
-    <groupId>org.eclipse.hawkbit</groupId>
-    <artifactId>hawkbit-repository-jpa-hibernate</artifactId>
-    <version>${project.version}</version>
-</dependency>
+The JPA vendor is selected at build time via the Maven property `jpa.vendor` (default `eclipselink`, defined in
+`hawkbit-repository-jpa/pom.xml`):
+
+- profile `eclipselink` - active when `jpa.vendor` is not `hibernate`; adds `hawkbit-repository-jpa-eclipselink` and
+  the EclipseLink static weaving (`eclipselink-maven-plugin`)
+- profile `hibernate` - active with `-Djpa.vendor=hibernate`; adds this module and the Hibernate bytecode enhancement
+  (`hibernate-maven-plugin`, `enhance` goal)
+
+To build hawkBit with Hibernate:
+
+```shell
+mvn clean install -Djpa.vendor=hibernate
 ```

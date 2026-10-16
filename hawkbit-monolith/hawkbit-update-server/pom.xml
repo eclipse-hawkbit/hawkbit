@@ -87,7 +87,6 @@
                             <goal>repackage</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${baseDir}</outputDirectory>
                             <mainClass>${spring.app.class}</mainClass>
                             <layout>JAR</layout>
                         </configuration>

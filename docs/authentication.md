@@ -34,7 +34,7 @@ DMF clients to leverage the feature or can it be manually retrieved per target
 by **Management UI** or in the **Management UI** in the target details.
 
 Note: needs to be enabled in your hawkBit installation (
-See [DdiSecurityProperties](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-security-core/src/main/java/org/eclipse/hawkbit/security/DdiSecurityProperties.java)
+See [DdiSecurityProperties](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-ddi/hawkbit-ddi-security/src/main/java/org/eclipse/hawkbit/security/controller/DdiSecurityProperties.java)
 for system-wide enablement) **and** in the tenant configuration (
 set [TenantConfigurationProperties](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-repository/hawkbit-repository-api/src/main/java/org/eclipse/hawkbit/tenancy/configuration/TenantConfigurationProperties.java)
 #TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED, _authentication.targettoken.enabled_ to
@@ -58,7 +58,7 @@ Authorization: GatewayToken 3nkswAZhX81oDtktq0FF9Pn0Tc0UGXPW
 ```
 
 Note: needs to be enabled in your hawkBit installation (
-See [DdiSecurityProperties](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-security-core/src/main/java/org/eclipse/hawkbit/security/DdiSecurityProperties.java)
+See [DdiSecurityProperties](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-ddi/hawkbit-ddi-security/src/main/java/org/eclipse/hawkbit/security/controller/DdiSecurityProperties.java)
 for system-wide enablement) **and** in the tenant configuration (
 set [TenantConfigurationProperties](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-repository/hawkbit-repository-api/src/main/java/org/eclipse/hawkbit/tenancy/configuration/TenantConfigurationProperties.java)
 #TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED, _authentication.gatewaytoken.enabled_ to

@@ -1,0 +1,10 @@
+# Search ignore (ripgrep/fd and most coding agents). Committed but noisy for code search.
+# Pre-rendered Redoc bundles of the REST API (multi-MB single-line HTML)
+docs/rest-api/
+# Binary images and drawio sources
+docs/images/
+docs/graphics-source/
+# Generated 3rd-party dependency list
+.3rd-party/DEPENDENCIES
+# Local code-graph cache
+graphify-out/

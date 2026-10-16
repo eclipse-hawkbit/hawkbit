@@ -13,7 +13,7 @@ new MAJOR version.
 #### Build hawkbit-mgmt-api
 
 ```
-$ cd hawkbit/hawkbit-mgmt-api
+$ cd hawkbit-mgmt/hawkbit-mgmt-api
 $ mvn clean install
 ```
 

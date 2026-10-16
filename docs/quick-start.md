@@ -35,7 +35,7 @@ Start the hawkBit Update Server together with a PostgreSQL and RabbitMQ instance
 ```bash
 $ git clone https://github.com/eclipse-hawkbit/hawkbit.git
 $ cd hawkbit/docker
-$ docker-compose -f docker-compose-monolith-postgres.yml up -d
+$ docker compose -f postgres/docker-compose-monolith-postgres.yml up -d
 ```
 
 or with MySQL:
@@ -43,7 +43,7 @@ or with MySQL:
 ```bash
 $ git clone https://github.com/eclipse-hawkbit/hawkbit.git
 $ cd hawkbit/docker
-$ docker-compose -f docker-compose-monolith-mysql.yml up -d
+$ docker compose -f mysql/docker-compose-monolith-mysql.yml up -d
 ```
 
 If you want to start also the hawkBit UI, you can use, for PostgreSQL:
@@ -51,7 +51,7 @@ If you want to start also the hawkBit UI, you can use, for PostgreSQL:
 ```bash
 $ git clone https://github.com/eclipse-hawkbit/hawkbit.git
 $ cd hawkbit/docker
-$ docker-compose -f docker-compose-monolith-with-ui-postgres.yml up -d
+$ docker compose -f postgres/docker-compose-monolith-with-ui-postgres.yml up -d
 ```
 
 or with MySQL:
@@ -59,7 +59,7 @@ or with MySQL:
 ```bash
 $ git clone https://github.com/eclipse-hawkbit/hawkbit.git
 $ cd hawkbit/docker
-$ docker-compose -f docker-compose-monolith-with-ui-mysql.yml up -d
+$ docker compose -f mysql/docker-compose-monolith-with-ui-mysql.yml up -d
 ```
 
 > **Note:** `-d` flag is used to run the containers in detached mode.  
@@ -74,7 +74,7 @@ Start the hawkBit Update Server together with a PostgreSQL and RabbitMQ instance
 ```bash
 $ git clone https://github.com/eclipse-hawkbit/hawkbit.git
 $ cd hawkbit/docker
-$ docker-compose -f docker-compose-micro-services-postgres.yml up -d
+$ docker compose -f postgres/docker-compose-micro-services-postgres.yml up -d
 ```
 
 or with MySQL:
@@ -82,7 +82,7 @@ or with MySQL:
 ```bash
 $ git clone https://github.com/eclipse-hawkbit/hawkbit.git
 $ cd hawkbit/docker
-$ docker-compose -f docker-compose-micro-services-mysql.yml up -d
+$ docker compose -f mysql/docker-compose-micro-services-mysql.yml up -d
 ```
 
 If you want to start also the hawkBit UI, you can use, for PostgreSQL:
@@ -90,7 +90,7 @@ If you want to start also the hawkBit UI, you can use, for PostgreSQL:
 ```bash
 $ git clone https://github.com/eclipse-hawkbit/hawkbit.git
 $ cd hawkbit/docker
-$ docker-compose -f docker-compose-micro-services-with-ui-postgres.yml up -d
+$ docker compose -f postgres/docker-compose-micro-services-with-ui-postgres.yml up -d
 ```
 
 or with MySQL:
@@ -98,7 +98,7 @@ or with MySQL:
 ```bash
 $ git clone https://github.com/eclipse-hawkbit/hawkbit.git
 $ cd hawkbit/docker
-$ docker-compose -f docker-compose-micro-services-with-ui-mysql.yml up -d
+$ docker compose -f mysql/docker-compose-micro-services-with-ui-mysql.yml up -d
 ```
 
 > **Note:** `-d` flag is used to run the containers in detached mode.  
@@ -124,19 +124,21 @@ $ mvn clean install -DskipTests
 $ java -jar ./hawkbit-monolith/hawkbit-update-server/target/hawkbit-update-server-0-SNAPSHOT.jar
 ```
 
-**Note:** you could start it also in **microservices mode** by:
+**Note:** you could start it also in **microservices mode** by (Management API on port 8080, DDI API on port 8081):
 
 ```bash
 $ java -jar ./hawkbit-mgmt/hawkbit-mgmt-server/target/hawkbit-mgmt-server-0-SNAPSHOT.jar
 $ java -jar ./hawkbit-ddi/hawkbit-ddi-server/target/hawkbit-ddi-server-0-SNAPSHOT.jar
+```
+
+And (only if you want to use the DMF feature, requires a running RabbitMQ):
+
+```bash
 $ java -jar ./hawkbit-dmf/hawkbit-dmf-server/target/hawkbit-dmf-server-0-SNAPSHOT.jar
 ```
 
-And (only if you want to use the DMF feature):
-
-```bash
-$ java -jar ./hawkbit-monolith/hawkbit-update-server/target/hawkbit-update-server-0-SNAPSHOT.jar
-```
+**Note:** the monolith has RabbitMQ (`RabbitAutoConfiguration` excluded) and DMF (`hawkbit.dmf.enabled=false`) disabled
+by default. See [Base Setup](base-setup.md) how to enable them.
 
 **Note:** You could also start with H2 console enabled with:
 
@@ -157,8 +159,11 @@ Then you will get H2 console available at '/h2-console' (Database available at '
 You could also start the **hawkBit UI** by:
 
 ```bash
-$ java -jar ./hawkbit-ui/target/hawkbit-ui-0-SNAPSHOT.jar
+$ java -jar ./hawkbit-ui/target/hawkbit-ui.jar
 ```
+
+The UI listens on port 8088 (override with `PORT` environment variable) and connects to the Management API at
+`hawkbit.server.mgmtUrl` (default `http://localhost:8080`).
 
 ---
 

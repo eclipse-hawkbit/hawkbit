@@ -5,7 +5,7 @@ initialize or migrate the database to the current hawkBit schema.
 
 ## Configuration
 
-Could be configured with _hawkbit.db.\<key\>_ or <spring.database.\<key\>_ environment or system properties, with keys:
+Could be configured with _hawkbit.db.\<key\>_ or _spring.datasource.\<key\>_ environment or system properties, with keys:
 
 * **mode** - migrate or validate (default)
 * **url** - database url
@@ -17,13 +17,16 @@ Could be configured with _hawkbit.db.\<key\>_ or <spring.database.\<key\>_ envir
 Where:
 
 1. Environment properties takes precedence over the system properties
-2. The _hawkbit.db.\<key\>_ properties take precedence over the _spring.database.\<key\>_ properties
+2. The _hawkbit.db.\<key\>_ properties take precedence over the _spring.datasource.\<key\>_ properties
 
 There are two modes:
 
 * **migrate** - migrate the database, only when started with parameter with key mode (environment or system property)
-* **validate** - validate the database, default, only validates db and throws
-  org.flywaydb.core.api.exception.FlywayValidateException if not in sync
+* **validate** - validate the database, default, only validates db and exits with code `2` if not in sync
+  (org.flywaydb.core.api.exception.FlywayValidateException)
+
+Exit codes: `0` - success, `1` - failed (e.g. db connection or migration failed), `2` - validation failed (validate
+mode only).
 
 **Note**: could also be configured using default flyway env properties
 

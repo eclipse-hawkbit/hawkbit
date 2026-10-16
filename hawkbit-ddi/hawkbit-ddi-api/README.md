@@ -13,6 +13,6 @@ new MAJOR version.
 #### Build hawkbit-ddi-api
 
 ```
-$ cd hawkbit/hawkbit-ddi-api
+$ cd hawkbit-ddi/hawkbit-ddi-api
 $ mvn clean install
 ```

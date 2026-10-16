@@ -123,7 +123,7 @@ public class HawkbitSecurityProperties {
     public static class Dos {
 
         private final Filter filter = new Filter();
-        private final Filter uiFilter = new Filter();
+
         /**
          * Maximum number of status updates that the controller can report for
          * an action (0 to disable).

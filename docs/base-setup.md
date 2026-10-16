@@ -13,7 +13,7 @@ and no artifact storage.
 This guide describes a target architecture that is more like one that you will expect in a production system:
 
 - [hawkBit](https://github.com/eclipse-hawkbit/hawkbit/tree/master/hawkbit-monolith/hawkbit-update-server) Update Server
-- [MariaDB](https://mariadb.org/) for the repository
+- [MariaDB](https://mariadb.org/) / MySQL or [PostgreSQL](https://www.postgresql.org/) for the repository
 - [RabbitMQ](https://www.rabbitmq.com/) for DMF communication
 
 ---
@@ -39,17 +39,46 @@ spring.datasource.password: YOUR_PWD
 spring.datasource.driverClassName: org.mariadb.jdbc.Driver
 ```
 
-> **Note:** On Ubuntu 18.04 with MariaDB 10.1 installed from the default repository via `apt install`,  
-> the `COLLATE` option of database has to be changed manually to `latin1`.  
-> For recent versions of MariaDB running on Ubuntu this is not required. (
-> cf. [issue](https://github.com/eclipse-hawkbit/hawkbit/issues/963))
+The update server ships with a `mysql` profile (`application-mysql.properties`) with these settings for a local
+MariaDB/MySQL (`jdbc:mariadb://localhost:3306/hawkbit`, user `root`), which you can activate with
+`--spring.profiles.active=mysql`.
+
+---
+
+### Configure PostgreSQL connection settings
+
+Alternatively, you can use PostgreSQL:
+
+```properties
+spring.jpa.database: POSTGRESQL
+spring.datasource.url: jdbc:postgresql://localhost:5432/YOUR_SCHEMA
+spring.datasource.username: YOUR_USER
+spring.datasource.password: YOUR_PWD
+spring.datasource.driverClassName: org.postgresql.Driver
+```
+
+The update server ships with a `postgresql` profile (`application-postgresql.properties`) with these settings for a local
+PostgreSQL (`jdbc:postgresql://localhost:5432/hawkbit`, user `postgres`), which you can activate with
+`--spring.profiles.active=postgresql`.
 
 ---
 
 ### Configure RabbitMQ (optional)
 
+RabbitMQ is needed for the Device Management Federation API (DMF) and for the remote events between hawkBit instances
+(see [Clustering](clustering.md)). In the update server (monolith) it is **disabled by default**:
+
+```properties
+spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration
+hawkbit.dmf.enabled=false
+hawkbit.events.remote.enabled=false
+```
+
+To enable it, remove the `RabbitAutoConfiguration` exclusion (e.g. `spring.autoconfigure.exclude=`) and set
+`hawkbit.dmf.enabled=true` (for DMF) and/or `hawkbit.events.remote.enabled=true` (for remote events).
+
 Defaults are already provided for a standard Rabbit installation. Otherwise configure the following in
-`application.properties` of the two services:
+`application.properties` of the update server (or of each service in micro-service mode):
 
 ```properties
 spring.rabbitmq.username: guest

@@ -26,7 +26,7 @@
 
     <properties>
         <spring-shell.version>4.0.3</spring-shell.version>
-        <spring.app.class>org.eclipse.hawkbit.sdk.demo.multidevice.MultiDeviceApp</spring.app.class>
+        <spring.app.class>org.eclipse.hawkbit.sdk.demo.multidevice.DeviceApp</spring.app.class>
         <start-class>${spring.app.class}</start-class>
     </properties>
 
@@ -70,13 +70,12 @@
                             <goal>repackage</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${baseDir}</outputDirectory>
                             <layout>JAR</layout>
                         </configuration>
                     </execution>
                 </executions>
                 <configuration>
-                    <mainClass>org.eclipse.hawkbit.sdk.demo.device.DeviceApp</mainClass>
+                    <mainClass>${spring.app.class}</mainClass>
                 </configuration>
             </plugin>
         </plugins>

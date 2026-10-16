@@ -91,7 +91,9 @@ There are clients outside of the Eclipse IoT eco system as well, e.g.:
 | JDBC driver                       | [H2](https://github.com/h2database/h2database) | [MariaDB Connector/J](https://github.com/MariaDB/mariadb-connector-j) | [PostgreSQL JDBC Driver](https://github.com/pgjdbc/pgjdbc) |
 | Status                            |                   Test, Dev                    |                           Production grade                            |                         Test, Dev                          |
 
-## (Optional) RabbitMQ: 3.6,3.7,3.8
+## (Optional) RabbitMQ: 3.x
+
+Required only for the DMF (AMQP) API. CI runs against `rabbitmq:3-management-alpine`.
 
 # Getting Started
 
@@ -176,11 +178,63 @@ java -jar ./hawkbit-sdk/hawkbit-sdk-demo/target/hawkbit-sdk-demo-0-SNAPSHOT.jar
 * Execute `start` command in the simulator console to start the device simulation.
 * Your device will be registered automatically on the update server and will start polling for updates.
 
-## Generate getting started data with the [Management API example](https://github.com/eclipse-hawkbit/hawkbit-examples/tree/master/hawkbit-example-mgmt-simulator) (optional)
+## Generate getting started data (optional)
+
+The former `hawkbit-example-mgmt-simulator` (in the archived
+[hawkbit-examples](https://github.com/eclipse-hawkbit/hawkbit-examples) repository) is no longer maintained. Use the
+[hawkBit SDK](hawkbit-sdk) instead - `hawkbit-sdk-mgmt` provides a Management API client and
+[hawkbit-sdk-demo](hawkbit-sdk/hawkbit-sdk-demo) contains device (`DeviceApp`), multi-device (`MultiDeviceApp`, with a
+`setup` command for target authentication) and DMF (`DmfApp`) examples. See [hawkBit SDK](docs/hawkbit-sdk.md).
+
+## Build and test details
+
+* Single module / single test (`-am` builds required modules too):
 
 ```bash
-java -jar ./hawkbit-example-mgmt-simulator/target/hawkbit-example-mgmt-simulator-#version#-exec.jar
+mvn -pl hawkbit-repository/hawkbit-repository-jpa -am test -Dtest=ClassName -Dsurefire.failIfNoSpecifiedTests=false
 ```
+
+* Code format (Spotless with [eclipse_codeformatter.xml](eclipse_codeformatter.xml), only files changed against
+  `origin/master` - `ratchetFrom`): `mvn spotless:apply` / `mvn spotless:check`
+* License headers: `mvn license:check -PcheckLicense`
+* Tests use embedded H2 by default. To run against PostgreSQL:
+
+```bash
+mvn verify -Dspring.jpa.database=POSTGRESQL -Dspring.datasource.url=jdbc:postgresql://localhost:5432/hawkbit \
+  -Dspring.datasource.username=<user> -Dspring.datasource.password=<password>
+```
+
+* AMQP (DMF) tests need RabbitMQ with management plugin on localhost (`5672`, `15672`), user `guest:guest`.
+* JPA vendor is EclipseLink by default; build/test with Hibernate via `-Djpa.vendor=hibernate`.
+
+## Project layout
+
+| Module                                   | Content                                                                    |
+|------------------------------------------|----------------------------------------------------------------------------|
+| [hawkbit-core](hawkbit-core)             | Core shared classes (tenancy, security, utilities)                         |
+| [hawkbit-ql-jpa](hawkbit-ql-jpa)         | Query language (RSQL) to JPA Specifications                                |
+| [hawkbit-artifact](hawkbit-artifact)     | Artifact storage                                                           |
+| [hawkbit-repository](hawkbit-repository) | Repository API and JPA implementation (EclipseLink / Hibernate, Flyway)    |
+| [hawkbit-rest](hawkbit-rest)             | Common REST API / core                                                     |
+| [hawkbit-mgmt](hawkbit-mgmt)             | Management API, resources, starter, server                                 |
+| [hawkbit-ddi](hawkbit-ddi)               | Direct Device Integration API, resources, security, starter, server        |
+| [hawkbit-dmf](hawkbit-dmf)               | Device Management Federation API (AMQP), starter, server                   |
+| [hawkbit-mcp](hawkbit-mcp)               | MCP (Model Context Protocol) server and starter                            |
+| [hawkbit-autoconfigure](hawkbit-autoconfigure) | Spring Boot auto-configuration                                       |
+| [hawkbit-monolith](hawkbit-monolith)     | Monolith starter and Update Server                                         |
+| [hawkbit-ui](hawkbit-ui)                 | Vaadin based UI                                                            |
+| [hawkbit-sdk](hawkbit-sdk)               | SDK (device, DMF, Management API clients) and demo                         |
+
+## Further documentation
+
+* [Quick start](docs/quick-start.md), [Base setup](docs/base-setup.md), [Database setup](docs/database-setup.md)
+* [Architecture](docs/architecture.md), [Data model](docs/datamodel.md), [Clustering](docs/clustering.md),
+  [Throttling](docs/throttling.md)
+* [Authentication](docs/authentication.md), [Authorization](docs/authorization.md)
+* [Management API](docs/management-api.md), [DDI API](docs/direct-device-integration-api.md),
+  [DMF API](docs/device-management-federation-api.md)
+* [hawkBit SDK](docs/hawkbit-sdk.md), [MCP server](docs/mcp-server.md), [UI](docs/ui.md)
+* [Contributing](CONTRIBUTING.md)
 
 # Status and API stability
 
@@ -190,10 +244,10 @@ configuration as well as internal Java APIs (e.g.
 the [repository API](https://github.com/eclipse-hawkbit/hawkbit/issues/197) ).
 
 However, the device
-facing [DDI API](https://github.com/eclipse-hawkbit/hawkbit/tree/master/hawkbit-rest/hawkbit-ddi-api) is on major
+facing [DDI API](https://github.com/eclipse-hawkbit/hawkbit/tree/master/hawkbit-ddi/hawkbit-ddi-api) is on major
 version 'v1' and will be kept stable.
 
-Server facing and [DMF API](https://github.com/eclipse-hawkbit/hawkbit/tree/master/hawkbit-dmf/hawkbit-dmf-api)
-are [Management API](https://github.com/eclipse-hawkbit/hawkbit/tree/master/hawkbit-mgmt/hawkbit-mgmt-api) are on v1 as
+Server facing [DMF API](https://github.com/eclipse-hawkbit/hawkbit/tree/master/hawkbit-dmf/hawkbit-dmf-api)
+and [Management API](https://github.com/eclipse-hawkbit/hawkbit/tree/master/hawkbit-mgmt/hawkbit-mgmt-api) are on v1 as
 well. However, we cannot fully guarantee the same stability during hawkBit's 0.X development but we will try as best we
 can.
