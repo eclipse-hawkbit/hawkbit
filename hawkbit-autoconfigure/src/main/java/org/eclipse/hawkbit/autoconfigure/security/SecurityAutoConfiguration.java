@@ -25,12 +25,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.AuditorAware;
-import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
-import org.springframework.security.web.authentication.logout.LogoutHandler;
-import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
-import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
-import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
 
 /**
  * {@link EnableAutoConfiguration Auto-configuration} for security.
@@ -55,25 +49,5 @@ public class SecurityAutoConfiguration {
     @ConditionalOnMissingBean
     public AuditLoggingAspect auditLoggingAspect() {
         return new AuditLoggingAspect();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public AuthenticationSuccessHandler authenticationSuccessHandler() {
-        return new SimpleUrlAuthenticationSuccessHandler();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public LogoutHandler logoutHandler() {
-        return new SecurityContextLogoutHandler();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public LogoutSuccessHandler logoutSuccessHandler() {
-        final SimpleUrlLogoutSuccessHandler simpleUrlLogoutSuccessHandler = new SimpleUrlLogoutSuccessHandler();
-        simpleUrlLogoutSuccessHandler.setTargetUrlParameter("login");
-        return simpleUrlLogoutSuccessHandler;
     }
 }
