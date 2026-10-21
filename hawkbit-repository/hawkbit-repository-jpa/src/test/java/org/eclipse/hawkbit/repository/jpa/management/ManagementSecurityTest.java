@@ -47,6 +47,7 @@ import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.test.util.AbstractIntegrationTest;
 import org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch;
+import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -126,7 +127,9 @@ class ManagementSecurityTest extends AbstractJpaIntegrationTest {
 
     private static Stream<Arguments> testMethods() {
         final String packageName = "org.eclipse.hawkbit.repository";
-        try (final ScanResult scanResult = new ClassGraph().acceptPackages(packageName).scan()) {
+        try (final ScanResult scanResult = new ClassGraph()
+                .enableClasspath().enableClassInfo().enableMethodInfo()
+                .acceptPackages(packageName).scan()) {
             return scanResult.getAllClasses()
                     .stream()
                     // scan scans subpackages as well, so we need to filter out the classes that are not in the package (e.g. JpaActionManagement)
@@ -138,7 +141,7 @@ class ManagementSecurityTest extends AbstractJpaIntegrationTest {
                     // it is not an exposed db service but internally used
                     .filter(classInPackage -> !classInPackage.getSimpleName().equals("QuotaManagement") &&
                             !classInPackage.getSimpleName().equals("PropertiesQuotaManagement"))
-                    .map(ClassInfo::loadClass)
+                    .map(ManagementSecurityTest::loadClass)
                     .flatMap(clazz -> collectMethods(clazz, new ArrayList<>()).stream()
                             // permissionGroup is an internal method and should not be protected by @PreAuthorize
                             .filter(method -> !"permissionGroup".equals(method.getName()) ||
@@ -320,12 +323,14 @@ class ManagementSecurityTest extends AbstractJpaIntegrationTest {
                             })
                             .orElseThrow(() -> new IllegalStateException("No management implementation found for " + clazz));
                 }
-                try (final ScanResult scanResult = new ClassGraph().acceptPackages("org.eclipse.hawkbit.repository").scan()) {
-                    return scanResult.getClassesImplementing(clazz)
+                try (final ScanResult scanResult = new ClassGraph()
+                        .enableClasspath().enableClassInfo()
+                        .acceptPackages("org.eclipse.hawkbit.repository").scan()) {
+                    return scanResult.getAllClassesImplementing(clazz)
                             .stream()
                             .filter(impl -> !impl.isAbstract())
                             .findFirst()
-                            .map(impl -> instance(impl.loadClass()))
+                            .map(impl -> instance(loadClass(impl)))
                             .orElseThrow(() -> new IllegalStateException("No instance for interface " + clazz));
                 }
             } else {
@@ -391,6 +396,14 @@ class ManagementSecurityTest extends AbstractJpaIntegrationTest {
                 log.debug("Could not instantiate {} (but if inside instance, could be fine)", clazz.getName(), e);
                 throw e;
             }
+        }
+    }
+
+    private static @NonNull Class<?> loadClass(final ClassInfo classInfo) {
+        try {
+            return Class.forName(classInfo.getName(), false, ManagementSecurityTest.class.getClassLoader());
+        } catch (final ClassNotFoundException e) {
+            throw new AssertionError(e);
         }
     }
 

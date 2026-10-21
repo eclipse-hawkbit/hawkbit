@@ -25,15 +25,14 @@ class QueryFieldsTest {
      * Verifies that fields classes are correctly implemented
      */
     @Test
-    @SuppressWarnings("unchecked")
     void repositoryManagementMethodsArePreAuthorizedAnnotated() {
         final String packageName = getClass().getPackage().getName();
-        try (final ScanResult scanResult = new ClassGraph().acceptPackages(packageName).scan()) {
-            final List<? extends Class<? extends QueryField>> matchingClasses = scanResult.getAllClasses()
+        try (final ScanResult scanResult = new ClassGraph()
+                .enableClasspath().enableClassInfo().enableFieldInfo()
+                .acceptPackages(packageName).scan()) {
+            final List<ClassInfo> matchingClasses = scanResult.getAllClasses()
                     .stream()
                     .filter(classInPackage -> classInPackage.implementsInterface(QueryField.class))
-                    .map(ClassInfo::loadClass)
-                    .map(clazz -> (Class<? extends QueryField>) clazz)
                     .toList();
             assertThat(matchingClasses).isNotEmpty();
             matchingClasses.forEach(providerClass -> assertThat(providerClass.getEnumConstants()).isNotEmpty());
