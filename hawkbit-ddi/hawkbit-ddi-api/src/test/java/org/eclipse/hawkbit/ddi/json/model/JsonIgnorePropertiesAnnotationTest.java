@@ -15,6 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import io.github.classgraph.AnnotationInfo;
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ScanResult;
@@ -32,25 +33,23 @@ class JsonIgnorePropertiesAnnotationTest {
      * This test verifies that all model classes within the 'org.eclipse.hawkbit.ddi.json.model' package are annotated with '@JsonIgnoreProperties(ignoreUnknown = true)'
      */
     @Test
-    void shouldCheckAnnotationsForAllModelClasses() {
+    void checkAnnotationsForAllModelClasses() {
         final String packageName = getClass().getPackage().getName();
-        try (final ScanResult scanResult = new ClassGraph().acceptPackages(packageName).scan()) {
-            final List<? extends Class<?>> matchingClasses = scanResult.getAllClasses()
+        try (final ScanResult scanResult = new ClassGraph()
+                .enableClasspath().enableClassInfo().enableAnnotationInfo()
+                .acceptPackages(packageName).scan()) {
+            final List<ClassInfo> matchingClasses = scanResult.getAllClasses()
                     .stream()
-                    .filter(classInPackage -> classInPackage.getSimpleName().endsWith("Test") || classInPackage.isEnum())
-                    .map(ClassInfo::loadClass)
+                    .filter(classInPackage -> !classInPackage.getSimpleName().endsWith("Test") && !classInPackage.isEnum())
                     .toList();
 
             assertThat(matchingClasses).isNotEmpty();
             matchingClasses.forEach(modelClass -> {
-                if (modelClass.getSimpleName().contains("Test") || modelClass.isEnum()) {
-                    return;
-                }
-                final JsonIgnoreProperties annotation = modelClass.getAnnotation(JsonIgnoreProperties.class);
+                final AnnotationInfo annotation = modelClass.getDirectAnnotationInfo(JsonIgnoreProperties.class);
                 assertThat(annotation)
                         .describedAs("Annotation 'JsonIgnoreProperties' is missing for class: " + modelClass.getSimpleName())
                         .isNotNull();
-                assertThat(annotation.ignoreUnknown()).isTrue();
+                assertThat(annotation.getParameterValues().getValue("ignoreUnknown")).isEqualTo(Boolean.TRUE);
             });
         }
     }

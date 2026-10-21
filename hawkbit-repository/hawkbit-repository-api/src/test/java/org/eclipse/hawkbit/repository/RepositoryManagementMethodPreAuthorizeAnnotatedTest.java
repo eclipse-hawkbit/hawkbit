@@ -11,12 +11,10 @@ package org.eclipse.hawkbit.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
+import io.github.classgraph.AnnotationInfo;
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ScanResult;
@@ -29,29 +27,25 @@ import org.springframework.security.access.prepost.PreAuthorize;
  */
 class RepositoryManagementMethodPreAuthorizeAnnotatedTest {
 
-    // if some methods are to be excluded
-    private static final Set<Method> METHOD_SECURITY_EXCLUSION = new HashSet<>();
-
     /**
      * Verifies that repository methods are @PreAuthorize annotated
      */
     @Test
     void repositoryManagementMethodsArePreAuthorizedAnnotated() {
         final String packageName = getClass().getPackage().getName();
-        try (final ScanResult scanResult = new ClassGraph().acceptPackages(packageName).scan()) {
-            final List<? extends Class<?>> matchingClasses = scanResult.getAllClasses()
+        try (final ScanResult scanResult = new ClassGraph()
+                .enableClasspath().enableClassInfo().enableMethodInfo().enableAnnotationInfo()
+                .acceptPackages(packageName).scan()) {
+            final List<ClassInfo> matchingClasses = scanResult.getAllClasses()
                     .stream()
                     .filter(classInPackage -> classInPackage.getSimpleName().endsWith("Management") && classInPackage.isInterface())
-                    .map(ClassInfo::loadClass)
+                    // quota management doesn't need to be explicitly protected
+                    .filter(classInfo -> !"org.eclipse.hawkbit.repository.QuotaManagement".equals(classInfo.getName()))
                     .toList();
             assertThat(matchingClasses).isNotEmpty();
             matchingClasses.forEach(
                     RepositoryManagementMethodPreAuthorizeAnnotatedTest::assertDeclaredMethodsContainsPreAuthorizeAnnotations);
         }
-
-        // all exclusion should be used, otherwise the method exclusion should be
-        // cleaned up again
-        assertThat(METHOD_SECURITY_EXCLUSION).isEmpty();
     }
 
     /**
@@ -60,22 +54,23 @@ class RepositoryManagementMethodPreAuthorizeAnnotatedTest {
      * checked. The following methods are excluded due inherited from
      * {@link Object}, like equals() or toString().
      *
-     * @param clazz the class to retrieve the declared methods
+     * @param classInfo the class info to retrieve the declared methods
      */
-    private static void assertDeclaredMethodsContainsPreAuthorizeAnnotations(final Class<?> clazz) {
-        final Method[] declaredMethods = clazz.getDeclaredMethods();
-        for (final Method method : declaredMethods) {
-            final boolean methodExcluded = METHOD_SECURITY_EXCLUSION.contains(method);
-            if (methodExcluded || method.isSynthetic() || Modifier.isPublic(method.getModifiers())) {
-                // skip method because it should be excluded
-                METHOD_SECURITY_EXCLUSION.remove(method);
-                continue;
+    private static void assertDeclaredMethodsContainsPreAuthorizeAnnotations(final ClassInfo classInfo) {
+        classInfo.getMethodInfo().forEach(method -> {
+            if (method.isSynthetic() || !Modifier.isPublic(method.getModifiers())) {
+                // skip synthetic and not public
+                return;
             }
-            final PreAuthorize annotation = method.getAnnotation(PreAuthorize.class);
+            if ("permissionGroup".equals(method.getName()) && method.getParameterInfo().isEmpty()) {
+                // PermissionSupport#permissionGroup
+                return;
+            }
+            final AnnotationInfo annotation = method.getDirectAnnotationInfo(PreAuthorize.class);
             assertThat(annotation)
-                    .as("The method " + method.getName() + " in class " + clazz.getName() +
-                            " is not annotated with @PreAuthorize, security leak?")
+                    .as(String.format("The method %s#%s is not annotated with @PreAuthorize, security leak?",
+                            classInfo.getName(), method.getName()))
                     .isNotNull();
-        }
+        });
     }
 }
