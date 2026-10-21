@@ -13,7 +13,6 @@
          xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
@@ -41,15 +40,16 @@
     </scm>
 
     <properties>
-        <!-- Overrides START - to be reviewed regularly current overrides against spring-boot 4.1.1-->
         <commons-lang.version>3.21.0</commons-lang.version>
+
+        <!-- Overrides START - to be reviewed regularly current overrides against spring-boot 4.1.1-->
         <freemarker.version>2.3.35</freemarker.version>
-        <jackson-2-bom.version>2.22.3</jackson-2-bom.version>
-        <jackson-bom.version>3.2.3</jackson-bom.version>
+        <jackson-2-bom.version>2.22.4</jackson-2-bom.version>
+        <jackson-bom.version>3.2.4</jackson-bom.version>
         <logback.version>1.6.5</logback.version>
-        <netty.version>4.2.18.Final</netty.version>
-        <rabbit-amqp-client.version>5.35.0</rabbit-amqp-client.version>
-        <tomcat.version>11.0.26</tomcat.version>
+        <netty.version>4.2.19.Final</netty.version>
+        <rabbit-amqp-client.version>5.37.0</rabbit-amqp-client.version>
+        <tomcat.version>11.0.27</tomcat.version>
         <!-- Overrides END -->
 
         <revision>0-SNAPSHOT</revision>
