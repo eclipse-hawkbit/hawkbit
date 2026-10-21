@@ -63,7 +63,7 @@ class RepositoryManagementMethodPreAuthorizeAnnotatedTest {
                 return;
             }
             if ("permissionGroup".equals(method.getName()) && method.getParameterInfo().isEmpty()) {
-                // PermissionSupport#permissionGroup
+                // PermissionSupport#permissionGroup()
                 return;
             }
             final AnnotationInfo annotation = method.getDirectAnnotationInfo(PreAuthorize.class);
