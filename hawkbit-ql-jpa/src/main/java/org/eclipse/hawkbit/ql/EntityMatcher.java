@@ -231,7 +231,7 @@ public class EntityMatcher {
         } else if (type.isInstance(value)) {
             return value;
         } else if (type.isEnum()) {
-            return Enum.valueOf((Class<Enum>) type, value.toString());
+            return Enum.valueOf((Class<Enum>) type, value.toString().toUpperCase());
         } else if (type == Boolean.class || type == boolean.class) {
             return Boolean.parseBoolean(value.toString());
         } else if (type == Integer.class || type == int.class) {

@@ -247,6 +247,27 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     }
 
     /**
+     * Ensures that polling time overrides matching enum fields (e.g. update status) are evaluated case-insensitive.
+     */
+    @Test
+    @ExpectEvents({
+            @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetPollEvent.class, count = 1),
+            @Expect(type = TenantConfigurationCreatedEvent.class, count = 1),
+            @Expect(type = TenantConfigurationDeletedEvent.class, count = 1) })
+    void pollWithOverrideOnUpdateStatusIsCaseInsensitive() throws Exception {
+        withPollingTime("00:02:00, updatestatus==registered -> 00:05:05", () -> callAs(
+                withUser("controller", CONTROLLER_ROLE), () -> {
+                    mvc.perform(get(CONTROLLER_BASE, AccessContext.tenant(), 4711))
+                            .andDo(MockMvcResultPrinter.print())
+                            .andExpect(status().isOk())
+                            .andExpect(content().contentType(MediaTypes.HAL_JSON))
+                            .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:05:05")));
+                    return null;
+                }));
+    }
+
+    /**
      * Ensures that etag check results in not modified response if provided etag by client is identical to entity in repository.
      */
     @Test
