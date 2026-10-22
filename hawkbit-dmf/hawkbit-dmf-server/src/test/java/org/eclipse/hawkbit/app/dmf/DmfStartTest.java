@@ -15,6 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 // Smoke test that the DMF server application context starts.
 @SpringBootTest(properties = {
         "spring.datasource.url=jdbc:h2:mem:dmf-start;DB_CLOSE_DELAY=-1",
+        "spring.datasource.driver-class-name=org.h2.Driver",
         "spring.datasource.username=sa",
         "spring.datasource.password=",
         "spring.jpa.database=H2",

@@ -10,9 +10,13 @@
 package org.eclipse.hawkbit.ql.rsql;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
+
+import jakarta.persistence.EntityManager;
 
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
+import org.eclipse.hawkbit.repository.jpa.Jpa;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModule.MetadataValueCreate;
@@ -20,6 +24,7 @@ import org.eclipse.hawkbit.repository.qfields.SoftwareModuleFields;
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.orm.jpa.vendor.Database;
@@ -29,6 +34,9 @@ import org.springframework.orm.jpa.vendor.Database;
  * Story: RSQL filter software module
  */
 class RsqlSoftwareModuleFieldTest extends AbstractJpaIntegrationTest {
+
+    @Autowired
+    private EntityManager entityManager;
 
     private SoftwareModule ah;
 
@@ -100,6 +108,10 @@ class RsqlSoftwareModuleFieldTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void testFilterByParameterNameWithUmlaut() {
+        // with an accent-insensitive collation (e.g. MySQL / MariaDB defaults) 'Ö' matches 'O' as well, so the expected
+        // counts don't apply - umlaut distinction is a database property, not something the RSQL layer could enforce
+        assumeTrue(isAccentSensitive(), "Skipped: the database collation of sp_software_module.name is accent-insensitive");
+
         assertRSQLQuery(SoftwareModuleFields.NAME.name() + "==*Ö*", 1);
         assertRSQLQuery(SoftwareModuleFields.NAME.name() + "==*Ä*", 1);
         assertRSQLQuery(SoftwareModuleFields.NAME.name() + "==*Ü*", 1);
@@ -176,6 +188,19 @@ class RsqlSoftwareModuleFieldTest extends AbstractJpaIntegrationTest {
         assertRSQLQuery(SoftwareModuleFields.METADATA.name() + ".metaKey=in=(metaValue,value)", 2);
         assertRSQLQuery(SoftwareModuleFields.METADATA.name() + ".metaKey=out=(metaValue,notexist)", 1);
         assertRSQLQuery(SoftwareModuleFields.METADATA.name() + ".notExist==metaValue", 0);
+    }
+
+    /**
+     * Asks the database itself (plain native equality on the column, bypassing the RSQL layer under test) whether the
+     * umlaut name created in {@link #setupBeforeTest()} differs from its accent-stripped form. This detects the effective
+     * column collation regardless of database vendor or server / schema defaults.
+     */
+    private boolean isAccentSensitive() {
+        final Number matches = (Number) entityManager
+                .createNativeQuery("SELECT COUNT(*) FROM sp_software_module WHERE name = " + Jpa.nativeQueryParamPrefix() + "name")
+                .setParameter("name", "*§$%&/&%AU*O@") // umlaut name "*§$%&/&%ÄÜ*Ö@" with Ä/Ü/Ö replaced by A/U/O
+                .getSingleResult();
+        return matches.longValue() == 0;
     }
 
     private void assertRSQLQuery(final String rsql, final long expectedEntity) {
