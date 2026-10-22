@@ -42,6 +42,8 @@ updates:
         update-types: [ "version-update:semver-major" ]
       - dependency-name: "org.eclipse.persistence:org.eclipse.persistence.jpa"
         update-types: [ "version-update:semver-major" ]
+      - dependency-name: "io.github.classgraph:*"
+        update-types: [ "version-update:semver-major" ]
   - package-ecosystem: "docker"
     directory: "/docker"
     target-branch: "1.0"
