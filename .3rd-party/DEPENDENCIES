@@ -1,5 +1,5 @@
-maven/mavencentral/ch.qos.logback/logback-classic/1.5.38, EPL-1.0 AND LGPL-2.1-only, approved, #18704
-maven/mavencentral/ch.qos.logback/logback-core/1.5.38, EPL-1.0 AND LGPL-2.1-only, approved, #15210
+maven/mavencentral/ch.qos.logback/logback-classic/1.6.6, EPL-1.0 AND LGPL-2.1-only, approved, #29898
+maven/mavencentral/ch.qos.logback/logback-core/1.6.6, EPL-1.0 AND LGPL-2.1-only, approved, #29897
 maven/mavencentral/com.cronutils/cron-utils/9.2.1, Apache-2.0, approved, clearlydefined
 maven/mavencentral/com.ethlo.time/itu/1.14.0, Apache-2.0, approved, #19505
 maven/mavencentral/com.fasterxml.jackson.core/jackson-annotations/2.22, Apache-2.0, approved, #28540
@@ -17,7 +17,7 @@ maven/mavencentral/com.google.errorprone/error_prone_annotations/2.49.0, Apache-
 maven/mavencentral/com.h2database/h2/2.4.240, EPL-1.0 AND MPL-2.0 AND LGPL-2.1-or-later AND BSD-3-Clause AND LicenseRef-Public-Domain, approved, #23567
 maven/mavencentral/com.jayway.jsonpath/json-path/2.10.0, Apache-2.0, approved, clearlydefined
 maven/mavencentral/com.knuddels/jtokkit/1.1.0, MIT, approved, clearlydefined
-maven/mavencentral/com.networknt/json-schema-validator/3.0.0, Apache-2.0 AND Unicode-3.0, approved, #26454
+maven/mavencentral/com.networknt/json-schema-validator/3.0.6, Apache-2.0 AND Unicode-3.0, approved, #26454
 maven/mavencentral/com.nimbusds/content-type/2.3, Apache-2.0, approved, clearlydefined
 maven/mavencentral/com.nimbusds/lang-tag/1.7, Apache-2.0, approved, clearlydefined
 maven/mavencentral/com.nimbusds/nimbus-jose-jwt/10.9.1, Apache-2.0, approved, #29000
@@ -104,9 +104,9 @@ maven/mavencentral/io.micrometer/micrometer-commons/1.17.2, Apache-2.0 AND (Apac
 maven/mavencentral/io.micrometer/micrometer-core/1.17.2, Apache-2.0 AND (Apache-2.0 AND MIT), approved, #28755
 maven/mavencentral/io.micrometer/micrometer-jakarta9/1.17.2, Apache-2.0, approved, #28719
 maven/mavencentral/io.micrometer/micrometer-observation/1.17.2, Apache-2.0, approved, #28734
-maven/mavencentral/io.modelcontextprotocol.sdk/mcp-core/2.0.0, MIT, approved, #28872
-maven/mavencentral/io.modelcontextprotocol.sdk/mcp-json-jackson3/2.0.0, MIT, approved, #28874
-maven/mavencentral/io.modelcontextprotocol.sdk/mcp/2.0.0, MIT AND Apache-2.0, approved, #28862
+maven/mavencentral/io.modelcontextprotocol.sdk/mcp-core/2.1.0, , restricted, clearlydefined
+maven/mavencentral/io.modelcontextprotocol.sdk/mcp-json-jackson3/2.1.0, , restricted, clearlydefined
+maven/mavencentral/io.modelcontextprotocol.sdk/mcp/2.1.0, , restricted, clearlydefined
 maven/mavencentral/io.netty/netty-buffer/4.2.19.Final, Apache-2.0, approved, #16116
 maven/mavencentral/io.netty/netty-codec-base/4.2.19.Final, Apache-2.0, approved, #21322
 maven/mavencentral/io.netty/netty-codec-classes-quic/4.2.19.Final, Apache-2.0, approved, #21311
@@ -203,18 +203,18 @@ maven/mavencentral/org.skyscreamer/jsonassert/1.5.3, Apache-2.0, approved, clear
 maven/mavencentral/org.slf4j/jul-to-slf4j/2.0.20, MIT, approved, #7698
 maven/mavencentral/org.slf4j/slf4j-api/2.0.20, MIT, approved, #5915
 maven/mavencentral/org.snakeyaml/snakeyaml-engine/3.0.1, Apache-2.0, approved, clearlydefined
-maven/mavencentral/org.springdoc/springdoc-openapi-starter-common/3.1.1, Apache-2.0, approved, #31036
-maven/mavencentral/org.springdoc/springdoc-openapi-starter-webmvc-api/3.1.1, Apache-2.0, approved, #31035
-maven/mavencentral/org.springdoc/springdoc-openapi-starter-webmvc-ui/3.1.1, Apache-2.0, approved, #30092
-maven/mavencentral/org.springframework.ai/mcp-spring-webmvc/2.0.1, Apache-2.0, approved, #28866
-maven/mavencentral/org.springframework.ai/spring-ai-autoconfigure-mcp-server-common/2.0.1, Apache-2.0, approved, #28868
-maven/mavencentral/org.springframework.ai/spring-ai-autoconfigure-mcp-server-webmvc/2.0.1, Apache-2.0, approved, #28861
-maven/mavencentral/org.springframework.ai/spring-ai-commons/2.0.1, Apache-2.0, approved, #28859
-maven/mavencentral/org.springframework.ai/spring-ai-mcp-annotations/2.0.1, Apache-2.0, approved, #28860
-maven/mavencentral/org.springframework.ai/spring-ai-mcp/2.0.1, Apache-2.0, approved, #28876
-maven/mavencentral/org.springframework.ai/spring-ai-model/2.0.1, Apache-2.0, approved, #28865
-maven/mavencentral/org.springframework.ai/spring-ai-starter-mcp-server-webmvc/2.0.1, Apache-2.0 AND LicenseRef-scancode-oasis-ws-security-spec AND BSD-3-Clause, approved, #28867
-maven/mavencentral/org.springframework.ai/spring-ai-template-st/2.0.1, Apache-2.0, approved, #28864
+maven/mavencentral/org.springdoc/springdoc-openapi-starter-common/3.2.0, , restricted, clearlydefined
+maven/mavencentral/org.springdoc/springdoc-openapi-starter-webmvc-api/3.2.0, , restricted, clearlydefined
+maven/mavencentral/org.springdoc/springdoc-openapi-starter-webmvc-ui/3.2.0, , restricted, clearlydefined
+maven/mavencentral/org.springframework.ai/mcp-spring-webmvc/2.0.2, Apache-2.0, approved, #28866
+maven/mavencentral/org.springframework.ai/spring-ai-autoconfigure-mcp-server-common/2.0.2, Apache-2.0, approved, #28868
+maven/mavencentral/org.springframework.ai/spring-ai-autoconfigure-mcp-server-webmvc/2.0.2, Apache-2.0, approved, #28861
+maven/mavencentral/org.springframework.ai/spring-ai-commons/2.0.2, Apache-2.0, approved, #28859
+maven/mavencentral/org.springframework.ai/spring-ai-mcp-annotations/2.0.2, Apache-2.0, approved, #28860
+maven/mavencentral/org.springframework.ai/spring-ai-mcp/2.0.2, Apache-2.0, approved, #28876
+maven/mavencentral/org.springframework.ai/spring-ai-model/2.0.2, Apache-2.0, approved, #28865
+maven/mavencentral/org.springframework.ai/spring-ai-starter-mcp-server-webmvc/2.0.2, Apache-2.0 AND LicenseRef-scancode-oasis-ws-security-spec AND BSD-3-Clause, approved, #28867
+maven/mavencentral/org.springframework.ai/spring-ai-template-st/2.0.2, Apache-2.0, approved, #28864
 maven/mavencentral/org.springframework.amqp/spring-amqp/4.1.2, Apache-2.0, approved, #28768
 maven/mavencentral/org.springframework.amqp/spring-rabbit-junit/4.1.2, Apache-2.0, approved, #28756
 maven/mavencentral/org.springframework.amqp/spring-rabbit/4.1.2, Apache-2.0, approved, #28714
@@ -282,17 +282,17 @@ maven/mavencentral/org.springframework.boot/spring-boot-web-server/4.1.2, Apache
 maven/mavencentral/org.springframework.boot/spring-boot-webflux/4.1.2, Apache-2.0, approved, #28758
 maven/mavencentral/org.springframework.boot/spring-boot-webmvc/4.1.2, Apache-2.0, approved, #28777
 maven/mavencentral/org.springframework.boot/spring-boot/4.1.2, Apache-2.0, approved, #28704
-maven/mavencentral/org.springframework.cloud/spring-cloud-commons/5.0.3, Apache-2.0, approved, #26106
-maven/mavencentral/org.springframework.cloud/spring-cloud-context/5.0.3, Apache-2.0, approved, #26094
-maven/mavencentral/org.springframework.cloud/spring-cloud-function-context/5.0.4, Apache-2.0, approved, #27659
-maven/mavencentral/org.springframework.cloud/spring-cloud-function-core/5.0.4, Apache-2.0, approved, #27594
-maven/mavencentral/org.springframework.cloud/spring-cloud-openfeign-core/5.0.3, Apache-2.0, approved, #27637
-maven/mavencentral/org.springframework.cloud/spring-cloud-starter-openfeign/5.0.3, MIT AND Apache-2.0, approved, #27654
-maven/mavencentral/org.springframework.cloud/spring-cloud-starter-stream-rabbit/5.0.3, Apache-2.0, approved, #27625
-maven/mavencentral/org.springframework.cloud/spring-cloud-starter/5.0.3, Apache-2.0, approved, #26100
-maven/mavencentral/org.springframework.cloud/spring-cloud-stream-binder-rabbit-core/5.0.3, Apache-2.0, approved, #27631
-maven/mavencentral/org.springframework.cloud/spring-cloud-stream-binder-rabbit/5.0.3, Apache-2.0, approved, #27628
-maven/mavencentral/org.springframework.cloud/spring-cloud-stream/5.0.3, Apache-2.0, approved, #27587
+maven/mavencentral/org.springframework.cloud/spring-cloud-commons/5.0.4, Apache-2.0, approved, #26106
+maven/mavencentral/org.springframework.cloud/spring-cloud-context/5.0.4, Apache-2.0, approved, #26094
+maven/mavencentral/org.springframework.cloud/spring-cloud-function-context/5.0.5, Apache-2.0, approved, #27659
+maven/mavencentral/org.springframework.cloud/spring-cloud-function-core/5.0.5, Apache-2.0, approved, #27594
+maven/mavencentral/org.springframework.cloud/spring-cloud-openfeign-core/5.0.4, Apache-2.0, approved, #27637
+maven/mavencentral/org.springframework.cloud/spring-cloud-starter-openfeign/5.0.4, MIT AND Apache-2.0, approved, #27654
+maven/mavencentral/org.springframework.cloud/spring-cloud-starter-stream-rabbit/5.0.4, Apache-2.0, approved, #27625
+maven/mavencentral/org.springframework.cloud/spring-cloud-starter/5.0.4, Apache-2.0, approved, #26100
+maven/mavencentral/org.springframework.cloud/spring-cloud-stream-binder-rabbit-core/5.0.4, Apache-2.0, approved, #27631
+maven/mavencentral/org.springframework.cloud/spring-cloud-stream-binder-rabbit/5.0.4, Apache-2.0, approved, #27628
+maven/mavencentral/org.springframework.cloud/spring-cloud-stream/5.0.4, Apache-2.0, approved, #27587
 maven/mavencentral/org.springframework.data/spring-data-commons/4.1.2, Apache-2.0, approved, #28748
 maven/mavencentral/org.springframework.data/spring-data-jpa/4.1.2, Apache-2.0, approved, #28788
 maven/mavencentral/org.springframework.hateoas/spring-hateoas/3.1.3, Apache-2.0, approved, #28706
@@ -331,7 +331,7 @@ maven/mavencentral/org.springframework/spring-web/7.0.10, Apache-2.0, approved, 
 maven/mavencentral/org.springframework/spring-webflux/7.0.10, Apache-2.0, approved, #25625
 maven/mavencentral/org.springframework/spring-webmvc/7.0.10, Apache-2.0, approved, #25606
 maven/mavencentral/org.springframework/spring-websocket/7.0.10, Apache-2.0, approved, #27622
-maven/mavencentral/org.webjars/swagger-ui/5.32.14, Apache-2.0 AND (Apache-2.0 AND MIT) AND MIT, approved, #27611
+maven/mavencentral/org.webjars/swagger-ui/5.34.0, , restricted, clearlydefined
 maven/mavencentral/org.webjars/webjars-locator-lite/1.1.5, MIT, approved, #24484
 maven/mavencentral/org.xmlunit/xmlunit-core/2.11.0, Apache-2.0, approved, #24661
 maven/mavencentral/org.yaml/snakeyaml/2.6, Apache-2.0, approved, #26233
