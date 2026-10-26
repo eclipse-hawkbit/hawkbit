@@ -16,7 +16,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.1.1</version>
+        <version>4.1.2</version>
     </parent>
 
     <groupId>org.eclipse.hawkbit</groupId>
@@ -42,14 +42,10 @@
     <properties>
         <commons-lang.version>3.21.0</commons-lang.version>
 
-        <!-- Overrides START - to be reviewed regularly current overrides against spring-boot 4.1.1-->
-        <freemarker.version>2.3.35</freemarker.version>
+        <!-- Overrides START - to be reviewed regularly current overrides against spring-boot 4.1.2-->
         <jackson-2-bom.version>2.22.4</jackson-2-bom.version>
         <jackson-bom.version>3.2.4</jackson-bom.version>
-        <logback.version>1.6.5</logback.version>
-        <netty.version>4.2.19.Final</netty.version>
         <rabbit-amqp-client.version>5.37.0</rabbit-amqp-client.version>
-        <tomcat.version>11.0.27</tomcat.version>
         <!-- Overrides END -->
 
         <revision>0-SNAPSHOT</revision>
@@ -60,7 +56,7 @@
         <java.client.version>17</java.client.version>
 
         <!-- must be the same as the parent version -->
-        <spring-boot.version>4.1.1</spring-boot.version>
+        <spring-boot.version>4.1.2</spring-boot.version>
         <spring-cloud.version>2025.1.3</spring-cloud.version>
         <spring-ai.version>2.0.1</spring-ai.version>
         <springdoc-openapi.version>3.1.1</springdoc-openapi.version>

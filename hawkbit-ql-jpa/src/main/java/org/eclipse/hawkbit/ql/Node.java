@@ -124,7 +124,7 @@ public interface Node {
     }
 
     @Value
-    @Builder(builderClassName = "Builder")
+    @Builder
     class Comparison implements Node {
 
         public enum Operator {
