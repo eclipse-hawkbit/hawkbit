@@ -30,8 +30,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # inputs are passed via env (not ${{ }} in run:) so they can't inject shell code; the format check stops
+      # a malformed revision before tag / deploy, which depend on this job
       - name: "Release ${{ inputs.revision }}"
-        run: echo "Releasing ${{ inputs.revision }}"
+        env:
+          REVISION: ${{ inputs.revision }}
+        run: |
+          [[ "$REVISION" =~ ^[0-9A-Za-z._-]+$ ]] || { echo "invalid revision: $REVISION"; exit 1; }
+          echo "Releasing $REVISION"
 
   # tag with release version if not already tagged
   # if already tagged - it will release from there
@@ -117,11 +123,15 @@ jobs:
             ${{ runner.os }}-maven-
 
       - name: Run build javadoc, verify (test)
-        run: mvn verify javadoc:jar -DdetectOfflineLinks=false -PgenerateTestReport -Drevision=${{ inputs.revision }} --batch-mode
+        env:
+          REVISION: ${{ inputs.revision }}
+        run: mvn verify javadoc:jar -DdetectOfflineLinks=false -PgenerateTestReport "-Drevision=$REVISION" --batch-mode
 
       - name: "Deploy ${{ inputs.revision }}"
-        run: mvn deploy -DskipTests -Ppublish -Drevision=${{ inputs.revision }} -DskipPublishing=${{ inputs.dry_run }} --batch-mode
         env:
+          REVISION: ${{ inputs.revision }}
+          DRY_RUN: ${{ inputs.dry_run }}
           MAVEN_USERNAME: ${{ secrets.CENTRAL_SONATYPE_TOKEN_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.CENTRAL_SONATYPE_TOKEN_PASSWORD }}
           MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+        run: mvn deploy -DskipTests -Ppublish "-Drevision=$REVISION" "-DskipPublishing=$DRY_RUN" --batch-mode

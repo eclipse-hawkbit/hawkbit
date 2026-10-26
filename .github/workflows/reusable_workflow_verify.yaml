@@ -48,11 +48,16 @@ jobs:
           - 5432:5432
 
     steps:
+      # inputs are passed via env (not ${{ }} in run:) so they can't inject shell code
       - name: Parameters
+        env:
+          REPOSITORY: ${{ inputs.repository }}
+          REF: ${{ inputs.ref }}
+          MAVEN_PROPERTIES: ${{ inputs.maven_properties }}
         run: |
-          echo "Repository: ${{ inputs.repository }},"
-          echo "Ref: ${{ inputs.ref }},"
-          echo "Maven Properties: ${{ inputs.maven_properties }}"
+          echo "Repository: $REPOSITORY,"
+          echo "Ref: $REF,"
+          echo "Maven Properties: $MAVEN_PROPERTIES"
 
       - uses: actions/checkout@v7.0.1
         with:
@@ -78,4 +83,7 @@ jobs:
         run: mvn license:check -PcheckLicense --batch-mode
 
       - name: Run tests & javadoc
-        run: mvn clean verify javadoc:javadoc -DdetectOfflineLinks=false -PgenerateTestReport ${{ inputs.maven_properties }} --batch-mode
+        env:
+          MAVEN_PROPERTIES: ${{ inputs.maven_properties }}
+        # intentionally unquoted: the input holds several -D options; word splitting doesn't execute $(...) or ;
+        run: mvn clean verify javadoc:javadoc -DdetectOfflineLinks=false -PgenerateTestReport $MAVEN_PROPERTIES --batch-mode

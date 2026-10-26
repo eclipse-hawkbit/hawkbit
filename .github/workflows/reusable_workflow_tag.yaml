@@ -33,24 +33,28 @@ jobs:
         run: git fetch --tags
 
       - name: Create Tag ${{ inputs.tag_name }}
+        env:
+          TAG_NAME: ${{ inputs.tag_name }}
+          TAG_MESSAGE: ${{ inputs.tag_message }}
+          OVERRIDE_TAG: ${{ inputs.override_tag }}
         run: |
           git config --local user.name "github-actions[bot]"
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           
-          if git rev-parse ${TAG_NAME} >/dev/null 2>&1; then
+          if git rev-parse "${TAG_NAME}" >/dev/null 2>&1; then
             echo "Tag ${TAG_NAME} already exists"
-            if [ "${{ inputs.override_tag }}" == "true" ]; then
+            if [ "${OVERRIDE_TAG}" == "true" ]; then
               echo "Override is set to true, so moving the tag ..."
               # delete the existing tag locally and remotely
-              git tag -d ${TAG_NAME}
-              git push origin :refs/tags/${TAG_NAME}
+              git tag -d "${TAG_NAME}"
+              git push origin ":refs/tags/${TAG_NAME}"
               # create a new tag with the same name
               if [ -n "${TAG_MESSAGE}" ]; then
-                git tag -a ${TAG_NAME} -m "${TAG_MESSAGE}"
+                git tag -a "${TAG_NAME}" -m "${TAG_MESSAGE}"
               else
-                git tag -a ${TAG_NAME}
+                git tag -a "${TAG_NAME}"
               fi
-              git push origin ${TAG_NAME}
+              git push origin "${TAG_NAME}"
               echo "Tag ${TAG_NAME} moved." 
             else
               echo "Override is set to false, so do nothing."
@@ -58,13 +62,10 @@ jobs:
           else
             echo "Creating a tag ${TAG_NAME} ..."
             if [ -n "${TAG_MESSAGE}" ]; then
-              git tag -a ${TAG_NAME} -m "${TAG_MESSAGE}"
+              git tag -a "${TAG_NAME}" -m "${TAG_MESSAGE}"
             else
-              git tag -a ${TAG_NAME}
+              git tag -a "${TAG_NAME}"
             fi
-            git push origin ${TAG_NAME}
+            git push origin "${TAG_NAME}"
             echo "Tag ${TAG_NAME} created."
           fi
-        env:
-          TAG_NAME: ${{ inputs.tag_name }}
-          TAG_MESSAGE: ${{ inputs.tag_message }}
