@@ -33,8 +33,10 @@ jobs:
 
       - name: Derive branch ref for SARIF upload
         id: upload-ref
+        # input passed via env (not ${{ }} in run:) so it can't inject shell code
+        env:
+          R: ${{ inputs.ref }}
         run: |
-          R="${{ inputs.ref }}"
           R="${R#refs/heads/}"                              # strip refs/heads/ if present
           R="${R#refs/tags/}"                               # strip refs/tags/ if present
           if [[ "$R" =~ ^([0-9]+\.[0-9]+)\.[0-9]+(-.+)?$ ]]; then

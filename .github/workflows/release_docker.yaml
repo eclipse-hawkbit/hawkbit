@@ -23,10 +23,18 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
 
+      # inputs are passed via env (not ${{ }} in run:) so they can't inject shell code; the format check also
+      # prevents injecting extra variables into $GITHUB_ENV via a newline in the revision
       - name: "Release ${{ inputs.revision }}"
-        run: echo "Releasing ${{ inputs.revision }}"
+        env:
+          REVISION: ${{ inputs.revision }}
+        run: |
+          [[ "$REVISION" =~ ^[0-9A-Za-z._-]+$ ]] || { echo "invalid revision: $REVISION"; exit 1; }
+          echo "Releasing $REVISION"
 
       - name: Setup
+        env:
+          REVISION: ${{ inputs.revision }}
         run: |
           ALL_APPS=(
             # microservices
@@ -35,8 +43,8 @@ jobs:
             "hawkbit-update-server",
             # db init
             "hawkbit-repository-jpa-init")
-          echo "ALL_APPS_STRING=${ALL_APPS[*]}" >> $GITHUB_ENV
-          echo "REVISION=${{ github.event.inputs.revision }}" >> $GITHUB_ENV
+          echo "ALL_APPS_STRING=${ALL_APPS[*]}" >> "$GITHUB_ENV"
+          echo "REVISION=$REVISION" >> "$GITHUB_ENV"
 
       - name: Build Docker Images
         run: |
