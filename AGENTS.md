@@ -1,7 +1,7 @@
 # Eclipse hawkBit
 
 Domain-independent back end for rolling out software updates to IoT devices. It provides the Management REST API, the DDI device HTTP API, the DMF AMQP API, a Vaadin UI and an MCP server.
-Stack: Java 21, Maven multi-module, Spring Boot 4, EclipseLink 5 (default) or Hibernate, Flyway, Vaadin 25. Version `0-SNAPSHOT` (`${revision}` + flatten plugin).
+Stack: Java 25, Maven multi-module, Spring Boot 4, EclipseLink 5 (default) or Hibernate, Flyway, Vaadin 25. Version `0-SNAPSHOT` (`${revision}` + flatten plugin).
 
 ## Commands
 There is no Maven wrapper, so use the system `mvn`.

@@ -50,11 +50,14 @@
         <!-- Other Overrides START - to be reviewed regularly -->
         <!-- override of org.apache.commons:commons-lang3 - old version coming via spring cloud openfeign 5.0.4 and org.springdoc 3.2.0 -->
         <commons-lang.version>3.21.0</commons-lang.version>
+        <!-- override spring-boot-starter-test 4.1.2 → json-smart 2.6.0 → accessors-smart 2.6.0 → org.ow2.asm:asm:9.7.1 that doesn't support java 25
+          ASM used by EclipseLink to read entity metadata, must support the class file version of java.version. -->
+        <asm.version>9.11.1</asm.version>
         <!-- END -->
 
         <revision>0-SNAPSHOT</revision>
 
-        <java.version>21</java.version>
+        <java.version>25</java.version>
         <!-- java.version is used to build the hawkbit in general, however, some artifacts which could be used
         as libraries in other projects might be compiled with a different, lower, java version. -->
         <java.client.version>17</java.client.version>
@@ -98,7 +101,7 @@
         <flatten-maven-plugin.version>1.8.0</flatten-maven-plugin.version>
 
         <maven-surefire-plugin.version>3.6.1</maven-surefire-plugin.version>
-        <jacoco-maven-plugin.version>0.8.15</jacoco-maven-plugin.version>
+        <jacoco-maven-plugin.version>0.8.16</jacoco-maven-plugin.version>
         <lombok-maven-plugin.version>1.18.20.0</lombok-maven-plugin.version>
 
         <license-tool-plugin.version>1.1.0</license-tool-plugin.version>
@@ -226,6 +229,11 @@
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
                 <version>${commons-lang.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.ow2.asm</groupId>
+                <artifactId>asm</artifactId>
+                <version>${asm.version}</version>
             </dependency>
             <!-- Overrides END -->
 
@@ -429,7 +437,7 @@
                                         <version>3.8.6</version>
                                     </requireMavenVersion>
                                     <requireJavaVersion>
-                                        <version>21</version>
+                                        <version>${java.version}</version>
                                     </requireJavaVersion>
                                 </rules>
                             </configuration>
