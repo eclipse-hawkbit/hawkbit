@@ -27,7 +27,8 @@ public enum TargetFilterQueryFields implements QueryField {
     CREATEDBY("createdBy"),
     LASTMODIFIEDAT("lastModifiedAt"),
     LASTMODIFIEDBY("lastModifiedBy"),
-    AUTOASSIGNDISTRIBUTIONSET("autoAssignment.distributionSet", "name", "version");
+    AUTOASSIGNDISTRIBUTIONSET("autoAssignment.distributionSet",
+            DistributionSetFields.ID.getName(), DistributionSetFields.NAME.getName(), DistributionSetFields.VERSION.getName());
 
     private final String name;
     private final List<String> subEntityAttributes;

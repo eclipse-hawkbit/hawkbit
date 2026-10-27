@@ -52,6 +52,34 @@ public interface QueryField {
     }
 
     /**
+     * Return the default attribute of a sub entity attribute which is an entity itself, if available. This allows to skip the nested
+     * attribute and call with "shortcut" - e.g. <code>distributionSet.type==os</code> instead of <code>distributionSet.type.key==os</code>
+     *
+     * @param subEntityAttribute the sub entity attribute (as returned by {@link #getSubEntityAttributes()})
+     * @return the default attribute of the sub entity attribute or <code>null</code> if no default is available
+     */
+    default String getDefaultSubEntityAttribute(final String subEntityAttribute) {
+        return null;
+    }
+
+    /**
+     * Returns the default sub entity attribute of the field of the given query field type with the given name. Helps query fields
+     * to resolve their {@link #getDefaultSubEntityAttribute(String)} using the query field type of the sub entity.
+     *
+     * @param queryFieldType the query field type of the sub entity
+     * @param name the (entity field) name of the field
+     * @return the default sub entity attribute or <code>null</code> if there is no such field or it has no default sub attribute
+     */
+    static <T extends Enum<T> & QueryField> String defaultSubEntityAttributeOf(final Class<T> queryFieldType, final String name) {
+        for (final T field : queryFieldType.getEnumConstants()) {
+            if (field.getName().equals(name) && !field.isMap() && !field.getSubEntityAttributes().isEmpty()) {
+                return field.getDefaultSubEntityAttribute();
+            }
+        }
+        return null;
+    }
+
+    /**
      * Returns the name of the field, that identifies the entity.
      *
      * @return the name of the identifier, by default 'id'

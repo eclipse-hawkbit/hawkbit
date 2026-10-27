@@ -110,6 +110,17 @@ class RsqlActionFieldsTest extends AbstractJpaIntegrationTest {
         assertRSQLQuery(ActionFields.EXTERNALREF.name() + "==extRef*", 10);
     }
 
+    /**
+     * Test filter action by distribution set type - explicit sub-attribute and default (key)
+     */
+    @Test
+    void testFilterByDsType() {
+        final String typeKey = action.getDistributionSet().getType().getKey();
+        assertRSQLQuery(ActionFields.DISTRIBUTIONSET.name() + ".type.key==" + typeKey, 11);
+        assertRSQLQuery(ActionFields.DISTRIBUTIONSET.name() + ".type==" + typeKey, 11);
+        assertRSQLQuery(ActionFields.DISTRIBUTIONSET.name() + ".type==notexist", 0);
+    }
+
     private JpaAction newJpaAction(final DistributionSet dsA, final boolean active, final String extRef) {
         final JpaAction newAction = new JpaAction();
         newAction.setActionType(ActionType.SOFT);

@@ -59,6 +59,7 @@ CI (`.github/workflows/reusable_workflow_verify.yaml`) runs `license:check`, the
   - JPA metamodel `*_` classes in `target/generated-sources/apt/`
   - EclipseLink static weaving / Hibernate enhancement output
   - Vaadin frontend files in `hawkbit-ui`
+- **RSQL field names** are the `qfields` enum constant names (case-insensitive, e.g. `assignedDS.name`, `tag.id`), not JPA field names. A field can be queried without a sub-attribute (`tag==x` → `tag.name`) only if it has exactly one sub-attribute or overrides `getDefaultSubEntityAttribute()`. Adding a second sub-attribute drops that default unless you override it, and that breaks stored filters, rollouts and auto-assignments.
 - **Schema change:** add one Flyway script per DB (H2, MYSQL, POSTGRESQL) with the same version. See `hawkbit-repository/hawkbit-repository-jpa-flyway/README.md`.
 - **Schedulers** (rollout, auto-assign, auto-cleanup, tenant hard-delete) are off by default. They are enabled via `hawkbit.<name>.scheduler.enabled`, and only mgmt-server and the monolith set them.
 - **Monolith defaults:** RabbitMQ and DMF are off (`hawkbit.dmf.enabled=false`, Rabbit autoconfig excluded).
@@ -97,5 +98,6 @@ Update these in the same change set:
 - Build, run or config changed → relevant `README.md`
 - User-visible behavior, config options or concepts changed → `docs/` (add new pages to `docs/_sidebar.md`)
 - Entity fields changed → `docs/entity-definitions.md` and `hawkbit-mcp/hawkbit-mcp-starter/src/main/resources/hawkbit-entity-definitions.md`
+- Query fields (`hawkbit-repository-api/.../qfields`) changed → field tables in `docs/entity-definitions.md` and the MCP copy
 
 Keep this file short: link, don't duplicate.

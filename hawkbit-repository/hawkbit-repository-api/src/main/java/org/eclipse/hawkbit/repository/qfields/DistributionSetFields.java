@@ -23,9 +23,7 @@ public enum DistributionSetFields implements QueryField {
 
     ID("id"),
     TYPE("type",
-            DistributionSetTypeFields.ID.getName(),
-            DistributionSetTypeFields.KEY.getName(),
-            DistributionSetTypeFields.NAME.getName()),
+            DistributionSetTypeFields.ID.getName(), DistributionSetTypeFields.KEY.getName(), DistributionSetTypeFields.NAME.getName()),
     NAME("name"),
     DESCRIPTION("description"),
     CREATEDAT("createdAt"),
@@ -34,7 +32,7 @@ public enum DistributionSetFields implements QueryField {
     LASTMODIFIEDBY("lastModifiedBy"),
     VERSION("version"),
     MODULE("modules", SoftwareModuleFields.ID.getName(), SoftwareModuleFields.NAME.getName()),
-    TAG("tags", "name"),
+    TAG("tags", TagFields.ID.getName(), TagFields.NAME.getName()),
     METADATA("metadata"),
     VALID("valid");
 
@@ -48,7 +46,12 @@ public enum DistributionSetFields implements QueryField {
 
     @Override
     public String getDefaultSubEntityAttribute() {
-        return this == TYPE ? DistributionSetTypeFields.KEY.getName() : QueryField.super.getDefaultSubEntityAttribute();
+        // keep the defaults of the sub-attributes used before more sub-attributes were added (backward compatibility of the "shortcut" queries)
+        return switch (this) {
+            case TYPE -> DistributionSetTypeFields.KEY.getName();
+            case TAG -> TagFields.NAME.getName();
+            default -> QueryField.super.getDefaultSubEntityAttribute();
+        };
     }
 
     @Override

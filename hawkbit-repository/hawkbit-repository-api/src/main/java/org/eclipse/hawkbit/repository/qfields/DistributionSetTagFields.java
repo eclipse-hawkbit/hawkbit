@@ -31,9 +31,7 @@ public enum DistributionSetTagFields implements QueryField {
     CREATEDBY("createdBy"),
     LASTMODIFIEDAT("lastModifiedAt"),
     LASTMODIFIEDBY("lastModifiedBy"),
-    DISTRIBUTIONSET(
-            "assignedToDistributionSet",
-            DistributionSetFields.ID.getName(), DistributionSetFields.NAME.getName());
+    DISTRIBUTIONSET("assignedToDistributionSet", DistributionSetFields.ID.getName(), DistributionSetFields.NAME.getName());
 
     private final String name;
     private final List<String> subEntityAttributes;

@@ -56,6 +56,7 @@ class RsqlAutoAssignmentFieldsTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void testFilterByAutoAssignedDsName() {
+        assertRSQLQuery(AutoAssignmentFields.DISTRIBUTIONSET.name() + ".id==" + autoAssignment1.getDistributionSet().getId(), 1);
         assertRSQLQuery(AutoAssignmentFields.DISTRIBUTIONSET.name() + ".name=="
                 + autoAssignment1.getDistributionSet().getName(), 1);
         assertRSQLQuery(AutoAssignmentFields.DISTRIBUTIONSET.name() + ".name=="

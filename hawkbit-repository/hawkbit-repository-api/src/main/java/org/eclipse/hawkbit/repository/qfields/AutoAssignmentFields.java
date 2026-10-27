@@ -27,7 +27,8 @@ public enum AutoAssignmentFields implements QueryField {
     STATUS("status"),
     ACTIONTYPE("actionType"),
     APPROVALDECIDEDBY("approvalDecidedBy"),
-    DISTRIBUTIONSET("distributionSet", "name", "version");
+    DISTRIBUTIONSET("distributionSet",
+            DistributionSetFields.ID.getName(), DistributionSetFields.NAME.getName(), DistributionSetFields.VERSION.getName());
 
     private final String name;
     private final List<String> subEntityAttributes;

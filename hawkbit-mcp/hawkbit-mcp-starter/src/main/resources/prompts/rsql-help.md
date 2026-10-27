@@ -30,7 +30,7 @@ Use `*` for pattern matching:
 
 Access related entities with dot notation:
 
-- `assignedDistributionSet.name==Firmware`
+- `assignedDS.name==Firmware`
 - `target.controllerId==device-001`
 - `metadata.environment==production`
 

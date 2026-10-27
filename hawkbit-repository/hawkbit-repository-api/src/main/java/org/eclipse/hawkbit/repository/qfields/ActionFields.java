@@ -47,4 +47,9 @@ public enum ActionFields implements QueryField {
         this.name = name;
         this.subEntityAttributes = List.of(subEntityAttributes);
     }
+
+    @Override
+    public String getDefaultSubEntityAttribute(final String subEntityAttribute) {
+        return this == DISTRIBUTIONSET ? QueryField.defaultSubEntityAttributeOf(DistributionSetFields.class, subEntityAttribute) : null;
+    }
 }
