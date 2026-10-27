@@ -34,8 +34,10 @@ import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
 import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtTag;
 import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtTagRequestBodyPut;
+import org.eclipse.hawkbit.rest.ApiPermission;
 import org.eclipse.hawkbit.rest.ApiResponsesConstants.PostUpdateNoContentResponses;
 import org.eclipse.hawkbit.rest.OpenApi;
+import org.eclipse.hawkbit.rest.RequiredPermissions;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -70,6 +72,7 @@ public interface MgmtDistributionSetTagRestApi {
     @Operation(summary = "Return all Distribution Set Tags",
             description = "Handles the GET request of retrieving all distribution set tags.")
     @GetIfExistResponses
+    @RequiredPermissions({ ApiPermission.READ_DISTRIBUTION_SET })
     @GetMapping(value = DISTRIBUTIONSETTAGS_V1, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtTag>> getDistributionSetTags(
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false)
@@ -96,6 +99,7 @@ public interface MgmtDistributionSetTagRestApi {
     @Operation(summary = "Return single Distribution Set Tag",
             description = "Handles the GET request of retrieving a single distribution set tag.")
     @GetResponses
+    @RequiredPermissions({ ApiPermission.READ_DISTRIBUTION_SET })
     @GetMapping(value = DISTRIBUTIONSETTAGS_V1 + "/{distributionsetTagId}", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtTag> getDistributionSetTag(@PathVariable("distributionsetTagId") Long distributionsetTagId);
 
@@ -109,6 +113,7 @@ public interface MgmtDistributionSetTagRestApi {
     @Operation(summary = "Creates new Distribution Set Tags", description = "Handles the POST request of creating " +
             "new distribution set tag. The request body must always be a list of distribution set tags.")
     @PostCreateResponses
+    @RequiredPermissions({ ApiPermission.CREATE_DISTRIBUTION_SET })
     @PostMapping(value = DISTRIBUTIONSETTAGS_V1,
             consumes = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE }, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtTag>> createDistributionSetTags(@RequestBody List<MgmtTagRequestBodyPut> tags);
@@ -123,6 +128,7 @@ public interface MgmtDistributionSetTagRestApi {
     @Operation(summary = "Update Distribution Set Tag",
             description = "Handles the PUT request of updating a distribution set tag.")
     @PutResponses
+    @RequiredPermissions({ ApiPermission.UPDATE_DISTRIBUTION_SET })
     @PutMapping(value = DISTRIBUTIONSETTAGS_V1 + "/{distributionsetTagId}",
             consumes = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE }, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtTag> updateDistributionSetTag(
@@ -138,6 +144,7 @@ public interface MgmtDistributionSetTagRestApi {
     @Operation(summary = "Delete a single distribution set tag",
             description = "Handles the DELETE request of deleting a single distribution set tag.")
     @DeleteResponses
+    @RequiredPermissions({ ApiPermission.DELETE_DISTRIBUTION_SET })
     @DeleteMapping(value = DISTRIBUTIONSETTAGS_V1 + "/{distributionsetTagId}")
     ResponseEntity<Void> deleteDistributionSetTag(@PathVariable("distributionsetTagId") Long distributionsetTagId);
 
@@ -155,6 +162,7 @@ public interface MgmtDistributionSetTagRestApi {
     @Operation(summary = "Return all assigned distribution sets by given tag Id",
             description = "Handles the GET request of retrieving a list of assigned distributions.")
     @GetResponses
+    @RequiredPermissions({ ApiPermission.READ_DISTRIBUTION_SET })
     @GetMapping(value = DISTRIBUTIONSETTAGS_V1 + DISTRIBUTIONSET_TAG_ID_ASSIGNED, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtDistributionSet>> getAssignedDistributionSets(
             @PathVariable("distributionsetTagId") Long distributionsetTagId,
@@ -183,6 +191,7 @@ public interface MgmtDistributionSetTagRestApi {
     @Operation(summary = "Assign distribution set to the given tag id",
             description = "Handles the POST request of distribution assignment. Already assigned distribution will be ignored.")
     @PostCreateNoContentResponses
+    @RequiredPermissions({ ApiPermission.READ_DISTRIBUTION_SET, ApiPermission.UPDATE_DISTRIBUTION_SET })
     @PostMapping(value = DISTRIBUTIONSETTAGS_V1 + DISTRIBUTIONSET_TAG_ID_ASSIGNED + "/{distributionsetId}")
     ResponseEntity<Void> assignDistributionSet(
             @PathVariable("distributionsetTagId") Long distributionsetTagId,
@@ -198,6 +207,7 @@ public interface MgmtDistributionSetTagRestApi {
     @Operation(summary = "Assign distribution sets to the given tag id",
             description = "Handles the POST request of distribution assignment. Already assigned distribution will be ignored.")
     @PostUpdateNoContentResponses
+    @RequiredPermissions({ ApiPermission.READ_DISTRIBUTION_SET, ApiPermission.UPDATE_DISTRIBUTION_SET })
     @PostMapping(value = DISTRIBUTIONSETTAGS_V1 + DISTRIBUTIONSET_TAG_ID_ASSIGNED,
             consumes = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE }, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<Void> assignDistributionSets(
@@ -214,6 +224,7 @@ public interface MgmtDistributionSetTagRestApi {
     @Operation(summary = "Unassign one distribution set from the given tag id",
             description = "Handles the DELETE request of unassign the given distribution.")
     @DeleteResponses
+    @RequiredPermissions({ ApiPermission.READ_DISTRIBUTION_SET, ApiPermission.UPDATE_DISTRIBUTION_SET })
     @DeleteMapping(value = DISTRIBUTIONSETTAGS_V1 + DISTRIBUTIONSET_TAG_ID_ASSIGNED + "/{distributionsetId}")
     ResponseEntity<Void> unassignDistributionSet(
             @PathVariable("distributionsetTagId") Long distributionsetTagId,
@@ -229,6 +240,7 @@ public interface MgmtDistributionSetTagRestApi {
     @Operation(summary = "Unassign multiple distribution sets from the given tag id",
             description = "Handles the DELETE request of unassign the given distribution.")
     @DeleteResponses
+    @RequiredPermissions({ ApiPermission.READ_DISTRIBUTION_SET, ApiPermission.UPDATE_DISTRIBUTION_SET })
     @DeleteMapping(value = DISTRIBUTIONSETTAGS_V1 + DISTRIBUTIONSET_TAG_ID_ASSIGNED)
     ResponseEntity<Void> unassignDistributionSets(
             @PathVariable("distributionsetTagId") Long distributionsetTagId,

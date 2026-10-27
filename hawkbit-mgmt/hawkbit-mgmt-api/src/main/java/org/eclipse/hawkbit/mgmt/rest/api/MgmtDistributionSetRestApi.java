@@ -55,9 +55,11 @@ import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModule;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleAssignment;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
 import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtTargetFilterQuery;
+import org.eclipse.hawkbit.rest.ApiPermission;
 import org.eclipse.hawkbit.rest.ApiResponsesConstants.PostUpdateNoContentResponses;
 import org.eclipse.hawkbit.rest.ApiResponsesConstants.PostUpdateResponses;
 import org.eclipse.hawkbit.rest.OpenApi;
+import org.eclipse.hawkbit.rest.RequiredPermissions;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -89,8 +91,9 @@ public interface MgmtDistributionSetRestApi {
      *         JsonResponseExceptionHandler is handling the response.
      */
     @Operation(summary = "Return all Distribution Sets",
-            description = "Handles the GET request of retrieving all distribution sets. Required permission: READ_REPOSITORY")
+            description = "Handles the GET request of retrieving all distribution sets.")
     @GetIfExistResponses
+    @RequiredPermissions({ ApiPermission.READ_DISTRIBUTION_SET })
     @GetMapping(value = DISTRIBUTIONSETS_V1, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtDistributionSet>> getDistributionSets(
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false)
@@ -118,8 +121,9 @@ public interface MgmtDistributionSetRestApi {
      * @return a single DistributionSet with status OK.
      */
     @Operation(summary = "Return single Distribution Set",
-            description = "Handles the GET request of retrieving a single distribution set. Required permission: READ_REPOSITORY")
+            description = "Handles the GET request of retrieving a single distribution set.")
     @GetResponses
+    @RequiredPermissions({ ApiPermission.READ_DISTRIBUTION_SET })
     @GetMapping(value = DISTRIBUTIONSETS_V1 + "/{distributionSetId}", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtDistributionSet> getDistributionSet(@PathVariable("distributionSetId") Long distributionSetId);
 
@@ -132,8 +136,13 @@ public interface MgmtDistributionSetRestApi {
      */
     @Operation(summary = "Creates new Distribution Sets", description = "Handles the POST request of creating new " +
             "distribution sets within Hawkbit. The request body must always be a list of sets. " +
-            "Required permission: CREATE_REPOSITORY")
+            "If software modules are referenced, READ_SOFTWARE_MODULE is required as well.")
     @PostCreateResponses
+    @RequiredPermissions(
+            value = { ApiPermission.CREATE_DISTRIBUTION_SET },
+            anyOf = @RequiredPermissions.AnyOf({
+                    ApiPermission.READ_DISTRIBUTION_SET, ApiPermission.READ_TARGET, ApiPermission.READ_TENANT_CONFIGURATION }),
+            optional = { ApiPermission.READ_SOFTWARE_MODULE })
     @PostMapping(value = DISTRIBUTIONSETS_V1,
             consumes = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE }, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtDistributionSet>> createDistributionSets(@RequestBody List<MgmtDistributionSetRequestBodyPost> sets);
@@ -145,8 +154,9 @@ public interface MgmtDistributionSetRestApi {
      * @return status OK if delete as successful.
      */
     @Operation(summary = "Delete Distribution Set by Id",
-            description = "Handles the DELETE request for a single Distribution Set. Required permission: DELETE_REPOSITORY")
+            description = "Handles the DELETE request for a single Distribution Set.")
     @DeleteResponses
+    @RequiredPermissions({ ApiPermission.DELETE_DISTRIBUTION_SET })
     @DeleteMapping(value = DISTRIBUTIONSETS_V1 + "/{distributionSetId}")
     ResponseEntity<Void> deleteDistributionSet(@PathVariable("distributionSetId") Long distributionSetId);
 
@@ -158,8 +168,9 @@ public interface MgmtDistributionSetRestApi {
      * @return status OK if update as successful with updated content.
      */
     @Operation(summary = "Update Distribution Set",
-            description = "Handles the UPDATE request for a single Distribution Set. Required permission: UPDATE_REPOSITORY")
+            description = "Handles the UPDATE request for a single Distribution Set.")
     @PutResponses
+    @RequiredPermissions({ ApiPermission.UPDATE_DISTRIBUTION_SET })
     @PutMapping(value = DISTRIBUTIONSETS_V1 + "/{distributionSetId}",
             consumes = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE }, produces = { APPLICATION_JSON_VALUE, HAL_JSON_VALUE })
     ResponseEntity<MgmtDistributionSet> updateDistributionSet(
@@ -178,9 +189,11 @@ public interface MgmtDistributionSetRestApi {
      * @return status OK if get request is successful with the paged list of targets
      */
     @Operation(summary = "Return assigned targets to a specific distribution set", description = "Handles the GET " +
-            "request for retrieving assigned targets of a single distribution set. " +
-            "Required permissions: READ_REPOSITORY and READ_TARGET")
+            "request for retrieving assigned targets of a single distribution set.")
     @GetResponses
+    @RequiredPermissions(
+            value = { ApiPermission.READ_DISTRIBUTION_SET, ApiPermission.READ_TARGET },
+            optional = { ApiPermission.READ_TARGET_SECURITY_TOKEN })
     @GetMapping(value = DISTRIBUTIONSETS_V1 + "/{distributionSetId}/assignedTargets",
             produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtTarget>> getAssignedTargets(
@@ -212,9 +225,11 @@ public interface MgmtDistributionSetRestApi {
      * @return status OK if get request is successful with the paged list of targets
      */
     @Operation(summary = "Return installed targets to a specific distribution set", description = "Handles the GET " +
-            "request for retrieving installed targets of a single distribution set. " +
-            "Required permissions: READ_REPOSITORY and READ_TARGET")
+            "request for retrieving installed targets of a single distribution set.")
     @GetResponses
+    @RequiredPermissions(
+            value = { ApiPermission.READ_DISTRIBUTION_SET, ApiPermission.READ_TARGET },
+            optional = { ApiPermission.READ_TARGET_SECURITY_TOKEN })
     @GetMapping(value = DISTRIBUTIONSETS_V1 + "/{distributionSetId}/installedTargets",
             produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtTarget>> getInstalledTargets(
@@ -249,8 +264,9 @@ public interface MgmtDistributionSetRestApi {
     @Deprecated
     @Operation(summary = "Return target filter queries that have the given distribution set as auto assign DS",
             description = "Handles the GET request for retrieving assigned target filter queries of a single " +
-                    "distribution set. Required permissions: READ_REPOSITORY and READ_TARGET")
+                    "distribution set.")
     @GetResponses
+    @RequiredPermissions({ ApiPermission.READ_DISTRIBUTION_SET, ApiPermission.READ_TARGET })
     @GetMapping(value = DISTRIBUTIONSETS_V1 + "/{distributionSetId}/autoAssignTargetFilters", produces = { HAL_JSON_VALUE,
             APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtTargetFilterQuery>> getAutoAssignTargetFilterQueries(
@@ -283,8 +299,9 @@ public interface MgmtDistributionSetRestApi {
      */
     @Operation(summary = "Return target filter queries that have the given distribution set as auto assign DS",
             description = "Handles the GET request for retrieving assigned target filter queries of a single " +
-                    "distribution set. Required permissions: READ_REPOSITORY and READ_TARGET")
+                    "distribution set.")
     @GetResponses
+    @RequiredPermissions({ ApiPermission.READ_DISTRIBUTION_SET, ApiPermission.READ_AUTO_ASSIGNMENT })
     @GetMapping(value = DISTRIBUTIONSETS_V1 + "/{distributionSetId}/autoAssignments", produces = { HAL_JSON_VALUE,
             APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtAutoAssignmentResponseBody>> getAutoAssignments(
@@ -316,8 +333,11 @@ public interface MgmtDistributionSetRestApi {
     @Operation(summary = "Assigning multiple targets to a single distribution set", description = "Handles the POST " +
             "request for assigning multiple targets to a distribution set.The request body must always be a list of " +
             "target IDs. Non-existing targets are silently ignored resulting in a valid response. " +
-            "Required permissions: READ_REPOSITORY and UPDATE_TARGET")
+            "If the distribution set is not locked yet and implicit locking applies, UPDATE_DISTRIBUTION_SET is required as well.")
     @PostUpdateResponses
+    @RequiredPermissions(
+            value = { ApiPermission.READ_DISTRIBUTION_SET, ApiPermission.UPDATE_TARGET },
+            optional = { ApiPermission.UPDATE_DISTRIBUTION_SET })
     @PostMapping(value = DISTRIBUTIONSETS_V1 + "/{distributionSetId}/assignedTargets",
             consumes = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE }, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtTargetAssignmentResponseBody> createAssignedTarget(
@@ -332,12 +352,13 @@ public interface MgmtDistributionSetRestApi {
      * @param metadataRest the list of meta-data entries to create
      */
     @Operation(summary = "Create a list of meta data for a specific distribution set",
-            description = "Create a list of meta data entries Required permissions: READ_REPOSITORY and UPDATE_TARGET")
+            description = "Create a list of meta data entries.")
     @PostCreateResponses
     @ApiResponses(value = {
             @ApiResponse(responseCode = NOT_FOUND_404, description = "Distribution Set not found.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
+    @RequiredPermissions({ ApiPermission.UPDATE_DISTRIBUTION_SET })
     @PostMapping(value = DISTRIBUTIONSETS_V1 + "/{distributionSetId}/metadata", consumes = { APPLICATION_JSON_VALUE, HAL_JSON_VALUE })
     ResponseEntity<Void> createMetadata(
             @PathVariable("distributionSetId") Long distributionSetId,
@@ -350,8 +371,9 @@ public interface MgmtDistributionSetRestApi {
      * @return status OK if get request is successful with the paged list of meta data
      */
     @Operation(summary = "Return meta data for Distribution Set", description = "Get a paged list of meta data for a " +
-            "distribution set. Required permission: READ_REPOSITORY")
+            "distribution set.")
     @GetResponses
+    @RequiredPermissions({ ApiPermission.READ_DISTRIBUTION_SET })
     @GetMapping(value = DISTRIBUTIONSETS_V1 + "/{distributionSetId}/metadata", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtMetadata>> getMetadata(@PathVariable("distributionSetId") Long distributionSetId);
 
@@ -363,8 +385,9 @@ public interface MgmtDistributionSetRestApi {
      * @return status OK with the value of the meta-data, if the request is successful
      */
     @Operation(summary = "Return single meta data value for a specific key of a Distribution Set",
-            description = "Get a single meta data value for a meta data key. Required permission: READ_REPOSITORY")
+            description = "Get a single meta data value for a meta data key.")
     @GetResponses
+    @RequiredPermissions({ ApiPermission.READ_DISTRIBUTION_SET })
     @GetMapping(value = DISTRIBUTIONSETS_V1 + "/{distributionSetId}/metadata/{metadataKey}", produces = { APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtMetadata> getMetadataValue(
             @PathVariable("distributionSetId") Long distributionSetId,
@@ -378,8 +401,9 @@ public interface MgmtDistributionSetRestApi {
      * @param metadata update body
      */
     @Operation(summary = "Update single meta data value of a distribution set",
-            description = "Update a single meta data value for speficic key. Required permission: UPDATE_REPOSITORY")
+            description = "Update a single meta data value for speficic key.")
     @PutNoContentResponses
+    @RequiredPermissions({ ApiPermission.UPDATE_DISTRIBUTION_SET })
     @PutMapping(value = DISTRIBUTIONSETS_V1 + "/{distributionSetId}/metadata/{metadataKey}",
             consumes = { APPLICATION_JSON_VALUE, HAL_JSON_VALUE })
     ResponseEntity<Void> updateMetadata(
@@ -394,8 +418,9 @@ public interface MgmtDistributionSetRestApi {
      * @param metadataKey the key of the meta-data to delete
      */
     @Operation(summary = "Delete a single meta data entry from the distribution set",
-            description = "Delete a single meta data. Required permission: UPDATE_REPOSITORY")
+            description = "Delete a single meta data.")
     @DeleteResponses
+    @RequiredPermissions({ ApiPermission.UPDATE_DISTRIBUTION_SET })
     @DeleteMapping(value = DISTRIBUTIONSETS_V1 + "/{distributionSetId}/metadata/{metadataKey}")
     ResponseEntity<Void> deleteMetadata(
             @PathVariable("distributionSetId") Long distributionSetId,
@@ -410,13 +435,14 @@ public interface MgmtDistributionSetRestApi {
      */
     @Operation(summary = "Assign a list of software modules to a distribution set", description = """
             Handles the POST request for assigning multiple software modules to a distribution set.The request body must
-            always be a list of software module IDs. Required permissions: READ_REPOSITORY and UPDATE_REPOSITORY
+            always be a list of software module IDs.
             """)
     @PostUpdateNoContentResponses
     @ApiResponses(value = {
             @ApiResponse(responseCode = LOCKED_423, description = "Software module is locked",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
+    @RequiredPermissions({ ApiPermission.UPDATE_DISTRIBUTION_SET })
     @PostMapping(value = DISTRIBUTIONSETS_V1 + "/{distributionSetId}/assignedSM",
             consumes = { APPLICATION_JSON_VALUE, HAL_JSON_VALUE }, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<Void> assignSoftwareModules(
@@ -431,12 +457,13 @@ public interface MgmtDistributionSetRestApi {
      * @return status OK if rejection was successful.
      */
     @Operation(summary = "Delete the assignment of the software module from the distribution set",
-            description = "Delete an assignment. Required permission: UPDATE_REPOSITORY")
+            description = "Delete an assignment.")
     @DeleteResponses
     @ApiResponses(value = {
             @ApiResponse(responseCode = LOCKED_423, description = "Distribution set is locked",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
+    @RequiredPermissions({ ApiPermission.UPDATE_DISTRIBUTION_SET })
     @DeleteMapping(value = DISTRIBUTIONSETS_V1 + "/{distributionSetId}/assignedSM/{softwareModuleId}")
     ResponseEntity<Void> deleteAssignSoftwareModules(
             @PathVariable("distributionSetId") Long distributionSetId,
@@ -454,8 +481,9 @@ public interface MgmtDistributionSetRestApi {
      * @return a list of the assigned software modules of a distribution set with status OK, if none is assigned than {@code null}
      */
     @Operation(summary = "Return the assigned software modules of a specific distribution set",
-            description = "Handles the GET request of retrieving a single distribution set. Required permission: READ_REPOSITORY")
+            description = "Handles the GET request of retrieving a single distribution set.")
     @GetResponses
+    @RequiredPermissions({ ApiPermission.READ_SOFTWARE_MODULE })
     @GetMapping(value = DISTRIBUTIONSETS_V1 + "/{distributionSetId}/assignedSM", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtSoftwareModule>> getAssignedSoftwareModules(
             @PathVariable("distributionSetId") Long distributionSetId,
@@ -480,6 +508,7 @@ public interface MgmtDistributionSetRestApi {
     @Operation(summary = "Return Rollouts count by status for Distribution Set",
             description = "Handles the GET request of retrieving Rollouts count by Status for Distribution Set")
     @GetResponses
+    @RequiredPermissions({ ApiPermission.READ_DISTRIBUTION_SET })
     @GetMapping(value = DISTRIBUTIONSETS_V1 + "/{distributionSetId}/statistics/rollouts",
             produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtDistributionSetStatistics> getRolloutsCountByStatusForDistributionSet(
@@ -494,6 +523,7 @@ public interface MgmtDistributionSetRestApi {
     @Operation(summary = "Return Actions count by status for Distribution Set",
             description = "Handles the GET request of retrieving Actions count by Status for Distribution Set")
     @GetResponses
+    @RequiredPermissions({ ApiPermission.READ_DISTRIBUTION_SET })
     @GetMapping(value = DISTRIBUTIONSETS_V1 + "/{distributionSetId}/statistics/actions",
             produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtDistributionSetStatistics> getActionsCountByStatusForDistributionSet(
@@ -508,6 +538,7 @@ public interface MgmtDistributionSetRestApi {
     @Operation(summary = "Return Auto Assignments count for Distribution Set",
             description = "Handles the GET request of retrieving Auto Assignments count for Distribution Set")
     @GetResponses
+    @RequiredPermissions({ ApiPermission.READ_DISTRIBUTION_SET })
     @GetMapping(value = DISTRIBUTIONSETS_V1 + "/{distributionSetId}/statistics/autoassignments",
             produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtDistributionSetStatistics> getAutoAssignmentsCountForDistributionSet(
@@ -522,6 +553,7 @@ public interface MgmtDistributionSetRestApi {
     @Operation(summary = "Return Rollouts, Actions and Auto Assignments counts by Status for Distribution Set",
             description = "Handles the GET request of retrieving Rollouts, Actions and Auto Assignments counts by Status for Distribution Set")
     @GetResponses
+    @RequiredPermissions({ ApiPermission.READ_DISTRIBUTION_SET })
     @GetMapping(value = DISTRIBUTIONSETS_V1 + "/{distributionSetId}/statistics", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtDistributionSetStatistics> getStatisticsForDistributionSet(@PathVariable("distributionSetId") Long distributionSetId);
 
@@ -536,7 +568,8 @@ public interface MgmtDistributionSetRestApi {
             Invalidate a distribution set. Once a distribution set is invalidated, it can not be valid again. An invalidated
             distribution set cannot be assigned to targets anymore. The distribution set that is going to be invalidated
             will be removed from all auto assignments. Furthermore, the user can choose to cancel all rollouts and (force)
-            cancel all actions connected to this distribution set. Required permission: UPDATE_REPOSITORY, UPDATE_TARGET
+            cancel all actions connected to this distribution set. If 'actionCancelationType' is not 'none', UPDATE_ROLLOUT
+            and UPDATE_TARGET are required as well.
             """)
     @PostUpdateNoContentResponses
     @ApiResponses(value = {
@@ -545,6 +578,9 @@ public interface MgmtDistributionSetRestApi {
             @ApiResponse(responseCode = LOCKED_423, description = "Distribution set is locked",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
+    @RequiredPermissions(
+            value = { ApiPermission.READ_DISTRIBUTION_SET, ApiPermission.UPDATE_DISTRIBUTION_SET },
+            optional = { ApiPermission.UPDATE_ROLLOUT, ApiPermission.UPDATE_TARGET })
     @PostMapping(value = DISTRIBUTIONSETS_V1 + "/{distributionSetId}/invalidate",
             consumes = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE }, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<Void> invalidateDistributionSet(

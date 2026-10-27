@@ -9,9 +9,17 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Collections;
+import java.util.IdentityHashMap;
+import java.util.List;
+import java.util.Set;
 
 import lombok.SneakyThrows;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
@@ -27,6 +35,9 @@ import org.eclipse.hawkbit.repository.test.TestConfiguration;
 import org.eclipse.hawkbit.rest.AbstractRestIntegrationTest;
 import org.eclipse.hawkbit.rest.RestConfiguration;
 import org.json.JSONObject;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.ResultMatcher;
@@ -35,6 +46,38 @@ import org.springframework.test.web.servlet.ResultMatcher;
         classes = { MgmtApiConfiguration.class, RestConfiguration.class, JpaRepositoryConfiguration.class, TestConfiguration.class })
 @TestPropertySource(locations = "classpath:/mgmt-test.properties")
 public abstract class AbstractManagementApiIntegrationTest extends AbstractRestIntegrationTest {
+
+    // enabled via mgmt-test.properties - verifies the @RequiredPermissions against the actually checked permissions
+    @Autowired(required = false)
+    private MgmtRequiredPermissionsVerifier requiredPermissionsVerifier;
+
+    // the verifiers of all used contexts (test classes with different configurations use different contexts), kept for the report
+    private static final Set<MgmtRequiredPermissionsVerifier> REQUIRED_PERMISSIONS_VERIFIERS =
+            Collections.synchronizedSet(Collections.newSetFromMap(new IdentityHashMap<>()));
+
+    @AfterEach
+    void verifyRequiredPermissions() {
+        if (requiredPermissionsVerifier != null) {
+            REQUIRED_PERMISSIONS_VERIFIERS.add(requiredPermissionsVerifier);
+            assertThat(requiredPermissionsVerifier.drainViolations()).as("Required permissions mismatches").isEmpty();
+        }
+    }
+
+    // declared permissions which were never checked can be detected only over all tests - so the cumulative report is (re)written after
+    // every test class, finally containing the result of all
+    @AfterAll
+    @SneakyThrows
+    static void reportUnusedRequiredPermissions() {
+        if (!REQUIRED_PERMISSIONS_VERIFIERS.isEmpty()) {
+            final List<String> unused;
+            synchronized (REQUIRED_PERMISSIONS_VERIFIERS) {
+                unused = MgmtRequiredPermissionsVerifier.unusedDeclarations(List.copyOf(REQUIRED_PERMISSIONS_VERIFIERS));
+            }
+            Files.write(
+                    Path.of(System.getProperty("hawkbit.test.required-permissions-report", "target/required-permissions-unused.txt")),
+                    unused);
+        }
+    }
 
     protected static ResultMatcher applyBaseEntityMatcherOnArrayResult(final BaseEntity entity, final String arrayElement) {
         return mvcResult -> {

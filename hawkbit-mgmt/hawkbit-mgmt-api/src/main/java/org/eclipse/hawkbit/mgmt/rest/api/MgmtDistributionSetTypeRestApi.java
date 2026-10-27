@@ -42,7 +42,9 @@ import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionS
 import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionSetTypeRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionSetTypeRequestBodyPut;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModuleType;
+import org.eclipse.hawkbit.rest.ApiPermission;
 import org.eclipse.hawkbit.rest.OpenApi;
+import org.eclipse.hawkbit.rest.RequiredPermissions;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -76,8 +78,9 @@ public interface MgmtDistributionSetTypeRestApi {
      *         failure the JsonResponseExceptionHandler is handling the response.
      */
     @Operation(summary = "Return all Distribution Set Types", description = "Handles the GET request of " +
-            "retrieving all distribution set types. Required Permission: READ_REPOSITORY")
+            "retrieving all distribution set types.")
     @GetIfExistResponses
+    @RequiredPermissions({ ApiPermission.READ_DISTRIBUTION_SET_TYPE })
     @GetMapping(value = DISTRIBUTIONSETTYPES_V1, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtDistributionSetType>> getDistributionSetTypes(
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false)
@@ -105,8 +108,9 @@ public interface MgmtDistributionSetTypeRestApi {
      * @return a single DS type with status OK.
      */
     @Operation(summary = "Return single Distribution Set Type", description = "Handles the GET request of retrieving a " +
-            "single distribution set type. Required Permission: READ_REPOSITORY")
+            "single distribution set type.")
     @GetResponses
+    @RequiredPermissions({ ApiPermission.READ_DISTRIBUTION_SET_TYPE })
     @GetMapping(value = DISTRIBUTIONSETTYPES_V1 + "/{distributionSetTypeId}", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtDistributionSetType> getDistributionSetType(
             @PathVariable("distributionSetTypeId") Long distributionSetTypeId);
@@ -118,8 +122,9 @@ public interface MgmtDistributionSetTypeRestApi {
      * @return status OK if delete is successful.
      */
     @Operation(summary = "Delete Distribution Set Type by Id",
-            description = "Handles the DELETE request for a single distribution set type. Required Permission: DELETE_REPOSITORY")
+            description = "Handles the DELETE request for a single distribution set type.")
     @DeleteResponses
+    @RequiredPermissions({ ApiPermission.DELETE_DISTRIBUTION_SET_TYPE })
     @DeleteMapping(value = DISTRIBUTIONSETTYPES_V1 + "/{distributionSetTypeId}")
     ResponseEntity<Void> deleteDistributionSetType(@PathVariable("distributionSetTypeId") Long distributionSetTypeId);
 
@@ -131,8 +136,9 @@ public interface MgmtDistributionSetTypeRestApi {
      * @return status OK if update is successful
      */
     @Operation(summary = "Update Distribution Set Type",
-            description = "Handles the PUT request for a single distribution set type. Required Permission: UPDATE_REPOSITORY")
+            description = "Handles the PUT request for a single distribution set type.")
     @PutResponses
+    @RequiredPermissions({ ApiPermission.UPDATE_DISTRIBUTION_SET_TYPE })
     @PutMapping(value = DISTRIBUTIONSETTYPES_V1 + "/{distributionSetTypeId}",
             consumes = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE }, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtDistributionSetType> updateDistributionSetType(
@@ -148,8 +154,11 @@ public interface MgmtDistributionSetTypeRestApi {
      */
     @Operation(summary = "Create new distribution set types", description = "Handles the POST request for creating " +
             "new distribution set types. The request body must always be a list of types. " +
-            "Required Permission: CREATE_REPOSITORY")
+            "If mandatory or optional module types are set, READ_SOFTWARE_MODULE_TYPE is required as well.")
     @PostCreateResponses
+    @RequiredPermissions(
+            value = { ApiPermission.CREATE_DISTRIBUTION_SET_TYPE },
+            optional = { ApiPermission.READ_SOFTWARE_MODULE_TYPE })
     @PostMapping(value = DISTRIBUTIONSETTYPES_V1,
             consumes = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE }, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtDistributionSetType>> createDistributionSetTypes(
@@ -163,8 +172,9 @@ public interface MgmtDistributionSetTypeRestApi {
      */
     @Operation(summary = "Return mandatory Software Module Types in a Distribution Set Type",
             description = "Handles the GET request of retrieving the list of mandatory software module types in that " +
-                    "distribution set type. Required Permission: READ_REPOSITORY")
+                    "distribution set type.")
     @GetResponses
+    @RequiredPermissions({ ApiPermission.READ_DISTRIBUTION_SET_TYPE })
     @GetMapping(value = DISTRIBUTIONSETTYPES_V1 + "/{distributionSetTypeId}/" + MANDATORYMODULETYPES,
             produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtSoftwareModuleType>> getMandatoryModules(
@@ -180,8 +190,9 @@ public interface MgmtDistributionSetTypeRestApi {
      */
     @Operation(summary = "Return single mandatory Software Module Type in a Distribution Set Type",
             description = "Handles the GET request of retrieving the single mandatory software module type in that " +
-                    "distribution set type. Required Permission: READ_REPOSITORY")
+                    "distribution set type.")
     @GetResponses
+    @RequiredPermissions({ ApiPermission.READ_DISTRIBUTION_SET_TYPE, ApiPermission.READ_SOFTWARE_MODULE_TYPE })
     @GetMapping(value = DISTRIBUTIONSETTYPES_V1 + "/{distributionSetTypeId}/" + MANDATORYMODULETYPES + "/{softwareModuleTypeId}",
             produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtSoftwareModuleType> getMandatoryModule(
@@ -197,8 +208,9 @@ public interface MgmtDistributionSetTypeRestApi {
      */
     @Operation(summary = "Return single optional Software Module Type in a Distribution Set Type",
             description = "Handles the GET request of retrieving the single optional software module type in that " +
-                    "distribution set type. Required Permission: READ_REPOSITORY")
+                    "distribution set type.")
     @GetResponses
+    @RequiredPermissions({ ApiPermission.READ_DISTRIBUTION_SET_TYPE, ApiPermission.READ_SOFTWARE_MODULE_TYPE })
     @GetMapping(value = DISTRIBUTIONSETTYPES_V1 + "/{distributionSetTypeId}/" + OPTIONALMODULETYPES + "/{softwareModuleTypeId}",
             produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtSoftwareModuleType> getOptionalModule(
@@ -213,8 +225,9 @@ public interface MgmtDistributionSetTypeRestApi {
      */
     @Operation(summary = "Return optional Software Module Types in a Distribution Set Type",
             description = "Handles the GET request of retrieving the list of optional software module types in that " +
-                    "distribution set type. Required Permission: READ_REPOSITORY")
+                    "distribution set type.")
     @GetResponses
+    @RequiredPermissions({ ApiPermission.READ_DISTRIBUTION_SET_TYPE })
     @GetMapping(value = DISTRIBUTIONSETTYPES_V1 + "/{distributionSetTypeId}/" + OPTIONALMODULETYPES,
             produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtSoftwareModuleType>> getOptionalModules(
@@ -229,8 +242,9 @@ public interface MgmtDistributionSetTypeRestApi {
      */
     @Operation(summary = "Delete a mandatory module from a Distribution Set Type",
             description = "Handles the DELETE request for removing a software module type from a single " +
-                    "distribution set type. Required Permission: DELETE_REPOSITORY")
+                    "distribution set type.")
     @DeleteResponses
+    @RequiredPermissions({ ApiPermission.UPDATE_DISTRIBUTION_SET_TYPE })
     @DeleteMapping(value = DISTRIBUTIONSETTYPES_V1 + "/{distributionSetTypeId}/" + MANDATORYMODULETYPES + "/{softwareModuleTypeId}")
     ResponseEntity<Void> removeMandatoryModule(
             @PathVariable("distributionSetTypeId") Long distributionSetTypeId,
@@ -245,9 +259,9 @@ public interface MgmtDistributionSetTypeRestApi {
      */
     @Operation(summary = "Delete an optional module from a Distribution Set Type",
             description = "Handles DELETE request for removing an optional module from the distribution set type. " +
-                    "Note that a DS type cannot be changed after it has been used by a DS. " +
-                    "Required Permission: UPDATE_REPOSITORY and READ_REPOSITORY")
+                    "Note that a DS type cannot be changed after it has been used by a DS.")
     @DeleteResponses
+    @RequiredPermissions({ ApiPermission.UPDATE_DISTRIBUTION_SET_TYPE })
     @DeleteMapping(value = DISTRIBUTIONSETTYPES_V1 + "/{distributionSetTypeId}/" + OPTIONALMODULETYPES + "/{softwareModuleTypeId}")
     ResponseEntity<Void> removeOptionalModule(
             @PathVariable("distributionSetTypeId") Long distributionSetTypeId,
@@ -262,13 +276,13 @@ public interface MgmtDistributionSetTypeRestApi {
      */
     @Operation(summary = "Add mandatory Software Module Type to a Distribution Set Type",
             description = "Handles the POST request for adding a mandatory software module type to a " +
-                    "distribution set type.Note that a DS type cannot be changed after it has been used by a DS. " +
-                    "Required Permission: UPDATE_REPOSITORY and READ_REPOSITORY")
+                    "distribution set type. Note that a DS type cannot be changed after it has been used by a DS.")
     @PostCreateNoContentResponses
     @ApiResponses(value = {
             @ApiResponse(responseCode = NOT_FOUND_404, description = "Distribution Set Type not found.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
+    @RequiredPermissions({ ApiPermission.UPDATE_DISTRIBUTION_SET_TYPE })
     @PostMapping(value = DISTRIBUTIONSETTYPES_V1 + "/{distributionSetTypeId}/" + MANDATORYMODULETYPES,
             consumes = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<Void> addMandatoryModule(
@@ -284,13 +298,13 @@ public interface MgmtDistributionSetTypeRestApi {
      */
     @Operation(summary = "Add optional Software Module Type to a Distribution Set Type",
             description = "Handles the POST request for adding an optional software module type to a " +
-                    "distribution set type.Note that a DS type cannot be changed after it has been used by a DS. " +
-                    "Required Permission: UPDATE_REPOSITORY and READ_REPOSITORY")
+                    "distribution set type. Note that a DS type cannot be changed after it has been used by a DS.")
     @PostCreateNoContentResponses
     @ApiResponses(value = {
             @ApiResponse(responseCode = NOT_FOUND_404, description = "Distribution Set Type not found.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
+    @RequiredPermissions({ ApiPermission.UPDATE_DISTRIBUTION_SET_TYPE })
     @PostMapping(value = DISTRIBUTIONSETTYPES_V1 + "/{distributionSetTypeId}/" + OPTIONALMODULETYPES,
             consumes = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<Void> addOptionalModule(

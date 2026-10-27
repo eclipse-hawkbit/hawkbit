@@ -187,6 +187,7 @@ public final class SpPermission {
                 }
                 for (final GrantedAuthority authority : grantedAuthorities) {
                     if (permission.equals(authority.getAuthority())) {
+                        PermissionTracker.record(permission);
                         return true;
                     }
                 }

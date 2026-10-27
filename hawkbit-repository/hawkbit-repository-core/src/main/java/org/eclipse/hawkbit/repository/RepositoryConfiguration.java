@@ -12,7 +12,9 @@ package org.eclipse.hawkbit.repository;
 import java.util.Optional;
 
 import lombok.extern.slf4j.Slf4j;
+import org.aopalliance.intercept.MethodInvocation;
 import org.eclipse.hawkbit.auth.Hierarchy;
+import org.eclipse.hawkbit.auth.PermissionTracker;
 import org.eclipse.hawkbit.auth.SpringEvalExpressions;
 import org.eclipse.hawkbit.tenancy.configuration.ControllerPollProperties;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
@@ -30,6 +32,7 @@ import org.springframework.security.access.expression.method.MethodSecurityExpre
 import org.springframework.security.access.expression.method.MethodSecurityExpressionOperations;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
+import org.springframework.security.authorization.DefaultAuthorizationManagerFactory;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -78,7 +81,9 @@ public class RepositoryConfiguration {
                             .getReachableGrantedAuthorities(authentication.getAuthorities()).stream()
                             .map(GrantedAuthority::getAuthority)
                             .anyMatch(authority -> authority.equals(neededPermission));
-                    if (!hasPermission) {
+                    if (hasPermission) {
+                        PermissionTracker.record(neededPermission);
+                    } else {
                         log.debug("User {} does not have permission {} for target {}",
                                 authentication.getName(), neededPermission, targetDomainObject);
                     }
@@ -95,9 +100,19 @@ public class RepositoryConfiguration {
     @ConditionalOnMissingBean
     MethodSecurityExpressionHandler methodSecurityExpressionHandler(
             final RoleHierarchy roleHierarchy, final PermissionEvaluator permissionEvaluator,
+            @Value("${" + PermissionTracker.ENABLED_PROPERTY + ":false}") final boolean permissionTrackingEnabled,
             final Optional<ApplicationContext> applicationContext) {
         final DefaultMethodSecurityExpressionHandler methodSecurityExpressionHandler = new DefaultMethodSecurityExpressionHandler() {};
-        methodSecurityExpressionHandler.setRoleHierarchy(roleHierarchy);
+        if (permissionTrackingEnabled) {
+            // the authority checks (hasAuthority / hasAnyAuthority) are delegated to the authorization manager factory - decorated in
+            // order to track the granted authorities (see PermissionTracker). Not decorated at all if tracking is disabled.
+            final DefaultAuthorizationManagerFactory<MethodInvocation> authorizationManagerFactory = new DefaultAuthorizationManagerFactory<>();
+            authorizationManagerFactory.setRoleHierarchy(roleHierarchy);
+            methodSecurityExpressionHandler.setAuthorizationManagerFactory(
+                    new PermissionTrackingAuthorizationManagerFactory<>(authorizationManagerFactory));
+        } else {
+            methodSecurityExpressionHandler.setRoleHierarchy(roleHierarchy);
+        }
         methodSecurityExpressionHandler.setPermissionEvaluator(permissionEvaluator);
         applicationContext.ifPresent(methodSecurityExpressionHandler::setApplicationContext);
         return methodSecurityExpressionHandler;

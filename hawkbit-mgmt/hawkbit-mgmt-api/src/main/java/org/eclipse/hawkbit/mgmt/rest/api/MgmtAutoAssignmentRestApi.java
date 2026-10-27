@@ -29,11 +29,13 @@ import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.autoassignment.MgmtAutoAssignmentResponseBody;
 import org.eclipse.hawkbit.mgmt.json.model.autoassignment.MgmtAutoAssignmentRestRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.json.model.autoassignment.MgmtAutoAssignmentRestRequestBodyPut;
+import org.eclipse.hawkbit.rest.ApiPermission;
 import org.eclipse.hawkbit.rest.ApiResponsesConstants.DeleteResponses;
 import org.eclipse.hawkbit.rest.ApiResponsesConstants.GetIfExistResponses;
 import org.eclipse.hawkbit.rest.ApiResponsesConstants.PostCreateNoContentResponses;
 import org.eclipse.hawkbit.rest.ApiResponsesConstants.PostCreateResponses;
 import org.eclipse.hawkbit.rest.OpenApi;
+import org.eclipse.hawkbit.rest.RequiredPermissions;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -60,8 +62,13 @@ public interface MgmtAutoAssignmentRestApi {
      * and the newly created auto assignment. In case of a failure the {@code JsonResponseExceptionHandler} is handling the response
      */
 
-    @Operation(summary = "Create a new auto assignment", description = "Handles the POST request for creating an auto assignment. Required Permission: CREATE_AUTO_ASSIGNMENT")
+    @Operation(summary = "Create a new auto assignment",
+            description = "Handles the POST request for creating an auto assignment. If the distribution set gets implicitly locked, " +
+                    "UPDATE_DISTRIBUTION_SET is required as well.")
     @PostCreateResponses
+    @RequiredPermissions(
+            value = { ApiPermission.UPDATE_TARGET, ApiPermission.READ_DISTRIBUTION_SET },
+            optional = { ApiPermission.UPDATE_DISTRIBUTION_SET })
     @PostMapping(value = AUTO_ASSIGNMENTS_V1,
             consumes = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE }, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtAutoAssignmentResponseBody> create(@Valid @RequestBody MgmtAutoAssignmentRestRequestBodyPost autoAssignmentRequestBody);
@@ -70,8 +77,9 @@ public interface MgmtAutoAssignmentRestApi {
      * Handles the GET request of retrieving multiple auto assignment
      */
     @Operation(summary = "Return all auto assignments",
-            description = "Handles the GET request of retrieving all auto assignments. Required Permission: READ_AUTO_ASSIGNMENT")
+            description = "Handles the GET request of retrieving all auto assignments.")
     @GetIfExistResponses
+    @RequiredPermissions({ ApiPermission.READ_AUTO_ASSIGNMENT })
     @GetMapping(value = AUTO_ASSIGNMENTS_V1, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtAutoAssignmentResponseBody>> getAutoAssignments(
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false)
@@ -97,8 +105,9 @@ public interface MgmtAutoAssignmentRestApi {
      * @return a single auto assignment with status OK
      */
     @Operation(summary = "Return a single auto assignment",
-            description = "Handles the GET request of retrieving a single auto assignment. Required Permission: READ_AUTO_ASSIGNMENT")
+            description = "Handles the GET request of retrieving a single auto assignment.")
     @GetIfExistResponses
+    @RequiredPermissions({ ApiPermission.READ_AUTO_ASSIGNMENT })
     @GetMapping(value = AUTO_ASSIGNMENTS_V1 + "/{id}", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtAutoAssignmentResponseBody> getAutoAssignment(@PathVariable("id") long id);
 
@@ -110,7 +119,8 @@ public interface MgmtAutoAssignmentRestApi {
      * @return OK response (200) if the auto assignment is updated. In case of any exceptions, the corresponding errors occur
      */
     @Operation(summary = "Update an auto assignment",
-            description = "Handles the request for updating an auto assignment. Required Permission: UPDATE_AUTO_ASSIGNMENT")
+            description = "Handles the request for updating an auto assignment.")
+    @RequiredPermissions({ ApiPermission.UPDATE_AUTO_ASSIGNMENT })
     @PutMapping(value = AUTO_ASSIGNMENTS_V1 + "/{id}",
             consumes = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE }, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtAutoAssignmentResponseBody> update(
@@ -127,8 +137,9 @@ public interface MgmtAutoAssignmentRestApi {
     @Operation(summary = "Approve an auto assignment",
             description = "Handles the request for approving an auto assignment. Only possible if " +
                             "approval workflow is enabled in the system configuration and the auto assignment " +
-                            "is in state WAITING_FOR_APPROVAL. Required Permission: APPROVE_AUTO_ASSIGNMENT")
+                            "is in state WAITING_FOR_APPROVAL.")
     @PostCreateNoContentResponses
+    @RequiredPermissions({ ApiPermission.APPROVE_AUTO_ASSIGNMENT })
     @PostMapping(value = AUTO_ASSIGNMENTS_V1 + "/{id}/approve", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<Void> approve(
             @PathVariable("id") long id,
@@ -144,8 +155,9 @@ public interface MgmtAutoAssignmentRestApi {
     @Operation(summary = "Deny an auto assignment",
             description = "Handles the request for denying the approval of an auto assignment. Only possible if " +
                     "approval workflow is enabled in the system configuration and the auto assignment " +
-                    "is in state WAITING_FOR_APPROVAL. Required Permission: APPROVE_AUTO_ASSIGNMENT")
+                    "is in state WAITING_FOR_APPROVAL.")
     @PostCreateNoContentResponses
+    @RequiredPermissions({ ApiPermission.APPROVE_AUTO_ASSIGNMENT })
     @PostMapping(value = AUTO_ASSIGNMENTS_V1 + "/{id}/deny", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<Void> deny(
             @PathVariable("id") long id,
@@ -158,8 +170,9 @@ public interface MgmtAutoAssignmentRestApi {
      * @return OK response (200) if the auto assignment could be started. In case of any exceptions the corresponding errors occur
      */
     @Operation(summary = "Start an auto assignment",
-            description = "Handles the POST request for starting an auto assignment. Required Permission: HANDLE_AUTO_ASSIGNMENT")
+            description = "Handles the POST request for starting an auto assignment.")
     @PostCreateNoContentResponses
+    @RequiredPermissions({ ApiPermission.HANDLE_AUTO_ASSIGNMENT })
     @PostMapping(value = AUTO_ASSIGNMENTS_V1 + "/{id}/start", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<Void> start(@PathVariable("id") long id);
 
@@ -170,8 +183,9 @@ public interface MgmtAutoAssignmentRestApi {
      * @return OK response (200) if the auto assignment could be paused. In case of any exceptions the corresponding errors occur
      */
     @Operation(summary = "Pause an auto assignment",
-            description = "Handles the POST request for pausing an auto assignment. Required Permission: HANDLE_AUTO_ASSIGNMENT")
+            description = "Handles the POST request for pausing an auto assignment.")
     @PostCreateNoContentResponses
+    @RequiredPermissions({ ApiPermission.HANDLE_AUTO_ASSIGNMENT })
     @PostMapping(value = AUTO_ASSIGNMENTS_V1 + "/{id}/pause", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<Void> pause(@PathVariable("id") long id);
 
@@ -182,8 +196,9 @@ public interface MgmtAutoAssignmentRestApi {
      * @return OK response (200) if the auto assignment could be resumed. In case of any exceptions the corresponding errors occur
      */
     @Operation(summary = "Resume an auto assignment",
-            description = "Handles the POST request for resuming an auto assignment. Required Permission: HANDLE_AUTO_ASSIGNMENT")
+            description = "Handles the POST request for resuming an auto assignment.")
     @PostCreateNoContentResponses
+    @RequiredPermissions({ ApiPermission.HANDLE_AUTO_ASSIGNMENT })
     @PostMapping(value = AUTO_ASSIGNMENTS_V1 + "/{id}/resume", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<Void> resume(@PathVariable("id") long id);
 
@@ -193,8 +208,9 @@ public interface MgmtAutoAssignmentRestApi {
      * @param id the id of the auto assignment
      * @return OK response (200) if the auto assignment could be deleted. In case of any exceptions the corresponding errors occur
      */
-    @Operation(summary = "Delete an auto assignment", description = "Handles the DELETE request for deleting an auto assignment. Required Permission: DELETE_AUTO_ASSIGNMENT")
+    @Operation(summary = "Delete an auto assignment", description = "Handles the DELETE request for deleting an auto assignment.")
     @DeleteResponses
+    @RequiredPermissions({ ApiPermission.DELETE_AUTO_ASSIGNMENT })
     @DeleteMapping(value = AUTO_ASSIGNMENTS_V1 + "/{id}", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<Void> delete(@PathVariable("id") long id);
 }

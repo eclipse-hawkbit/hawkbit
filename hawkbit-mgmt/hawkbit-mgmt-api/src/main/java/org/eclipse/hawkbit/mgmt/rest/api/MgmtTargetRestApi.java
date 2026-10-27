@@ -55,9 +55,11 @@ import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTargetAttributes;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTargetAutoConfirm;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTargetAutoConfirmUpdate;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTargetRequestBody;
+import org.eclipse.hawkbit.rest.ApiPermission;
 import org.eclipse.hawkbit.rest.ApiResponsesConstants.PostUpdateNoContentResponses;
 import org.eclipse.hawkbit.rest.ApiResponsesConstants.PostUpdateResponses;
 import org.eclipse.hawkbit.rest.OpenApi;
+import org.eclipse.hawkbit.rest.RequiredPermissions;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -85,9 +87,13 @@ public interface MgmtTargetRestApi {
      * @param targetId the ID of the target to retrieve
      * @return a single target with status OK.
      */
-    @Operation(summary = "Return target by id", description = "Handles the GET request of retrieving a single target. " +
-            "Required Permission: READ_TARGET.")
+    @Operation(summary = "Return target by id",
+            description = "Handles the GET request of retrieving a single target. " +
+                    "The security token is only returned if the caller has READ_TARGET_SECURITY_TOKEN.")
     @GetResponses
+    @RequiredPermissions(
+            value = { ApiPermission.READ_TARGET },
+            optional = { ApiPermission.READ_TARGET_SECURITY_TOKEN })
     @GetMapping(value = TARGETS_V1 + "/{targetId}", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtTarget> getTarget(@PathVariable("targetId") String targetId);
 
@@ -102,8 +108,13 @@ public interface MgmtTargetRestApi {
      * @return a list of all targets for a defined or default page request with status OK. The response is always paged. In any failure the
      *         JsonResponseExceptionHandler is handling the response.
      */
-    @Operation(summary = "Return all targets", description = "Handles the GET request of retrieving all targets. Required permission: READ_TARGET")
+    @Operation(summary = "Return all targets",
+            description = "Handles the GET request of retrieving all targets. The security token is only returned if the caller has " +
+                    "READ_TARGET_SECURITY_TOKEN.")
     @GetIfExistResponses
+    @RequiredPermissions(
+            value = { ApiPermission.READ_TARGET },
+            optional = { ApiPermission.READ_TARGET_SECURITY_TOKEN })
     @GetMapping(value = TARGETS_V1, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtTarget>> getTargets(
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false)
@@ -128,8 +139,13 @@ public interface MgmtTargetRestApi {
      * @return In case all targets could successful created the ResponseEntity with status code 201 with a list of successfully created
      *         entities. In any failure the JsonResponseExceptionHandler is handling the response.
      */
-    @Operation(summary = "Create target(s)", description = "Handles the POST request of creating new targets. The request body must always be a list of targets. Required Permission: CREATE_TARGET")
+    @Operation(summary = "Create target(s)",
+            description = "Handles the POST request of creating new targets. The request body must always be a list of targets. The security " +
+                    "token is only returned if the caller has READ_TARGET_SECURITY_TOKEN.")
     @PostCreateResponses
+    @RequiredPermissions(
+            value = { ApiPermission.CREATE_TARGET, ApiPermission.READ_TARGET },
+            optional = { ApiPermission.READ_TARGET_SECURITY_TOKEN })
     @PostMapping(value = TARGETS_V1,
             consumes = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE }, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtTarget>> createTargets(@RequestBody List<MgmtTargetRequestBody> targets);
@@ -143,8 +159,13 @@ public interface MgmtTargetRestApi {
      *         update.
      * @return the updated target response which contains all fields also fields which have not updated
      */
-    @Operation(summary = "Update target by id", description = "Handles the PUT request of updating a target. Required Permission: UPDATE_TARGET")
+    @Operation(summary = "Update target by id",
+            description = "Handles the PUT request of updating a target. The security token is only returned if the caller has " +
+                    "READ_TARGET_SECURITY_TOKEN.")
     @PutResponses
+    @RequiredPermissions(
+            value = { ApiPermission.READ_TARGET, ApiPermission.UPDATE_TARGET },
+            optional = { ApiPermission.READ_TARGET_SECURITY_TOKEN })
     @PutMapping(value = TARGETS_V1 + "/{targetId}",
             consumes = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE }, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtTarget> updateTarget(
@@ -158,8 +179,9 @@ public interface MgmtTargetRestApi {
      * @return If the given targetId could exists and could be deleted Http OK. In any failure the JsonResponseExceptionHandler is handling the
      *         response.
      */
-    @Operation(summary = "Delete target by id", description = "Handles the DELETE request of deleting a single target. Required Permission: DELETE_TARGET")
+    @Operation(summary = "Delete target by id", description = "Handles the DELETE request of deleting a single target.")
     @DeleteResponses
+    @RequiredPermissions({ ApiPermission.DELETE_TARGET })
     @DeleteMapping(value = TARGETS_V1 + "/{targetId}")
     ResponseEntity<Void> deleteTarget(@PathVariable("targetId") String targetId);
 
@@ -170,8 +192,10 @@ public interface MgmtTargetRestApi {
      * @return If the given targetId could exists and could be unassign Http OK. In any failure the JsonResponseExceptionHandler is handling the
      *         response.
      */
-    @Operation(summary = "Unassign target type from target.", description = "Remove the target type from a target. The target type will be set to null. Required permission: UPDATE_TARGET")
+    @Operation(summary = "Unassign target type from target.",
+            description = "Remove the target type from a target. The target type will be set to null.")
     @DeleteResponses
+    @RequiredPermissions({ ApiPermission.UPDATE_TARGET })
     @DeleteMapping(value = TARGETS_V1 + TARGET_ID_TARGETTYPE)
     ResponseEntity<Void> unassignTargetType(@PathVariable("targetId") String targetId);
 
@@ -183,8 +207,9 @@ public interface MgmtTargetRestApi {
      * @return If the given targetId could exists and could be assign Http OK. In any failure the JsonResponseExceptionHandler is handling the
      *         response.
      */
-    @Operation(summary = "Assign target type to a target", description = "Assign or update the target type of a target. Required permission: UPDATE_TARGET")
+    @Operation(summary = "Assign target type to a target", description = "Assign or update the target type of a target.")
     @PostUpdateNoContentResponses
+    @RequiredPermissions({ ApiPermission.UPDATE_TARGET })
     @PostMapping(value = TARGETS_V1 + TARGET_ID_TARGETTYPE, consumes = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<Void> assignTargetType(@PathVariable("targetId") String targetId, @RequestBody MgmtId targetTypeId);
 
@@ -194,8 +219,10 @@ public interface MgmtTargetRestApi {
      * @param targetId the ID of the target to retrieve the attributes.
      * @return the target attributes as map response with status OK
      */
-    @Operation(summary = "Return attributes of a specific target", description = "Handles the GET request of retrieving the attributes of a specific target. Reponse is a key/value list. Required Permission: READ_TARGET")
+    @Operation(summary = "Return attributes of a specific target",
+            description = "Handles the GET request of retrieving the attributes of a specific target. Reponse is a key/value list.")
     @GetResponses
+    @RequiredPermissions({ ApiPermission.READ_TARGET })
     @GetMapping(value = TARGETS_V1 + "/{targetId}/attributes", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtTargetAttributes> getAttributes(@PathVariable("targetId") String targetId);
 
@@ -211,8 +238,10 @@ public interface MgmtTargetRestApi {
      * @return a list of all Actions for a defined or default page request with status OK. The response is always paged. In any failure the
      *         JsonResponseExceptionHandler is handling the response.
      */
-    @Operation(summary = "Return actions for a specific target", description = "Handles the GET request of retrieving the full action history of a specific target. Required Permission: READ_TARGET")
+    @Operation(summary = "Return actions for a specific target",
+            description = "Handles the GET request of retrieving the full action history of a specific target.")
     @GetResponses
+    @RequiredPermissions({ ApiPermission.READ_TARGET })
     @GetMapping(value = TARGETS_V1 + "/{targetId}/actions", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtAction>> getActionHistory(
             @PathVariable("targetId") String targetId,
@@ -245,12 +274,13 @@ public interface MgmtTargetRestApi {
                     "actions in the provided action ids list. Deletion is restricted to actions whose status is allowed for deletion " +
                     "by the tenant configuration 'action.delete.allowed.statuses' (default: CANCELED, ERROR, FINISHED). With keepLast, " +
                     "actions not in an allowed status are skipped; with an action ids list, the request is rejected if any provided " +
-                    "action is not in an allowed status. Required Permission: DELETE_REPOSITORY")
+                    "action is not in an allowed status.")
     @DeleteResponses
     @ApiResponses(@ApiResponse(responseCode = METHOD_NOT_ALLOWED_405,
             description = "At least one action in the provided action ids list is not in a status that is allowed for deletion (see " +
                     "tenant configuration 'action.delete.allowed.statuses').",
             content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))))
+    @RequiredPermissions({ ApiPermission.UPDATE_TARGET })
     @DeleteMapping(value = TARGETS_V1 + "/{targetId}/actions", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<Void> deleteActionsForTarget(
             @PathVariable("targetId") String targetId,
@@ -266,8 +296,9 @@ public interface MgmtTargetRestApi {
      * @return the action
      */
     @Operation(summary = "Return action by id of a specific target",
-            description = "Handles the GET request of retrieving a specific action on a specific target. Required Permission: READ_TARGET")
+            description = "Handles the GET request of retrieving a specific action on a specific target.")
     @GetResponses
+    @RequiredPermissions({ ApiPermission.READ_TARGET })
     @GetMapping(value = TARGETS_V1 + "/{targetId}/actions/{actionId}", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtAction> getAction(
             @PathVariable("targetId") String targetId,
@@ -282,12 +313,13 @@ public interface MgmtTargetRestApi {
      * @return status no content in case cancellation was successful
      */
     @Operation(summary = "Cancel action for a specific target",
-            description = "Cancels an active action, only active actions can be deleted. Required Permission: UPDATE_TARGET")
+            description = "Cancels an active action, only active actions can be deleted.")
     @DeleteResponses
     @ApiResponses(value = {
             @ApiResponse(responseCode = METHOD_NOT_ALLOWED_405, description = "Action is not in cancelling state",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
+    @RequiredPermissions({ ApiPermission.READ_TARGET, ApiPermission.UPDATE_TARGET })
     @DeleteMapping(value = TARGETS_V1 + "/{targetId}/actions/{actionId}")
     ResponseEntity<Void> cancelAction(
             @PathVariable("targetId") String targetId,
@@ -302,8 +334,10 @@ public interface MgmtTargetRestApi {
      * @param actionUpdate to update the action
      * @return status no content in case cancellation was successful
      */
-    @Operation(summary = "Switch an action from soft to forced", description = "Handles the PUT request to switch an action from soft to forced. Required Permission: UPDATE_TARGET.")
+    @Operation(summary = "Switch an action from soft to forced",
+            description = "Handles the PUT request to switch an action from soft to forced.")
     @PutResponses
+    @RequiredPermissions({ ApiPermission.READ_TARGET, ApiPermission.UPDATE_TARGET })
     @PutMapping(value = TARGETS_V1 + "/{targetId}/actions/{actionId}",
             consumes = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE }, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtAction> updateAction(
@@ -318,13 +352,13 @@ public interface MgmtTargetRestApi {
             Either confirm or deny an action which is waiting for confirmation.
             The action will be transferred into the RUNNING state in case confirming it.
             The action will remain in WAITING_FOR_CONFIRMATION state in case denying it.
-            Required Permission: READ_REPOSITORY AND UPDATE_TARGET
             """)
     @PutNoContentResponses
     @ApiResponses(value = {
             @ApiResponse(responseCode = GONE_410, description = "Action is not active anymore.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
     })
+    @RequiredPermissions({ ApiPermission.READ_TARGET, ApiPermission.UPDATE_TARGET })
     @PutMapping(value = TARGETS_V1 + "/{targetId}/actions/{actionId}/confirmation",
             consumes = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE },
             produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
@@ -346,8 +380,9 @@ public interface MgmtTargetRestApi {
      *         JsonResponseExceptionHandler is handling the response.
      */
     @Operation(summary = "Return status of a specific action on a specific target",
-            description = "Handles the GET request of retrieving a specific action on a specific target. Required Permission: READ_TARGET")
+            description = "Handles the GET request of retrieving a specific action on a specific target.")
     @GetResponses
+    @RequiredPermissions({ ApiPermission.READ_TARGET })
     @GetMapping(value = TARGETS_V1 + "/{targetId}/actions/{actionId}/status",
             produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtActionStatus>> getActionStatusList(
@@ -366,8 +401,10 @@ public interface MgmtTargetRestApi {
      * @param targetId the ID of the target to retrieve the assigned distribution
      * @return the assigned distribution set with status OK, if none is assigned than {@code null} content (e.g. "{}")
      */
-    @Operation(summary = "Return the assigned distribution set of a specific target", description = "Handles the GET request of retrieving the assigned distribution set of an specific target. Required Permission: READ_TARGET")
+    @Operation(summary = "Return the assigned distribution set of a specific target",
+            description = "Handles the GET request of retrieving the assigned distribution set of an specific target.")
     @GetResponses
+    @RequiredPermissions({ ApiPermission.READ_TARGET })
     @GetMapping(value = TARGETS_V1 + "/{targetId}/assignedDS", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtDistributionSet> getAssignedDistributionSet(@PathVariable("targetId") String targetId);
 
@@ -380,8 +417,14 @@ public interface MgmtTargetRestApi {
      * @return status OK if the assignment of the targets was successful and a complex return body which contains information about the assigned
      *         targets and the already assigned targets counters
      */
-    @Operation(summary = "Assigns a distribution set to a specific target", description = "Handles the POST request for assigning a distribution set to a specific target. Required Permission: READ_REPOSITORY and UPDATE_TARGET")
+    @Operation(summary = "Assigns a distribution set to a specific target",
+            description = "Handles the POST request for assigning a distribution set to a specific target. Unless 'offline' is set, " +
+                    "READ_TARGET is required as well. If the distribution set is not locked yet and implicit locking is enabled, " +
+                    "UPDATE_DISTRIBUTION_SET is required as well.")
     @PostUpdateResponses
+    @RequiredPermissions(
+            value = { ApiPermission.UPDATE_TARGET, ApiPermission.READ_DISTRIBUTION_SET },
+            optional = { ApiPermission.READ_TARGET, ApiPermission.UPDATE_DISTRIBUTION_SET })
     @PostMapping(value = TARGETS_V1 + "/{targetId}/assignedDS",
             consumes = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE }, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtTargetAssignmentResponseBody> postAssignedDistributionSet(
@@ -401,8 +444,10 @@ public interface MgmtTargetRestApi {
      * @param targetId the ID of the target to retrieve
      * @return the assigned installed set with status OK, if none is installed than {@code null} content (e.g. "{}")
      */
-    @Operation(summary = "Return installed distribution set of a specific target", description = "Handles the GET request of retrieving the installed distribution set of an specific target. Required Permission: READ_TARGET")
+    @Operation(summary = "Return installed distribution set of a specific target",
+            description = "Handles the GET request of retrieving the installed distribution set of an specific target.")
     @GetResponses
+    @RequiredPermissions({ ApiPermission.READ_TARGET })
     @GetMapping(value = TARGETS_V1 + "/{targetId}/installedDS", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtDistributionSet> getInstalledDistributionSet(@PathVariable("targetId") String targetId);
 
@@ -411,8 +456,9 @@ public interface MgmtTargetRestApi {
      *
      * @param targetId the ID of the target for the metadata
      */
-    @Operation(summary = "Return tags for specific target", description = "Get a paged list of tags for a target. Required permission: READ_REPOSITORY")
+    @Operation(summary = "Return tags for specific target", description = "Get a paged list of tags for a target.")
     @GetResponses
+    @RequiredPermissions({ ApiPermission.READ_TARGET })
     @GetMapping(value = TARGETS_V1 + "/{targetId}/tags", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtTag>> getTags(@PathVariable("targetId") String targetId);
 
@@ -422,12 +468,13 @@ public interface MgmtTargetRestApi {
      * @param targetId the ID of the targetId to create metadata for
      * @param metadataRest the list of metadata entries to create
      */
-    @Operation(summary = "Create a list of metadata for a specific target", description = "Create a list of metadata entries Required permissions: READ_REPOSITORY and UPDATE_TARGET")
+    @Operation(summary = "Create a list of metadata for a specific target", description = "Create a list of metadata entries.")
     @PostCreateResponses
     @ApiResponses(value = {
             @ApiResponse(responseCode = NOT_FOUND_404, description = "Target not found",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
+    @RequiredPermissions({ ApiPermission.UPDATE_TARGET })
     @PostMapping(value = TARGETS_V1 + "/{targetId}/metadata",
             consumes = { APPLICATION_JSON_VALUE, HAL_JSON_VALUE })
     ResponseEntity<Void> createMetadata(@PathVariable("targetId") String targetId, @RequestBody List<MgmtMetadata> metadataRest);
@@ -438,8 +485,9 @@ public interface MgmtTargetRestApi {
      * @param targetId the ID of the target for the metadata
      * @return status OK if get request is successful with the paged list of metadata
      */
-    @Operation(summary = "Return metadata for specific target", description = "Get a paged list of metadata for a target. Required permission: READ_REPOSITORY")
+    @Operation(summary = "Return metadata for specific target", description = "Get a paged list of metadata for a target.")
     @GetResponses
+    @RequiredPermissions({ ApiPermission.READ_TARGET })
     @GetMapping(value = TARGETS_V1 + "/{targetId}/metadata", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtMetadata>> getMetadata(@PathVariable("targetId") String targetId);
 
@@ -451,8 +499,9 @@ public interface MgmtTargetRestApi {
      * @return status OK if get request is successful with the value of the metadata
      */
     @Operation(summary = "Return single metadata value for a specific key of a target",
-            description = "Get a single metadata value for a metadata key. Required permission: READ_REPOSITORY")
+            description = "Get a single metadata value for a metadata key.")
     @GetResponses
+    @RequiredPermissions({ ApiPermission.READ_TARGET })
     @GetMapping(value = TARGETS_V1 + "/{targetId}/metadata/{metadataKey}", produces = { APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtMetadata> getMetadataValue(
             @PathVariable("targetId") String targetId,
@@ -466,8 +515,9 @@ public interface MgmtTargetRestApi {
      * @param metadata update body
      */
     @Operation(summary = "Updates a single metadata value of a target",
-            description = "Update a single metadata value for speficic key. Required permission: UPDATE_REPOSITORY")
+            description = "Update a single metadata value for speficic key.")
     @PutNoContentResponses
+    @RequiredPermissions({ ApiPermission.UPDATE_TARGET })
     @PutMapping(value = TARGETS_V1 + "/{targetId}/metadata/{metadataKey}")
     ResponseEntity<Void> updateMetadata(
             @PathVariable("targetId") String targetId,
@@ -481,8 +531,9 @@ public interface MgmtTargetRestApi {
      * @param metadataKey the key of the metadata to delete
      * @return status OK if the delete request is successful
      */
-    @Operation(summary = "Deletes a single metadata entry from a target", description = "Delete a single metadata. Required permission: UPDATE_REPOSITORY")
+    @Operation(summary = "Deletes a single metadata entry from a target", description = "Delete a single metadata.")
     @DeleteResponses
+    @RequiredPermissions({ ApiPermission.UPDATE_TARGET })
     @DeleteMapping(value = TARGETS_V1 + "/{targetId}/metadata/{metadataKey}")
     ResponseEntity<Void> deleteMetadata(
             @PathVariable("targetId") String targetId,
@@ -494,8 +545,10 @@ public interface MgmtTargetRestApi {
      * @param targetId to check the state for
      * @return the current state as {@link MgmtTargetAutoConfirm}
      */
-    @Operation(summary = "Return the current auto-confitm state for a specific target", description = "Handles the GET request to check the current auto-confirmation state of a target. Required Permission: READ_TARGET")
+    @Operation(summary = "Return the current auto-confitm state for a specific target",
+            description = "Handles the GET request to check the current auto-confirmation state of a target.")
     @GetResponses
+    @RequiredPermissions({ ApiPermission.READ_TARGET })
     @GetMapping(value = TARGETS_V1 + "/{targetId}/autoConfirm", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtTargetAutoConfirm> getAutoConfirmStatus(
             @PathVariable("targetId") String targetId);
@@ -507,8 +560,12 @@ public interface MgmtTargetRestApi {
      * @param update properties to update
      * @return {@link org.springframework.http.HttpStatus#OK} in case of a success
      */
-    @Operation(summary = "Activate auto-confirm on a specific target", description = "Handles the POST request to activate auto-confirmation for a specific target. As a result all current active as well as future actions will automatically be confirmed by mentioning the initiator as triggered person. Actions will be automatically confirmed, as long as auto-confirmation is active. Required Permission: UPDATE_TARGET")
+    @Operation(summary = "Activate auto-confirm on a specific target",
+            description = "Handles the POST request to activate auto-confirmation for a specific target. As a result all current active as " +
+                    "well as future actions will automatically be confirmed by mentioning the initiator as triggered person. Actions will be " +
+                    "automatically confirmed, as long as auto-confirmation is active.")
     @PostUpdateNoContentResponses
+    @RequiredPermissions({ ApiPermission.UPDATE_TARGET })
     @PostMapping(value = TARGETS_V1 + "/{targetId}/autoConfirm/activate")
     ResponseEntity<Void> activateAutoConfirm(
             @PathVariable("targetId") String targetId,
@@ -520,8 +577,11 @@ public interface MgmtTargetRestApi {
      * @param targetId to deactivate auto-confirm on
      * @return {@link org.springframework.http.HttpStatus#OK} in case of a success
      */
-    @Operation(summary = "Deactivate auto-confirm on a specific target", description = "Handles the POST request to deactivate auto-confirmation for a specific target. All active actions will remain unchanged while all future actions need to be confirmed, before processing with the deployment. Required Permission: UPDATE_TARGET")
+    @Operation(summary = "Deactivate auto-confirm on a specific target",
+            description = "Handles the POST request to deactivate auto-confirmation for a specific target. All active actions will remain " +
+                    "unchanged while all future actions need to be confirmed, before processing with the deployment.")
     @PostUpdateNoContentResponses
+    @RequiredPermissions({ ApiPermission.UPDATE_TARGET })
     @PostMapping(value = TARGETS_V1 + "/{targetId}/autoConfirm/deactivate")
     ResponseEntity<Void> deactivateAutoConfirm(
             @PathVariable("targetId") String targetId);

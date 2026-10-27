@@ -9,11 +9,14 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.OAuthFlow;
@@ -24,18 +27,25 @@ import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.servers.ServerVariable;
 import io.swagger.v3.oas.models.servers.ServerVariables;
 import io.swagger.v3.oas.models.tags.Tag;
+import org.eclipse.hawkbit.auth.SpPermission;
 import org.eclipse.hawkbit.rest.OpenApi;
+import org.eclipse.hawkbit.rest.RequiredPermissions;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
+import org.springdoc.core.customizers.GlobalOperationCustomizer;
 import org.springdoc.core.models.GroupedOpenApi;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 @Configuration
 @ConditionalOnProperty(value = OpenApi.HAWKBIT_SERVER_OPENAPI_ENABLED, havingValue = "true", matchIfMissing = true)
@@ -54,8 +64,7 @@ public class MgmtOpenApiConfiguration {
             @Value("${springdoc.oauth-flow.authorizationUrl:}") final String authorizationUrl,
             @Value("${springdoc.oauth-flow.tokenUrl:}") final String tokenUrl,
             @Autowired(required = false) @Qualifier("hawkbitOAuth2ResourceServerCustomizer") final Customizer<OAuth2ResourceServerConfigurer<HttpSecurity>> oauth2ResourceServerCustomizer,
-            final HawkbitSecurityProperties hawkbitSecurityProperties
-    ) {
+            final HawkbitSecurityProperties hawkbitSecurityProperties) {
         final boolean oauth2Enabled = oauth2ResourceServerCustomizer != null;
         final Map<String, SecurityScheme> securitySchemeMap = new LinkedHashMap<>(); // linked map to keep the order
         final SecurityRequirement securityRequirement = new SecurityRequirement();
@@ -113,6 +122,56 @@ public class MgmtOpenApiConfiguration {
                                 .tags(sort(openApi.getTags())))
                 .build();
         // @formatter:on
+    }
+
+    // Appends the required permissions, declared via @RequiredPermissions on the REST API interface methods, to the
+    // operation descriptions. So they are kept in one place (as constants) instead of being hand-written in each
+    // description, and the permissions implying them (via the role hierarchy) are listed as well.
+    // Global - so applied to the default document (/v3/api-docs) and to all groups (not registered explicitly to the group, otherwise
+    // it would be applied twice). Operations without @RequiredPermissions (e.g. of other APIs in the monolith) are not changed.
+    @Bean
+    @ConditionalOnProperty(
+            value = "hawkbit.server.openapi.mgmt.enabled", havingValue = "true", matchIfMissing = true)
+    GlobalOperationCustomizer mgmtRequiredPermissionsCustomizer(final ObjectProvider<RoleHierarchy> roleHierarchyProvider) {
+        return (operation, handlerMethod) -> {
+            // searches the type hierarchy, i.e. finds the annotation declared on the implemented *RestApi interface
+            final RequiredPermissions requiredPermissions = AnnotatedElementUtils.findMergedAnnotation(
+                    handlerMethod.getMethod(), RequiredPermissions.class);
+            if (requiredPermissions != null) {
+                final RoleHierarchy roleHierarchy = roleHierarchyProvider.getIfAvailable();
+                final List<String> required = new ArrayList<>();
+                Arrays.stream(requiredPermissions.value()).forEach(permission -> required.add(withImpliedBy(permission, roleHierarchy)));
+                Arrays.stream(requiredPermissions.anyOf()).forEach(anyOf -> required.add("one of (" + Arrays.stream(anyOf.value())
+                        .map(permission -> withImpliedBy(permission, roleHierarchy))
+                        .collect(Collectors.joining(", ")) + ")"));
+                final StringBuilder permissionsDescription = new StringBuilder(required.size() > 1 ? "Required Permissions: " : "Required Permission: ")
+                        .append(required.isEmpty() ? "none (authentication only)" : String.join(", ", required));
+                if (requiredPermissions.optional().length > 0) {
+                    permissionsDescription.append(". Conditionally Required Permissions: ").append(Arrays.stream(requiredPermissions.optional())
+                            .map(permission -> withImpliedBy(permission, roleHierarchy))
+                            .collect(Collectors.joining(", ")));
+                }
+                final String description = operation.getDescription();
+                operation.setDescription(description == null || description.isBlank()
+                        ? permissionsDescription.toString()
+                        : description.strip() + " " + permissionsDescription);
+            }
+            return operation;
+        };
+    }
+
+    private static String withImpliedBy(final String permission, final RoleHierarchy roleHierarchy) {
+        if (roleHierarchy == null) {
+            return permission;
+        }
+        final List<String> implying = SpPermission.getAllAuthorities().stream()
+                .filter(authority -> !authority.equals(permission))
+                .filter(authority -> roleHierarchy.getReachableGrantedAuthorities(List.of(new SimpleGrantedAuthority(authority)))
+                        .stream()
+                        .anyMatch(reachable -> permission.equals(reachable.getAuthority())))
+                .sorted()
+                .toList();
+        return implying.isEmpty() ? permission : permission + " (or implied by " + String.join(", ", implying) + ")";
     }
 
     private static ServerVariable tenantSeverVariable() {
