@@ -33,6 +33,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.integration.jdbc.lock.DefaultLockRepository;
 import org.springframework.integration.jdbc.lock.JdbcLockRegistry;
 import org.springframework.integration.jdbc.lock.LockRepository;
+import org.springframework.integration.support.locks.DistributedLock;
 import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.integration.util.UUIDConverter;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -98,8 +99,8 @@ class DistributedLockTest extends AbstractJpaIntegrationTest {
     @SuppressWarnings({ "java:S2925" })
     @Test
     void keepLockAlive() {
-        final LockRegistry lockRegistry0 = new JdbcLockRegistry(lockRepository0);
-        final LockRegistry lockRegistry1 = new JdbcLockRegistry(lockRepository1);
+        final LockRegistry<DistributedLock> lockRegistry0 = new JdbcLockRegistry(lockRepository0);
+        final LockRegistry<DistributedLock> lockRegistry1 = new JdbcLockRegistry(lockRepository1);
 
         final String lockKey0 = "test-lock0";
         final String lockKey1 = "test-lock1";

@@ -549,7 +549,7 @@ public class JpaTargetManagement
         query.where(cb.equal(targetRoot.get(JpaTarget_.controllerId), controllerId));
 
         final MapJoin<JpaTarget, String, String> mapJoin = targetRoot.join(mapAttribute);
-        query.multiselect(mapJoin.key(), mapJoin.value());
+        query.select(cb.array(mapJoin.key(), mapJoin.value()));
         query.orderBy(cb.asc(mapJoin.key()));
 
         return entityManager

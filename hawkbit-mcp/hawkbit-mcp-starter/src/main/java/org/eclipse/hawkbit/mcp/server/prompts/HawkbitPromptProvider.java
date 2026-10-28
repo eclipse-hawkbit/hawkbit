@@ -36,19 +36,19 @@ public class HawkbitPromptProvider {
     @McpPrompt(
             name = "hawkbit-context", description = "Provides initial context about hawkBit, available tools, and documentation resources. " + "Use this prompt at the start of a session to understand what you can do with hawkBit MCP.")
     public GetPromptResult getHawkBitContext() {
-        return new GetPromptResult(
-                "hawkBit MCP Server Context",
-                List.of(new PromptMessage(Role.ASSISTANT, new TextContent(loadPrompt("hawkbit-context.md"))))
-        );
+        return GetPromptResult.builder(
+                        List.of(new PromptMessage(Role.ASSISTANT, TextContent.builder(loadPrompt("hawkbit-context.md")).build())))
+                .description("hawkBit MCP Server Context")
+                .build();
     }
 
     @McpPrompt(
             name = "rsql-help", description = "Explains RSQL query syntax for filtering hawkBit entities. " + "Use this when you need help constructing filter queries for targets, rollouts, etc.")
     public GetPromptResult getRsqlHelp() {
-        return new GetPromptResult(
-                "RSQL Query Help",
-                List.of(new PromptMessage(Role.ASSISTANT, new TextContent(loadPrompt("rsql-help.md"))))
-        );
+        return GetPromptResult.builder(
+                        List.of(new PromptMessage(Role.ASSISTANT, TextContent.builder(loadPrompt("rsql-help.md")).build())))
+                .description("RSQL Query Help")
+                .build();
     }
 
     private String loadPrompt(final String filename) {

@@ -55,7 +55,7 @@ import org.eclipse.hawkbit.ui.view.TargetView;
  * The main view is a top-level placeholder for other views.
  */
 @RolesAllowed({ "ANONYMOUS" })
-public class MainLayout extends AppLayout {
+public final class MainLayout extends AppLayout {
 
     @Serial
     private static final long serialVersionUID = 1L;

@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Stream;
 
 import org.assertj.core.api.Assertions;
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
@@ -178,9 +177,11 @@ class DistributionSetTagManagementTest extends AbstractRepositoryManagementTest<
         final Collection<Long> retrievedFilteredDsIds = distributionSetManagement.findByTag(tag.getId(), UNPAGED).getContent().stream()
                 .map(DistributionSet::getId)
                 .toList();
-        final Collection<Long> expectedFilteredDsIds = Stream.of(expectedDistributionSets).flatMap(Collection::stream)
-                .map(DistributionSet::getId)
-                .toList();
+        // loop instead of Stream.of(array) - passing the generic varargs array on is reported as possible heap pollution
+        final Collection<Long> expectedFilteredDsIds = new ArrayList<>();
+        for (final Collection<DistributionSet> distributionSets : expectedDistributionSets) {
+            distributionSets.forEach(ds -> expectedFilteredDsIds.add(ds.getId()));
+        }
         assertThat(retrievedFilteredDsIds).hasSameElementsAs(expectedFilteredDsIds);
     }
 }

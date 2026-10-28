@@ -911,7 +911,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         final CriteriaQuery<Object[]> queryActionStatus = cb.createQuery(Object[].class);
         final Root<JpaActionStatus> actionStatusRoot = queryActionStatus.from(JpaActionStatus.class);
         final CriteriaQuery<Object[]> query = queryActionStatus
-                .multiselect(actionStatusRoot.get(AbstractJpaBaseEntity_.id), actionStatusRoot.get(JpaActionStatus_.status))
+                .select(cb.array(actionStatusRoot.get(AbstractJpaBaseEntity_.id), actionStatusRoot.get(JpaActionStatus_.status)))
                 .where(cb.equal(actionStatusRoot.get(JpaActionStatus_.action).get(AbstractJpaBaseEntity_.id), actionId))
                 .orderBy(cb.desc(actionStatusRoot.get(AbstractJpaBaseEntity_.id)));
         final List<Object[]> resultList = entityManager.createQuery(query).setFirstResult(0).setMaxResults(1).getResultList();

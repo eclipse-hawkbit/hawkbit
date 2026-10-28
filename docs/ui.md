@@ -38,7 +38,7 @@ Build hawkBit (see [Quick Start](quick-start.md)), start the hawkBit Update Serv
 Management API:
 
 ```bash
-$ java -jar hawkbit-ui/target/hawkbit-ui.jar --hawkbit.server.mgmtUrl=http://localhost:8080
+$ java -jar hawkbit-ui/target/hawkbit-ui-0-SNAPSHOT.jar --hawkbit.server.mgmtUrl=http://localhost:8080
 ```
 
 Building the UI from sources needs Node.js.

@@ -33,7 +33,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.jayway.jsonpath.JsonPath;
+
 import jakarta.validation.ConstraintViolationException;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -44,6 +46,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
+
 import org.eclipse.hawkbit.auth.SpPermission;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtActionConfirmationRequestBodyPut;
@@ -1096,11 +1099,11 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("[2].createdBy", equalTo("bumlux")))
                 .andReturn();
 
-        assertThat((Object) JsonPath.compile("[0]._links.self.href").read(mvcResult.getResponse().getContentAsString()))
+        assertThat(JsonPath.compile("[0]._links.self.href").<Object> read(mvcResult.getResponse().getContentAsString()))
                 .hasToString("http://localhost/rest/v1/targets/id1");
-        assertThat((Object) JsonPath.compile("[1]._links.self.href").read(mvcResult.getResponse().getContentAsString()))
+        assertThat(JsonPath.compile("[1]._links.self.href").<Object> read(mvcResult.getResponse().getContentAsString()))
                 .hasToString("http://localhost/rest/v1/targets/id2");
-        assertThat((Object) JsonPath.compile("[2]._links.self.href").read(mvcResult.getResponse().getContentAsString()))
+        assertThat(JsonPath.compile("[2]._links.self.href").<Object> read(mvcResult.getResponse().getContentAsString()))
                 .hasToString("http://localhost/rest/v1/targets/id3");
 
         final Target t1 = assertTarget("id1", "testname1", "testid1");
@@ -2758,8 +2761,6 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
             Assertions.assertTrue(remainingIds.contains(oldActions.get(i).getId()));
         }
     }
-
-
 
     @Test
     void testThatDeletionOfLastNTargetActionsReturnsBadRequestWhenNeeded() throws Exception {

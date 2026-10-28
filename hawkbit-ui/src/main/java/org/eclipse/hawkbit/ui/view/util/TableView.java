@@ -87,7 +87,8 @@ public class TableView<T, ID> extends Div implements Constants, BeforeEnterObser
                 detailsOrientation, null);
     }
 
-    @SuppressWarnings("java:S107")
+    // this-escape: base class for views, the layout is built in the constructor by calling inherited component methods
+    @SuppressWarnings({ "java:S107", "this-escape" })
     public TableView(
             final Filter.Rsql rsql, final Filter.Rsql alternativeRsql,
             final SelectionGrid.EntityRepresentation<T, ID> entityRepresentation,

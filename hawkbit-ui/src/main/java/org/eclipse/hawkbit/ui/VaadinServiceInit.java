@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.ui;
 
 import java.io.Serial;
 
+import com.vaadin.flow.component.page.ExtendedClientDetails;
 import com.vaadin.flow.server.ServiceInitEvent;
 import com.vaadin.flow.server.VaadinServiceInitListener;
 import com.vaadin.flow.spring.annotation.SpringComponent;
@@ -25,8 +26,14 @@ public class VaadinServiceInit implements VaadinServiceInitListener {
     private static final long serialVersionUID = 1L;
 
     @Override
-    public void serviceInit(ServiceInitEvent event) {
-        // cache zoneId of client as soon as possible
-        event.getSource().addUIInitListener(uiEvent -> uiEvent.getUI().getPage().retrieveExtendedClientDetails(details -> {}));
+    public void serviceInit(final ServiceInitEvent event) {
+        // cache zoneId of client as soon as possible: details are normally sent with the UI init request,
+        // if only the placeholder (screen width -1) is available, fetch them from the browser in background
+        event.getSource().addUIInitListener(uiEvent -> {
+            final ExtendedClientDetails details = uiEvent.getUI().getPage().getExtendedClientDetails();
+            if (details.getScreenWidth() == -1) {
+                details.refresh(null);
+            }
+        });
     }
 }

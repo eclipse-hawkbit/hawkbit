@@ -81,6 +81,7 @@ import org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch;
 import org.eclipse.hawkbit.repository.test.util.TargetTestData;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.ConcurrencyFailureException;
@@ -861,7 +862,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     @Test
     void findOrRegisterTargetIfItDoesNotExistThrowsExceptionAfterMaxRetries() {
         final TargetRepository mockTargetRepository = Mockito.mock(TargetRepository.class);
-        when(mockTargetRepository.findOne(any(Specification.class))).thenThrow(ConcurrencyFailureException.class);
+        when(mockTargetRepository.findOne(ArgumentMatchers.<Specification<JpaTarget>> any())).thenThrow(ConcurrencyFailureException.class);
         ((JpaControllerManagement) controllerManagement).setTargetRepository(mockTargetRepository);
 
         try {
@@ -869,7 +870,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
                     .as("Expected an ConcurrencyFailureException to be thrown!")
                     .isThrownBy(() -> controllerManagement.findOrRegisterTargetIfItDoesNotExist("AA", LOCALHOST));
 
-            verify(mockTargetRepository, times(10 /* default retry max */ + 1)).findOne(any(Specification.class));
+            verify(mockTargetRepository, times(10 /* default retry max */ + 1)).findOne(ArgumentMatchers.<Specification<JpaTarget>> any());
         } finally {
             // revert
             ((JpaControllerManagement) controllerManagement).setTargetRepository(targetRepository);
@@ -890,14 +891,14 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         ((JpaControllerManagement) controllerManagement).setTargetRepository(mockTargetRepository);
         final Target target = testdataFactory.createTarget();
 
-        when(mockTargetRepository.findOne(any(Specification.class))).thenThrow(ConcurrencyFailureException.class)
+        when(mockTargetRepository.findOne(ArgumentMatchers.<Specification<JpaTarget>> any())).thenThrow(ConcurrencyFailureException.class)
                 .thenThrow(ConcurrencyFailureException.class).thenReturn(Optional.of((JpaTarget) target));
         when(mockTargetRepository.save(any())).thenReturn(target);
 
         try {
             final Target targetFromControllerManagement = controllerManagement
                     .findOrRegisterTargetIfItDoesNotExist(target.getControllerId(), LOCALHOST);
-            verify(mockTargetRepository, times(3)).findOne(any(Specification.class));
+            verify(mockTargetRepository, times(3)).findOne(ArgumentMatchers.<Specification<JpaTarget>> any());
             verify(mockTargetRepository, times(1)).save(any());
             assertThat(target).isEqualTo(targetFromControllerManagement);
         } finally {
@@ -940,14 +941,14 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final TargetRepository mockTargetRepository = Mockito.mock(TargetRepository.class);
         ((JpaControllerManagement) controllerManagement).setTargetRepository(mockTargetRepository);
 
-        when(mockTargetRepository.findOne(any(Specification.class))).thenReturn(Optional.empty());
+        when(mockTargetRepository.findOne(ArgumentMatchers.<Specification<JpaTarget>> any())).thenReturn(Optional.empty());
         when(mockTargetRepository.save(any())).thenThrow(EntityAlreadyExistsException.class);
 
         try {
             assertThatExceptionOfType(EntityAlreadyExistsException.class)
                     .as("Expected an EntityAlreadyExistsException to be thrown!")
                     .isThrownBy(() -> controllerManagement.findOrRegisterTargetIfItDoesNotExist("1234", LOCALHOST));
-            verify(mockTargetRepository, times(1)).findOne(any(Specification.class));
+            verify(mockTargetRepository, times(1)).findOne(ArgumentMatchers.<Specification<JpaTarget>> any());
             verify(mockTargetRepository, times(1)).save(any());
         } finally {
             // revert
@@ -965,13 +966,13 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final TargetRepository mockTargetRepository = Mockito.mock(TargetRepository.class);
         ((JpaControllerManagement) controllerManagement).setTargetRepository(mockTargetRepository);
 
-        when(mockTargetRepository.findOne(any(Specification.class))).thenThrow(RuntimeException.class);
+        when(mockTargetRepository.findOne(ArgumentMatchers.<Specification<JpaTarget>> any())).thenThrow(RuntimeException.class);
 
         try {
             assertThatExceptionOfType(RuntimeException.class).as("Expected a RuntimeException to be thrown!")
                     .isThrownBy(() -> controllerManagement.findOrRegisterTargetIfItDoesNotExist("aControllerId",
                             LOCALHOST));
-            verify(mockTargetRepository, times(1)).findOne(any(Specification.class));
+            verify(mockTargetRepository, times(1)).findOne(ArgumentMatchers.<Specification<JpaTarget>> any());
         } finally {
             // revert
             ((JpaControllerManagement) controllerManagement).setTargetRepository(targetRepository);
@@ -2019,7 +2020,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         testdataFactory.createTarget(controllerId);
 
         final WithUser withController = SecurityContextSwitch.withController("controller");
-        runAs(withController, () -> controllerManagement.updateControllerAttributes(controllerId, Map.of("a", "1", "b", "2"), UpdateMode.MERGE));
+        runAs(withController,
+                () -> controllerManagement.updateControllerAttributes(controllerId, Map.of("a", "1", "b", "2"), UpdateMode.MERGE));
 
         // null value means "remove key a" in copy() — must NOT be treated as no-op
         final Map<String, String> removeA = new HashMap<>();

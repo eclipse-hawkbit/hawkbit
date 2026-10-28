@@ -14,17 +14,18 @@ phase and always makes a production frontend bundle - `forceProductionBuild=true
 $ mvn clean install -pl hawkbit-ui -am
 ```
 
-The repackaged executable jar is `hawkbit-ui/target/hawkbit-ui.jar` (`finalName` of the `spring-boot-maven-plugin`,
-installed in the maven repository as `hawkbit-ui-0-SNAPSHOT.jar`).
+The repackaged executable jar is `hawkbit-ui/target/hawkbit-ui-0-SNAPSHOT.jar` (also installed in the maven repository).
 
 Vaadin generates frontend files (`package.json`, `package-lock.json`, `vite.config.ts`, `tsconfig.json`, `types.d.ts`,
-`node_modules`, `src/main/frontend/*`, ...) during the build. They are ignored by `hawkbit-ui/.gitignore` - only
-`src/main/frontend/themes/` is tracked.
+`node_modules`, `src/main/frontend/*`, ...) during the build. They are ignored by `hawkbit-ui/.gitignore`.
+
+Styling uses the Lumo theme (`@StyleSheet(Lumo.STYLESHEET)` on `HawkbitUiApp`) plus the custom
+`src/main/resources/META-INF/resources/styles.css`.
 
 ## Run
 
 ```
-$ java -jar hawkbit-ui/target/hawkbit-ui.jar --hawkbit.server.mgmtUrl=http://localhost:8080
+$ java -jar hawkbit-ui/target/hawkbit-ui-0-SNAPSHOT.jar --hawkbit.server.mgmtUrl=http://localhost:8080
 ```
 
 Or run `org.eclipse.hawkbit.ui.HawkbitUiApp` from the IDE, or `mvn` in `hawkbit-ui` (default goal is

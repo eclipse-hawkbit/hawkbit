@@ -150,6 +150,9 @@
 
         <skipPublishing>false</skipPublishing>
         <ratchetFrom>origin/master</ratchetFrom>
+        <!-- IntelliJ IDEA launcher used by spotless (default: 'idea' on PATH). E.g. on macOS:
+             -Dspotless.idea.binary="/Applications/IntelliJ IDEA.app/Contents/MacOS/idea" -->
+        <spotless.idea.binary>idea</spotless.idea.binary>
     </properties>
 
     <developers>
@@ -404,6 +407,10 @@
                 Usage:
                 mvn spotless:apply
                 mvn spotless:check
+
+                Formats with the IntelliJ IDEA formatter ('idea' step), because intellij_codeformatter.xml is the single
+                source of truth and the Eclipse formatter can't reproduce it. Needs a local IntelliJ IDEA install; point to
+                its launcher with -Dspotless.idea.binary=<path> (see the property). Runs one IDEA process per changed file.
                 -->
                 <groupId>com.diffplug.spotless</groupId>
                 <artifactId>spotless-maven-plugin</artifactId>
@@ -411,9 +418,12 @@
                 <configuration>
                     <ratchetFrom>${ratchetFrom}</ratchetFrom>
                     <java>
-                        <eclipse>
-                            <file>${maven.multiModuleProjectDirectory}/eclipse_codeformatter.xml</file>
-                        </eclipse>
+                        <idea>
+                            <binaryPath>${spotless.idea.binary}</binaryPath>
+                            <codeStyleSettingsPath>${maven.multiModuleProjectDirectory}/intellij_codeformatter.xml</codeStyleSettingsPath>
+                            <!-- false: don't pass -allowDefaults, i.e. never fall back to IDEA default settings -->
+                            <withDefaults>false</withDefaults>
+                        </idea>
                     </java>
                 </configuration>
             </plugin>
@@ -499,7 +509,11 @@
                     <configuration>
                         <parameters>true</parameters>
                         <proc>full</proc>
-                        <compilerArgument>-Xlint:all,-processing</compilerArgument>
+                        <compilerArgs>
+                            <!-- -classfile: hides "Cannot find annotation method" warnings from third-party class files
+                                 whose annotation types are not on the classpath -->
+                            <arg>-Xlint:all,-processing,-classfile,-dangling-doc-comments</arg>
+                        </compilerArgs>
                         <showWarnings>true</showWarnings>
                         <showDeprecation>true</showDeprecation>
                     </configuration>

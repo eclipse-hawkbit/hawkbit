@@ -33,6 +33,7 @@ public class TargetPollEvent extends RemoteTenantAwareEvent {
 
     private String targetAddress;
     private long lastTargetPoll;
+    @SuppressWarnings("serial") // List implementations used (List.of, unmodifiableList) are serializable
     private List<String> controllerIds;
 
     public TargetPollEvent(final List<String> controllerIds, final long lastTargetPoll, final String tenant) {

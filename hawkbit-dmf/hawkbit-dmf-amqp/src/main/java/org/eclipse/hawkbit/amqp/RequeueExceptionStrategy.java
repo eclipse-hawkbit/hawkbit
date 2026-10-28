@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.amqp;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import jakarta.validation.ConstraintViolationException;
@@ -104,11 +105,16 @@ final class RequeueExceptionStrategy implements FatalExceptionStrategy {
     @ToString
     public static class TypeBasedFatalExceptionStrategy implements FatalExceptionStrategy {
 
-        private final Class<? extends Throwable>[] types;
+        private final List<Class<? extends Throwable>> types;
 
         @SafeVarargs
         public TypeBasedFatalExceptionStrategy(final Class<? extends Throwable>... types) {
-            this.types = types;
+            // copied element-wise - storing or passing on the generic varargs array would void the @SafeVarargs guarantee
+            final List<Class<? extends Throwable>> typeList = new ArrayList<>(types.length);
+            for (final Class<? extends Throwable> type : types) {
+                typeList.add(type);
+            }
+            this.types = Collections.unmodifiableList(typeList);
         }
 
         @Override

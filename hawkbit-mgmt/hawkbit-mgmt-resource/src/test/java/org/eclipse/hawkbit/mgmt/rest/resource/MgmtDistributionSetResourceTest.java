@@ -27,6 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.jayway.jsonpath.JsonPath;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -38,6 +39,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+
 import org.eclipse.hawkbit.auth.SpRole;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtId;
@@ -1030,20 +1032,20 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
         final DistributionSet three = distributionSetManagement
                 .getWithDetails(distributionSetManagement.findByRsql("name==three", PAGE).getContent().get(0).getId());
 
-        assertThat((Object) JsonPath.compile("[0]_links.self.href").read(mvcResult.getResponse().getContentAsString()))
+        assertThat(JsonPath.compile("[0]_links.self.href").<Object> read(mvcResult.getResponse().getContentAsString()))
                 .hasToString("http://localhost/rest/v1/distributionsets/" + one.getId());
 
-        assertThat((Object) JsonPath.compile("[0]id").read(mvcResult.getResponse().getContentAsString()))
+        assertThat(JsonPath.compile("[0]id").<Object> read(mvcResult.getResponse().getContentAsString()))
                 .hasToString(String.valueOf(one.getId()));
-        assertThat((Object) JsonPath.compile("[1]_links.self.href").read(mvcResult.getResponse().getContentAsString()))
+        assertThat(JsonPath.compile("[1]_links.self.href").<Object> read(mvcResult.getResponse().getContentAsString()))
                 .hasToString("http://localhost/rest/v1/distributionsets/" + two.getId());
 
-        assertThat((Object) JsonPath.compile("[1]id").read(mvcResult.getResponse().getContentAsString()))
+        assertThat(JsonPath.compile("[1]id").<Object> read(mvcResult.getResponse().getContentAsString()))
                 .hasToString(String.valueOf(two.getId()));
-        assertThat((Object) JsonPath.compile("[2]_links.self.href").read(mvcResult.getResponse().getContentAsString()))
+        assertThat(JsonPath.compile("[2]_links.self.href").<Object> read(mvcResult.getResponse().getContentAsString()))
                 .hasToString("http://localhost/rest/v1/distributionsets/" + three.getId());
 
-        assertThat((Object) JsonPath.compile("[2]id").read(mvcResult.getResponse().getContentAsString()))
+        assertThat(JsonPath.compile("[2]id").<Object> read(mvcResult.getResponse().getContentAsString()))
                 .hasToString(String.valueOf(three.getId()));
 
         // check in database
@@ -2114,15 +2116,19 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
 
     private void prepareTestFilters(final String filterNamePrefix, final DistributionSet createdDs) {
         // create target filter queries with a matching auto assignment that should be found
-        targetFilterQueryManagement.create(TargetFilterQueryManagement.UpdateCreate.builder().name(filterNamePrefix + "1").query("name==y").build());
+        targetFilterQueryManagement.create(
+                TargetFilterQueryManagement.UpdateCreate.builder().name(filterNamePrefix + "1").query("name==y").build());
         autoAssignmentManagement.create(Create.builder().name(filterNamePrefix + "1")
                 .targetFilterQuery("name==y").distributionSet(createdDs).build());
-        targetFilterQueryManagement.create(TargetFilterQueryManagement.UpdateCreate.builder().name(filterNamePrefix + "2").query("name==y").build());
+        targetFilterQueryManagement.create(
+                TargetFilterQueryManagement.UpdateCreate.builder().name(filterNamePrefix + "2").query("name==y").build());
         autoAssignmentManagement.create(Create.builder().name(filterNamePrefix + "2")
                 .targetFilterQuery("name==y").distributionSet(createdDs).build());
         // create some dummy target filter queries
-        targetFilterQueryManagement.create(TargetFilterQueryManagement.UpdateCreate.builder().name(filterNamePrefix + "b").query("name==y").build());
-        targetFilterQueryManagement.create(TargetFilterQueryManagement.UpdateCreate.builder().name(filterNamePrefix + "c").query("name==y").build());
+        targetFilterQueryManagement.create(
+                TargetFilterQueryManagement.UpdateCreate.builder().name(filterNamePrefix + "b").query("name==y").build());
+        targetFilterQueryManagement.create(
+                TargetFilterQueryManagement.UpdateCreate.builder().name(filterNamePrefix + "c").query("name==y").build());
     }
 
     private MvcResult executeMgmtTargetPost(

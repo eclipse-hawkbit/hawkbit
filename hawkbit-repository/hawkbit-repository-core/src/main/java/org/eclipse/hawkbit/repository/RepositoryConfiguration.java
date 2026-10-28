@@ -50,7 +50,8 @@ public class RepositoryConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    @SuppressWarnings("java:S3358") // java:S3358 better readable this way
+    @SuppressWarnings("java:S3358")
+        // java:S3358 better readable this way
     RoleHierarchy roleHierarchy(
             // if configured replaces the hierarchy completely
             @Value("${hawkbit.hierarchy:}") final String hierarchy,
@@ -103,16 +104,13 @@ public class RepositoryConfiguration {
             @Value("${" + PermissionTracker.ENABLED_PROPERTY + ":false}") final boolean permissionTrackingEnabled,
             final Optional<ApplicationContext> applicationContext) {
         final DefaultMethodSecurityExpressionHandler methodSecurityExpressionHandler = new DefaultMethodSecurityExpressionHandler() {};
-        if (permissionTrackingEnabled) {
-            // the authority checks (hasAuthority / hasAnyAuthority) are delegated to the authorization manager factory - decorated in
-            // order to track the granted authorities (see PermissionTracker). Not decorated at all if tracking is disabled.
-            final DefaultAuthorizationManagerFactory<MethodInvocation> authorizationManagerFactory = new DefaultAuthorizationManagerFactory<>();
-            authorizationManagerFactory.setRoleHierarchy(roleHierarchy);
-            methodSecurityExpressionHandler.setAuthorizationManagerFactory(
-                    new PermissionTrackingAuthorizationManagerFactory<>(authorizationManagerFactory));
-        } else {
-            methodSecurityExpressionHandler.setRoleHierarchy(roleHierarchy);
-        }
+        final DefaultAuthorizationManagerFactory<MethodInvocation> authorizationManagerFactory = new DefaultAuthorizationManagerFactory<>();
+        authorizationManagerFactory.setRoleHierarchy(roleHierarchy);
+        // the authority checks (hasAuthority / hasAnyAuthority) are delegated to the authorization manager factory - decorated in
+        // order to track the granted authorities (see PermissionTracker). Not decorated at all if tracking is disabled.
+        methodSecurityExpressionHandler.setAuthorizationManagerFactory(permissionTrackingEnabled
+                ? new PermissionTrackingAuthorizationManagerFactory<>(authorizationManagerFactory)
+                : authorizationManagerFactory);
         methodSecurityExpressionHandler.setPermissionEvaluator(permissionEvaluator);
         applicationContext.ifPresent(methodSecurityExpressionHandler::setApplicationContext);
         return methodSecurityExpressionHandler;

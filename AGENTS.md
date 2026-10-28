@@ -8,12 +8,12 @@ There is no Maven wrapper, so use the system `mvn`.
 - Build: `mvn clean install -DskipTests`
 - Test all: `mvn clean verify`
 - Test one: `mvn -pl <module-path> -am test -Dtest=ClassName[#method] -Dsurefire.failIfNoSpecifiedTests=false`
-- Format: `mvn spotless:apply`. Check with `mvn spotless:check`. Only files changed since `origin/master` are checked (`-DratchetFrom=<ref>`).
+- Format: `mvn spotless:apply`. Check with `mvn spotless:check`. Only files changed since `origin/master` are checked (`-DratchetFrom=<ref>`). Uses the IntelliJ formatter (`intellij_codeformatter.xml`), so it needs a local IntelliJ IDEA: `-Dspotless.idea.binary=<launcher>` if `idea` isn't on `PATH`.
 - License headers: `mvn license:check -PcheckLicense` (templates in `licenses/`)
 - Hibernate build/test: add `-Djpa.vendor=hibernate`
 - PostgreSQL tests: add `-Dspring.jpa.database=POSTGRESQL -Dspring.datasource.url=jdbc:postgresql://localhost:5432/hawkbit -Dspring.datasource.username=postgres -Dspring.datasource.password=admin`
 - Run monolith: `java -jar hawkbit-monolith/hawkbit-update-server/target/hawkbit-update-server-0-SNAPSHOT.jar` (port 8080, admin/admin)
-- Run UI: `java -jar hawkbit-ui/target/hawkbit-ui.jar` (port 8088)
+- Run UI: `java -jar hawkbit-ui/target/hawkbit-ui-0-SNAPSHOT.jar` (port 8088)
 - Docker: see `docker/README.md` (`docker compose -f mysql/docker-compose-monolith-mysql.yml up`)
 
 CI (`.github/workflows/reusable_workflow_verify.yaml`) runs `license:check`, then `mvn clean verify javadoc:javadoc -PgenerateTestReport` against H2 or PostgreSQL × EclipseLink or Hibernate. `style_check.yaml` runs spotless.

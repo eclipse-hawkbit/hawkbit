@@ -9,12 +9,19 @@ Please read this if you intend to contribute to the project.
 ### Code Style
 
 * Java files:
-    * the formatter is [eclipse_codeformatter.xml](eclipse_codeformatter.xml) (Eclipse formatter, spaces only, 4),
-      enforced by [Spotless](https://github.com/diffplug/spotless)
+    * [intellij_codeformatter.xml](intellij_codeformatter.xml) (IntelliJ IDEA code style, spaces only, 4) is the
+      single source of truth for formatting, enforced by [Spotless](https://github.com/diffplug/spotless)
     * format your changes with `mvn spotless:apply`, verify with `mvn spotless:check`. Spotless only checks files
       changed against `origin/master` (`ratchetFrom`)
+    * Spotless formats with IntelliJ IDEA itself (`idea` step), so it needs a local IntelliJ IDEA install. If the `idea`
+      launcher isn't on the `PATH`, set it with `-Dspotless.idea.binary=<launcher>`, e.g.
+      `-Dspotless.idea.binary="/Applications/IntelliJ IDEA.app/Contents/MacOS/idea"` (macOS) or
+      `-Dspotless.idea.binary=<install-dir>/bin/idea.sh` (Linux). It starts IDEA once per changed file, so it's slow on
+      large change sets
     * the CI `style_check` workflow runs `mvn spotless:check` on every pull request
-    * for IntelliJ IDEA import [intellij_codeformatter.xml](intellij_codeformatter.xml)
+    * [eclipse_codeformatter.xml](eclipse_codeformatter.xml) is provided only for Eclipse IDE users. It approximates
+      the IntelliJ style but is NOT identical (nested continuation indent, line breaks after lambda arrows, kept
+      operator line breaks, text blocks), so run `mvn spotless:apply` before pushing
 * XML files:
     * we follow the standard eclipse IDE XML formatter with the following changes:
         * Indent using spaces only: 4

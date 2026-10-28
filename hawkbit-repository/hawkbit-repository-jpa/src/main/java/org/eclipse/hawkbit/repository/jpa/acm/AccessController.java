@@ -54,6 +54,7 @@ public interface AccessController<T> {
                 .orElseGet(() -> specification == null ? Specification.unrestricted() : specification);
     }
 
+    @SuppressWarnings("overloads") // the Update/Delete overloads are distinguished by the argument type, lambdas are not expected
     default @NonNull UpdateSpecification<T> appendAccessRules(final Operation operation, @Nullable final UpdateSpecification<T> specification) {
         return getAccessRules(operation)
                 .map(this::predicateSpec)
@@ -61,6 +62,7 @@ public interface AccessController<T> {
                 .orElseGet(() -> specification == null ? UpdateSpecification.unrestricted() : specification);
     }
 
+    @SuppressWarnings("overloads")
     default @NonNull DeleteSpecification<T> appendAccessRules(final Operation operation, @Nullable final DeleteSpecification<T> specification) {
         return getAccessRules(operation)
                 .map(this::predicateSpec)
@@ -89,6 +91,7 @@ public interface AccessController<T> {
 
     // TODO - since Spring 4.x migration, reconsider if it is the best way
     // shall not be used externally
+    @SuppressWarnings("unchecked")
     default PredicateSpecification<T> predicateSpec(final Specification<T> spec) {
         return (from, cb) -> spec.toPredicate((Root<T>) from, cb.createQuery(), cb);
     }

@@ -223,11 +223,11 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
         final SoftwareModuleType created2 = softwareModuleTypeManagement.findByKey("test2").get();
         final SoftwareModuleType created3 = softwareModuleTypeManagement.findByKey("test3").get();
 
-        assertThat((Object) JsonPath.compile("[0]_links.self.href").read(mvcResult.getResponse().getContentAsString()))
+        assertThat(JsonPath.compile("[0]_links.self.href").<Object> read(mvcResult.getResponse().getContentAsString()))
                 .hasToString("http://localhost/rest/v1/softwaremoduletypes/" + created1.getId());
-        assertThat((Object) JsonPath.compile("[1]_links.self.href").read(mvcResult.getResponse().getContentAsString()))
+        assertThat(JsonPath.compile("[1]_links.self.href").<Object> read(mvcResult.getResponse().getContentAsString()))
                 .hasToString("http://localhost/rest/v1/softwaremoduletypes/" + created2.getId());
-        assertThat((Object) JsonPath.compile("[2]_links.self.href").read(mvcResult.getResponse().getContentAsString()))
+        assertThat(JsonPath.compile("[2]_links.self.href").<Object> read(mvcResult.getResponse().getContentAsString()))
                 .hasToString("http://localhost/rest/v1/softwaremoduletypes/" + created3.getId());
 
         assertThat(softwareModuleTypeManagement.count()).isEqualTo(6);

@@ -159,7 +159,7 @@ Then you will get H2 console available at '/h2-console' (Database available at '
 You could also start the **hawkBit UI** by:
 
 ```bash
-$ java -jar ./hawkbit-ui/target/hawkbit-ui.jar
+$ java -jar ./hawkbit-ui/target/hawkbit-ui-0-SNAPSHOT.jar
 ```
 
 The UI listens on port 8088 (override with `PORT` environment variable) and connects to the Management API at

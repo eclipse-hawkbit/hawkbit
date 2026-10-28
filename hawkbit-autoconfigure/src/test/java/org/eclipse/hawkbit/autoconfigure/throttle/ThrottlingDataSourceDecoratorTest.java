@@ -55,7 +55,7 @@ class ThrottlingDataSourceDecoratorTest {
 
     @Test
     void tenantRequestExecutesRealQueryAndReleasesPermitOnClose() {
-        final Throttle throttle = throttle(5, config -> { });
+        final Throttle throttle = throttle(5, config -> {});
         final ThrottlingDataSourceDecorator dataSource = dataSource(throttle);
 
         asTenant(TENANT_ACME, () -> {
@@ -75,7 +75,7 @@ class ThrottlingDataSourceDecoratorTest {
 
     @Test
     void workWithoutTenantContextIsChargedToTheNullKey() throws Exception {
-        final Throttle throttle = throttle(2, config -> { });
+        final Throttle throttle = throttle(2, config -> {});
         final ThrottlingDataSourceDecorator dataSource = dataSource(throttle);
 
         // no tenant context → counted as internal work rather than waved through, so permits mirror pool usage
@@ -90,7 +90,7 @@ class ThrottlingDataSourceDecoratorTest {
     void nestedBorrowOnSameThreadTakesAChildPermit() throws Exception {
         // regression: a closing nested connection must not deregister the outer one as the thread's root permit,
         // which would make the next borrow a second root and double-count the unit of work
-        final Throttle throttle = throttle(4, config -> { });
+        final Throttle throttle = throttle(4, config -> {});
         final ThrottlingDataSourceDecorator dataSource = dataSource(throttle);
 
         final Connection outer = dataSource.getConnection();
@@ -112,7 +112,7 @@ class ThrottlingDataSourceDecoratorTest {
     @Test
     void borrowsOnDifferentThreadsAreIndependentUnitsOfWork() {
         // the root permit is tracked per thread, so a concurrent borrow elsewhere must not be mistaken for a child
-        final Throttle throttle = throttle(2, config -> { });
+        final Throttle throttle = throttle(2, config -> {});
         final ThrottlingDataSourceDecorator dataSource = dataSource(throttle);
 
         asTenant("acme", () -> {
@@ -134,8 +134,8 @@ class ThrottlingDataSourceDecoratorTest {
 
     @Test
     void tenantOverCapacityIsThrottledWithoutTouchingThePool() {
-        final Throttle throttle = throttle(1, config -> { });
-        try (final Permit permit = throttle.acquire("filler", Duration.ZERO)) { // capacity full, a different unit of work
+        final Throttle throttle = throttle(1, config -> {});
+        try (final Permit _ = throttle.acquire("filler", Duration.ZERO)) { // capacity full, a different unit of work
             final ThrottlingDataSourceDecorator dataSource = dataSource(throttle);
 
             asTenant("acme", () -> assertThatExceptionOfType(ThrottledException.class).isThrownBy(dataSource::getConnection));
@@ -146,7 +146,7 @@ class ThrottlingDataSourceDecoratorTest {
 
     @Test
     void permitIsReleasedWhenTheUnderlyingPoolFails() {
-        final Throttle throttle = throttle(2, config -> { });
+        final Throttle throttle = throttle(2, config -> {});
         final ThrottlingDataSourceDecorator dataSource = dataSource(throttle);
         target.close(); // borrowing now fails after the permit has been taken
 
