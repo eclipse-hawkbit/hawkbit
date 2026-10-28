@@ -139,7 +139,9 @@ public class RsqlParser {
                 attribute = enumValue.getName() + SUB_ATTRIBUTE_SEPARATOR + enumValue.getSubEntityAttributes().stream()
                         .filter(attr -> attr.equalsIgnoreCase(subAttribute[0])) // case normalized
                         .findFirst()
-                        .map(attr -> subAttribute.length == 1 ? attr : attr + key.substring(firstSeparatorIndex + 1 + attr.length()))
+                        .map(attr -> subAttribute.length == 1
+                                ? withDefaultSubEntityAttribute(attr, enumValue.getDefaultSubEntityAttribute(attr))
+                                : attr + key.substring(firstSeparatorIndex + 1 + attr.length()))
                         .orElseThrow(() -> new QueryException(
                                 UNSUPPORTED_FIELD,
                                 String.format("The given search field {%s} has unsupported sub-attributes. Supported sub-attributes are %s",
@@ -148,6 +150,11 @@ public class RsqlParser {
         }
 
         return attribute;
+    }
+
+    // if the sub-attribute is an entity itself (e.g. distributionSet.type) and has a default attribute - resolve to it (e.g. type.key)
+    private static String withDefaultSubEntityAttribute(final String subEntityAttribute, final String defaultSubEntityAttribute) {
+        return defaultSubEntityAttribute == null ? subEntityAttribute : subEntityAttribute + SUB_ATTRIBUTE_SEPARATOR + defaultSubEntityAttribute;
     }
 
     private static class RsqlVisitor implements RSQLVisitor<Node, String> {

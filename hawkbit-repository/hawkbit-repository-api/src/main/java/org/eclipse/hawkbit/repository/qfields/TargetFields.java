@@ -34,25 +34,23 @@ public enum TargetFields implements QueryField {
     ATTRIBUTE("controllerAttributes"),
     GROUP("group"),
     ASSIGNEDDS("assignedDistributionSet",
-            DistributionSetFields.NAME.getName(), DistributionSetFields.VERSION.getName()),
+            DistributionSetFields.ID.getName(),
+            DistributionSetFields.NAME.getName(), DistributionSetFields.VERSION.getName(),
+            DistributionSetFields.TYPE.getName()),
     INSTALLEDDS("installedDistributionSet",
-            DistributionSetFields.NAME.getName(), DistributionSetFields.VERSION.getName()),
-    TAG("tags", TagFields.NAME.getName()),
+            DistributionSetFields.ID.getName(),
+            DistributionSetFields.NAME.getName(), DistributionSetFields.VERSION.getName(),
+            DistributionSetFields.TYPE.getName()),
+    TAG("tags", TagFields.ID.getName(), TagFields.NAME.getName()),
     LASTCONTROLLERREQUESTAT("lastTargetQuery"),
     METADATA("metadata"),
-    TYPE("targetType",
-            TargetTypeFields.ID.getName(),
-            TargetTypeFields.KEY.getName(),
-            TargetTypeFields.NAME.getName()),
+    TYPE("targetType", TargetTypeFields.ID.getName(), TargetTypeFields.KEY.getName(), TargetTypeFields.NAME.getName()),
     AUTOCONFIRM("autoConfirmationStatus"),
     // kept just for backward compatibility for backward compatibility
     // could be removed only if in the systems there are no active auto assignments or rollouts (dynamic or starting) with that condition
     // to be reconsidered if and when to be removed
     @Deprecated(forRemoval = true, since = "0.10.0")
-    TARGETTYPE("targetType",
-            TargetTypeFields.ID.getName(),
-            TargetTypeFields.KEY.getName(),
-            TargetTypeFields.NAME.getName());
+    TARGETTYPE("targetType", TargetTypeFields.ID.getName(), TargetTypeFields.KEY.getName(), TargetTypeFields.NAME.getName());
 
     private final String name;
     private final List<String> subEntityAttributes;
@@ -64,7 +62,17 @@ public enum TargetFields implements QueryField {
 
     @Override
     public String getDefaultSubEntityAttribute() {
-        return this == TYPE ? TargetTypeFields.KEY.getName() : QueryField.super.getDefaultSubEntityAttribute();
+        // keep the defaults of the sub-attributes used before more sub-attributes were added (backward compatibility of the "shortcut" queries)
+        return switch (this) {
+            case TYPE -> TargetTypeFields.KEY.getName();
+            case TAG -> TagFields.NAME.getName();
+            default -> QueryField.super.getDefaultSubEntityAttribute();
+        };
+    }
+
+    @Override
+    public String getDefaultSubEntityAttribute(final String subEntityAttribute) {
+        return this == ASSIGNEDDS || this == INSTALLEDDS ? QueryField.defaultSubEntityAttributeOf(DistributionSetFields.class, subEntityAttribute) : null;
     }
 
     @Override

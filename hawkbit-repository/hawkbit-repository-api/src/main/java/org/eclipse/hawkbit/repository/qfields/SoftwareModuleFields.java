@@ -21,10 +21,7 @@ import org.eclipse.hawkbit.ql.QueryField;
 public enum SoftwareModuleFields implements QueryField {
 
     ID("id"),
-    TYPE("type",
-            SoftwareModuleTypeFields.ID.getName(),
-            SoftwareModuleTypeFields.KEY.getName(),
-            SoftwareModuleTypeFields.NAME.getName()),
+    TYPE("type", SoftwareModuleTypeFields.ID.getName(), SoftwareModuleTypeFields.KEY.getName(), SoftwareModuleTypeFields.NAME.getName()),
     NAME("name"),
     DESCRIPTION("description"),
     VERSION("version"),

@@ -48,6 +48,9 @@ class RsqlRolloutFieldTest extends AbstractJpaIntegrationTest {
         assertRSQLQuery(RolloutFields.DISTRIBUTIONSET.name() + ".type.id" + "!=" + rollout.getDistributionSet().getType().getId() + 1, 1);
         assertRSQLQuery(RolloutFields.DISTRIBUTIONSET.name() + ".type.id" + "==" + rollout.getDistributionSet().getType().getId(), 1);
         assertRSQLQuery(RolloutFields.DISTRIBUTIONSET.name() + ".type.id" + "!=" + rollout.getDistributionSet().getType().getId(), 0);
+        // default type sub-attribute is the key
+        assertRSQLQuery(RolloutFields.DISTRIBUTIONSET.name() + ".type" + "==" + rollout.getDistributionSet().getType().getKey(), 1);
+        assertRSQLQuery(RolloutFields.DISTRIBUTIONSET.name() + ".type" + "!=" + rollout.getDistributionSet().getType().getKey(), 0);
     }
 
     private void assertRSQLQuery(final String rsql, final long expectedTargets) {

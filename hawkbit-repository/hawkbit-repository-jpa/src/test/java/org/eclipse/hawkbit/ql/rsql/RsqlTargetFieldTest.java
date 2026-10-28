@@ -51,6 +51,8 @@ class RsqlTargetFieldTest extends AbstractJpaIntegrationTest {
     private Target target2;
     private TargetType targetType1;
     private TargetType targetType2;
+    private TargetTag targetTag1;
+    private DistributionSet ds;
 
     @BeforeEach
     void setupBeforeTest() {
@@ -63,9 +65,9 @@ class RsqlTargetFieldTest extends AbstractJpaIntegrationTest {
                         .name("Type2").description("Desc. Type2").key("Type2.key")
                         .build());
 
-        final DistributionSet ds = testdataFactory.createDistributionSet("AssignedDs");
+        ds = testdataFactory.createDistributionSet("AssignedDs");
 
-        final TargetTag targetTag = targetTagManagement.create(TargetTagManagement.Create.builder().name("Tag1").build());
+        targetTag1 = targetTagManagement.create(TargetTagManagement.Create.builder().name("Tag1").build());
         final TargetTag targetTag2 = targetTagManagement.create(TargetTagManagement.Create.builder().name("Tag2").build());
         final TargetTag targetTag3 = targetTagManagement.create(TargetTagManagement.Create.builder().name("Tag3").build());
         targetTagManagement.create(TargetTagManagement.Create.builder().name("Tag4").build());
@@ -83,7 +85,7 @@ class RsqlTargetFieldTest extends AbstractJpaIntegrationTest {
         targetManagement.assignType(target2.getControllerId(), targetType2.getId());
         targetManagement.createMetadata(target2.getControllerId(), Map.of("metaKey", "value"));
         target2 = controllerManagement.findOrRegisterTargetIfItDoesNotExist(target2.getControllerId(), LOCALHOST);
-        targetManagement.assignTag(Arrays.asList(target.getControllerId(), target2.getControllerId()), targetTag.getId());
+        targetManagement.assignTag(Arrays.asList(target.getControllerId(), target2.getControllerId()), targetTag1.getId());
 
         final Target target3 = testdataFactory.createTarget("targetId1235");
 
@@ -264,6 +266,27 @@ class RsqlTargetFieldTest extends AbstractJpaIntegrationTest {
         assertRSQLQuery(TargetFields.TAG.name() + "==Tag1" + OR + TargetFields.TAG.name() + "==Tag2", 4);
         assertRSQLQuery(TargetFields.TAG.name() + "!=Tag2" + AND + TargetFields.TAG.name() + "==Tag3", 1);
         assertRSQLQuery(TargetFields.TAG.name() + "!=Tag2" + OR + TargetFields.TAG.name() + "!=Tag3", 3);
+    }
+
+    /**
+     * Test filter target by assigned distribution set id and type (explicit sub-attribute and default - key)
+     */
+    @Test
+    void testFilterByAssignedDsIdAndType() {
+        assertRSQLQuery(TargetFields.ASSIGNEDDS.name() + ".id==" + ds.getId(), 1);
+        assertRSQLQuery(TargetFields.ASSIGNEDDS.name() + ".type.key==" + ds.getType().getKey(), 1);
+        assertRSQLQuery(TargetFields.ASSIGNEDDS.name() + ".type==" + ds.getType().getKey(), 1);
+        assertRSQLQuery(TargetFields.ASSIGNEDDS.name() + ".type==notexist", 0);
+    }
+
+    /**
+     * Test filter target by tag id and explicit tag name (tag supports multiple sub-attributes, name is still the default)
+     */
+    @Test
+    void testFilterByTagSubAttributes() {
+        assertRSQLQuery(TargetFields.TAG.name() + ".id==" + targetTag1.getId(), 2);
+        assertRSQLQuery(TargetFields.TAG.name() + ".id!=" + targetTag1.getId(), 3);
+        assertRSQLQuery(TargetFields.TAG.name() + ".name==Tag1", 2);
     }
 
     /**

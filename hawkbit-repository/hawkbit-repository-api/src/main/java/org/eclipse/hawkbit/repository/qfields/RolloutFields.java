@@ -28,8 +28,7 @@ public enum RolloutFields implements QueryField {
     CREATEDBY("createdBy"),
     LASTMODIFIEDAT("lastModifiedAt"),
     LASTMODIFIEDBY("lastModifiedBy"),
-    DISTRIBUTIONSET(
-            "distributionSet",
+    DISTRIBUTIONSET("distributionSet",
             DistributionSetFields.ID.getName(),
             DistributionSetFields.NAME.getName(), DistributionSetFields.VERSION.getName(),
             DistributionSetFields.TYPE.getName());
@@ -40,5 +39,10 @@ public enum RolloutFields implements QueryField {
     RolloutFields(final String name, final String... subEntityAttributes) {
         this.name = name;
         this.subEntityAttributes = List.of(subEntityAttributes);
+    }
+
+    @Override
+    public String getDefaultSubEntityAttribute(final String subEntityAttribute) {
+        return this == DISTRIBUTIONSET ? QueryField.defaultSubEntityAttributeOf(DistributionSetFields.class, subEntityAttribute) : null;
     }
 }

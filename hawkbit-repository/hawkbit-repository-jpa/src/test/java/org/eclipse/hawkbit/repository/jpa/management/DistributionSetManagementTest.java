@@ -264,6 +264,10 @@ class DistributionSetManagementTest extends AbstractRepositoryManagementWithMeta
                 .getNumberOfElements()).as("ds tag ds has wrong ds size").isZero();
         assertThat(distributionSetManagement.findByRsqlAndTag("name!=" + unAssignDS.getName(), tag.getId(), PAGE)
                 .getNumberOfElements()).as("ds tag ds has wrong ds size").isEqualTo(3);
+
+        // tag query field - by default (name) and by id sub-attribute
+        assertThat(distributionSetManagement.findByRsql("tag==" + TAG1_NAME, PAGE).getNumberOfElements()).isEqualTo(3);
+        assertThat(distributionSetManagement.findByRsql("tag.id==" + tag.getId(), PAGE).getNumberOfElements()).isEqualTo(3);
     }
 
     /**
