@@ -33,12 +33,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v7.0.1
 
-      - name: Setup Java 21
+      - name: Setup Java
         if: matrix.language == 'java-kotlin'
         uses: actions/setup-java@v6.1.0
         with:
           distribution: 'temurin'
-          java-version: '21'
+          java-version: '25'
 
       # Initializes the CodeQL tools for scanning.
       - name: Initialize CodeQL
