@@ -43,7 +43,9 @@ import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutRestRequestBodyPut
 import org.eclipse.hawkbit.mgmt.json.model.rolloutgroup.MgmtRolloutGroupResponseBody;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
 import org.eclipse.hawkbit.rest.ApiResponsesConstants.PostUpdateNoContentResponses;
+import org.eclipse.hawkbit.rest.ApiPermission;
 import org.eclipse.hawkbit.rest.OpenApi;
+import org.eclipse.hawkbit.rest.RequiredPermissions;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -76,8 +78,9 @@ public interface MgmtRolloutRestApi {
      *         JsonResponseExceptionHandler is handling the response.
      */
     @Operation(summary = "Return all Rollouts",
-            description = "Handles the GET request of retrieving all rollouts. Required Permission: READ_ROLLOUT")
+            description = "Handles the GET request of retrieving all rollouts.")
     @GetIfExistResponses
+    @RequiredPermissions({ ApiPermission.READ_ROLLOUT })
     @GetMapping(value = ROLLOUTS_V1, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtRolloutResponseBody>> getRollouts(
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false)
@@ -107,8 +110,9 @@ public interface MgmtRolloutRestApi {
      * @return a single rollout with status OK.
      */
     @Operation(summary = "Return single Rollout",
-            description = "Handles the GET request of retrieving a single rollout. Required Permission: READ_ROLLOUT")
+            description = "Handles the GET request of retrieving a single rollout.")
     @GetResponses
+    @RequiredPermissions({ ApiPermission.READ_ROLLOUT })
     @GetMapping(value = ROLLOUTS_V1 + "/{rolloutId}", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtRolloutResponseBody> getRollout(@PathVariable("rolloutId") Long rolloutId);
 
@@ -120,8 +124,13 @@ public interface MgmtRolloutRestApi {
      *         failure the JsonResponseExceptionHandler is handling the response.
      */
     @Operation(summary = "Create a new Rollout",
-            description = "Handles the POST request of creating new rollout. Required Permission: CREATE_ROLLOUT")
+            description = "Handles the POST request of creating new rollout. If the rollout is scheduled ('startAt' is set), " +
+                    "HANDLE_ROLLOUT is required as well. If the distribution set gets implicitly locked, " +
+                    "UPDATE_DISTRIBUTION_SET is required as well.")
     @PostCreateResponses
+    @RequiredPermissions(
+            value = { ApiPermission.CREATE_ROLLOUT, ApiPermission.READ_TARGET, ApiPermission.READ_DISTRIBUTION_SET },
+            optional = { ApiPermission.HANDLE_ROLLOUT, ApiPermission.UPDATE_DISTRIBUTION_SET })
     @PostMapping(value = ROLLOUTS_V1,
             consumes = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE }, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtRolloutResponseBody> create(
@@ -135,8 +144,9 @@ public interface MgmtRolloutRestApi {
      *         failure the JsonResponseExceptionHandler is handling the response.
      */
     @Operation(summary = "Update Rollout",
-            description = "Handles the UPDATE request for a single Rollout. Required permission: UPDATE_ROLLOUT")
+            description = "Handles the UPDATE request for a single Rollout.")
     @PutResponses
+    @RequiredPermissions({ ApiPermission.UPDATE_ROLLOUT })
     @PutMapping(value = ROLLOUTS_V1 + "/{rolloutId}",
             consumes = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE }, produces = { APPLICATION_JSON_VALUE, HAL_JSON_VALUE })
     ResponseEntity<MgmtRolloutResponseBody> update(
@@ -152,9 +162,9 @@ public interface MgmtRolloutRestApi {
      */
     @Operation(summary = "Approve a Rollout",
             description = "Handles the POST request of approving a created rollout. Only possible if approval " +
-                    "workflow is enabled in system configuration and rollout is in state WAITING_FOR_APPROVAL. " +
-                    "Required Permission: APPROVE_ROLLOUT")
+                    "workflow is enabled in system configuration and rollout is in state WAITING_FOR_APPROVAL.")
     @PostCreateNoContentResponses
+    @RequiredPermissions({ ApiPermission.APPROVE_ROLLOUT })
     @PostMapping(value = ROLLOUTS_V1 + "/{rolloutId}/approve", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<Void> approve(
             @PathVariable("rolloutId") Long rolloutId,
@@ -168,9 +178,9 @@ public interface MgmtRolloutRestApi {
      * @return OK response (200) if rollout is denied now. In case of any exception the corresponding errors occur.
      */
     @Operation(summary = "Deny a Rollout", description = "Handles the POST request of denying a created rollout. " +
-            "Only possible if approval workflow is enabled in system configuration and rollout is in state " +
-            "WAITING_FOR_APPROVAL. Required Permission: APPROVE_ROLLOUT")
+            "Only possible if approval workflow is enabled in system configuration and rollout is in state " + "WAITING_FOR_APPROVAL.")
     @PostCreateNoContentResponses
+    @RequiredPermissions({ ApiPermission.APPROVE_ROLLOUT })
     @PostMapping(value = ROLLOUTS_V1 + "/{rolloutId}/deny", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<Void> deny(
             @PathVariable("rolloutId") Long rolloutId,
@@ -183,8 +193,9 @@ public interface MgmtRolloutRestApi {
      * @return OK response (200) if rollout could be started. In case of any exception the corresponding errors occur.
      */
     @Operation(summary = "Start a Rollout",
-            description = "Handles the POST request of starting a created rollout. Required Permission: HANDLE_ROLLOUT")
+            description = "Handles the POST request of starting a created rollout.")
     @PostCreateNoContentResponses
+    @RequiredPermissions({ ApiPermission.HANDLE_ROLLOUT })
     @PostMapping(value = ROLLOUTS_V1 + "/{rolloutId}/start", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<Void> start(@PathVariable("rolloutId") Long rolloutId);
 
@@ -195,8 +206,9 @@ public interface MgmtRolloutRestApi {
      * @return OK response (200) if rollout could be paused. In case of any exception the corresponding errors occur.
      */
     @Operation(summary = "Pause a Rollout",
-            description = "Handles the POST request of pausing a running rollout. Required Permission: HANDLE_ROLLOUT")
+            description = "Handles the POST request of pausing a running rollout.")
     @PostCreateNoContentResponses
+    @RequiredPermissions({ ApiPermission.HANDLE_ROLLOUT })
     @PostMapping(value = ROLLOUTS_V1 + "/{rolloutId}/pause", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<Void> pause(@PathVariable("rolloutId") Long rolloutId);
 
@@ -207,8 +219,9 @@ public interface MgmtRolloutRestApi {
      * @return OK response (200) if rollout could be stopped. In case of any exception the corresponding errors occur.
      */
     @Operation(summary = "Stop a Rollout",
-            description = "Handles the POST request of stopping a running rollout. Required Permission: HANDLE_ROLLOUT")
+            description = "Handles the POST request of stopping a running rollout.")
     @PostUpdateNoContentResponses
+    @RequiredPermissions({ ApiPermission.UPDATE_ROLLOUT })
     @PostMapping(value = ROLLOUTS_V1 + "/{rolloutId}/stop", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<Void> stop(@PathVariable("rolloutId") Long rolloutId);
 
@@ -218,9 +231,9 @@ public interface MgmtRolloutRestApi {
      * @param rolloutId the ID of the rollout to be deleted.
      * @return OK response (200) if rollout could be deleted. In case of any exception the corresponding errors occur.
      */
-    @Operation(summary = "Delete a Rollout", description = "Handles the DELETE request of deleting a rollout. " +
-            "Required Permission: DELETE_ROLLOUT")
+    @Operation(summary = "Delete a Rollout", description = "Handles the DELETE request of deleting a rollout.")
     @DeleteResponses
+    @RequiredPermissions({ ApiPermission.DELETE_ROLLOUT })
     @DeleteMapping(value = ROLLOUTS_V1 + "/{rolloutId}", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<Void> delete(@PathVariable("rolloutId") Long rolloutId);
 
@@ -230,9 +243,9 @@ public interface MgmtRolloutRestApi {
      * @param rolloutId the ID of the rollout to be resumed.
      * @return OK response (200) if rollout could be resumed. In case of any exception the corresponding errors occur.
      */
-    @Operation(summary = "Resume a Rollout", description = "Handles the POST request of resuming a paused rollout. " +
-            "Required Permission: HANDLE_ROLLOUT")
+    @Operation(summary = "Resume a Rollout", description = "Handles the POST request of resuming a paused rollout.")
     @PostCreateNoContentResponses
+    @RequiredPermissions({ ApiPermission.HANDLE_ROLLOUT })
     @PostMapping(value = ROLLOUTS_V1 + "/{rolloutId}/resume", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<Void> resume(@PathVariable("rolloutId") Long rolloutId);
 
@@ -249,8 +262,9 @@ public interface MgmtRolloutRestApi {
      *         paged. In any failure the JsonResponseExceptionHandler is handling the response.
      */
     @Operation(summary = "Return all rollout groups referred to a Rollout",
-            description = "Handles the GET request of retrieving all deploy groups of a specific rollout. Required Permission: READ_ROLLOUT")
+            description = "Handles the GET request of retrieving all deploy groups of a specific rollout.")
     @GetResponses
+    @RequiredPermissions({ ApiPermission.READ_ROLLOUT })
     @GetMapping(value = ROLLOUTS_V1 + "/{rolloutId}/deploygroups", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtRolloutGroupResponseBody>> getRolloutGroups(
             @PathVariable("rolloutId") Long rolloutId,
@@ -279,8 +293,9 @@ public interface MgmtRolloutRestApi {
      * @return the OK response containing the MgmtRolloutGroupResponseBody
      */
     @Operation(summary = "Return single rollout group",
-            description = "Handles the GET request of a single deploy group of a specific rollout. Required Permission: READ_ROLLOUT")
+            description = "Handles the GET request of a single deploy group of a specific rollout.")
     @GetResponses
+    @RequiredPermissions({ ApiPermission.READ_ROLLOUT })
     @GetMapping(value = ROLLOUTS_V1 + "/{rolloutId}/deploygroups/{groupId}", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtRolloutGroupResponseBody> getRolloutGroup(
             @PathVariable("rolloutId") Long rolloutId,
@@ -299,9 +314,11 @@ public interface MgmtRolloutRestApi {
      * @return a paged list of targets related to a specific rollout and rollout group.
      */
     @Operation(summary = "Return all targets related to a specific rollout group",
-            description = "Handles the GET request of retrieving all targets of a single deploy group of a specific " +
-                    "rollout. Required Permissions: READ_ROLLOUT, READ_TARGET.")
+            description = "Handles the GET request of retrieving all targets of a single deploy group of a specific " + "rollout.")
     @GetResponses
+    @RequiredPermissions(
+            value = { ApiPermission.READ_ROLLOUT, ApiPermission.READ_TARGET },
+            optional = { ApiPermission.READ_TARGET_SECURITY_TOKEN })
     @GetMapping(value = ROLLOUTS_V1 + "/{rolloutId}/deploygroups/{groupId}/targets", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtTarget>> getRolloutGroupTargets(
             @PathVariable("rolloutId") Long rolloutId,
@@ -328,8 +345,9 @@ public interface MgmtRolloutRestApi {
      * @return OK response (200). In case of any exception the corresponding errors occur.
      */
     @Operation(summary = "Force trigger processing next group of a Rollout", description = "Handles the POST request " +
-            "of triggering the next group of a rollout. Required Permission: UPDATE_ROLLOUT")
+            "of triggering the next group of a rollout.")
     @PostCreateNoContentResponses
+    @RequiredPermissions({ ApiPermission.UPDATE_ROLLOUT })
     @PostMapping(value = ROLLOUTS_V1 + "/{rolloutId}/triggerNextGroup", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<Void> triggerNextGroup(@PathVariable("rolloutId") Long rolloutId);
 
@@ -339,13 +357,17 @@ public interface MgmtRolloutRestApi {
      * @param rolloutId the ID of the rollout to be retried.
      * @return OK response (200). In case of any exception the corresponding errors occur.
      */
-    @Operation(summary = "Retry a rollout", description = "Handles the POST request of retrying a rollout. " +
-            "Required Permission: CREATE_ROLLOUT")
+    @Operation(summary = "Retry a rollout",
+            description = "Handles the POST request of retrying a rollout. If the retried rollout is scheduled (has 'startAt'), " +
+                    "HANDLE_ROLLOUT is required as well. If the distribution set gets implicitly locked, UPDATE_DISTRIBUTION_SET is required as well.")
     @PostCreateResponses
     @ApiResponses(value = {
             @ApiResponse(responseCode = NOT_FOUND_404, description = "Rollout not found.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
+    @RequiredPermissions(
+            value = { ApiPermission.CREATE_ROLLOUT, ApiPermission.READ_ROLLOUT, ApiPermission.READ_TARGET, ApiPermission.READ_DISTRIBUTION_SET },
+            optional = { ApiPermission.HANDLE_ROLLOUT, ApiPermission.UPDATE_DISTRIBUTION_SET })
     @PostMapping(value = ROLLOUTS_V1 + "/{rolloutId}/retry", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtRolloutResponseBody> retryRollout(@PathVariable("rolloutId") Long rolloutId);
 }

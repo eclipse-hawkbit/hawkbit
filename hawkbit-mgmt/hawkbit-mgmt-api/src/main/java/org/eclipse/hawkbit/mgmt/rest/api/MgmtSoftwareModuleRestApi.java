@@ -45,7 +45,9 @@ import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleMeta
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleMetadataBodyPut;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleRequestBodyPut;
+import org.eclipse.hawkbit.rest.ApiPermission;
 import org.eclipse.hawkbit.rest.OpenApi;
+import org.eclipse.hawkbit.rest.RequiredPermissions;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -81,7 +83,7 @@ public interface MgmtSoftwareModuleRestApi {
      * @return In case all sets could be successfully be created the ResponseEntity with status code 201 - Created but without ResponseBody. In any
      *         failure the JsonResponseExceptionHandler is handling the response.
      */
-    @Operation(summary = "Upload artifact", description = "Handles POST request for artifact upload. Required Permission: CREATE_REPOSITORY")
+    @Operation(summary = "Upload artifact", description = "Handles POST request for artifact upload.")
     @PostCreateResponses
     @ApiResponses(value = {
             @ApiResponse(responseCode = NOT_FOUND_404, description = "Software Module not found",
@@ -91,6 +93,7 @@ public interface MgmtSoftwareModuleRestApi {
             @ApiResponse(responseCode = INTERNAL_SERVER_ERROR_500, description = "Upload / store to storage or encryption failed",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
+    @RequiredPermissions({ ApiPermission.CREATE_SOFTWARE_MODULE })
     @PostMapping(value = SOFTWAREMODULES_V1 + "/{softwareModuleId}/artifacts",
             consumes = MULTIPART_FORM_DATA_VALUE, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtArtifact> uploadArtifact(
@@ -110,8 +113,12 @@ public interface MgmtSoftwareModuleRestApi {
      */
     @Operation(summary = "Return all metadata of artifacts assigned to a software module",
             description = "Handles the GET request of retrieving all metadata of artifacts assigned to a " +
-                    "software module. Required Permission: READ_REPOSITORY")
+                    "software module. If 'useartifacturlhandler' is true, READ_DISTRIBUTION_SET, READ_TARGET or " +
+                    "READ_TENANT_CONFIGURATION is required as well.")
     @GetResponses
+    @RequiredPermissions(
+            value = { ApiPermission.READ_SOFTWARE_MODULE },
+            optional = { ApiPermission.READ_DISTRIBUTION_SET, ApiPermission.READ_TARGET, ApiPermission.READ_TENANT_CONFIGURATION })
     @GetMapping(value = SOFTWAREMODULES_V1 + "/{softwareModuleId}/artifacts", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtArtifact>> getArtifacts(
             @PathVariable("softwareModuleId") Long softwareModuleId,
@@ -126,8 +133,12 @@ public interface MgmtSoftwareModuleRestApi {
      * @return responseEntity with status ok if successful
      */
     @Operation(summary = "Return single Artifact metadata",
-            description = "Handles the GET request of retrieving a single Artifact metadata request. Required Permission: READ_REPOSITORY")
+            description = "Handles the GET request of retrieving a single Artifact metadata request. If 'useartifacturlhandler' is true, " +
+                    "READ_DISTRIBUTION_SET, READ_TARGET or READ_TENANT_CONFIGURATION is required as well.")
     @GetResponses
+    @RequiredPermissions(
+            value = { ApiPermission.READ_SOFTWARE_MODULE },
+            optional = { ApiPermission.READ_DISTRIBUTION_SET, ApiPermission.READ_TARGET, ApiPermission.READ_TENANT_CONFIGURATION })
     @GetMapping(value = SOFTWAREMODULES_V1 + "/{softwareModuleId}/artifacts/{artifactId}",
             produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     @ResponseBody
@@ -144,7 +155,7 @@ public interface MgmtSoftwareModuleRestApi {
      * @return status OK if delete as successful.
      */
     @Operation(summary = "Delete artifact by Id",
-            description = "Handles the DELETE request for a single Artifact assigned to a SoftwareModule. Required Permission: DELETE_REPOSITORY")
+            description = "Handles the DELETE request for a single Artifact assigned to a SoftwareModule.")
     @DeleteResponses
     @ApiResponses(value = {
             @ApiResponse(responseCode = LOCKED_423, description = "Software module is locked",
@@ -152,6 +163,7 @@ public interface MgmtSoftwareModuleRestApi {
             @ApiResponse(responseCode = INTERNAL_SERVER_ERROR_500, description = "Artifact delete failed with internal server error",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
+    @RequiredPermissions({ ApiPermission.READ_SOFTWARE_MODULE, ApiPermission.DELETE_SOFTWARE_MODULE })
     @DeleteMapping(value = SOFTWAREMODULES_V1 + "/{softwareModuleId}/artifacts/{artifactId}")
     @ResponseBody
     ResponseEntity<Void> deleteArtifact(
@@ -170,8 +182,9 @@ public interface MgmtSoftwareModuleRestApi {
      *         JsonResponseExceptionHandler is handling the response.
      */
     @Operation(summary = "Return all Software modules",
-            description = "Handles the GET request of retrieving all softwaremodules. Required Permission: READ_REPOSITORY")
+            description = "Handles the GET request of retrieving all softwaremodules.")
     @GetIfExistResponses
+    @RequiredPermissions({ ApiPermission.READ_SOFTWARE_MODULE })
     @GetMapping(value = SOFTWAREMODULES_V1, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtSoftwareModule>> getSoftwareModules(
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false)
@@ -198,8 +211,9 @@ public interface MgmtSoftwareModuleRestApi {
      * @param softwareModuleId the ID of the module to retrieve
      * @return a single softwareModule with status OK.
      */
-    @Operation(summary = "Return Software Module by id", description = "Handles the GET request of retrieving a single softwaremodule. Required Permission: READ_REPOSITORY")
+    @Operation(summary = "Return Software Module by id", description = "Handles the GET request of retrieving a single softwaremodule.")
     @GetResponses
+    @RequiredPermissions({ ApiPermission.READ_SOFTWARE_MODULE })
     @GetMapping(value = SOFTWAREMODULES_V1 + "/{softwareModuleId}", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtSoftwareModule> getSoftwareModule(@PathVariable("softwareModuleId") Long softwareModuleId);
 
@@ -211,12 +225,13 @@ public interface MgmtSoftwareModuleRestApi {
      *         failure the JsonResponseExceptionHandler is handling the response.
      */
     @Operation(summary = "Create Software Module(s)",
-            description = "Handles the POST request of creating new software modules. The request body must always be a list of modules. Required Permission: CREATE_REPOSITORY")
+            description = "Handles the POST request of creating new software modules. The request body must always be a list of modules.")
     @PostCreateResponses
     @ApiResponses(value = {
             @ApiResponse(responseCode = INTERNAL_SERVER_ERROR_500, description = "Artifact encryption failed",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
+    @RequiredPermissions({ ApiPermission.CREATE_SOFTWARE_MODULE })
     @PostMapping(value = SOFTWAREMODULES_V1,
             consumes = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE }, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtSoftwareModule>> createSoftwareModules(@RequestBody List<MgmtSoftwareModuleRequestBodyPost> softwareModules);
@@ -229,8 +244,9 @@ public interface MgmtSoftwareModuleRestApi {
      * @return status OK if update was successful
      */
     @Operation(summary = "Update Software Module",
-            description = "Handles the PUT request for a single softwaremodule within Hawkbit. Required Permission: UPDATE_REPOSITORY")
+            description = "Handles the PUT request for a single softwaremodule within Hawkbit.")
     @PutResponses
+    @RequiredPermissions({ ApiPermission.UPDATE_SOFTWARE_MODULE })
     @PutMapping(value = SOFTWAREMODULES_V1 + "/{softwareModuleId}",
             consumes = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE }, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtSoftwareModule> updateSoftwareModule(
@@ -244,8 +260,9 @@ public interface MgmtSoftwareModuleRestApi {
      * @return status OK if delete was successful.
      */
     @Operation(summary = "Delete Software Module by Id",
-            description = "Handles the DELETE request for a single softwaremodule within Hawkbit. Required Permission: DELETE_REPOSITORY")
+            description = "Handles the DELETE request for a single softwaremodule within Hawkbit.")
     @DeleteResponses
+    @RequiredPermissions({ ApiPermission.READ_SOFTWARE_MODULE, ApiPermission.DELETE_SOFTWARE_MODULE })
     @DeleteMapping(value = SOFTWAREMODULES_V1 + "/{softwareModuleId}")
     ResponseEntity<Void> deleteSoftwareModule(@PathVariable("softwareModuleId") Long softwareModuleId);
 
@@ -257,12 +274,13 @@ public interface MgmtSoftwareModuleRestApi {
      * @return status created if post request is successful with the value of the created metadata
      */
     @Operation(summary = "Creates a list of metadata for a specific Software Module",
-            description = "Create a list of metadata entries Required Permission: UPDATE_REPOSITORY")
+            description = "Create a list of metadata entries.")
     @PostCreateResponses
     @ApiResponses(value = {
             @ApiResponse(responseCode = NOT_FOUND_404, description = "Software Module not found",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
+    @RequiredPermissions({ ApiPermission.UPDATE_SOFTWARE_MODULE })
     @PostMapping(value = SOFTWAREMODULES_V1 + "/{softwareModuleId}/metadata", consumes = { APPLICATION_JSON_VALUE, HAL_JSON_VALUE })
     ResponseEntity<Void> createMetadata(@PathVariable("softwareModuleId") Long softwareModuleId,
             @RequestBody List<MgmtSoftwareModuleMetadata> metadataRest);
@@ -273,8 +291,9 @@ public interface MgmtSoftwareModuleRestApi {
      * @param softwareModuleId the ID of the software module for the metadata
      * @return status OK with the paged list of metadata, if the request is successful
      */
-    @Operation(summary = "Return metadata for a Software Module", description = "Get a paged list of metadata for a software module. Required Permission: READ_REPOSITORY")
+    @Operation(summary = "Return metadata for a Software Module", description = "Get a paged list of metadata for a software module.")
     @GetResponses
+    @RequiredPermissions({ ApiPermission.READ_SOFTWARE_MODULE })
     @GetMapping(value = SOFTWAREMODULES_V1 + "/{softwareModuleId}/metadata", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtSoftwareModuleMetadata>> getMetadata(@PathVariable("softwareModuleId") Long softwareModuleId);
 
@@ -286,8 +305,9 @@ public interface MgmtSoftwareModuleRestApi {
      * @return status OK if get request is successful with the value of the metadata
      */
     @Operation(summary = "Return single metadata value for a specific key of a Software Module",
-            description = "Get a single metadata value for a metadata key. Required Permission: READ_REPOSITORY")
+            description = "Get a single metadata value for a metadata key.")
     @GetResponses
+    @RequiredPermissions({ ApiPermission.READ_SOFTWARE_MODULE })
     @GetMapping(value = SOFTWAREMODULES_V1 + "/{softwareModuleId}/metadata/{metadataKey}",
             produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtSoftwareModuleMetadata> getMetadataValue(
@@ -302,8 +322,9 @@ public interface MgmtSoftwareModuleRestApi {
      * @param metadata body to update
      */
     @Operation(summary = "Update a single metadata value of a Software Module",
-            description = "Update a single metadata value for specific key. Required Permission: UPDATE_REPOSITORY")
+            description = "Update a single metadata value for specific key.")
     @PutResponses
+    @RequiredPermissions({ ApiPermission.UPDATE_SOFTWARE_MODULE })
     @PutMapping(value = SOFTWAREMODULES_V1 + "/{softwareModuleId}/metadata/{metadataKey}")
     ResponseEntity<Void> updateMetadata(
             @PathVariable("softwareModuleId") Long softwareModuleId,
@@ -317,8 +338,9 @@ public interface MgmtSoftwareModuleRestApi {
      * @param metadataKey the key of the metadata to delete
      */
     @Operation(summary = "Delete single metadata entry from the software module",
-            description = "Delete a single metadata. Required Permission: UPDATE_REPOSITORY")
+            description = "Delete a single metadata.")
     @DeleteResponses
+    @RequiredPermissions({ ApiPermission.UPDATE_SOFTWARE_MODULE })
     @DeleteMapping(value = SOFTWAREMODULES_V1 + "/{softwareModuleId}/metadata/{metadataKey}")
     ResponseEntity<Void> deleteMetadata(@PathVariable("softwareModuleId") Long softwareModuleId,
             @PathVariable("metadataKey") String metadataKey);

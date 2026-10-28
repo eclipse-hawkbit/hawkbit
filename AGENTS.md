@@ -36,6 +36,7 @@ CI (`.github/workflows/reusable_workflow_verify.yaml`) runs `license:check`, the
 
 ## Conventions
 - **API layering:** `*-api` holds `*RestApi` interfaces (Spring MVC and springdoc annotations) and `json/model` DTOs. `*-resource` holds the implementations (`MgmtXxxResource implements MgmtXxxRestApi`). SDK, UI and MCP consume the `-api` interfaces via Feign, so an interface change affects all clients.
+- **Endpoint permissions:** annotate each Mgmt `@*Mapping` method with `@RequiredPermissions({ ApiPermission.X })` (`hawkbit-rest-api`; derive from the service `@PreAuthorize`, `${permissionGroup}` resolved per service). The OpenAPI text is generated from it, so don't write "Required Permission" in descriptions. `MgmtRequiredPermissionsTest` enforces presence, and `ApiPermissionTest` keeps `ApiPermission` in sync with `SpPermission`. Use `anyOf` for `A or B` checks and `optional` for conditional ones. Mgmt tests run with `MgmtRequiredPermissionsVerifier` on (`hawkbit.server.mgmt.permission-tracking.enabled`), which fails a test when a granted permission isn't declared.
 - **Services:** `XxxManagement` (repository-api) → `JpaXxxManagement` (repository-jpa `management`).
   - `get…` returns the entity or throws `EntityNotFoundException`. `find…` returns `Optional`.
   - Secure methods with `@PreAuthorize(SpringEvalExpressions.…)`. Permissions are String constants in `SpPermission`.

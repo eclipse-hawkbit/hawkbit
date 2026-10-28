@@ -19,6 +19,7 @@ import io.swagger.v3.oas.annotations.extensions.ExtensionProperty;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.eclipse.hawkbit.mgmt.json.model.auth.MgmtUserInfo;
 import org.eclipse.hawkbit.rest.OpenApi;
+import org.eclipse.hawkbit.rest.RequiredPermissions;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 
@@ -39,6 +40,7 @@ public interface MgmtBasicAuthRestApi {
      * @return the userinfo with status OK.
      */
     @GetResponses
+    @RequiredPermissions({})
     @GetMapping(value = USERINFO_V1, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtUserInfo> validateBasicAuth();
 }

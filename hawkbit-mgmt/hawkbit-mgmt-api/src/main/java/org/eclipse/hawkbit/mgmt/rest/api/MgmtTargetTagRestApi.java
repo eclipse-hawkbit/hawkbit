@@ -33,8 +33,10 @@ import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtTag;
 import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtTagRequestBodyPut;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
+import org.eclipse.hawkbit.rest.ApiPermission;
 import org.eclipse.hawkbit.rest.ApiResponsesConstants.PostUpdateNoContentResponses;
 import org.eclipse.hawkbit.rest.OpenApi;
+import org.eclipse.hawkbit.rest.RequiredPermissions;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -69,6 +71,7 @@ public interface MgmtTargetTagRestApi {
      */
     @Operation(summary = "Return all target tags", description = "Handles the GET request of retrieving all target tags.")
     @GetIfExistResponses
+    @RequiredPermissions({ ApiPermission.READ_TARGET })
     @GetMapping(value = TARGETTAGS_V1, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtTag>> getTargetTags(
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false)
@@ -94,6 +97,7 @@ public interface MgmtTargetTagRestApi {
      */
     @Operation(summary = "Return target tag by id", description = "Handles the GET request of retrieving a single target tag.")
     @GetResponses
+    @RequiredPermissions({ ApiPermission.READ_TARGET })
     @GetMapping(value = TARGETTAGS_V1 + "/{targetTagId}", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtTag> getTargetTag(@PathVariable("targetTagId") Long targetTagId);
 
@@ -107,6 +111,7 @@ public interface MgmtTargetTagRestApi {
     @Operation(summary = "Create target tag(s)", description = "Handles the POST request of creating new target tag. " +
             "The request body must always be a list of target tags.")
     @PostCreateResponses
+    @RequiredPermissions({ ApiPermission.CREATE_TARGET })
     @PostMapping(value = TARGETTAGS_V1,
             consumes = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE }, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtTag>> createTargetTags(@RequestBody List<MgmtTagRequestBodyPut> tags);
@@ -120,6 +125,7 @@ public interface MgmtTargetTagRestApi {
      */
     @Operation(summary = "Update target tag by id", description = "Handles the PUT request of updating a target tag.")
     @PutResponses
+    @RequiredPermissions({ ApiPermission.UPDATE_TARGET })
     @PutMapping(value = TARGETTAGS_V1 + "/{targetTagId}",
             consumes = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE }, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtTag> updateTargetTag(
@@ -134,6 +140,7 @@ public interface MgmtTargetTagRestApi {
      */
     @Operation(summary = "Delete target tag by id", description = "Handles the DELETE request of deleting a single target tag.")
     @DeleteResponses
+    @RequiredPermissions({ ApiPermission.READ_TARGET, ApiPermission.DELETE_TARGET })
     @DeleteMapping(value = TARGETTAGS_V1 + "/{targetTagId}")
     ResponseEntity<Void> deleteTargetTag(@PathVariable("targetTagId") Long targetTagId);
 
@@ -151,6 +158,9 @@ public interface MgmtTargetTagRestApi {
     @Operation(summary = "Return assigned targets for tag",
             description = "Handles the GET request of retrieving a list of assigned targets.")
     @GetResponses
+    @RequiredPermissions(
+            value = { ApiPermission.READ_TARGET },
+            optional = { ApiPermission.READ_TARGET_SECURITY_TOKEN })
     @GetMapping(value = TARGETTAGS_V1 + TARGET_TAG_ID_ASSIGNED, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtTarget>> getAssignedTargets(
             @PathVariable("targetTagId") Long targetTagId,
@@ -179,6 +189,7 @@ public interface MgmtTargetTagRestApi {
     @Operation(summary = "Assign target(s) to given tagId",
             description = "Handles the POST request of target assignment. Already assigned target will be ignored.")
     @PostUpdateNoContentResponses
+    @RequiredPermissions({ ApiPermission.UPDATE_TARGET })
     @PostMapping(value = TARGETTAGS_V1 + TARGET_TAG_ID_ASSIGNED + "/{controllerId}")
     ResponseEntity<Void> assignTarget(
             @PathVariable("targetTagId") Long targetTagId,
@@ -194,6 +205,7 @@ public interface MgmtTargetTagRestApi {
     @Operation(summary = "Assign target(s) to given tagId",
             description = "Handles the POST request of target assignment. Already assigned target will be ignored.")
     @PostUpdateNoContentResponses
+    @RequiredPermissions({ ApiPermission.UPDATE_TARGET })
     @PostMapping(value = TARGETTAGS_V1 + TARGET_TAG_ID_ASSIGNED, consumes = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<Void> assignTargets(
             @PathVariable("targetTagId") Long targetTagId,
@@ -210,6 +222,7 @@ public interface MgmtTargetTagRestApi {
      */
     @Operation(summary = "Unassign target from a given tagId", description = "Handles the DELETE request to unassign the given target.")
     @DeleteResponses
+    @RequiredPermissions({ ApiPermission.UPDATE_TARGET })
     @DeleteMapping(value = TARGETTAGS_V1 + TARGET_TAG_ID_ASSIGNED + "/{controllerId}")
     ResponseEntity<Void> unassignTarget(
             @PathVariable("targetTagId") Long targetTagId,
@@ -224,6 +237,7 @@ public interface MgmtTargetTagRestApi {
      */
     @Operation(summary = "Unassign targets from a given tagId", description = "Handles the DELETE request to unassign the given targets.")
     @DeleteResponses
+    @RequiredPermissions({ ApiPermission.UPDATE_TARGET })
     @DeleteMapping(value = TARGETTAGS_V1 + TARGET_TAG_ID_ASSIGNED, consumes = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<Void> unassignTargets(
             @PathVariable("targetTagId") Long targetTagId,

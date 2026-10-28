@@ -35,7 +35,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtAction;
+import org.eclipse.hawkbit.rest.ApiPermission;
 import org.eclipse.hawkbit.rest.OpenApi;
+import org.eclipse.hawkbit.rest.RequiredPermissions;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -67,6 +69,7 @@ public interface MgmtActionRestApi {
      */
     @Operation(summary = "Return all actions", description = "Handles the GET request of retrieving all actions.")
     @GetIfExistResponses
+    @RequiredPermissions({ ApiPermission.READ_TARGET })
     @GetMapping(value = ACTIONS_V1, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtAction>> getActions(
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false)
@@ -97,6 +100,7 @@ public interface MgmtActionRestApi {
      */
     @Operation(summary = "Return action by id", description = "Handles the GET request of retrieving a single action by actionId.")
     @GetResponses
+    @RequiredPermissions({ ApiPermission.READ_TARGET })
     @GetMapping(value = ACTIONS_V1 + "/{actionId}", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtAction> getAction(@PathVariable("actionId") Long actionId);
 
@@ -109,12 +113,13 @@ public interface MgmtActionRestApi {
     @Operation(summary = "Delete a single action by id",
             description = "Handles the DELETE request for single action within Bosch IoT Rollouts. Only actions whose status is " +
                     "allowed for deletion by the tenant configuration 'action.delete.allowed.statuses' (default: CANCELED, ERROR, " +
-                    "FINISHED) can be deleted; otherwise the request is rejected. Required Permission: DELETE_REPOSITORY")
+                    "FINISHED) can be deleted; otherwise the request is rejected.")
     @DeleteResponses
     @ApiResponses(@ApiResponse(responseCode = METHOD_NOT_ALLOWED_405,
             description = "The action is not in a status that is allowed for deletion (see tenant configuration " +
                     "'action.delete.allowed.statuses').",
             content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))))
+    @RequiredPermissions({ ApiPermission.UPDATE_TARGET })
     @DeleteMapping(value = ACTIONS_V1 + "/{actionId}")
     ResponseEntity<Void> deleteAction(@PathVariable("actionId") Long actionId);
 
@@ -129,12 +134,13 @@ public interface MgmtActionRestApi {
             description = "Handles the DELETE request for multiple actions within Bosch IoT Rollouts. Either action id list OR rsql " +
                     "filter SHOULD be provided. Only actions whose status is allowed for deletion by the tenant configuration " +
                     "'action.delete.allowed.statuses' (default: CANCELED, ERROR, FINISHED) can be deleted; if any matched action is " +
-                    "not in an allowed status the request is rejected. Required Permission: DELETE_REPOSITORY")
+                    "not in an allowed status the request is rejected.")
     @DeleteResponses
     @ApiResponses(@ApiResponse(responseCode = METHOD_NOT_ALLOWED_405,
             description = "At least one matched action is not in a status that is allowed for deletion (see tenant configuration " +
                     "'action.delete.allowed.statuses').",
             content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))))
+    @RequiredPermissions({ ApiPermission.UPDATE_TARGET })
     @DeleteMapping(value = ACTIONS_V1)
     ResponseEntity<Void> deleteActions(
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false, defaultValue = "")

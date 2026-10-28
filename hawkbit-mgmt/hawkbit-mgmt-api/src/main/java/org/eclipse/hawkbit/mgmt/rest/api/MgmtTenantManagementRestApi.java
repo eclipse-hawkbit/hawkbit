@@ -25,7 +25,9 @@ import io.swagger.v3.oas.annotations.extensions.ExtensionProperty;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.eclipse.hawkbit.mgmt.json.model.system.MgmtSystemTenantConfigurationValue;
 import org.eclipse.hawkbit.mgmt.json.model.system.MgmtSystemTenantConfigurationValueRequest;
+import org.eclipse.hawkbit.rest.ApiPermission;
 import org.eclipse.hawkbit.rest.OpenApi;
+import org.eclipse.hawkbit.rest.RequiredPermissions;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -52,8 +54,16 @@ public interface MgmtTenantManagementRestApi {
      * @return a map of all configuration values.
      */
     @Operation(summary = "Return all tenant specific configuration values",
-            description = "The GET request returns a list of all possible configuration keys for the tenant. Required Permission: READ_TENANT_CONFIGURATION")
+            description = "The GET request returns a list of all possible configuration keys for the tenant. The values not accessible " +
+                    "for the caller are skipped: the default distribution set type is included with any of READ_TENANT_CONFIGURATION, " +
+                    "READ_DISTRIBUTION_SET or READ_TARGET, the other configuration values only with READ_TENANT_CONFIGURATION and " +
+                    "the gateway security token only with READ_GATEWAY_SECURITY_TOKEN.")
     @GetIfExistResponses
+    @RequiredPermissions(
+            value = {},
+            anyOf = @RequiredPermissions.AnyOf({
+                    ApiPermission.READ_TENANT_CONFIGURATION, ApiPermission.READ_DISTRIBUTION_SET, ApiPermission.READ_TARGET }),
+            optional = { ApiPermission.READ_TENANT_CONFIGURATION, ApiPermission.READ_GATEWAY_SECURITY_TOKEN })
     @GetMapping(value = SYSTEM_V1 + "/configs", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<Map<String, MgmtSystemTenantConfigurationValue>> getTenantConfiguration();
 
@@ -65,9 +75,15 @@ public interface MgmtTenantManagementRestApi {
      *         response.
      */
     @Operation(summary = "Return a tenant specific configuration value", description = "The GET request returns the " +
-            "configuration value of a specific configuration key for the tenant. " +
-            "Required Permission: READ_TENANT_CONFIGURATION")
+            "configuration value of a specific configuration key for the tenant. For the default distribution set type any of " +
+            "READ_TENANT_CONFIGURATION, READ_DISTRIBUTION_SET or READ_TARGET is sufficient, all other keys require " +
+            "READ_TENANT_CONFIGURATION. If the key is the gateway security token, READ_GATEWAY_SECURITY_TOKEN is required as well.")
     @GetResponses
+    @RequiredPermissions(
+            value = {},
+            anyOf = @RequiredPermissions.AnyOf({
+                    ApiPermission.READ_TENANT_CONFIGURATION, ApiPermission.READ_DISTRIBUTION_SET, ApiPermission.READ_TARGET }),
+            optional = { ApiPermission.READ_GATEWAY_SECURITY_TOKEN })
     @GetMapping(value = SYSTEM_V1 + "/configs/{keyName}", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtSystemTenantConfigurationValue> getTenantConfigurationValue(@PathVariable("keyName") String keyName);
 
@@ -78,9 +94,9 @@ public interface MgmtTenantManagementRestApi {
      * @param configurationValueRest the new value for the configuration
      */
     @Operation(summary = "Update a tenant specific configuration value.",
-            description = "The PUT request changes a configuration value of a specific configuration key for the tenant. " +
-                    "Required Permission: TENANT_CONFIGURATION")
+            description = "The PUT request changes a configuration value of a specific configuration key for the tenant.")
     @PutResponses
+    @RequiredPermissions({ ApiPermission.UPDATE_TENANT_CONFIGURATION })
     @PutMapping(value = SYSTEM_V1 + "/configs/{keyName}",
             consumes = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE }, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -94,8 +110,12 @@ public interface MgmtTenantManagementRestApi {
      * @param configurationValueMap a Map of name - value pairs for the configurations
      */
     @Operation(summary = "Batch update of tenant configuration.",
-            description = "The PUT request updates the whole configuration for the tenant. Required Permission: TENANT_CONFIGURATION")
+            description = "The PUT request updates the whole configuration for the tenant. If the default distribution set type is " +
+                    "updated, READ_DISTRIBUTION_SET, READ_TARGET or READ_TENANT_CONFIGURATION is required as well.")
     @PutResponses
+    @RequiredPermissions(
+            value = { ApiPermission.UPDATE_TENANT_CONFIGURATION },
+            optional = { ApiPermission.READ_DISTRIBUTION_SET, ApiPermission.READ_TARGET, ApiPermission.READ_TENANT_CONFIGURATION })
     @PutMapping(value = SYSTEM_V1 + "/configs",
             consumes = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE }, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -108,8 +128,9 @@ public interface MgmtTenantManagementRestApi {
      */
     @Operation(summary = "Delete a tenant specific configuration value",
             description = "The DELETE request removes a tenant specific configuration value for the tenant. " +
-                    "Afterwards the global default value is used. Required Permission: TENANT_CONFIGURATION")
+                    "Afterwards the global default value is used.")
     @DeleteResponses
+    @RequiredPermissions({ ApiPermission.DELETE_TENANT_CONFIGURATION })
     @DeleteMapping(value = SYSTEM_V1 + "/configs/{keyName}", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void deleteTenantConfigurationValue(@PathVariable("keyName") String keyName);

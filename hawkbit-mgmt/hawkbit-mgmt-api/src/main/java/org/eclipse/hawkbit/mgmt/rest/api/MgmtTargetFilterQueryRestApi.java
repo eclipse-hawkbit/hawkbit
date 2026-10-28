@@ -34,8 +34,10 @@ import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
 import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtDistributionSetAutoAssignment;
 import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtTargetFilterQuery;
 import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtTargetFilterQueryRequestBody;
+import org.eclipse.hawkbit.rest.ApiPermission;
 import org.eclipse.hawkbit.rest.ApiResponsesConstants.PostUpdateResponses;
 import org.eclipse.hawkbit.rest.OpenApi;
+import org.eclipse.hawkbit.rest.RequiredPermissions;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -63,8 +65,9 @@ public interface MgmtTargetFilterQueryRestApi {
      */
 
     @Operation(summary = "Return target filter query by id",
-            description = "Handles the GET request of retrieving a single target filter query. Required permission: READ_TARGET")
+            description = "Handles the GET request of retrieving a single target filter query.")
     @GetResponses
+    @RequiredPermissions({ ApiPermission.READ_TARGET })
     @GetMapping(value = TARGETFILTERS_V1 + "/{filterId}", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtTargetFilterQuery> getFilter(@PathVariable("filterId") Long filterId);
 
@@ -80,8 +83,9 @@ public interface MgmtTargetFilterQueryRestApi {
      *         JsonResponseExceptionHandler is handling the response.
      */
     @Operation(summary = "Return all target filter queries",
-            description = "Handles the GET request of retrieving all target filter queries. Required permission: READ_TARGET")
+            description = "Handles the GET request of retrieving all target filter queries.")
     @GetIfExistResponses
+    @RequiredPermissions({ ApiPermission.READ_TARGET })
     @GetMapping(value = TARGETFILTERS_V1, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtTargetFilterQuery>> getFilters(
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false)
@@ -109,8 +113,9 @@ public interface MgmtTargetFilterQueryRestApi {
      *         is returned. In any failure the JsonResponseExceptionHandler is handling the response.
      */
     @Operation(summary = "Create target filter",
-            description = "Handles the POST request to create a new target filter query. Required permission: CREATE_TARGET")
+            description = "Handles the POST request to create a new target filter query.")
     @PostCreateResponses
+    @RequiredPermissions({ ApiPermission.CREATE_TARGET })
     @PostMapping(value = TARGETFILTERS_V1,
             consumes = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE }, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtTargetFilterQuery> createFilter(
@@ -125,8 +130,13 @@ public interface MgmtTargetFilterQueryRestApi {
      *         the update.
      * @return the updated target filter response which contains all fields including fields which have not been updated
      */
-    @Operation(summary = "Updates target filter query by id", description = "Handles the PUT request of updating a target filter query. Required permission: UPDATE_TARGET")
+    @Operation(summary = "Updates target filter query by id",
+            description = "Handles the PUT request of updating a target filter query. If the query of a filter with a linked auto assignment " +
+                    "is changed, READ_DISTRIBUTION_SET is required as well, and UPDATE_DISTRIBUTION_SET if the distribution set gets implicitly locked.")
     @PutResponses
+    @RequiredPermissions(
+            value = { ApiPermission.READ_TARGET, ApiPermission.UPDATE_TARGET },
+            optional = { ApiPermission.READ_DISTRIBUTION_SET, ApiPermission.UPDATE_DISTRIBUTION_SET })
     @PutMapping(value = TARGETFILTERS_V1 + "/{filterId}",
             consumes = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE }, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtTargetFilterQuery> updateFilter(
@@ -140,8 +150,13 @@ public interface MgmtTargetFilterQueryRestApi {
      * @return If the given controllerId could exists and could be deleted Http OK. In any failure the JsonResponseExceptionHandler is handling
      *         the response.
      */
-    @Operation(summary = "Delete target filter by id", description = "Handles the DELETE request of deleting a target filter query. Required permission: DELETE_TARGET")
+    @Operation(summary = "Delete target filter by id",
+            description = "Handles the DELETE request of deleting a target filter query. If an auto assignment is linked to the filter, " +
+                    "DELETE_AUTO_ASSIGNMENT is required as well.")
     @DeleteResponses
+    @RequiredPermissions(
+            value = { ApiPermission.DELETE_TARGET, ApiPermission.READ_AUTO_ASSIGNMENT },
+            optional = { ApiPermission.DELETE_AUTO_ASSIGNMENT })
     @DeleteMapping(value = TARGETFILTERS_V1 + "/{filterId}", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<Void> deleteFilter(@PathVariable("filterId") Long filterId);
 
@@ -153,8 +168,10 @@ public interface MgmtTargetFilterQueryRestApi {
      * @deprecated will be removed in 2.x
      */
     @Deprecated(forRemoval = true, since = "1.1.1")
-    @Operation(summary = "Return distribution set for auto assignment of a specific target filter", description = "Handles the GET request of retrieving the auto assign distribution set. Required permission: READ_TARGET")
+    @Operation(summary = "Return distribution set for auto assignment of a specific target filter",
+            description = "Handles the GET request of retrieving the auto assign distribution set.")
     @GetIfExistResponses
+    @RequiredPermissions({ ApiPermission.READ_TARGET })
     @GetMapping(value = TARGETFILTERS_V1 + "/{filterId}/autoAssignDS", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtDistributionSet> getAssignedDistributionSet(@PathVariable("filterId") Long filterId);
 
@@ -168,9 +185,12 @@ public interface MgmtTargetFilterQueryRestApi {
      */
     @Deprecated(forRemoval = true, since = "1.1.1")
     @Operation(summary = "Set auto assignment of distribution set for a target filter query",
-            description = "Handles the POST request of setting the auto assign distribution set for a target filter " +
-                    "query. Required permissions: UPDATE_TARGET and READ_REPOSITORY")
+            description = "Handles the POST request of setting the auto assign distribution set for a target filter query. " +
+                    "If the distribution set is not locked yet and implicit locking is enabled, UPDATE_DISTRIBUTION_SET is required as well.")
     @PostUpdateResponses
+    @RequiredPermissions(
+            value = { ApiPermission.READ_TARGET, ApiPermission.UPDATE_TARGET, ApiPermission.READ_DISTRIBUTION_SET },
+            optional = { ApiPermission.UPDATE_DISTRIBUTION_SET })
     @PostMapping(value = TARGETFILTERS_V1 + "/{filterId}/autoAssignDS",
             consumes = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE }, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtTargetFilterQuery> postAssignedDistributionSet(
@@ -186,9 +206,9 @@ public interface MgmtTargetFilterQueryRestApi {
      */
     @Deprecated(forRemoval = true, since = "1.1.1")
     @Operation(summary = "Remove Distribution Set for auto assignment of a target filter",
-            description = "Removes the auto assign distribution set from the target filter query. " +
-                    "Required permission: UPDATE_TARGET")
+            description = "Removes the auto assign distribution set from the target filter query.")
     @DeleteResponses
+    @RequiredPermissions({ ApiPermission.UPDATE_TARGET, ApiPermission.READ_AUTO_ASSIGNMENT })
     @DeleteMapping(value = TARGETFILTERS_V1 + "/{filterId}/autoAssignDS")
     ResponseEntity<Void> deleteAssignedDistributionSet(@PathVariable("filterId") Long filterId);
 }

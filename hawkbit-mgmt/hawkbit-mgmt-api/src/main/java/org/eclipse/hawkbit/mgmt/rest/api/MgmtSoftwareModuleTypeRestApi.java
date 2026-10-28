@@ -37,7 +37,9 @@ import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModuleType;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModuleTypeRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModuleTypeRequestBodyPut;
+import org.eclipse.hawkbit.rest.ApiPermission;
 import org.eclipse.hawkbit.rest.OpenApi;
+import org.eclipse.hawkbit.rest.RequiredPermissions;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -71,8 +73,9 @@ public interface MgmtSoftwareModuleTypeRestApi {
      *         JsonResponseExceptionHandler is handling the response.
      */
     @Operation(summary = "Return all Software Module Types",
-            description = "Handles the GET request of retrieving all software module types. Required Permission: READ_REPOSITORY")
+            description = "Handles the GET request of retrieving all software module types.")
     @GetIfExistResponses
+    @RequiredPermissions({ ApiPermission.READ_SOFTWARE_MODULE_TYPE })
     @GetMapping(value = SOFTWAREMODULETYPES_V1, produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtSoftwareModuleType>> getTypes(
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false)
@@ -100,8 +103,9 @@ public interface MgmtSoftwareModuleTypeRestApi {
      * @return a single softwareModule with status OK.
      */
     @Operation(summary = "Return single Software Module Type",
-            description = "Handles the GET request of retrieving a single software module type. Required Permission: READ_REPOSITORY")
+            description = "Handles the GET request of retrieving a single software module type.")
     @GetResponses
+    @RequiredPermissions({ ApiPermission.READ_SOFTWARE_MODULE_TYPE })
     @GetMapping(value = SOFTWAREMODULETYPES_V1 + "/{softwareModuleTypeId}",
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtSoftwareModuleType> getSoftwareModuleType(
@@ -114,8 +118,9 @@ public interface MgmtSoftwareModuleTypeRestApi {
      * @return status OK if delete as successfully.
      */
     @Operation(summary = "Delete Software Module Type by Id",
-            description = "Handles the DELETE request for a single software module type. Required Permission: DELETE_REPOSITORY")
+            description = "Handles the DELETE request for a single software module type.")
     @DeleteResponses
+    @RequiredPermissions({ ApiPermission.DELETE_SOFTWARE_MODULE_TYPE })
     @DeleteMapping(value = SOFTWAREMODULETYPES_V1 + "/{softwareModuleTypeId}")
     ResponseEntity<Void> deleteSoftwareModuleType(
             @PathVariable("softwareModuleTypeId") Long softwareModuleTypeId);
@@ -128,8 +133,9 @@ public interface MgmtSoftwareModuleTypeRestApi {
      * @return status OK if update is successful
      */
     @Operation(summary = "Update Software Module Type",
-            description = "Handles the PUT request for a single software module type. Required Permission: UPDATE_REPOSITORY")
+            description = "Handles the PUT request for a single software module type.")
     @PutResponses
+    @RequiredPermissions({ ApiPermission.UPDATE_SOFTWARE_MODULE_TYPE })
     @PutMapping(value = SOFTWAREMODULETYPES_V1 + "/{softwareModuleTypeId}",
             consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE },
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
@@ -146,12 +152,13 @@ public interface MgmtSoftwareModuleTypeRestApi {
      */
     @Operation(summary = "Creates new Software Module Types",
             description = "Handles the POST request of creating new software module types. The request body must " +
-                    "always be a list of module types. Required Permission: CREATE_REPOSITORY")
+                    "always be a list of module types.")
     @PostCreateResponses
     @ApiResponses(value = {
             @ApiResponse(responseCode = NOT_FOUND_404, description = "Software Module not found",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
+    @RequiredPermissions({ ApiPermission.CREATE_SOFTWARE_MODULE_TYPE })
     @PostMapping(value = SOFTWAREMODULETYPES_V1,
             consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE },
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })

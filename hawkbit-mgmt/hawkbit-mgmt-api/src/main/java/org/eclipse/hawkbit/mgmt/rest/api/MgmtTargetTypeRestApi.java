@@ -39,8 +39,10 @@ import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionS
 import org.eclipse.hawkbit.mgmt.json.model.targettype.MgmtTargetType;
 import org.eclipse.hawkbit.mgmt.json.model.targettype.MgmtTargetTypeRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.json.model.targettype.MgmtTargetTypeRequestBodyPut;
+import org.eclipse.hawkbit.rest.ApiPermission;
 import org.eclipse.hawkbit.rest.ApiResponsesConstants.PostUpdateNoContentResponses;
 import org.eclipse.hawkbit.rest.OpenApi;
+import org.eclipse.hawkbit.rest.RequiredPermissions;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -75,6 +77,7 @@ public interface MgmtTargetTypeRestApi {
      */
     @Operation(summary = "Return all target types", description = "Handles the GET request of retrieving all target types.")
     @GetIfExistResponses
+    @RequiredPermissions({ ApiPermission.READ_TARGET_TYPE })
     @GetMapping(value = TARGETTYPES_V1, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtTargetType>> getTargetTypes(
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false)
@@ -98,8 +101,9 @@ public interface MgmtTargetTypeRestApi {
      * @param targetTypeId the ID of the target type to retrieve
      * @return a single target type with status OK.
      */
-    @Operation(summary = "Return target type by id", description = "Handles the GET request of retrieving a single target type")
+    @Operation(summary = "Return target type by id", description = "Handles the GET request of retrieving a single target type.")
     @GetResponses
+    @RequiredPermissions({ ApiPermission.READ_TARGET_TYPE })
     @GetMapping(value = TARGETTYPES_V1 + "/{targetTypeId}", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtTargetType> getTargetType(@PathVariable("targetTypeId") Long targetTypeId);
 
@@ -110,8 +114,9 @@ public interface MgmtTargetTypeRestApi {
      * @return status OK if delete is successful.
      */
     @Operation(summary = "Delete target type by id",
-            description = "Handles the DELETE request for a single target type. Required Permission: DELETE_TARGET")
+            description = "Handles the DELETE request for a single target type.")
     @DeleteResponses
+    @RequiredPermissions({ ApiPermission.DELETE_TARGET_TYPE })
     @DeleteMapping(value = TARGETTYPES_V1 + "/{targetTypeId}")
     ResponseEntity<Void> deleteTargetType(@PathVariable("targetTypeId") Long targetTypeId);
 
@@ -123,8 +128,9 @@ public interface MgmtTargetTypeRestApi {
      * @return status OK if update is successful
      */
     @Operation(summary = "Update target type by id",
-            description = "Handles the PUT request for a single target type. Required Permission: UPDATE_TARGET")
+            description = "Handles the PUT request for a single target type.")
     @PutResponses
+    @RequiredPermissions({ ApiPermission.UPDATE_TARGET_TYPE })
     @PutMapping(value = TARGETTYPES_V1 + "/{targetTypeId}",
             consumes = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE }, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtTargetType> updateTargetType(
@@ -140,12 +146,13 @@ public interface MgmtTargetTypeRestApi {
      */
     @Operation(summary = "Create target types",
             description = "Handles the POST request for creating new target types. The request body must always be a list of types. " +
-                    "Required Permission: CREATE_TARGET")
+                    "If compatible distribution set types are given, READ_DISTRIBUTION_SET_TYPE is required as well.")
     @PostCreateResponses
     @ApiResponses(value = {
             @ApiResponse(responseCode = NOT_FOUND_404, description = "Compatible distributions sets not found.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
+    @RequiredPermissions(value = { ApiPermission.CREATE_TARGET_TYPE }, optional = { ApiPermission.READ_DISTRIBUTION_SET_TYPE })
     @PostMapping(value = TARGETTYPES_V1,
             consumes = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE }, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtTargetType>> createTargetTypes(@RequestBody List<MgmtTargetTypeRequestBodyPost> targetTypes);
@@ -157,9 +164,9 @@ public interface MgmtTargetTypeRestApi {
      * @return Unpaged list of distribution set types and OK in case of success.
      */
     @Operation(summary = "Return list of compatible distribution set types", description = "Handles the GET request " +
-            "of retrieving the list of compatible distribution set types in that target type. " +
-            "Required Permission: READ_TARGET, READ_REPOSITORY")
+            "of retrieving the list of compatible distribution set types in that target type.")
     @GetResponses
+    @RequiredPermissions({ ApiPermission.READ_TARGET_TYPE })
     @GetMapping(value = TARGETTYPES_V1 + "/{targetTypeId}/" + COMPATIBLEDISTRIBUTIONSETTYPES,
             produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtDistributionSetType>> getCompatibleDistributionSets(@PathVariable("targetTypeId") Long targetTypeId);
@@ -172,9 +179,9 @@ public interface MgmtTargetTypeRestApi {
      * @return OK if the request was successful
      */
     @Operation(summary = "Remove compatibility of distribution set type from the target type",
-            description = "Handles the DELETE request for removing a distribution set type from a single target type. " +
-                    "Required Permission: UPDATE_TARGET and READ_REPOSITORY")
+            description = "Handles the DELETE request for removing a distribution set type from a single target type.")
     @DeleteResponses
+    @RequiredPermissions({ ApiPermission.UPDATE_TARGET_TYPE, ApiPermission.READ_DISTRIBUTION_SET_TYPE })
     @DeleteMapping(value = TARGETTYPES_V1 + "/{targetTypeId}/" + COMPATIBLEDISTRIBUTIONSETTYPES + "/{distributionSetTypeId}")
     ResponseEntity<Void> removeCompatibleDistributionSet(
             @PathVariable("targetTypeId") Long targetTypeId,
@@ -188,9 +195,9 @@ public interface MgmtTargetTypeRestApi {
      * @return OK if the request was successful
      */
     @Operation(summary = "Adding compatibility of a distribution set type to a target type",
-            description = "Handles the POST request for adding compatible distribution set types to a target type. " +
-                    "Required Permission: UPDATE_TARGET and READ_REPOSITORY")
+            description = "Handles the POST request for adding compatible distribution set types to a target type.")
     @PostUpdateNoContentResponses
+    @RequiredPermissions({ ApiPermission.UPDATE_TARGET_TYPE, ApiPermission.READ_DISTRIBUTION_SET_TYPE })
     @PostMapping(value = TARGETTYPES_V1 + "/{targetTypeId}/" + COMPATIBLEDISTRIBUTIONSETTYPES,
             consumes = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<Void> addCompatibleDistributionSets(
