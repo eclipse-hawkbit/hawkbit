@@ -194,8 +194,7 @@ maven/mavencentral/org.mockito/mockito-junit-jupiter/5.23.0, MIT, approved, #265
 maven/mavencentral/org.opentest4j/opentest4j/1.3.0, Apache-2.0, approved, #9713
 maven/mavencentral/org.ow2.asm/asm-commons/9.10.1, BSD-3-Clause, approved, #28390
 maven/mavencentral/org.ow2.asm/asm-tree/9.10.1, BSD-3-Clause, approved, #28389
-maven/mavencentral/org.ow2.asm/asm/9.10.1, BSD-3-Clause, approved, #28386
-maven/mavencentral/org.ow2.asm/asm/9.7.1, BSD-3-Clause, approved, #16464
+maven/mavencentral/org.ow2.asm/asm/9.11.1, BSD-3-Clause, approved, #32484
 maven/mavencentral/org.postgresql/postgresql/42.7.14, BSD-2-Clause AND Apache-2.0, approved, #11681
 maven/mavencentral/org.projectlombok/lombok/1.18.48, MIT, approved, #15192
 maven/mavencentral/org.reactivestreams/reactive-streams/1.0.4, CC0-1.0, approved, CQ16332
