@@ -8,23 +8,28 @@ Please read this if you intend to contribute to the project.
 
 ### Code Style
 
-* Java files:
+* Formatting (all file types - Java, XML, YAML, Markdown, ...):
     * [intellij_codeformatter.xml](intellij_codeformatter.xml) (IntelliJ IDEA code style, spaces only, 4) is the
-      single source of truth for formatting, enforced by [Spotless](https://github.com/diffplug/spotless)
-    * format your changes with `mvn spotless:apply`, verify with `mvn spotless:check`. Spotless only checks files
-      changed against `origin/master` (`ratchetFrom`)
-    * Spotless formats with IntelliJ IDEA itself (`idea` step), so it needs a local IntelliJ IDEA install. If the `idea`
-      launcher isn't on the `PATH`, set it with `-Dspotless.idea.binary=<launcher>`, e.g.
-      `-Dspotless.idea.binary="/Applications/IntelliJ IDEA.app/Contents/MacOS/idea"` (macOS) or
-      `-Dspotless.idea.binary=<install-dir>/bin/idea.sh` (Linux). It starts IDEA once per changed file, so it's slow on
-      large change sets
-    * the CI `style_check` workflow runs `mvn spotless:check` on every pull request
+      single source of truth for formatting, enforced by [scripts/IdeaFormat](scripts/IdeaFormat).
+    * check with `mvn validate -PideaFormat`, format with `mvn validate -PideaFormat -Didea.format.args=--format`.
+      Covers the files changed against `origin/master` (merge base) in the directory maven is started in - the root, a
+      module directory or `-f <module dir>`. More options via `-Didea.format.args="..."`: `--base <ref>` for another
+      base, `--all` for all files, paths (files / directories)
+    * needs a local IntelliJ IDEA (`idea format`, a single IDEA process for all files). If the `idea` launcher
+      (`idea64.exe` on Windows) isn't on the `PATH`, set it with `-Didea.binary=<launcher>`, e.g.
+      `-Didea.binary="/Applications/IntelliJ IDEA.app"` (macOS) or `-Didea.binary=<install-dir>/bin/idea.sh` (Linux).
+      It runs with its own IDEA config, so it works while the IDE is open
+    * the CI `style_check` workflow runs the check on every pull request
     * [eclipse_codeformatter.xml](eclipse_codeformatter.xml) is provided only for Eclipse IDE users. It approximates
       the IntelliJ style but is NOT identical (nested continuation indent, line breaks after lambda arrows, kept
-      operator line breaks, text blocks), so run `mvn spotless:apply` before pushing
-* XML files:
-    * we follow the standard eclipse IDE XML formatter with the following changes:
-        * Indent using spaces only: 4
+      operator line breaks, text blocks), so format with maven before pushing
+* License headers:
+    * every file needs the EPL license
+      header - [licenses/LICENSE_HEADER_TEMPLATE.txt](licenses/LICENSE_HEADER_TEMPLATE.txt)
+      with any year (or year range) and one of the accepted copyright holders (`__HOLDER__` header section in the
+      `checkLicense` profile of the root `pom.xml` - add new holders there)
+    * check with `mvn license:check -PcheckLicense`, add missing headers (current year) with
+      `mvn license:format -PcheckLicense`
 * Sonarqube:
     * Our rule set can be found [here](https://sonarcloud.io/organizations/bosch-iot-rollouts/rules)
     * Sonarqube reports can be

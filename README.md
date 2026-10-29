@@ -193,10 +193,11 @@ The former `hawkbit-example-mgmt-simulator` (in the archived
 mvn -pl hawkbit-repository/hawkbit-repository-jpa -am test -Dtest=ClassName -Dsurefire.failIfNoSpecifiedTests=false
 ```
 
-* Code format (Spotless with the IntelliJ IDEA formatter and [intellij_codeformatter.xml](intellij_codeformatter.xml),
-  only files changed against `origin/master` - `ratchetFrom`): `mvn spotless:apply` / `mvn spotless:check`. Needs a
-  local IntelliJ IDEA, see [CONTRIBUTING.md](CONTRIBUTING.md#code-style) (`-Dspotless.idea.binary=<launcher>`)
-* License headers: `mvn license:check -PcheckLicense`
+* Code format, all file types (IntelliJ IDEA formatter and [intellij_codeformatter.xml](intellij_codeformatter.xml),
+  only files changed against `origin/master`, also in a module dir): check `mvn validate -PideaFormat`, format
+  `mvn validate -PideaFormat -Didea.format.args=--format`. Needs a local IntelliJ IDEA, see
+  [CONTRIBUTING.md](CONTRIBUTING.md#code-style) (`-Didea.binary=<launcher>`)
+* License headers: `mvn license:check -PcheckLicense` (add missing: `mvn license:format -PcheckLicense`)
 * Tests use embedded H2 by default. To run against PostgreSQL:
 
 ```bash

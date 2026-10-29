@@ -108,7 +108,7 @@
         <license-maven-plugin.version>5.1.2</license-maven-plugin.version>
         <central-publishing-maven-plugin.version>0.12.0</central-publishing-maven-plugin.version>
         <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
-        <spotless-maven-plugin.version>3.10.4</spotless-maven-plugin.version>
+        <exec-maven-plugin.version>3.6.4</exec-maven-plugin.version>
         <!-- Maven Plugin versions - END -->
 
         <!-- Test - START -->
@@ -149,10 +149,11 @@
         <!-- Dash tool integration - END -->
 
         <skipPublishing>false</skipPublishing>
-        <ratchetFrom>origin/master</ratchetFrom>
-        <!-- IntelliJ IDEA launcher used by spotless (default: 'idea' on PATH). E.g. on macOS:
-             -Dspotless.idea.binary="/Applications/IntelliJ IDEA.app/Contents/MacOS/idea" -->
-        <spotless.idea.binary>idea</spotless.idea.binary>
+        <!-- IntelliJ IDEA launcher used by the ideaFormat profile (default: 'idea' on PATH).
+             E.g. on macOS: -Didea.binary="/Applications/IntelliJ IDEA.app" -->
+        <idea.binary>idea</idea.binary>
+        <!-- arguments of scripts/IdeaFormat used by the ideaFormat profile (see the script), e.g. the format option -->
+        <idea.format.args/>
     </properties>
 
     <developers>
@@ -399,36 +400,6 @@
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
             </plugin>
-
-            <plugin>
-                <!--
-                https://github.com/diffplug/spotless/tree/main/plugin-maven#-spotless-keep-your-code-spotless-with-maven
-
-                Usage:
-                mvn spotless:apply
-                mvn spotless:check
-
-                Formats with the IntelliJ IDEA formatter ('idea' step), because intellij_codeformatter.xml is the single
-                source of truth and the Eclipse formatter can't reproduce it. Needs a local IntelliJ IDEA install; point to
-                its launcher with -Dspotless.idea.binary=<path> (see the property). Runs one IDEA process per changed file.
-                -->
-                <groupId>com.diffplug.spotless</groupId>
-                <artifactId>spotless-maven-plugin</artifactId>
-                <version>${spotless-maven-plugin.version}</version>
-                <configuration>
-                    <ratchetFrom>${ratchetFrom}</ratchetFrom>
-                    <java>
-                        <idea>
-                            <binaryPath>${spotless.idea.binary}</binaryPath>
-                            <codeStyleSettingsPath>
-                                ${maven.multiModuleProjectDirectory}/intellij_codeformatter.xml
-                            </codeStyleSettingsPath>
-                            <!-- false: don't pass -allowDefaults, i.e. never fall back to IDEA default settings -->
-                            <withDefaults>false</withDefaults>
-                        </idea>
-                    </java>
-                </configuration>
-            </plugin>
         </plugins>
 
         <pluginManagement>
@@ -667,7 +638,58 @@
 
     <profiles>
         <profile>
+            <!--
+            Checks / formats the files with IntelliJ IDEA and intellij_codeformatter.xml via scripts/IdeaFormat (see it for the options).
+            By default, only checks the files changed against origin/master.
+
+            Usage (in the root or in a module directory, or with -f <module dir>):
+            mvn validate -PideaFormat
+            mvn validate -PideaFormat -Didea.format.args="<script options>"
+            (to format instead of check pass the script format option - see CONTRIBUTING.md)
+
+            Processes the directory maven is started in (the whole repository in the root, a module and its sub-modules in a module dir) with
+            a single IDEA process - the script runs for every project but processes only the one maven is started in.
+            Needs a local IntelliJ IDEA - see the idea.binary property.
+            -->
+            <id>ideaFormat</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>${exec-maven-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>idea-format</id>
+                                <phase>validate</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <!--
+                                    the java single-file program is run with the JDK maven runs on (no shell, so it works on Windows too).
+                                    maven.multiModuleProjectDirectory is the repository root also in a module dir thanks to the .mvn dir
+                                    -->
+                                    <executable>${java.home}/bin/java</executable>
+                                    <commandlineArgs>--source 25 "${maven.multiModuleProjectDirectory}/scripts/IdeaFormat" ${idea.format.args}</commandlineArgs>
+                                    <environmentVariables>
+                                        <IDEA_BINARY>${idea.binary}</IDEA_BINARY>
+                                        <MAVEN_PROJECT_DIR>${project.basedir}</MAVEN_PROJECT_DIR>
+                                        <MAVEN_EXECUTION_ROOT>${session.executionRootDirectory}</MAVEN_EXECUTION_ROOT>
+                                    </environmentVariables>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
             <id>checkLicense</id>
+            <properties>
+                <!-- ${maven.build.timestamp} is the current year - the default year of the license header -->
+                <maven.build.timestamp.format>yyyy</maven.build.timestamp.format>
+            </properties>
             <build>
                 <plugins>
                     <plugin>
@@ -677,28 +699,27 @@
                         <configuration>
                             <licenseSets>
                                 <licenseSet>
+                                    <!--
+                                    One template for all files: the copyright year and holder are header sections, i.e.
+                                    on check they match any text accepted by 'ensureMatch' (so no new template is needed
+                                    each year or per holder), on format (license:format) 'defaultValue' is written.
+                                    -->
                                     <header>licenses/LICENSE_HEADER_TEMPLATE.txt</header>
-                                    <validHeaders>
-                                        <validHeader>licenses/LICENSE_HEADER_TEMPLATE_CONTRIBUTORS_23.txt</validHeader>
-                                        <validHeader>licenses/LICENSE_HEADER_TEMPLATE_CONTRIBUTORS_24.txt</validHeader>
-                                        <validHeader>licenses/LICENSE_HEADER_TEMPLATE_CONTRIBUTORS_25.txt</validHeader>
-                                        <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_15.txt</validHeader>
-                                        <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_18.txt</validHeader>
-                                        <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_19.txt</validHeader>
-                                        <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_20.txt</validHeader>
-                                        <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_21.txt</validHeader>
-                                        <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_22.txt</validHeader>
-                                        <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_23.txt</validHeader>
-                                        <validHeader>licenses/LICENSE_HEADER_TEMPLATE_MICROSOFT_18.txt</validHeader>
-                                        <validHeader>licenses/LICENSE_HEADER_TEMPLATE_MICROSOFT_20.txt</validHeader>
-                                        <validHeader>licenses/LICENSE_HEADER_TEMPLATE_SIEMENS.txt</validHeader>
-                                        <validHeader>licenses/LICENSE_HEADER_TEMPLATE_SIEMENS_18.txt</validHeader>
-                                        <validHeader>licenses/LICENSE_HEADER_TEMPLATE_DEVOLO_19.txt</validHeader>
-                                        <validHeader>licenses/LICENSE_HEADER_TEMPLATE_DEVOLO_20.txt</validHeader>
-                                        <validHeader>licenses/LICENSE_HEADER_TEMPLATE_KIWIGRID_19.txt</validHeader>
-                                        <validHeader>licenses/LICENSE_HEADER_TEMPLATE_ENAPTER.txt</validHeader>
-                                        <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BLUEZONE_25.txt</validHeader>
-                                    </validHeaders>
+                                    <headerSections>
+                                        <headerSection>
+                                            <key>__YEAR__</key>
+                                            <!-- the current year (see maven.build.timestamp.format) -->
+                                            <defaultValue>${maven.build.timestamp}</defaultValue>
+                                            <!-- year or year range, e.g. 2015 or 2015-2026 -->
+                                            <ensureMatch>20\d{2}(-20\d{2})?</ensureMatch>
+                                        </headerSection>
+                                        <headerSection>
+                                            <key>__HOLDER__</key>
+                                            <defaultValue>Contributors to the Eclipse Foundation</defaultValue>
+                                            <!-- accepted copyright holders - add a new one here -->
+                                            <ensureMatch>Contributors to the Eclipse Foundation|Bosch Software Innovations GmbH and others|Bosch\.IO GmbH and others|Microsoft and others|Siemens AG|devolo AG and others|Kiwigrid GmbH and others|Enapter Co\.,Ltd|blue-zone GmbH and others</ensureMatch>
+                                        </headerSection>
+                                    </headerSections>
                                     <excludes>
                                         <exclude>docker/**</exclude>
                                         <exclude>licenses/LICENSE*</exclude>

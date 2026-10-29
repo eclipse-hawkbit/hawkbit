@@ -8,13 +8,9 @@ on:
       - master
     paths-ignore:
       - '.3rd-party/**'
-      - 'docs/**'
-      - '**.md'
   pull_request:
     paths-ignore:
       - '.3rd-party/**'
-      - 'docs/**'
-      - '**.md'
   workflow_dispatch:
 
 permissions:
@@ -35,15 +31,15 @@ jobs:
           repository: ${{ inputs.repository }}
           ref: ${{ inputs.ref }}
 
+      # scripts/IdeaFormat is a java single-file program (JDK 25, no maven needed)
       - name: Set up JDK
         uses: actions/setup-java@v6.1.0
         with:
           distribution: 'temurin'
           java-version: '25'
-          cache: 'maven'
 
-      # spotless formats with IntelliJ IDEA ('idea' step), so a pinned IDEA is installed (and cached).
-      # 'idea format' runs headless; spotless sets its own idea config/system dirs under target/.
+      # scripts/IdeaFormat formats with IntelliJ IDEA, so a pinned IDEA is installed (and cached).
+      # 'idea format' runs headless with its own config/system dirs under target/.
       # restore / save are separate steps - actions/cache saves only when the job succeeds, but the job fails on
       # style violations and IDEA shall be cached anyway
       - name: Restore IntelliJ IDEA
@@ -75,7 +71,7 @@ jobs:
           PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
           PUSH_BEFORE: ${{ github.event.before }}
         run: |
-          # only the files changed since the base are checked (spotless ratchet)
+          # only the files changed since the base are checked
           if [ -n "$PR_BASE_SHA" ]; then
             # pull request - compare to the target branch
             git remote add target "$PR_BASE_REPO"
@@ -90,23 +86,23 @@ jobs:
             git fetch --deepen=1 origin
             BASE="HEAD~1"
           fi
-          echo "RATCHET_BASE=$BASE" >> "$GITHUB_ENV"
-          mvn spotless:check -DratchetFrom="$BASE" -Dspotless.idea.binary="$RUNNER_TEMP/idea/bin/idea.sh"
+          echo "FORMAT_BASE=$BASE" >> "$GITHUB_ENV"
+          IDEA_BINARY="$RUNNER_TEMP/idea/bin/idea.sh" scripts/IdeaFormat --base "$BASE"
 
-      # spotless:check lists at most 10 files / 50 diff lines per module (hard-coded) - on failure apply the formatting
-      # in the CI workspace and print / upload the complete diff (apply it locally with 'git apply spotless.patch')
+      # the checklists only the files - on failure apply the formatting in the CI workspace and print / upload the
+      # complete diff (apply it locally with 'git apply idea-format.patch')
       - name: Print all style violations
-        if: failure() && env.RATCHET_BASE != ''
+        if: failure() && env.FORMAT_BASE != ''
         run: |
-          mvn -q spotless:apply -DratchetFrom="$RATCHET_BASE" -Dspotless.idea.binary="$RUNNER_TEMP/idea/bin/idea.sh"
-          git diff > spotless.patch
+          IDEA_BINARY="$RUNNER_TEMP/idea/bin/idea.sh" scripts/IdeaFormat --format --base "$FORMAT_BASE"
+          git diff > idea-format.patch
           git --no-pager diff --stat
           git --no-pager diff
 
       - name: Upload style violations patch
-        if: failure() && env.RATCHET_BASE != ''
+        if: failure() && env.FORMAT_BASE != ''
         uses: actions/upload-artifact@v7.0.2
         with:
-          name: spotless.patch
-          path: spotless.patch
+          name: idea-format.patch
+          path: idea-format.patch
           if-no-files-found: ignore
