@@ -1,0 +1,169 @@
+#!/usr/bin/env -S java --source 25
+/*
+ * Copyright (c) 2026 Contributors to the Eclipse Foundation
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ */
+
+// Formats the files with the IntelliJ IDEA formatter and intellij_codeformatter.xml (the single source of truth for the code style).
+//
+// Usage: scripts/IdeaFormat [--format] [--base <ref> | --all] [<path>...]
+//   (default)     check the files changed since the merge base with origin/master - committed, uncommitted, untracked.
+//                 Lists the ones that need formatting and exits with 1 if there are any
+//   --format      format (modify) the files instead of checking them
+//   --base <ref>  as default but compared to <ref>, e.g. upstream/master or a pull request base commit
+//   --all         all files, not only the changed ones
+//   <path>...     only the files in these files / directories (git pathspecs, relative to the current directory).
+//                 Default: the current directory, e.g. in a module dir - only the module
+// Only files tracked by git (or untracked but not ignored) are formatted, so build output and generated code are skipped.
+//
+// The IDEA launcher is 'idea' from the PATH ('idea64.exe' on Windows) or IDEA_BINARY, e.g.:
+//   IDEA_BINARY="/Applications/IntelliJ IDEA.app" (macOS) or IDEA_BINARY=<install-dir>/bin/idea.sh (Linux).
+// IDEA runs with its own config / system dirs (under target/idea-format) so it doesn't touch the IDE settings and works while the IDE is running.
+//
+// Maven (profile ideaFormat in the root pom.xml) runs the program in every project of the reactor and passes MAVEN_PROJECT_DIR and MAVEN_EXECUTION_ROOT.
+// It formats only in the project maven is started in (so with a single IDEA process) - for the others it exits immediately.
+
+static final int CHUNK_SIZE = 1000;
+
+void main(final String[] args) throws Exception {
+    // called by maven for a project which isn't the one maven is started in - nothing to do (see above)
+    final String mavenProjectDir = System.getenv("MAVEN_PROJECT_DIR");
+    final String mavenExecutionRoot = System.getenv("MAVEN_EXECUTION_ROOT");
+    if (mavenProjectDir != null && mavenExecutionRoot != null &&
+            !Path.of(mavenProjectDir).toRealPath().equals(Path.of(mavenExecutionRoot).toRealPath())) {
+        return;
+    }
+
+    boolean check = true;
+    String base = "origin/master";
+    boolean all = false;
+    final List<String> paths = new ArrayList<>();
+    for (int i = 0; i < args.length; i++) {
+        switch (args[i]) {
+            case "--format" -> check = false;
+            case "--base" -> base = args[++i];
+            case "--all" -> all = true;
+            // empty arguments may come from the maven profile (empty property) - ignore them
+            case "" -> {
+            }
+            default -> {
+                if (args[i].startsWith("-")) {
+                    exit(2, "Unknown option: " + args[i]);
+                }
+                paths.add(args[i]);
+            }
+        }
+    }
+    if (paths.isEmpty()) {
+        paths.add(".");
+    }
+
+    final Path root = Path.of(git(true, "rev-parse", "--show-toplevel").getFirst());
+
+    // the files to format: all or the changed files in the paths (pathspecs are resolved relative to the current
+    // directory, the listed files are relative to the repository root)
+    final Set<String> files = new TreeSet<>();
+    if (all) {
+        files.addAll(git(true, concat(List.of("ls-files", "--full-name", "--"), paths)));
+    } else {
+        // merge base, so the changes made on the base branch meanwhile aren't included. In a shallow clone (CI) there
+        // could be no merge base - then the base itself (in CI the checkout is a pull request merge commit or a push on
+        // the base)
+        List<String> mergeBase = git(false, "merge-base", base, "HEAD");
+        if (mergeBase == null) {
+            mergeBase = git(true, "rev-parse", "--verify", base + "^{commit}");
+        }
+        files.addAll(git(true, concat(List.of("diff", "--name-only", "--diff-filter=ACMR", mergeBase.getFirst(), "--"), paths)));
+        files.addAll(git(true, concat(List.of("ls-files", "--others", "--exclude-standard", "--full-name", "--"), paths)));
+    }
+    if (files.isEmpty()) {
+        IO.println("No files to format");
+        return;
+    }
+
+    String idea = System.getenv("IDEA_BINARY");
+    if (idea == null || idea.isBlank()) {
+        idea = System.getProperty("os.name").toLowerCase().startsWith("windows") ? "idea64.exe" : "idea";
+    }
+    // on macOS the .app bundle could be given - the launcher is inside
+    if (idea.endsWith(".app")) {
+        idea = idea + "/Contents/MacOS/idea";
+    }
+
+    // own IDEA config / system dirs - isolated from the IDE (its settings and its running instance)
+    final Path workDir = root.resolve("target/idea-format");
+    Files.createDirectories(workDir.resolve("config"));
+    Files.createDirectories(workDir.resolve("system"));
+    final Path ideaProperties = workDir.resolve("idea.properties");
+    // forward slashes - backslashes (Windows) are escape characters in properties files
+    Files.writeString(ideaProperties, "idea.config.path=" + slashes(workDir.resolve("config")) + "\n" +
+            "idea.system.path=" + slashes(workDir.resolve("system")) + "\n");
+
+    final List<String> command = new ArrayList<>(
+            List.of(idea, "format", "-s", root.resolve("intellij_codeformatter.xml").toString(), "-charset", "UTF-8"));
+    if (check) {
+        // dry run - no file modifications, exit status 1 if some file needs formatting
+        command.add("-dry");
+    }
+
+    int status = 0;
+    final List<String> fileList = new ArrayList<>(files);
+    for (int i = 0; i < fileList.size(); i += CHUNK_SIZE) {
+        final ProcessBuilder processBuilder = new ProcessBuilder(
+                concat(command, fileList.subList(i, Math.min(i + CHUNK_SIZE, fileList.size()))))
+                .directory(root.toFile())
+                .inheritIO();
+        processBuilder.environment().put("IDEA_PROPERTIES", ideaProperties.toString());
+        final int exitCode = processBuilder.start().waitFor();
+        if (exitCode != 0) {
+            status = exitCode;
+        }
+    }
+
+    if (check && status != 0) {
+        System.err.println(
+                "Some files are not formatted (see 'Needs reformatting' above). Format them with: mvn validate -PideaFormat -Didea.format.args=--format");
+    }
+    System.exit(status);
+}
+
+// runs git in the current directory and returns its output lines. On failure exits if required, otherwise returns null
+List<String> git(final boolean required, final String... args) throws Exception {
+    return git(required, List.of(args));
+}
+
+List<String> git(final boolean required, final List<String> args) throws Exception {
+    final Process process = new ProcessBuilder(concat(List.of("git"), args))
+            .redirectError(required ? ProcessBuilder.Redirect.INHERIT : ProcessBuilder.Redirect.DISCARD)
+            .start();
+    final List<String> lines;
+    try (final BufferedReader reader = process.inputReader()) {
+        lines = reader.lines().filter(line -> !line.isBlank()).toList();
+    }
+    if (process.waitFor() == 0) {
+        return lines;
+    } else if (required) {
+        exit(process.exitValue(), "git " + String.join(" ", args) + " failed");
+    }
+    return null;
+}
+
+List<String> concat(final List<String> first, final List<String> second) {
+    final List<String> result = new ArrayList<>(first);
+    result.addAll(second);
+    return result;
+}
+
+String slashes(final Path path) {
+    return path.toString().replace('\\', '/');
+}
+
+void exit(final int status, final String message) {
+    System.err.println(message);
+    System.exit(status);
+}
