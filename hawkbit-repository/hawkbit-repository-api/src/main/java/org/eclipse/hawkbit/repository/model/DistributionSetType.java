@@ -10,7 +10,6 @@
 package org.eclipse.hawkbit.repository.model;
 
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * A {@link DistributionSetType} is an abstract definition for {@link DistributionSet} that defines what {@link SoftwareModule}s can be

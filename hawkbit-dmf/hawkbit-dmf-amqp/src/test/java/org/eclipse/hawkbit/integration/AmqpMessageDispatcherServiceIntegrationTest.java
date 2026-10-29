@@ -129,15 +129,15 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
      */
     @Test
     @ExpectEvents({
-        @Expect(type = TargetCreatedEvent.class, count = 1),
-        @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
-        @Expect(type = ActionCreatedEvent.class, count = 1),
-        @Expect(type = DistributionSetCreatedEvent.class, count = 1),
-        @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
-        @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
-        @Expect(type = SoftwareModuleUpdatedEvent.class, count = 9), // implicit lock
-        @Expect(type = TargetUpdatedEvent.class, count = 1),
-        @Expect(type = TargetPollEvent.class, count = 1) })
+            @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = ActionCreatedEvent.class, count = 1),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
+            @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
+            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 9), // implicit lock
+            @Expect(type = TargetUpdatedEvent.class, count = 1),
+            @Expect(type = TargetPollEvent.class, count = 1) })
     void sendDownloadAndInstallStatusMessageDuringMaintenanceWindow() {
         final String controllerId = TARGET_PREFIX + "sendDAndIStatusMessageDuringWindow";
 
@@ -145,7 +145,7 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
         final DistributionSet distributionSet = testdataFactory.createDistributionSet();
         testdataFactory.addSoftwareModuleMetadata(distributionSet);
         assignDistributionSetWithMaintenanceWindow(distributionSet.getId(), controllerId, getTestSchedule(-5),
-            getTestDuration(10), getTestTimeZone());
+                getTestDuration(10), getTestTimeZone());
 
         waitUntilTargetHasStatus(controllerId, TargetUpdateStatus.PENDING);
         assertDownloadAndInstallMessage(distributionSet.getModules(), controllerId);

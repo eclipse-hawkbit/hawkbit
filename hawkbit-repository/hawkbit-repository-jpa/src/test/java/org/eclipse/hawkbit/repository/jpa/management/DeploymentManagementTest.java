@@ -16,7 +16,6 @@ import static org.eclipse.hawkbit.repository.model.Action.Status.WAIT_FOR_CONFIR
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import jakarta.validation.ConstraintViolationException;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,6 +27,9 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+
+import jakarta.validation.ConstraintViolationException;
+
 import lombok.Getter;
 import org.assertj.core.api.Assertions;
 import org.eclipse.hawkbit.context.AccessContext;
@@ -990,10 +992,10 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
         final List<Long> deployedTargetIDs = deploymentResult.getDeployedTargetIDs();
         final List<Long> undeployedTargetIDs = deploymentResult.getUndeployedTargetIDs();
-        @SuppressWarnings({ "unchecked", "rawtypes" })
-        final Collection<JpaTarget> savedNakedTargets = (Collection) deploymentResult.getUndeployedTargets();
-        @SuppressWarnings({ "unchecked", "rawtypes" })
-        final Collection<JpaTarget> savedDeployedTargets = (Collection) deploymentResult.getDeployedTargets();
+        @SuppressWarnings({ "unchecked", "rawtypes" }) final Collection<JpaTarget> savedNakedTargets =
+                (Collection) deploymentResult.getUndeployedTargets();
+        @SuppressWarnings({ "unchecked", "rawtypes" }) final Collection<JpaTarget> savedDeployedTargets =
+                (Collection) deploymentResult.getDeployedTargets();
 
         // retrieving all Actions created by the assignDistributionSet call
         final Page<JpaAction> page = actionRepository.findAll(PAGE);

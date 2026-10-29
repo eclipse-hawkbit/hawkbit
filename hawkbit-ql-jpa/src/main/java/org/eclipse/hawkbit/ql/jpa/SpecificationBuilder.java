@@ -199,7 +199,7 @@ public class SpecificationBuilder<T> {
                 final Path<?> idPath = joinPath.get("id");
                 return switch (op) {
                     case EQ -> exists ? cb.isNotNull(idPath) : cb.isNull(idPath);
-                    case NE ->  exists ? cb.isNull(idPath) : cb.isNotNull(idPath);
+                    case NE -> exists ? cb.isNull(idPath) : cb.isNotNull(idPath);
                     default -> throw new QueryException(INVALID_SYNTAX,
                             String.format("Operator %s is not supported for existence check on %s", op, getPathContext(comparison)));
                 };

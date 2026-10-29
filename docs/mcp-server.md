@@ -108,17 +108,17 @@ The hawkBit URL and credentials are passed as environment variables:
 The most important options (as Spring Boot properties, e.g. `--name=value` on the command line, or environment
 variables):
 
-| Property / Environment variable         | Description                                            | Default                 |
-|-----------------------------------------|--------------------------------------------------------|-------------------------|
-| `hawkbit.mcp.mgmt-url` / `HAWKBIT_URL`  | URL of the hawkBit Management API                      | `http://localhost:8080` |
-| `HAWKBIT_USERNAME`, `HAWKBIT_PASSWORD`  | hawkBit credentials, used in STDIO mode                | -                       |
-| `server.port`                           | HTTP port                                              | `8082`                  |
-| `hawkbit.mcp.validation.enabled`        | Check the request credentials against hawkBit (HTTP)   | `true`                  |
-| `hawkbit.mcp.validation.cache-ttl`      | How long a credentials check result is cached          | `600s`                  |
-| `hawkbit.mcp.validation.cache-max-size` | Maximum number of cached credentials check results     | `1000`                  |
-| `hawkbit.mcp.tools-enabled`             | Offer the MCP tools                                    | `true`                  |
-| `hawkbit.mcp.resources-enabled`         | Offer the MCP resources                                | `true`                  |
-| `hawkbit.mcp.prompts-enabled`           | Offer the MCP prompts                                  | `true`                  |
+| Property / Environment variable         | Description                                          | Default                 |
+|-----------------------------------------|------------------------------------------------------|-------------------------|
+| `hawkbit.mcp.mgmt-url` / `HAWKBIT_URL`  | URL of the hawkBit Management API                    | `http://localhost:8080` |
+| `HAWKBIT_USERNAME`, `HAWKBIT_PASSWORD`  | hawkBit credentials, used in STDIO mode              | -                       |
+| `server.port`                           | HTTP port                                            | `8082`                  |
+| `hawkbit.mcp.validation.enabled`        | Check the request credentials against hawkBit (HTTP) | `true`                  |
+| `hawkbit.mcp.validation.cache-ttl`      | How long a credentials check result is cached        | `600s`                  |
+| `hawkbit.mcp.validation.cache-max-size` | Maximum number of cached credentials check results   | `1000`                  |
+| `hawkbit.mcp.tools-enabled`             | Offer the MCP tools                                  | `true`                  |
+| `hawkbit.mcp.resources-enabled`         | Offer the MCP resources                              | `true`                  |
+| `hawkbit.mcp.prompts-enabled`           | Offer the MCP prompts                                | `true`                  |
 
 ---
 

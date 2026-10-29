@@ -103,7 +103,7 @@ Enable JWT bearer token validation for the Management REST API:
 ```properties
 # Enable hawkBit default JWT resource server
 hawkbit.server.security.oauth2.resourceserver.enabled=true
-    
+
 # JWK issuer URI for token signature verification
 spring.security.oauth2.resourceserver.jwt.issuer-uri=https://idp.example.com/
 ```
@@ -214,15 +214,15 @@ management methods.
 
 The permissions required by each Management API endpoint are listed in its OpenAPI description (Swagger UI,
 `/v3/api-docs`), together with the permissions implying them via the role hierarchy. They are generated from the
-`@RequiredPermissions` annotations on the `Mgmt*RestApi` interfaces, which are documentation only. The enforcement is done
-by the `@PreAuthorize` checks described above. Besides the always required permissions, an endpoint can declare groups of
-alternatives (`anyOf`, e.g. for `A or B` checks) and conditionally required permissions (`optional`, e.g. depending on the
-request parameters).
+`@RequiredPermissions` annotations on the `Mgmt*RestApi` interfaces, which are documentation only. The enforcement is
+done by the `@PreAuthorize` checks described above. Besides the always required permissions, an endpoint can declare
+groups of alternatives (`anyOf`, e.g. for `A or B` checks) and conditionally required permissions (`optional`,
+e.g. depending on the request parameters).
 
 For diagnostics, `hawkbit.server.mgmt.permission-tracking.enabled=true` (default `false`) tracks the permissions granted
 during every Management API request and logs a warning if a granted permission is not covered by the endpoint's
-`@RequiredPermissions`. On shutdown it logs the declared permissions that were never checked. The Management API tests run
-with it enabled and fail on a mismatch.
+`@RequiredPermissions`. On shutdown it logs the declared permissions that were never checked. The Management API tests
+run with it enabled and fail on a mismatch.
 
 #### Fine-grained Access Control - Access Controller
 

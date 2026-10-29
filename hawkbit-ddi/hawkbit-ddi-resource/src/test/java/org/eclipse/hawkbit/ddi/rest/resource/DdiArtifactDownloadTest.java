@@ -397,7 +397,8 @@ class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
         final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         for (int i = 0; i < resultLength / range; i++) {
             final String rangeString = (i * range) + "-" + ((i + 1) * range - 1);
-            final MvcResult result = getRange(target, moduleId, artifact, rangeString, PARTIAL_CONTENT, range, rangeString + "/" + resultLength);
+            final MvcResult result = getRange(
+                    target, moduleId, artifact, rangeString, PARTIAL_CONTENT, range, rangeString + "/" + resultLength);
             outputStream.write(result.getResponse().getContentAsByteArray());
         }
 

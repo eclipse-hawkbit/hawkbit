@@ -5,7 +5,8 @@ initialize or migrate the database to the current hawkBit schema.
 
 ## Configuration
 
-Could be configured with _hawkbit.db.\<key\>_ or _spring.datasource.\<key\>_ environment or system properties, with keys:
+Could be configured with _hawkbit.db.\<key\>_ or _spring.datasource.\<key\>_ environment or system properties, with
+keys:
 
 * **mode** - migrate or validate (default)
 * **url** - database url

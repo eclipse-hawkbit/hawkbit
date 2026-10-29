@@ -92,7 +92,8 @@ class AutoAssignHandlerTest {
         final AutoAssignment matching = mockAutoAssignment(ds);
         final AutoAssignment notMatching = mockAutoAssignment(ds);
         when(autoAssignmentManagement.getActiveAutoAssignments(any())).thenReturn(new SliceImpl<>(Arrays.asList(notMatching, matching)));
-        when(targetManagement.isTargetMatchingQueryAndDSNotAssignedAndCompatibleAndUpdatable(target, ds, matching.getTargetFilterQuery())).thenReturn(true);
+        when(targetManagement.isTargetMatchingQueryAndDSNotAssignedAndCompatibleAndUpdatable(target, ds, matching.getTargetFilterQuery()))
+                .thenReturn(true);
         when(targetManagement.isTargetMatchingQueryAndDSNotAssignedAndCompatibleAndUpdatable(target, ds, notMatching.getTargetFilterQuery()))
                 .thenReturn(false);
 

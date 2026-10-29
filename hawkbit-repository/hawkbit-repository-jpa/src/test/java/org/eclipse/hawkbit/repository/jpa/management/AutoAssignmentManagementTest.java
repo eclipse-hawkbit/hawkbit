@@ -285,12 +285,12 @@ class AutoAssignmentManagementTest extends AbstractRepositoryManagementTest<Auto
     void autoAssignActionTypeConvert() {
         for (final ActionType actionType : ActionType.values()) {
             final Supplier<Long> create = () -> autoAssignmentManagement.create(
-                    Create.builder()
-                            .name("testAutoAssignActionTypeConvert_" + actionType)
-                            .targetFilterQuery("name==*")
-                            .distributionSet(testdataFactory.createDistributionSet("convert_" + actionType))
-                            .actionType(actionType)
-                            .build())
+                            Create.builder()
+                                    .name("testAutoAssignActionTypeConvert_" + actionType)
+                                    .targetFilterQuery("name==*")
+                                    .distributionSet(testdataFactory.createDistributionSet("convert_" + actionType))
+                                    .actionType(actionType)
+                                    .build())
                     .getId();
             if (ALLOWED_ACTION_TYPES.contains(actionType)) {
                 assertThat(autoAssignmentManagement.find(create.get()).orElseThrow().getActionType()).isEqualTo(actionType);

@@ -57,8 +57,8 @@ spring.datasource.password: YOUR_PWD
 spring.datasource.driverClassName: org.postgresql.Driver
 ```
 
-The update server ships with a `postgresql` profile (`application-postgresql.properties`) with these settings for a local
-PostgreSQL (`jdbc:postgresql://localhost:5432/hawkbit`, user `postgres`), which you can activate with
+The update server ships with a `postgresql` profile (`application-postgresql.properties`) with these settings for a
+local PostgreSQL (`jdbc:postgresql://localhost:5432/hawkbit`, user `postgres`), which you can activate with
 `--spring.profiles.active=postgresql`.
 
 ---

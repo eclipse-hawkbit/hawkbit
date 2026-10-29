@@ -29,8 +29,9 @@ import lombok.Data;
  * The content starts with a generic header and additional elements.
  * </p>
  *
- * <p>
- * The answer header would look like: {
+ * The answer header would look like:
+ * <pre>{@code
+ * {
  *   "timestamp": "1733218554123",
  *   "status": {
  *      "execution": "closed",
@@ -41,7 +42,7 @@ import lombok.Data;
  *      "details": []
  *   }
  * }
- * </p>
+ * }</pre>
  */
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -61,8 +62,7 @@ public class DdiActionFeedback {
      * @param status status to be appended to the action
      */
     @JsonCreator
-    public DdiActionFeedback(
-            @JsonProperty(value = "status", required = true) final DdiStatus status,
+    public DdiActionFeedback(@JsonProperty(value = "status", required = true) final DdiStatus status,
             @JsonProperty(value = "timestamp") final Long timestamp) {
         this.status = status;
         this.timestamp = timestamp != null ? timestamp : System.currentTimeMillis();

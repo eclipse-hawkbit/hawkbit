@@ -77,7 +77,8 @@ class AutoAssignHandlerIntTest extends AbstractJpaIntegrationTest {
 
             // auto assignment that matches all targets
             autoAssignmentManagement.create(
-                    AutoAssignmentManagement.Create.builder().name("filterA").targetFilterQuery("name==*").distributionSet(secondDistributionSet).build());
+                    AutoAssignmentManagement.Create.builder().name("filterA").targetFilterQuery("name==*")
+                            .distributionSet(secondDistributionSet).build());
             // Run the check
             autoAssignChecker.handleAll();
 
@@ -137,7 +138,8 @@ class AutoAssignHandlerIntTest extends AbstractJpaIntegrationTest {
         verifyThatTargetsHaveDistributionSetAssignment(setB, targets.subList(10, 20), targetsCount);
 
         // Count the number of targets that will be assigned with setA
-        assertThat(targetManagement.countByRsqlAndNonDsAndCompatibleAndUpdatable(setA.getId(), autoAssignment.getTargetFilterQuery())).isEqualTo(15);
+        assertThat(targetManagement.countByRsqlAndNonDsAndCompatibleAndUpdatable(setA.getId(), autoAssignment.getTargetFilterQuery()))
+                .isEqualTo(15);
 
         // Run the check
         autoAssignChecker.handleAll();
@@ -187,7 +189,8 @@ class AutoAssignHandlerIntTest extends AbstractJpaIntegrationTest {
 
         final DistributionSet distributionSet = testdataFactory.createDistributionSet("dsA");
         autoAssignmentManagement.create(AutoAssignmentManagement.Create.builder()
-                .name("filterA").targetFilterQuery("name==*").distributionSet(distributionSet).confirmationRequired(confirmationRequired).build());
+                .name("filterA").targetFilterQuery("name==*").distributionSet(distributionSet).confirmationRequired(confirmationRequired)
+                .build());
 
         final String targetDsAIdPref = "targ";
         final List<Target> targets = testdataFactory.createTargets(20, targetDsAIdPref, targetDsAIdPref.concat(SPACE_AND_DESCRIPTION));

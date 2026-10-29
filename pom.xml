@@ -420,7 +420,9 @@
                     <java>
                         <idea>
                             <binaryPath>${spotless.idea.binary}</binaryPath>
-                            <codeStyleSettingsPath>${maven.multiModuleProjectDirectory}/intellij_codeformatter.xml</codeStyleSettingsPath>
+                            <codeStyleSettingsPath>
+                                ${maven.multiModuleProjectDirectory}/intellij_codeformatter.xml
+                            </codeStyleSettingsPath>
                             <!-- false: don't pass -allowDefaults, i.e. never fall back to IDEA default settings -->
                             <withDefaults>false</withDefaults>
                         </idea>

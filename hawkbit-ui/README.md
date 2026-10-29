@@ -37,11 +37,11 @@ Management API calls.
 
 ## Configuration
 
-| Property                                          | Description                                                        | Default                 |
-|---------------------------------------------------|--------------------------------------------------------------------|-------------------------|
-| `server.port` (env `PORT`)                        | HTTP port                                                          | `8088`                  |
-| `hawkbit.server.mgmtUrl`                          | hawkBit Management API base URL                                    | `http://localhost:8080` |
-| `hawkbit.server.security.oauth2.client.enabled`   | Enable OIDC login (with standard `spring.security.oauth2.client.*`) | `false`                 |
+| Property                                        | Description                                                         | Default                 |
+|-------------------------------------------------|---------------------------------------------------------------------|-------------------------|
+| `server.port` (env `PORT`)                      | HTTP port                                                           | `8088`                  |
+| `hawkbit.server.mgmtUrl`                        | hawkBit Management API base URL                                     | `http://localhost:8080` |
+| `hawkbit.server.security.oauth2.client.enabled` | Enable OIDC login (with standard `spring.security.oauth2.client.*`) | `false`                 |
 
 See [OpenID Connect](../docs/authorization.md#openid-connect) for the OIDC setup. Docker Compose files with UI
 (`*-with-ui-*.yml`) are in [docker/mysql](../docker/mysql) and [docker/postgres](../docker/postgres).

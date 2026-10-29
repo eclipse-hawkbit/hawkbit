@@ -24,9 +24,9 @@ import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.experimental.Delegate;
 import org.eclipse.hawkbit.context.AccessContext;
+import org.eclipse.hawkbit.throttle.Permit;
 import org.eclipse.hawkbit.throttle.Throttle;
 import org.eclipse.hawkbit.throttle.ThrottledException;
-import org.eclipse.hawkbit.throttle.Permit;
 import org.springframework.jdbc.datasource.DelegatingDataSource;
 
 /**
@@ -116,7 +116,11 @@ class ThrottlingDataSourceDecorator extends DelegatingDataSource {
     private void countRejected(final ThrottledException e) {
         final MeterRegistry registry = meterRegistry();
         if (registry != null) {
-            registry.counter(REJECTED_METER, TENANT_TAG, TENANT_TAG_VALUE_PROVIDER.get(), REASON_TAG, e.getReason().name(), PRIORITY_TAG, priority()).increment();
+            registry.counter(REJECTED_METER,
+                            TENANT_TAG, TENANT_TAG_VALUE_PROVIDER.get(),
+                            REASON_TAG, e.getReason().name(),
+                            PRIORITY_TAG, priority())
+                    .increment();
         }
     }
 

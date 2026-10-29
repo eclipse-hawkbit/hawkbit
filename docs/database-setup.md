@@ -10,11 +10,11 @@ For a complete production-like setup (database, RabbitMQ, artifact storage) see 
 
 ### Supported databases
 
-| Database           | `spring.jpa.database` | Use                                                        |
-|--------------------|-----------------------|------------------------------------------------------------|
-| H2 (in-memory)     | `H2`                  | default - development, evaluation and tests only           |
-| MariaDB / MySQL    | `MYSQL`               | production                                                 |
-| PostgreSQL         | `POSTGRESQL`          | production                                                 |
+| Database        | `spring.jpa.database` | Use                                              |
+|-----------------|-----------------------|--------------------------------------------------|
+| H2 (in-memory)  | `H2`                  | default - development, evaluation and tests only |
+| MariaDB / MySQL | `MYSQL`               | production                                       |
+| PostgreSQL      | `POSTGRESQL`          | production                                       |
 
 Without any configuration hawkBit starts with an in-memory H2 database (`jdbc:h2:mem:hawkbit`). All data is lost when
 the server stops.
@@ -27,10 +27,10 @@ The servers (update server, mgmt, DDI and DMF servers) contain the H2, MariaDB a
 
 Each server ships with two Spring profiles with settings for a local database:
 
-| Profile      | File                                 | Defaults                                                                     |
-|--------------|--------------------------------------|------------------------------------------------------------------------------|
-| `mysql`      | `application-mysql.properties`       | `jdbc:mariadb://localhost:3306/hawkbit`, user `root`, empty password        |
-| `postgresql` | `application-postgresql.properties`  | `jdbc:postgresql://localhost:5432/hawkbit`, user `postgres`, password `admin` |
+| Profile      | File                                | Defaults                                                                      |
+|--------------|-------------------------------------|-------------------------------------------------------------------------------|
+| `mysql`      | `application-mysql.properties`      | `jdbc:mariadb://localhost:3306/hawkbit`, user `root`, empty password          |
+| `postgresql` | `application-postgresql.properties` | `jdbc:postgresql://localhost:5432/hawkbit`, user `postgres`, password `admin` |
 
 Activate a profile and override what differs in your environment:
 
@@ -115,7 +115,8 @@ flowchart LR
     HB --> DB
 ```
 
-More details: [hawkbit-repository-jpa-init](https://github.com/eclipse-hawkbit/hawkbit/tree/master/hawkbit-repository/hawkbit-repository-jpa-init).
+More details:
+[hawkbit-repository-jpa-init](https://github.com/eclipse-hawkbit/hawkbit/tree/master/hawkbit-repository/hawkbit-repository-jpa-init).
 
 ---
 

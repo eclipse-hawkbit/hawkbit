@@ -169,7 +169,7 @@ public final class AutoAssignmentView extends TableView<MgmtAutoAssignmentRespon
         }
 
         private void init(final MgmtAutoAssignmentResponseBody autoAssignment) {
-            if(READY_STATUS.equalsIgnoreCase(autoAssignment.getStatus())) {
+            if (READY_STATUS.equalsIgnoreCase(autoAssignment.getStatus())) {
                 add(Utils.tooltip(new Button(START_COG.create()) {
 
                     {
@@ -179,7 +179,7 @@ public final class AutoAssignmentView extends TableView<MgmtAutoAssignmentRespon
                         });
                     }
                 }, "Start"));
-            } else if(RUNNING_STATUS.equalsIgnoreCase(autoAssignment.getStatus())) {
+            } else if (RUNNING_STATUS.equalsIgnoreCase(autoAssignment.getStatus())) {
                 add(Utils.tooltip(new Button(PAUSE.create()) {
 
                     {
@@ -189,7 +189,7 @@ public final class AutoAssignmentView extends TableView<MgmtAutoAssignmentRespon
                         });
                     }
                 }, "Pause"));
-            } else if(PAUSED_STATUS.equalsIgnoreCase(autoAssignment.getStatus())) {
+            } else if (PAUSED_STATUS.equalsIgnoreCase(autoAssignment.getStatus())) {
                 add(Utils.tooltip(new Button(START_COG.create()) {
 
                     {
@@ -199,7 +199,7 @@ public final class AutoAssignmentView extends TableView<MgmtAutoAssignmentRespon
                         });
                     }
                 }, "Resume"));
-            } else if(WAITING_FOR_APPROVAL_STATUS.equalsIgnoreCase(autoAssignment.getStatus())) {
+            } else if (WAITING_FOR_APPROVAL_STATUS.equalsIgnoreCase(autoAssignment.getStatus())) {
                 final boolean canApprove = hasApprovePermission();
 
                 final Button approve = new Button(CHECK.create());
@@ -229,7 +229,7 @@ public final class AutoAssignmentView extends TableView<MgmtAutoAssignmentRespon
 
         private void refresh() {
             final MgmtAutoAssignmentResponseBody body = hawkbitClient.getAutoAssignmentRestApi().getAutoAssignment(autoAssignmentId).getBody();
-            if(body != null) {
+            if (body != null) {
                 grid.getDataProvider().refreshItem(body);
             }
         }
@@ -251,7 +251,8 @@ public final class AutoAssignmentView extends TableView<MgmtAutoAssignmentRespon
                 final HawkbitMgmtClient hawkbitClient, final Runnable onDone) {
             super(approve ? "Approve Auto Assignment" : "Deny Auto Assignment");
 
-            final Span target = new Span((approve ? APPROVE_CONFIRMATION : DENY_CONFIRMATION) + " auto assignment: " + autoAssignment.getName());
+            final Span target = new Span(
+                    (approve ? APPROVE_CONFIRMATION : DENY_CONFIRMATION) + " auto assignment: " + autoAssignment.getName());
             final TextArea remark = new TextArea("Remark");
             remark.setWidthFull();
 
@@ -260,7 +261,7 @@ public final class AutoAssignmentView extends TableView<MgmtAutoAssignmentRespon
             confirm.addClickListener(e -> {
                 close();
                 final String remarkValue = ObjectUtils.isEmpty(remark.getValue()) ? null : remark.getValue();
-                if(approve) {
+                if (approve) {
                     hawkbitClient.getAutoAssignmentRestApi().approve(autoAssignment.getId(), remarkValue);
                 } else {
                     hawkbitClient.getAutoAssignmentRestApi().deny(autoAssignment.getId(), remarkValue);
@@ -321,7 +322,6 @@ public final class AutoAssignmentView extends TableView<MgmtAutoAssignmentRespon
         private final TextField approvalDecidedBy = Utils.textField(Constants.APPROVAL_DECIDED_BY);
         private final TextField approvalRemark = Utils.textField(Constants.APPROVAL_REMARK);
         private final Checkbox confirmationRequired = new Checkbox(Constants.CONFIRMATION_REQUIRED);
-
 
         private AutoAssignmentDetails(final HawkbitMgmtClient hawkbitClient) {
             this.hawkbitClient = hawkbitClient;
@@ -498,7 +498,7 @@ public final class AutoAssignmentView extends TableView<MgmtAutoAssignmentRespon
 
         private void readyToCreate(final Object v) {
             final boolean createEnabled = !name.isEmpty() && !distributionSet.isEmpty() && !targetFilter.isEmpty();
-            if(create.isEnabled() != createEnabled) {
+            if (create.isEnabled() != createEnabled) {
                 create.setEnabled(createEnabled);
             }
         }

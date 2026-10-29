@@ -73,11 +73,13 @@ public class DeviceApp {
             this.device = this.ddiTenant.createController(
                     Controller.builder()
                             .controllerId(controllerId)
+                            // @formatter:off
                             .securityToken(ObjectUtils.isEmpty(securityToken)
                                     ? (ObjectUtils.isEmpty(ddiTenant.getTenant().getGatewayToken())
                                        ? AuthenticationSetupHelper.randomToken()
                                        : securityToken)
                                     : securityToken)
+                            // @formatter:on
                             .build(),
                     updateHandler.orElse(null)).setOverridePollMillis(10_000);
         }

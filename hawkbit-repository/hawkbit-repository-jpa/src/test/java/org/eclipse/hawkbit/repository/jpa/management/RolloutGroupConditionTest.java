@@ -36,17 +36,17 @@ import org.springframework.test.context.TestPropertySource;
  * Integration tests for rollout group condition evaluation — group cascade behavior.
  *
  * Every test uses a 2-group rollout so both groups' final state is verified:
- *   - group 1: the group under test
- *   - group 2: verifies cascade (SCHEDULED = did not start, RUNNING = was triggered)
+ * - group 1: the group under test
+ * - group 2: verifies cascade (SCHEDULED = did not start, RUNNING = was triggered)
  *
  * Success-action tests use PAUSE: PauseRolloutGroupSuccessAction only fires when a
  * scheduled child group exists, making success-action execution observable as
  * RolloutStatus.PAUSED without advancing to group 2.
  *
  * Decision-log rules under test:
- *   - Success Action fires on SuccessCondition OR GroupFINISHED
- *   - CANCEL not mapped to Error (ignored in condition evaluation)
- *   - Target's Action count used as Group Target count
+ * - Success Action fires on SuccessCondition OR GroupFINISHED
+ * - CANCEL not mapped to Error (ignored in condition evaluation)
+ * - Target's Action count used as Group Target count
  */
 @TestPropertySource(properties = { "hawkbit.server.repository.dynamicRolloutsMinInvolvePeriodMS=-1" })
 class RolloutGroupConditionTest extends AbstractJpaIntegrationTest {

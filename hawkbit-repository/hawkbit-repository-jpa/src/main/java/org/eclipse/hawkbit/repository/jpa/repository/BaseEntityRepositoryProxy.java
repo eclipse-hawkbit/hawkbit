@@ -406,6 +406,7 @@ public class BaseEntityRepositoryProxy<T extends AbstractJpaBaseEntity> implemen
                                     // BaseEntityRepository is hawkBit curated - has getCache, getManagementClass that is  not needed to be handled
                                     !List.of(TargetClassAware.class, Advised.class, DecoratingProxy.class, BaseEntityRepository.class)
                                             .contains(m.getDeclaringClass())
+                                            // @formatter:off
                                             // toString shall not be ACM handled
                                             && !("toString".equals(m.getName()) && m.getParameterCount() == 0)
                                             // not a find or get methods with handled response types
@@ -413,6 +414,7 @@ public class BaseEntityRepositoryProxy<T extends AbstractJpaBaseEntity> implemen
                                                 && (Iterable.class.isAssignableFrom(method.getReturnType())
                                                     || Optional.class.isAssignableFrom(method.getReturnType())
                                                     || repository.getDomainClass().isAssignableFrom(method.getReturnType()))))) {
+                                            // @formatter:on
                                 if (log.isDebugEnabled() || !m.getName().startsWith("count")) {
                                     log.debug("RepositoryProxy does not override method {} - call will fall through to the raw repository",
                                             m, nsme);

@@ -144,7 +144,8 @@ public class MgmtOpenApiConfiguration {
                 Arrays.stream(requiredPermissions.anyOf()).forEach(anyOf -> required.add("one of (" + Arrays.stream(anyOf.value())
                         .map(permission -> withImpliedBy(permission, roleHierarchy))
                         .collect(Collectors.joining(", ")) + ")"));
-                final StringBuilder permissionsDescription = new StringBuilder(required.size() > 1 ? "Required Permissions: " : "Required Permission: ")
+                final StringBuilder permissionsDescription = new StringBuilder(
+                        required.size() > 1 ? "Required Permissions: " : "Required Permission: ")
                         .append(required.isEmpty() ? "none (authentication only)" : String.join(", ", required));
                 if (requiredPermissions.optional().length > 0) {
                     permissionsDescription.append(". Conditionally Required Permissions: ").append(Arrays.stream(requiredPermissions.optional())

@@ -31,14 +31,14 @@ How the client IP is determined:
   whitelist contains the private and loopback address ranges (`10.*`, `192.168.*`, `172.16-31.*`, `169.254.*`, `127.*`)
 - if the client IP can't be determined the request fails with `500`
 
-| Property                                           | Default                       | Description                                              |
-|----------------------------------------------------|-------------------------------|----------------------------------------------------------|
-| `hawkbit.server.security.dos.filter.enabled`       | `true`                        | enables the DoS filter                                   |
-| `hawkbit.server.security.dos.filter.max-read`      | `200`                         | max read (`GET`) requests per second per client IP       |
-| `hawkbit.server.security.dos.filter.max-write`     | `50`                          | max write requests per second per client IP              |
-| `hawkbit.server.security.dos.filter.whitelist`     | private / loopback IP ranges  | IPs (regex) which are not limited                        |
-| `hawkbit.server.security.clients.blacklist`        | empty                         | IPs (regex) which are always rejected with `403`         |
-| `hawkbit.server.security.clients.remote-ip-header` | `X-Forwarded-For`             | header containing the client IP                          |
+| Property                                           | Default                      | Description                                        |
+|----------------------------------------------------|------------------------------|----------------------------------------------------|
+| `hawkbit.server.security.dos.filter.enabled`       | `true`                       | enables the DoS filter                             |
+| `hawkbit.server.security.dos.filter.max-read`      | `200`                        | max read (`GET`) requests per second per client IP |
+| `hawkbit.server.security.dos.filter.max-write`     | `50`                         | max write requests per second per client IP        |
+| `hawkbit.server.security.dos.filter.whitelist`     | private / loopback IP ranges | IPs (regex) which are not limited                  |
+| `hawkbit.server.security.clients.blacklist`        | empty                        | IPs (regex) which are always rejected with `403`   |
+| `hawkbit.server.security.clients.remote-ip-header` | `X-Forwarded-For`            | header containing the client IP                    |
 
 Example - stricter limits behind a reverse proxy, no whitelist:
 
@@ -105,18 +105,18 @@ than the capacity, otherwise tenant requests may never be served (a warning is l
 
 #### Properties
 
-| Property                                       | Default            | Description                                                                                       |
-|------------------------------------------------|--------------------|---------------------------------------------------------------------------------------------------|
-| `hawkbit.throttle.enabled`                     | `false`            | enables tenant throttling                                                                         |
-| `hawkbit.throttle.capacity`                    | `-1`               | total permits; `-1` = the Hikari `maximumPoolSize` (fallback `10` if it can't be detected)        |
-| `hawkbit.throttle.limit`                       | `-1`               | max concurrent connections per tenant; `-1` = no limit (capacity)                                 |
-| `hawkbit.throttle.timeout`                     | `0`                | max wait for a permit; `0` = reject immediately                                                   |
-| `hawkbit.throttle.max-pending`                 | `-1`               | max waiting requests over all tenants; `-1` = no limit                                            |
-| `hawkbit.throttle.threshold`                   | `-1`               | connections in use from which the tenant limit applies; `<= 0` = always apply                     |
-| `hawkbit.throttle.high-priority-granted`       | `4`                | connections served ahead to high priority work; `0` = no serving ahead                            |
-| `hawkbit.throttle.tenants.<tenant>.limit`      | `-1`               | per tenant limit override; `-1` = capacity, `0` = tenant blocked                                  |
-| `hawkbit.throttle.tenants.<tenant>.timeout`    | global `timeout`   | per tenant timeout override                                                                       |
-| `hawkbit.throttle.tenants.<tenant>.max-pending`| `-1`               | max waiting requests of the tenant; `-1` = only the global bound                                  |
+| Property                                        | Default          | Description                                                                                |
+|-------------------------------------------------|------------------|--------------------------------------------------------------------------------------------|
+| `hawkbit.throttle.enabled`                      | `false`          | enables tenant throttling                                                                  |
+| `hawkbit.throttle.capacity`                     | `-1`             | total permits; `-1` = the Hikari `maximumPoolSize` (fallback `10` if it can't be detected) |
+| `hawkbit.throttle.limit`                        | `-1`             | max concurrent connections per tenant; `-1` = no limit (capacity)                          |
+| `hawkbit.throttle.timeout`                      | `0`              | max wait for a permit; `0` = reject immediately                                            |
+| `hawkbit.throttle.max-pending`                  | `-1`             | max waiting requests over all tenants; `-1` = no limit                                     |
+| `hawkbit.throttle.threshold`                    | `-1`             | connections in use from which the tenant limit applies; `<= 0` = always apply              |
+| `hawkbit.throttle.high-priority-granted`        | `4`              | connections served ahead to high priority work; `0` = no serving ahead                     |
+| `hawkbit.throttle.tenants.<tenant>.limit`       | `-1`             | per tenant limit override; `-1` = capacity, `0` = tenant blocked                           |
+| `hawkbit.throttle.tenants.<tenant>.timeout`     | global `timeout` | per tenant timeout override                                                                |
+| `hawkbit.throttle.tenants.<tenant>.max-pending` | `-1`             | max waiting requests of the tenant; `-1` = only the global bound                           |
 
 Tenant names in `tenants.<tenant>` are case-insensitive.
 
@@ -150,9 +150,10 @@ hawkbit.throttle.tenants.big-tenant.limit=20
 
 With Micrometer available:
 
-- `hawkbit.throttle.connections.acquire` (timer, tag `tenant`) - time to get a connection, including waiting for a permit
-- `hawkbit.throttle.connections.rejected` (counter, tags `tenant`, `reason`, `priority`) - rejected requests; `reason` is one of `BLOCKED`,
-  `LIMIT`, `FAST_REJECT`, `DEADLOCK`, `KEY_QUEUE_FULL`, `QUEUE_FULL`, `EVICTED`, `TIMEOUT`
+- `hawkbit.throttle.connections.acquire` (timer, tag `tenant`) - time to get a connection, including waiting for a
+  permit
+- `hawkbit.throttle.connections.rejected` (counter, tags `tenant`, `reason`, `priority`) - rejected requests; `reason`
+  is one of `BLOCKED`, `LIMIT`, `FAST_REJECT`, `DEADLOCK`, `KEY_QUEUE_FULL`, `QUEUE_FULL`, `EVICTED`, `TIMEOUT`
 - `hawkbit.throttle.connections.usage` (timer, tags `tenant`, `priority`) - how long a connection was held
-- `hawkbit.throttle.connections.active` (gauge, tag `priority`) / `hawkbit.throttle.connections.pending` (gauge) - connections held / requests
-  waiting for a permit
+- `hawkbit.throttle.connections.active` (gauge, tag `priority`) / `hawkbit.throttle.connections.pending` (gauge) -
+  connections held / requests waiting for a permit

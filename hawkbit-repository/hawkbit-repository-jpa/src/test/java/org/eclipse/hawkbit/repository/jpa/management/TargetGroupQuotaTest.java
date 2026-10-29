@@ -327,7 +327,6 @@ class TargetGroupQuotaTest extends AbstractJpaIntegrationTest {
         assertThat(groupsOfCurrentTenant()).containsExactlyInAnyOrder(GERMANY, FRANCE, SPAIN);
     }
 
-
     /**
      * Rejection surfaces as AssignmentQuotaExceededException, carrying the SP_QUOTA_EXCEEDED error.
      */

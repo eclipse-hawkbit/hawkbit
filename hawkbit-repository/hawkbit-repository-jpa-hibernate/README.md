@@ -5,7 +5,8 @@ Implementation of [Hibernate](https://hibernate.org/) JPA vendor.
 Contains the vendor specific `JpaConfiguration`, `Jpa` helpers, `Statistics`, the tenant resolution (`TenantIdentifier`)
 and the base entity classes (`model.AbstractJpaBaseEntity`, `model.AbstractJpaTenantAwareBaseEntity`,
 `model.EntityPropertyChangeListener`). `JpaConfiguration`, `Jpa`, `Statistics` and the base entity classes exist with
-the same names in `hawkbit-repository-jpa-eclipselink`, so exactly one of the two vendor modules must be on the classpath.
+the same names in `hawkbit-repository-jpa-eclipselink`, so exactly one of the two vendor modules must be on the
+classpath.
 
 The JPA vendor is selected at build time via the Maven property `jpa.vendor` (default `eclipselink`, defined in
 `hawkbit-repository-jpa/pom.xml`):

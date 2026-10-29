@@ -567,8 +567,8 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
                 .actionId(deletedActionId2).status(Status.FINISHED).messages(List.of("done")).build());
 
         mvc.perform(delete(MgmtActionRestApi.ACTIONS_V1)
-                .content(toJson(actionIdsToDelete)).contentType(APPLICATION_JSON))
-                        .andExpect(status().isNoContent());
+                        .content(toJson(actionIdsToDelete)).contentType(APPLICATION_JSON))
+                .andExpect(status().isNoContent());
 
         mvc.perform(get(ACTIONS_V1 + "/" + deletedActionId1))
                 .andDo(MockMvcResultPrinter.print())

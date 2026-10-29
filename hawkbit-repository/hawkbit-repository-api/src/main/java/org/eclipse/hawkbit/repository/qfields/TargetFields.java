@@ -72,7 +72,9 @@ public enum TargetFields implements QueryField {
 
     @Override
     public String getDefaultSubEntityAttribute(final String subEntityAttribute) {
-        return this == ASSIGNEDDS || this == INSTALLEDDS ? QueryField.defaultSubEntityAttributeOf(DistributionSetFields.class, subEntityAttribute) : null;
+        return this == ASSIGNEDDS || this == INSTALLEDDS
+                ? QueryField.defaultSubEntityAttributeOf(DistributionSetFields.class, subEntityAttribute)
+                : null;
     }
 
     @Override

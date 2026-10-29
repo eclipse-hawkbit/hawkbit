@@ -404,7 +404,7 @@ class ThrottleTest {
      * contended, i.e. ceilings are enforced from the first permit — the interesting mode for every test here.
      */
     private static Throttle throttle(final int capacity) {
-        return throttle(capacity, config -> { });
+        return throttle(capacity, config -> {});
     }
 
     private static Throttle throttle(final int capacity, final Consumer<ThrottleConfig> customizer) {

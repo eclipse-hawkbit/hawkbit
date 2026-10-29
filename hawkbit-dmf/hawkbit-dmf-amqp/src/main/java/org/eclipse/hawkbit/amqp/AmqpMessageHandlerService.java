@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.amqp;
 
 import static org.eclipse.hawkbit.context.AccessContext.asSystemAsTenant;
 
-import jakarta.validation.constraints.NotNull;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,6 +20,9 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import jakarta.validation.constraints.NotNull;
+
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.audit.AuditLog;
 import org.eclipse.hawkbit.auth.SpRole;
@@ -329,8 +331,8 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         final Action action = actionOptional.get();
         if (action.isCancelingOrCanceled()) {
             amqpMessageDispatcherService.sendCancelMessageToTarget(
-                    target.getTenant(), target.getControllerId(), action.getId(), IpUtil.addressToUri(target.getAddress()), action.getExternalRef()
-            );
+                    target.getTenant(), target.getControllerId(),
+                    action.getId(), IpUtil.addressToUri(target.getAddress()), action.getExternalRef());
         } else {
             amqpMessageDispatcherService.sendUpdateMessageToTarget(
                     new ActionProperties(action), action.getTarget(), getSoftwareModulesWithMetadata(action.getDistributionSet()));

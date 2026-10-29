@@ -68,8 +68,10 @@ whole rollout is available, a paused rollout can be resumed by a user.
 
 ### Rollout Scheduler
 
-The rollout is managed by a scheduler task (`RolloutScheduler`) which periodically (`hawkbit.rollout.scheduler.fixedDelay`,
-default 2000 ms) checks, per tenant, the rollouts in an active state. The scheduler is disabled by default and is enabled by
+The rollout is managed by a scheduler task (`RolloutScheduler`) which periodically
+(`hawkbit.rollout.scheduler.fixedDelay`,
+default 2000 ms) checks, per tenant, the rollouts in an active state. The scheduler is disabled by default and is
+enabled by
 `hawkbit.rollout.scheduler.enabled=true` (set in the default configuration of the mgmt server and the monolith).
 
 To avoid that multiple instances process the rollouts of the same tenant at the same time, `JpaRolloutHandler` obtains a

@@ -109,8 +109,7 @@ public interface AutoAssignmentManagement<T extends AutoAssignment>
     /**
      * Removes the given {@link DistributionSet} from all auto assignments.
      *
-     * @param setId the {@link DistributionSet} to be removed from auto
-     *            assignments.
+     * @param setId the {@link DistributionSet} to be removed from auto assignments.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
     void cancelAutoAssignmentForDistributionSet(long setId);
@@ -126,8 +125,8 @@ public interface AutoAssignmentManagement<T extends AutoAssignment>
      * @return target filter query of the approved/denied auto assignment
      * @throws EntityNotFoundException if target filter query with given ID does not exist
      * @throws AutoAssignmentIllegalStateException if given auto assignment is not in
-     *             {@link AutoAssignment.AutoAssignStatus#WAITING_FOR_APPROVAL}. Only auto assignments
-     *             waiting for approval can be acted upon.
+     *         {@link AutoAssignment.AutoAssignStatus#WAITING_FOR_APPROVAL}. Only auto assignments
+     *         waiting for approval can be acted upon.
      */
     @PreAuthorize(HAS_AUTO_ASSIGNMENT_APPROVE)
     AutoAssignment approveOrDeny(long autoAssignmentId, AutoAssignment.AutoAssignApprovalDecision decision);
@@ -144,8 +143,8 @@ public interface AutoAssignmentManagement<T extends AutoAssignment>
      * @return target filter query of the approved/denied auto assignment
      * @throws EntityNotFoundException if target filter query with given ID does not exist
      * @throws AutoAssignmentIllegalStateException if given auto assignment is not in
-     *             {@link AutoAssignment.AutoAssignStatus#WAITING_FOR_APPROVAL}. Only auto assignments
-     *             waiting for approval can be acted upon.
+     *         {@link AutoAssignment.AutoAssignStatus#WAITING_FOR_APPROVAL}. Only auto assignments
+     *         waiting for approval can be acted upon.
      */
     @PreAuthorize(HAS_AUTO_ASSIGNMENT_APPROVE)
     AutoAssignment approveOrDeny(long autoAssignmentId, AutoAssignment.AutoAssignApprovalDecision decision, String remark);
@@ -158,7 +157,7 @@ public interface AutoAssignmentManagement<T extends AutoAssignment>
      * @return started target filter query
      * @throws EntityNotFoundException if target filter query with given ID does not exist
      * @throws AutoAssignmentIllegalStateException if given auto assignment is not in {@link AutoAssignment.AutoAssignStatus#READY}. Only
-     *             ready auto assignments can be started.
+     *         ready auto assignments can be started.
      */
     @PreAuthorize(HAS_AUTO_ASSIGNMENT_HANDLE)
     AutoAssignment start(final long autoAssignmentId);
@@ -171,7 +170,7 @@ public interface AutoAssignmentManagement<T extends AutoAssignment>
      * @return paused target filter query
      * @throws EntityNotFoundException if target filter query with given ID does not exist
      * @throws AutoAssignmentIllegalStateException if given auto assignment is not in {@link AutoAssignment.AutoAssignStatus#RUNNING}. Only
-     *             running auto assignments can be paused.
+     *         running auto assignments can be paused.
      */
     @PreAuthorize(HAS_AUTO_ASSIGNMENT_HANDLE)
     AutoAssignment pause(final long autoAssignmentId);
@@ -184,7 +183,7 @@ public interface AutoAssignmentManagement<T extends AutoAssignment>
      * @return resumed target filter query
      * @throws EntityNotFoundException if target filter query with given ID does not exist
      * @throws AutoAssignmentIllegalStateException if given auto assignment is not in {@link AutoAssignment.AutoAssignStatus#PAUSED}. Only
-     *             paused auto assignments can be resumed.
+     *         paused auto assignments can be resumed.
      */
     @PreAuthorize(HAS_AUTO_ASSIGNMENT_HANDLE)
     AutoAssignment resume(final long autoAssignmentId);

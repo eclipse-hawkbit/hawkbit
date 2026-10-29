@@ -7,8 +7,8 @@ API for repository access. Contains:
 
 ## Method naming concept (example target management)
 
-Common CRUD methods are defined once in `RepositoryManagement<T, C, U>` (and `SoftDeletableRepositoryManagement` for soft
-deletable entities); entity specific managements (e.g. `TargetManagement`) extend it and add entity specific methods.
+Common CRUD methods are defined once in `RepositoryManagement<T, C, U>` (and `SoftDeletableRepositoryManagement` for
+soft deletable entities); entity specific managements (e.g. `TargetManagement`) extend it and add entity specific methods.
 
 Read method convention:
 

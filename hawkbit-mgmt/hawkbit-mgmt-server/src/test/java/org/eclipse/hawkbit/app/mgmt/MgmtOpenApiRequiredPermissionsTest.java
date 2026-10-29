@@ -37,7 +37,7 @@ class MgmtOpenApiRequiredPermissionsTest extends AbstractSecurityTest {
                 // single permission, implied by others - and appended once only
                 .andExpect(jsonPath("$.paths['/rest/v1/softwaremoduletypes'].get.description", equalTo(
                         "Handles the GET request of retrieving all software module types. Required Permission: READ_SOFTWARE_MODULE_TYPE " +
-                        "(or implied by CREATE_SOFTWARE_MODULE, DELETE_SOFTWARE_MODULE, READ_SOFTWARE_MODULE, UPDATE_SOFTWARE_MODULE)")))
+                                "(or implied by CREATE_SOFTWARE_MODULE, DELETE_SOFTWARE_MODULE, READ_SOFTWARE_MODULE, UPDATE_SOFTWARE_MODULE)")))
                 // multiple permissions + conditionally required
                 .andExpect(jsonPath("$.paths['/rest/v1/rollouts/{rolloutId}/deploygroups/{groupId}/targets'].get.description",
                         endsWith(" Required Permissions: READ_ROLLOUT, READ_TARGET. " +

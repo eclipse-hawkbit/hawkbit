@@ -37,7 +37,6 @@ class TenantHardDeleteSchedulerTest extends AbstractJpaIntegrationTest {
     @Autowired
     private LockRegistry<Lock> lockRegistry;
 
-
     /**
      * Verifies that a soft deleted tenant whose hard delete time passed is hard deleted together with its data.
      */

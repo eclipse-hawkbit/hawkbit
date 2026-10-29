@@ -89,7 +89,7 @@ For more information, please see the Eclipse Committer Handbook:
 
 HowTo "Sign-off" your commits:
 
-You do this by adding the `-s` flag when you make the commit(s), e.g.
+You do this by adding the `-s` flag when you make the commit (s), e.g.
 
 ```bash
 git commit -s -m "Shave the yak some more"

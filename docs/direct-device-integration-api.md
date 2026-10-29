@@ -51,7 +51,8 @@ Devices report configuration data (controller attributes) with:
 PUT /{tenant}/controller/v1/{controllerId}/configData
 ```
 
-Each attribute key and each attribute value is limited to 128 characters. Requests that exceed either limit are rejected.
+Each attribute key and each attribute value is limited to 128 characters. Requests that exceed either limit are
+rejected.
 
 ---
 

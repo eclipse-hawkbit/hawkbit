@@ -102,7 +102,7 @@ allow passing a custom `Encoder`, `Decoder`, `Contract`, `ErrorDecoder`, request
 strategy.
 
 Then you can define the authentication setup helper, which offers helper methods for setting up your authentication
-method(s) :
+method (s) :
 
 ```java
     @Bean
@@ -162,11 +162,11 @@ for [DDI](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-sdk/haw
 and [DMF](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-sdk/hawkbit-sdk-demo/src/main/java/org/eclipse/hawkbit/sdk/demo/dmf/DmfApp.java)
 via the hawkbit SDK. They are interactive Spring Shell applications:
 
-| Application      | Shell commands                                                                                    |
-|------------------|---------------------------------------------------------------------------------------------------|
-| `DeviceApp`      | `setup`, `start`, `stop`                                                                          |
+| Application      | Shell commands                                                                                                  |
+|------------------|-----------------------------------------------------------------------------------------------------------------|
+| `DeviceApp`      | `setup`, `start`, `stop`                                                                                        |
 | `MultiDeviceApp` | `setup`, `start-one --id`, `stop-one --id`, `start --prefix --offset --count`, `stop --prefix --offset --count` |
-| `DmfApp`         | `start-one --id`, `stop-one --id`, `start --prefix --offset --count`, `stop --prefix --offset --count` |
+| `DmfApp`         | `start-one --id`, `stop-one --id`, `start --prefix --offset --count`, `stop --prefix --offset --count`          |
 
 The built jar starts `DeviceApp` (`demo.controller.id`, default `demo`, and optional `demo.controller.securityToken`
 configure the device); `MultiDeviceApp` and `DmfApp` could be started from the IDE:

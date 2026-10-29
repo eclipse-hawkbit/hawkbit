@@ -24,10 +24,10 @@ Modules:
 
 The MCP server supports two transport modes:
 
-| Mode         | Use Case                            | Authentication                         |
-|--------------|-------------------------------------|----------------------------------------|
-| **HTTP**     | Remote access, multi-user           | Per-request via `Authorization` header |
-| **STDIO**    | Local CLI tools (e.g., Claude Code) | Environment variables                  |
+| Mode      | Use Case                            | Authentication                         |
+|-----------|-------------------------------------|----------------------------------------|
+| **HTTP**  | Remote access, multi-user           | Per-request via `Authorization` header |
+| **STDIO** | Local CLI tools (e.g., Claude Code) | Environment variables                  |
 
 ### HTTP Transport
 
@@ -92,18 +92,18 @@ Use STDIO transport for direct integration:
 
 ## Configuration Properties
 
-| Property                                | Environment Variable | Description                                   | Default                 |
-|-----------------------------------------|----------------------|-----------------------------------------------|-------------------------|
-| `hawkbit.mcp.mgmt-url`                  | `HAWKBIT_URL`        | hawkBit Management API URL                    | `http://localhost:8080` |
-| -                                       | `HAWKBIT_USERNAME`   | Username for STDIO mode                       | -                       |
-| -                                       | `HAWKBIT_PASSWORD`   | Password for STDIO mode                       | -                       |
-| `hawkbit.mcp.validation.enabled`        | -                    | Validate credentials against hawkBit (HTTP)   | `true`                  |
-| `hawkbit.mcp.validation.cache-ttl`      | -                    | Cache TTL for auth validation results         | `600s`                  |
-| `hawkbit.mcp.validation.cache-max-size` | -                    | Max entries in the auth validation cache      | `1000`                  |
-| `hawkbit.mcp.tools-enabled`             | -                    | Register MCP tools                            | `true`                  |
-| `hawkbit.mcp.resources-enabled`         | -                    | Register MCP resources (hawkBit docs)         | `true`                  |
-| `hawkbit.mcp.prompts-enabled`           | -                    | Register MCP prompts                          | `true`                  |
-| `server.port`                           | -                    | HTTP port                                     | `8082`                  |
+| Property                                | Environment Variable | Description                                 | Default                 |
+|-----------------------------------------|----------------------|---------------------------------------------|-------------------------|
+| `hawkbit.mcp.mgmt-url`                  | `HAWKBIT_URL`        | hawkBit Management API URL                  | `http://localhost:8080` |
+| -                                       | `HAWKBIT_USERNAME`   | Username for STDIO mode                     | -                       |
+| -                                       | `HAWKBIT_PASSWORD`   | Password for STDIO mode                     | -                       |
+| `hawkbit.mcp.validation.enabled`        | -                    | Validate credentials against hawkBit (HTTP) | `true`                  |
+| `hawkbit.mcp.validation.cache-ttl`      | -                    | Cache TTL for auth validation results       | `600s`                  |
+| `hawkbit.mcp.validation.cache-max-size` | -                    | Max entries in the auth validation cache    | `1000`                  |
+| `hawkbit.mcp.tools-enabled`             | -                    | Register MCP tools                          | `true`                  |
+| `hawkbit.mcp.resources-enabled`         | -                    | Register MCP resources (hawkBit docs)       | `true`                  |
+| `hawkbit.mcp.prompts-enabled`           | -                    | Register MCP prompts                        | `true`                  |
+| `server.port`                           | -                    | HTTP port                                   | `8082`                  |
 
 `HAWKBIT_USERNAME` / `HAWKBIT_PASSWORD` are read directly via `@Value` in `HawkbitMcpProperties` (not as
 `hawkbit.mcp.*` keys). In HTTP mode credentials come from the `Authorization` header of each request.

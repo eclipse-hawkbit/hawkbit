@@ -106,6 +106,7 @@ See [TenantAwareCacheManager](https://github.com/eclipse-hawkbit/hawkbit/blob/ma
 hawkBit has multiple schedulers which run after a defined period of time.  
 They are disabled by default and enabled only on the nodes which explicitly set the properties (as the mgmt server and
 the monolith do in their default configuration):
+
 - `hawkbit.autoassign.scheduler.enabled`
 - `hawkbit.rollout.scheduler.enabled`
 - `hawkbit.autocleanup.scheduler.enabled`

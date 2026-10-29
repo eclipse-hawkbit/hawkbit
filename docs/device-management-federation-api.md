@@ -231,16 +231,17 @@ that can be sent by the client:
 Action-related messages can include an optional `externalRef` string. Its value is the external reference set on the
 action when the assignment is created, allowing a DMF consumer to correlate the action with an external system.
 
-| Message topic | JSON location |
-|---------------|---------------|
-| `DOWNLOAD_AND_INSTALL`, `DOWNLOAD`, `CONFIRM`, `CANCEL_DOWNLOAD` | `externalRef` in the message payload |
-| `BATCH_DOWNLOAD_AND_INSTALL`, `BATCH_DOWNLOAD` | `externalRef` in each entry of `targets` |
+| Message topic                                                    | JSON location                            |
+|------------------------------------------------------------------|------------------------------------------|
+| `DOWNLOAD_AND_INSTALL`, `DOWNLOAD`, `CONFIRM`, `CANCEL_DOWNLOAD` | `externalRef` in the message payload     |
+| `BATCH_DOWNLOAD_AND_INSTALL`, `BATCH_DOWNLOAD`                   | `externalRef` in each entry of `targets` |
 
 If an action has no external reference (`null`), the field is omitted rather than serialized as `null`. A batch can
 contain actions with different references as well as actions without a reference. Existing payloads without the field
 remain valid. Consumers should tolerate unknown JSON fields for forward compatibility.
 
-`externalRef` does not replace `actionId`: responses such as `UPDATE_ACTION_STATUS` still identify the action by `actionId`.
+`externalRef` does not replace `actionId`: responses such as `UPDATE_ACTION_STATUS` still identify the action by
+`actionId`.
 
 ### CANCEL_DOWNLOAD
 
@@ -445,8 +446,7 @@ The following simplified payload shows one action with a reference and another w
 ### MULTI_ACTION
 
 If `multi.assignments.enabled` is enabled, this message is sent instead of DOWNLOAD_AND_INSTALL, DOWNLOAD, or
-CANCEL_DOWNLOAD
-by hawkBit to initialize update, download, or cancel task(s).
+CANCEL_DOWNLOAD by hawkBit to initialize update, download, or cancel task (s).
 
 With weight, one can set the priority to the action. The higher the weight, the higher is the priority of an action.
 
