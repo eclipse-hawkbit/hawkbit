@@ -73,8 +73,8 @@ class DdiDeploymentSqlProbeTest extends AbstractDDiApiIntegrationTest {
                         .andExpect(status().isOk()));
         path("E2 PUT /configData",
                 () -> mvc.perform(put(CONFIG_DATA, tenant(), CONTROLLER_ID)
-                        .content(JsonBuilder.configData(Map.of("k", "v")).toString())
-                        .contentType(MediaType.APPLICATION_JSON))
+                                .content(JsonBuilder.configData(Map.of("k", "v")).toString())
+                                .contentType(MediaType.APPLICATION_JSON))
                         .andExpect(status().isOk()));
         path("E3 GET /deploymentBase/{actionId}",
                 () -> performGet(DEPLOYMENT_BASE, MediaTypes.HAL_JSON, status().isOk(),

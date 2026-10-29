@@ -157,9 +157,8 @@ Log in to [hawkbit UI](http://localhost:8088) with default `admin:admin` user.
 
 ## Start hawkBit [Device Simulator](hawkbit-sdk/hawkbit-sdk-demo)
 
-* Enable gateway token authentication - on update server set tenant configuration properties (
-  via [Swagger UI](http://localhost:8080/swagger-ui/index.html) or [hawkBit
-  UI](http://localhost:8088)):
+* Enable gateway token authentication - on update server set tenant configuration properties
+  (via [Swagger UI](http://localhost:8080/swagger-ui/index.html) or [hawkBit UI](http://localhost:8088)):
     * `authentication.gatewaytoken.enabled=true` and
     * `authentication.gatewaytoken.key=<gw_token>`)
 * Start demo Device Simulator - in the script below edit the environment properties accordingly.
@@ -210,21 +209,21 @@ mvn verify -Dspring.jpa.database=POSTGRESQL -Dspring.datasource.url=jdbc:postgre
 
 ## Project layout
 
-| Module                                   | Content                                                                    |
-|------------------------------------------|----------------------------------------------------------------------------|
-| [hawkbit-core](hawkbit-core)             | Core shared classes (tenancy, security, utilities)                         |
-| [hawkbit-ql-jpa](hawkbit-ql-jpa)         | Query language (RSQL) to JPA Specifications                                |
-| [hawkbit-artifact](hawkbit-artifact)     | Artifact storage                                                           |
-| [hawkbit-repository](hawkbit-repository) | Repository API and JPA implementation (EclipseLink / Hibernate, Flyway)    |
-| [hawkbit-rest](hawkbit-rest)             | Common REST API / core                                                     |
-| [hawkbit-mgmt](hawkbit-mgmt)             | Management API, resources, starter, server                                 |
-| [hawkbit-ddi](hawkbit-ddi)               | Direct Device Integration API, resources, security, starter, server        |
-| [hawkbit-dmf](hawkbit-dmf)               | Device Management Federation API (AMQP), starter, server                   |
-| [hawkbit-mcp](hawkbit-mcp)               | MCP (Model Context Protocol) server and starter                            |
-| [hawkbit-autoconfigure](hawkbit-autoconfigure) | Spring Boot auto-configuration                                       |
-| [hawkbit-monolith](hawkbit-monolith)     | Monolith starter and Update Server                                         |
-| [hawkbit-ui](hawkbit-ui)                 | Vaadin based UI                                                            |
-| [hawkbit-sdk](hawkbit-sdk)               | SDK (device, DMF, Management API clients) and demo                         |
+| Module                                         | Content                                                                 |
+|------------------------------------------------|-------------------------------------------------------------------------|
+| [hawkbit-core](hawkbit-core)                   | Core shared classes (tenancy, security, utilities)                      |
+| [hawkbit-ql-jpa](hawkbit-ql-jpa)               | Query language (RSQL) to JPA Specifications                             |
+| [hawkbit-artifact](hawkbit-artifact)           | Artifact storage                                                        |
+| [hawkbit-repository](hawkbit-repository)       | Repository API and JPA implementation (EclipseLink / Hibernate, Flyway) |
+| [hawkbit-rest](hawkbit-rest)                   | Common REST API / core                                                  |
+| [hawkbit-mgmt](hawkbit-mgmt)                   | Management API, resources, starter, server                              |
+| [hawkbit-ddi](hawkbit-ddi)                     | Direct Device Integration API, resources, security, starter, server     |
+| [hawkbit-dmf](hawkbit-dmf)                     | Device Management Federation API (AMQP), starter, server                |
+| [hawkbit-mcp](hawkbit-mcp)                     | MCP (Model Context Protocol) server and starter                         |
+| [hawkbit-autoconfigure](hawkbit-autoconfigure) | Spring Boot auto-configuration                                          |
+| [hawkbit-monolith](hawkbit-monolith)           | Monolith starter and Update Server                                      |
+| [hawkbit-ui](hawkbit-ui)                       | Vaadin based UI                                                         |
+| [hawkbit-sdk](hawkbit-sdk)                     | SDK (device, DMF, Management API clients) and demo                      |
 
 ## Further documentation
 

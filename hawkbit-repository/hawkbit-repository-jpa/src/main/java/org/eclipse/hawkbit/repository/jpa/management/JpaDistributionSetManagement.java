@@ -467,8 +467,8 @@ public class JpaDistributionSetManagement
         final JpaDistributionSetTag tag = distributionSetTagManagement.get(dsTagId);
         final List<JpaDistributionSet> allDs = dsIds.size() == 1
                 ? jpaRepository.findById(dsIds.iterator().next())
-                        .map(List::of)
-                        .orElseGet(Collections::emptyList)
+                .map(List::of)
+                .orElseGet(Collections::emptyList)
                 : jpaRepository.findAll(DistributionSetSpecification.byIdsFetch(dsIds));
         if (allDs.size() < dsIds.size()) {
             throw new EntityNotFoundException(DistributionSet.class, notFound(dsIds, allDs));

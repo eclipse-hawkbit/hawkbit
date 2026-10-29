@@ -42,8 +42,8 @@ import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutRestRequestBodyPos
 import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutRestRequestBodyPut;
 import org.eclipse.hawkbit.mgmt.json.model.rolloutgroup.MgmtRolloutGroupResponseBody;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
-import org.eclipse.hawkbit.rest.ApiResponsesConstants.PostUpdateNoContentResponses;
 import org.eclipse.hawkbit.rest.ApiPermission;
+import org.eclipse.hawkbit.rest.ApiResponsesConstants.PostUpdateNoContentResponses;
 import org.eclipse.hawkbit.rest.OpenApi;
 import org.eclipse.hawkbit.rest.RequiredPermissions;
 import org.springframework.http.ResponseEntity;
@@ -366,7 +366,8 @@ public interface MgmtRolloutRestApi {
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
     @RequiredPermissions(
-            value = { ApiPermission.CREATE_ROLLOUT, ApiPermission.READ_ROLLOUT, ApiPermission.READ_TARGET, ApiPermission.READ_DISTRIBUTION_SET },
+            value = {
+                    ApiPermission.CREATE_ROLLOUT, ApiPermission.READ_ROLLOUT, ApiPermission.READ_TARGET, ApiPermission.READ_DISTRIBUTION_SET },
             optional = { ApiPermission.HANDLE_ROLLOUT, ApiPermission.UPDATE_DISTRIBUTION_SET })
     @PostMapping(value = ROLLOUTS_V1 + "/{rolloutId}/retry", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtRolloutResponseBody> retryRollout(@PathVariable("rolloutId") Long rolloutId);

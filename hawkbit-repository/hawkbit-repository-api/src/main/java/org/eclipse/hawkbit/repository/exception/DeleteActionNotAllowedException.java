@@ -9,16 +9,17 @@
  */
 package org.eclipse.hawkbit.repository.exception;
 
+import java.io.Serial;
+
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.exception.SpServerError;
 
-import java.io.Serial;
-
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 public class DeleteActionNotAllowedException extends AbstractServerRtException {
+
     @Serial
     private static final long serialVersionUID = 1L;
 

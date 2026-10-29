@@ -70,7 +70,7 @@ public class DistributionSetTypeElement {
 
     /**
      * @return the id of the referenced {@link SoftwareModuleType}, read directly from the composite key with no
-     *             additional query (does not resolve the {@link SoftwareModuleType} entity).
+     *         additional query (does not resolve the {@link SoftwareModuleType} entity).
      */
     public Long getSmTypeId() {
         return key.getSmType();

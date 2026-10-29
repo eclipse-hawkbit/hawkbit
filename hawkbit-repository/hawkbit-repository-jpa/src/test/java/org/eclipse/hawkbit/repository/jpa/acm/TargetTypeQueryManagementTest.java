@@ -39,23 +39,23 @@ class TargetTypeQueryManagementTest extends AbstractAccessControllerManagementTe
                 UPDATE_DISTRIBUTION_SET + "/type.id==" + dsType1.getId(),
                 // create auto assignment permission and read / update target needed to create an auto assignment
                 CREATE_AUTO_ASSIGNMENT, READ_TARGET, UPDATE_TARGET), () -> {
-                    // a readable and updatable distribution set can be auto assigned
-                    assertThat(autoAssignmentManagement
-                            .create(AutoAssignmentManagement.Create.builder().name("aa1").targetFilterQuery("id==*")
-                                    .distributionSet(distributionSetManagement.get(ds1Type1.getId()))
-                                    .actionType(Action.ActionType.FORCED).confirmationRequired(false).build())
-                            .getDistributionSet().getId()).isEqualTo(ds1Type1.getId());
-                    // a readable distribution set can be auto assigned
-                    autoAssignmentManagement.create(AutoAssignmentManagement.Create.builder().name("aa2").targetFilterQuery("id==*")
-                            .distributionSet(distributionSetManagement.get(ds2Type2.getId()))
-                            .actionType(Action.ActionType.FORCED).confirmationRequired(false).build());
-                    // a not readable distribution set cannot be auto assigned - ds3Type2 was created as system in
-                    // setup, so create(...) is the single invocation expected to throw under the restricted rights
-                    final AutoAssignmentManagement.Create aa3 = AutoAssignmentManagement.Create.builder()
-                            .name("aa3").targetFilterQuery("id==*").distributionSet(ds3Type2)
-                            .actionType(Action.ActionType.FORCED).confirmationRequired(false).build();
-                    assertThatThrownBy(() -> autoAssignmentManagement.create(aa3))
-                            .isInstanceOf(EntityNotFoundException.class);
-                });
+            // a readable and updatable distribution set can be auto assigned
+            assertThat(autoAssignmentManagement
+                    .create(AutoAssignmentManagement.Create.builder().name("aa1").targetFilterQuery("id==*")
+                            .distributionSet(distributionSetManagement.get(ds1Type1.getId()))
+                            .actionType(Action.ActionType.FORCED).confirmationRequired(false).build())
+                    .getDistributionSet().getId()).isEqualTo(ds1Type1.getId());
+            // a readable distribution set can be auto assigned
+            autoAssignmentManagement.create(AutoAssignmentManagement.Create.builder().name("aa2").targetFilterQuery("id==*")
+                    .distributionSet(distributionSetManagement.get(ds2Type2.getId()))
+                    .actionType(Action.ActionType.FORCED).confirmationRequired(false).build());
+            // a not readable distribution set cannot be auto assigned - ds3Type2 was created as system in
+            // setup, so create(...) is the single invocation expected to throw under the restricted rights
+            final AutoAssignmentManagement.Create aa3 = AutoAssignmentManagement.Create.builder()
+                    .name("aa3").targetFilterQuery("id==*").distributionSet(ds3Type2)
+                    .actionType(Action.ActionType.FORCED).confirmationRequired(false).build();
+            assertThatThrownBy(() -> autoAssignmentManagement.create(aa3))
+                    .isInstanceOf(EntityNotFoundException.class);
+        });
     }
 }

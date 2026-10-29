@@ -9,15 +9,15 @@
  */
 package org.eclipse.hawkbit.repository.jpa.utils;
 
+import java.util.Arrays;
+import java.util.EnumSet;
+import java.util.stream.Collectors;
+
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
-
-import java.util.Arrays;
-import java.util.EnumSet;
-import java.util.stream.Collectors;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ActionUtils {

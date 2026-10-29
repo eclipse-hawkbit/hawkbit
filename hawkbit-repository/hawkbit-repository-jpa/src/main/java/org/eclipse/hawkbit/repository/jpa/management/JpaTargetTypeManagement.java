@@ -54,8 +54,9 @@ import org.springframework.validation.annotation.Validated;
 @Service
 @ConditionalOnBooleanProperty(prefix = "hawkbit.jpa", name = { "enabled", "target-type-management" }, matchIfMissing = true)
 public class JpaTargetTypeManagement
-        extends AbstractJpaRepositoryManagement<JpaTargetType, TargetTypeManagement.Create, TargetTypeManagement.Update, TargetTypeRepository, TargetTypeFields>
-        implements TargetTypeManagement<JpaTargetType>{
+        extends AbstractJpaRepositoryManagement
+        <JpaTargetType, TargetTypeManagement.Create, TargetTypeManagement.Update, TargetTypeRepository, TargetTypeFields>
+        implements TargetTypeManagement<JpaTargetType> {
 
     private static final String CACHE_TARGET_TYPE_NAME = "targetType";
 

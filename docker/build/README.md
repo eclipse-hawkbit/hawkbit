@@ -23,9 +23,9 @@ Building images supports the following build arguments (i.e. ARG-s which could b
   image to be used.
 * _HAWKBIT_APP_ - **[OPTIONAL, if not set _hawkbit-update-server_ is used (_hawkbit-repository-jpa-init_ for the dbinit
   Dockerfiles)]** the application to be built. Released images (see `.github/workflows/release_docker.yaml`) are:
-  * micro-services: _hawkbit-ddi-server_, _hawkbit-dmf-server_, _hawkbit-mgmt-server_, _hawkbit-ui_
-  * monolith: _hawkbit-update-server_
-  * db init: _hawkbit-repository-jpa-init_ (built with _Dockerfile_dbinit_)
+    * micro-services: _hawkbit-ddi-server_, _hawkbit-dmf-server_, _hawkbit-mgmt-server_, _hawkbit-ui_
+    * monolith: _hawkbit-update-server_
+    * db init: _hawkbit-repository-jpa-init_ (built with _Dockerfile_dbinit_)
 * _HAWKBIT_VERSION_ - **[MANDATORY for release builds, defaults to _0-SNAPSHOT_ for development builds]** the
   application version
 * _CONTAINER_PORT_ - **[OPTIONAL, if not set 8080 is used]** on which the app opens the http server (if available)

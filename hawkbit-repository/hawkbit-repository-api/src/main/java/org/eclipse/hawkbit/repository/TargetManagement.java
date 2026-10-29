@@ -459,10 +459,12 @@ public interface TargetManagement<T extends Target>
             super(builder);
             controllerId = builder.controllerId;
             // truncate controller ID to max name length (if too big)
+            // @formatter:off
             name = ObjectUtils.isEmpty(builder.name)
                     ? controllerId != null && controllerId.length() > NamedEntity.NAME_MAX_SIZE
-                      ? controllerId.substring(0, NamedEntity.NAME_MAX_SIZE) : controllerId
+                        ? controllerId.substring(0, NamedEntity.NAME_MAX_SIZE) : controllerId
                     : builder.name;
+            // @formatter:on
             securityToken = ObjectUtils.isEmpty(builder.securityToken)
                     ? SecurityTokenGenerator.generateToken()
                     : builder.securityToken;

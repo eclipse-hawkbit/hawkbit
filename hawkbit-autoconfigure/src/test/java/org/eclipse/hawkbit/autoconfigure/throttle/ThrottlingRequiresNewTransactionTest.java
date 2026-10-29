@@ -61,7 +61,7 @@ class ThrottlingRequiresNewTransactionTest {
 
     @Test
     void requiresNewTakesAChildPermitSoPermitsMatchConnections() {
-        final Throttle throttle = throttle(2, config -> { });
+        final Throttle throttle = throttle(2, config -> {});
         final PlatformTransactionManager txManager = txManager(throttle);
 
         asTenant(TENANT_ACME, () -> outer(txManager).executeWithoutResult(status -> {
@@ -101,7 +101,7 @@ class ThrottlingRequiresNewTransactionTest {
     @Test
     void requiresNewFailsFastInsteadOfDeadlockingWhenCapacityIsExhausted() {
         // capacity 1: the outer transaction is the sole unit of work, so parking its child would wedge the pool
-        final Throttle throttle = throttle(1, config -> { });
+        final Throttle throttle = throttle(1, config -> {});
         final PlatformTransactionManager txManager = txManager(throttle);
 
         asTenant(TENANT_ACME, () -> outer(txManager).executeWithoutResult(status -> {
@@ -110,7 +110,7 @@ class ThrottlingRequiresNewTransactionTest {
             // Spring wraps the refusal; what matters is that it returns instead of parking on a wedged pool
             final TransactionTemplate transactionTemplate = requiresNew(txManager);
             assertThatExceptionOfType(CannotCreateTransactionException.class)
-                    .isThrownBy(() -> transactionTemplate.executeWithoutResult(innerStatus -> { }))
+                    .isThrownBy(() -> transactionTemplate.executeWithoutResult(innerStatus -> {}))
                     .havingRootCause()
                     .isInstanceOf(ThrottledException.class)
                     .withMessageContaining("deadlock");

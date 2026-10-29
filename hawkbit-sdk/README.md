@@ -5,13 +5,13 @@ API from Java code. User guide: [hawkBit SDK](../docs/hawkbit-sdk.md).
 
 ## Modules
 
-| Module                | Description                                                                                                                                                         |
-|-----------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Module                | Description                                                                                                                                                                     |
+|-----------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `hawkbit-sdk-commons` | Common configuration (`HawkbitServer` - `hawkbit.server.*`, `Tenant` - `hawkbit.tenant.*`) and `HawkbitClient` - creates OpenFeign clients from the hawkBit `*-api` interfaces. |
-| `hawkbit-sdk-mgmt`    | Management API client support (over `hawkbit-mgmt-api`), e.g. `AuthenticationSetupHelper`.                                                                          |
-| `hawkbit-sdk-device`  | DDI device simulation (over `hawkbit-ddi-api`) - `DdiTenant`, `DdiController`, `UpdateHandler`.                                                                     |
-| `hawkbit-sdk-dmf`     | DMF device simulation over AMQP (over `hawkbit-dmf-api`, spring-amqp) - `DmfTenant`, `DmfController`, `UpdateHandler`.                                               |
-| `hawkbit-sdk-demo`    | Spring Shell demo applications using the modules above.                                                                                                              |
+| `hawkbit-sdk-mgmt`    | Management API client support (over `hawkbit-mgmt-api`), e.g. `AuthenticationSetupHelper`.                                                                                      |
+| `hawkbit-sdk-device`  | DDI device simulation (over `hawkbit-ddi-api`) - `DdiTenant`, `DdiController`, `UpdateHandler`.                                                                                 |
+| `hawkbit-sdk-dmf`     | DMF device simulation over AMQP (over `hawkbit-dmf-api`, spring-amqp) - `DmfTenant`, `DmfController`, `UpdateHandler`.                                                          |
+| `hawkbit-sdk-demo`    | Spring Shell demo applications using the modules above.                                                                                                                         |
 
 The REST clients are not generated - `HawkbitClient` builds Feign proxies directly from the Spring MVC annotated API
 interfaces (e.g. `MgmtTargetRestApi`, `DdiRootControllerRestApi`), so the SDK always matches the server API of the same

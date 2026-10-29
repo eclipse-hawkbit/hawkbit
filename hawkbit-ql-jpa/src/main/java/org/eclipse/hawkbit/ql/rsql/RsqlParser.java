@@ -154,7 +154,9 @@ public class RsqlParser {
 
     // if the sub-attribute is an entity itself (e.g. distributionSet.type) and has a default attribute - resolve to it (e.g. type.key)
     private static String withDefaultSubEntityAttribute(final String subEntityAttribute, final String defaultSubEntityAttribute) {
-        return defaultSubEntityAttribute == null ? subEntityAttribute : subEntityAttribute + SUB_ATTRIBUTE_SEPARATOR + defaultSubEntityAttribute;
+        return defaultSubEntityAttribute == null
+                ? subEntityAttribute
+                : subEntityAttribute + SUB_ATTRIBUTE_SEPARATOR + defaultSubEntityAttribute;
     }
 
     private static class RsqlVisitor implements RSQLVisitor<Node, String> {

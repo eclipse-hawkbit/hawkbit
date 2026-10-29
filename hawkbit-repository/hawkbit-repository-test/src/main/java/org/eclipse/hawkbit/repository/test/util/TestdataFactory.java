@@ -954,7 +954,9 @@ public class TestdataFactory {
 
     public AutoAssignment createTargetsAndAutoAssignment() {
         createTargets(quotaManagement.getMaxTargetsPerAutoAssignment());
-        return autoAssignmentManagement.create(AutoAssignmentManagement.Create.builder().name("testName").targetFilterQuery("id==*").distributionSet(createDistributionSet()).build());
+        return autoAssignmentManagement.create(AutoAssignmentManagement.Create.builder()
+                .name("testName").targetFilterQuery("id==*").distributionSet(createDistributionSet())
+                .build());
     }
 
     /**

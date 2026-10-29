@@ -26,18 +26,19 @@ Entry point is `JpaRepositoryConfiguration`, defaults are in `hawkbit-jpa-defaul
 All schedulers are **disabled by default** and must be enabled explicitly (the mgmt server and the monolith enable all
 of them in their default `application.properties`). They are never created in the `test` profile.
 
-| Scheduler                   | Enable property                                | Delay property (ms)                               | Default delay        |
-|-----------------------------|------------------------------------------------|---------------------------------------------------|----------------------|
-| `RolloutScheduler`          | `hawkbit.rollout.scheduler.enabled`            | `hawkbit.rollout.scheduler.fixedDelay`            | `2000`               |
-| `AutoAssignScheduler`       | `hawkbit.autoassign.scheduler.enabled`         | `hawkbit.autoassign.scheduler.fixedDelay`         | `2000`               |
-| `AutoCleanupScheduler`      | `hawkbit.autocleanup.scheduler.enabled`        | `hawkbit.autocleanup.scheduler.fixedDelay`        | `86400000` (1 day)   |
-| `TenantHardDeleteScheduler` | `hawkbit.tenant.hard-delete.scheduler.enabled` | `hawkbit.tenant.hard-delete.scheduler.fixedDelay` | `3600000` (1 hour)   |
+| Scheduler                   | Enable property                                | Delay property (ms)                               | Default delay      |
+|-----------------------------|------------------------------------------------|---------------------------------------------------|--------------------|
+| `RolloutScheduler`          | `hawkbit.rollout.scheduler.enabled`            | `hawkbit.rollout.scheduler.fixedDelay`            | `2000`             |
+| `AutoAssignScheduler`       | `hawkbit.autoassign.scheduler.enabled`         | `hawkbit.autoassign.scheduler.fixedDelay`         | `2000`             |
+| `AutoCleanupScheduler`      | `hawkbit.autocleanup.scheduler.enabled`        | `hawkbit.autocleanup.scheduler.fixedDelay`        | `86400000` (1 day) |
+| `TenantHardDeleteScheduler` | `hawkbit.tenant.hard-delete.scheduler.enabled` | `hawkbit.tenant.hard-delete.scheduler.fixedDelay` | `3600000` (1 hour) |
 
 The rollout and auto assignment schedulers process the tenants sequentially by default; with
 `hawkbit.rollout.executor.thread-pool.size` / `hawkbit.autoassign.executor.thread-pool.size` greater than `1`
 (default `1`) tenants are processed in parallel by a thread pool of that size.
 
-To avoid concurrent processing on multiple nodes, the rollout and auto assignment handlers, auto cleanup and tenant hard delete use locks
+To avoid concurrent processing on multiple nodes, the rollout and auto assignment handlers, auto cleanup and tenant hard
+delete use locks
 from the `LockRegistry`: by default (`hawkbit.lock=distributed`) a JDBC based registry (`DistributedLockRepository`,
 configured via `hawkbit.repository.cluster.lock.*`), otherwise an in-memory one.
 

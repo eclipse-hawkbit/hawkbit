@@ -54,12 +54,14 @@ class AutoAssignmentTest extends AbstractAccessControllerManagementTest {
 
     private void verifyOnlyUpdatableTargetsArePartOfAutoAssignment(final Runnable assigner) throws Exception {
         final AutoAssignment autoAssignment = callAs(withAuthorities(
-                READ_TARGET + "/controllerid==*",
-                UPDATE_TARGET + "/type.id==" + targetType2.getId(), // only updatable (i.e. of targetType2) shall be assigned
-                DELETE_TARGET + "/type.id==" + targetType1.getId(),
-                READ_DISTRIBUTION_SET + "/type.id==" + dsType2.getId()),
+                        READ_TARGET + "/controllerid==*",
+                        UPDATE_TARGET + "/type.id==" + targetType2.getId(), // only updatable (i.e. of targetType2) shall be assigned
+                        DELETE_TARGET + "/type.id==" + targetType1.getId(),
+                        READ_DISTRIBUTION_SET + "/type.id==" + dsType2.getId()),
                 () -> autoAssignmentManagement
-                        .create(AutoAssignmentManagement.Create.builder().name("testAutoAssignment").targetFilterQuery("controllerid==*").distributionSet(ds2Type2).build()));
+                        .create(AutoAssignmentManagement.Create.builder()
+                                .name("testAutoAssignment").targetFilterQuery("controllerid==*").distributionSet(ds2Type2)
+                                .build()));
 
         // do the assignment
         assigner.run();

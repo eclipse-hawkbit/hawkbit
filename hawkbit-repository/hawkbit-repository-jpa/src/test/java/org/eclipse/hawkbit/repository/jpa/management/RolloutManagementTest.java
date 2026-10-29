@@ -1086,8 +1086,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         changeStatusForAllRunningActions(rolloutD, Status.FINISHED);
         rolloutHandler.handleAll();
 
-        final Slice<Rollout> rolloutPage = rolloutManagement
-                .findAllWithDetailedStatus(SoftDeletedMode.EXCLUDE_SOFT_DELETED, new OffsetBasedPageRequest(0, 100, Sort.by(Direction.ASC, "name")));
+        final Slice<Rollout> rolloutPage = rolloutManagement.findAllWithDetailedStatus(
+                SoftDeletedMode.EXCLUDE_SOFT_DELETED, new OffsetBasedPageRequest(0, 100, Sort.by(Direction.ASC, "name")));
         final List<Rollout> rolloutList = rolloutPage.getContent();
 
         // validate rolloutA -> 6 running and 6 ready

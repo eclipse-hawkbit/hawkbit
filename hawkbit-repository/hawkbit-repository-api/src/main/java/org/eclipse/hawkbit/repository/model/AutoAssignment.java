@@ -84,7 +84,7 @@ public interface AutoAssignment extends NamedEntity {
 
     /**
      * @return if confirmation is required for configured auto assignment
-     *             (considered with confirmation flow active)
+     *         (considered with confirmation flow active)
      */
     boolean isConfirmationRequired();
 

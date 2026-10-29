@@ -6,16 +6,16 @@ Spring Boot auto-configurations for the common hawkBit server parts. Used by the
 
 ## Auto-configurations (`org.eclipse.hawkbit.autoconfigure.*`)
 
-| Package       | Class                                                | Purpose                                                                                                         |
-|---------------|------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------|
-| `repository`  | `JpaRepositoryAutoConfiguration`                     | imports `JpaRepositoryConfiguration` (if on the classpath) - the JPA repository                                 |
-| `repository.event` | `EventPublisherAutoConfiguration`               | imports `EventPublisherConfiguration` - repository event publishing                                             |
-| `scheduling`  | `ExecutorAutoConfiguration`                          | central `asyncExecutor`, `taskExecutor`, `scheduledExecutorService`, `taskScheduler` (security context aware), configured via `hawkbit.executor.*` (`ExecutorProperties`) |
-| `scheduling`  | `AsyncConfigurerAutoConfiguration`                   | `@EnableAsync` using the `asyncExecutor` (if no other `AsyncConfigurer`)                                        |
-| `security`    | `SecurityAutoConfiguration`                          | security properties (`HawkbitSecurityProperties`, ...), auditor aware, audit logging aspect, login / logout handlers |
-| `security`    | `StaticUserManagementAutoConfiguration`              | in-memory (property based) user management                                                                     |
-| `artifact`    | `PropertyBasedArtifactUrlResolverAutoConfiguration`  | property based artifact download URL resolver, defaults in `hawkbit-artifactdl-defaults.properties`             |
-| `throttle`    | `ThrottleAutoConfiguration`                          | per-tenant DB connection throttle - only with `hawkbit.throttle.enabled=true`, see [throttling](../docs/throttling.md) |
+| Package            | Class                                               | Purpose                                                                                                                                                                   |
+|--------------------|-----------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `repository`       | `JpaRepositoryAutoConfiguration`                    | imports `JpaRepositoryConfiguration` (if on the classpath) - the JPA repository                                                                                           |
+| `repository.event` | `EventPublisherAutoConfiguration`                   | imports `EventPublisherConfiguration` - repository event publishing                                                                                                       |
+| `scheduling`       | `ExecutorAutoConfiguration`                         | central `asyncExecutor`, `taskExecutor`, `scheduledExecutorService`, `taskScheduler` (security context aware), configured via `hawkbit.executor.*` (`ExecutorProperties`) |
+| `scheduling`       | `AsyncConfigurerAutoConfiguration`                  | `@EnableAsync` using the `asyncExecutor` (if no other `AsyncConfigurer`)                                                                                                  |
+| `security`         | `SecurityAutoConfiguration`                         | security properties (`HawkbitSecurityProperties`, ...), auditor aware, audit logging aspect, login / logout handlers                                                      |
+| `security`         | `StaticUserManagementAutoConfiguration`             | in-memory (property based) user management                                                                                                                                |
+| `artifact`         | `PropertyBasedArtifactUrlResolverAutoConfiguration` | property based artifact download URL resolver, defaults in `hawkbit-artifactdl-defaults.properties`                                                                       |
+| `throttle`         | `ThrottleAutoConfiguration`                         | per-tenant DB connection throttle - only with `hawkbit.throttle.enabled=true`, see [throttling](../docs/throttling.md)                                                    |
 
 Most beans are `@ConditionalOnMissingBean`, so they could be replaced by application specific beans.
 

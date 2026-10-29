@@ -152,7 +152,7 @@ public class JpaAutoAssignmentManagement extends
     @Override
     public Optional<AutoAssignment> findByName(final String name) {
         return JpaManagementHelper.<AutoAssignment, JpaAutoAssignment> findAllWithCountBySpec(jpaRepository,
-                List.of(AutoAssignmentSpecification.getAll(), AutoAssignmentSpecification.byName(name)), Pageable.ofSize(1))
+                        List.of(AutoAssignmentSpecification.getAll(), AutoAssignmentSpecification.byName(name)), Pageable.ofSize(1))
                 .stream().findFirst();
     }
 

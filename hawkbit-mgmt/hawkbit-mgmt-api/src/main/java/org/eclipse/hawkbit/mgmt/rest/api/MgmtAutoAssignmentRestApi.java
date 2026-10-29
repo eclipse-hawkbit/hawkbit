@@ -18,13 +18,13 @@ import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.REST_V1;
 import static org.springframework.hateoas.MediaTypes.HAL_JSON_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
+import jakarta.validation.Valid;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.extensions.Extension;
 import io.swagger.v3.oas.annotations.extensions.ExtensionProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
-
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.autoassignment.MgmtAutoAssignmentResponseBody;
 import org.eclipse.hawkbit.mgmt.json.model.autoassignment.MgmtAutoAssignmentRestRequestBodyPost;
@@ -59,7 +59,7 @@ public interface MgmtAutoAssignmentRestApi {
      *
      * @param autoAssignmentRequestBody the auto assignment body to be created
      * @return In case the auto assignment could be successfully created, the {@code ResponseEntity} is returned with status code 201
-     * and the newly created auto assignment. In case of a failure the {@code JsonResponseExceptionHandler} is handling the response
+     *         and the newly created auto assignment. In case of a failure the {@code JsonResponseExceptionHandler} is handling the response
      */
 
     @Operation(summary = "Create a new auto assignment",
@@ -135,9 +135,8 @@ public interface MgmtAutoAssignmentRestApi {
      * @return OK response (200) if the auto assignment is approved. In case of any exceptions, the corresponding errors occur
      */
     @Operation(summary = "Approve an auto assignment",
-            description = "Handles the request for approving an auto assignment. Only possible if " +
-                            "approval workflow is enabled in the system configuration and the auto assignment " +
-                            "is in state WAITING_FOR_APPROVAL.")
+            description = "Handles the request for approving an auto assignment." +
+                    " Only possible if approval workflow is enabled in the system configuration and the auto assignment is in state WAITING_FOR_APPROVAL.")
     @PostCreateNoContentResponses
     @RequiredPermissions({ ApiPermission.APPROVE_AUTO_ASSIGNMENT })
     @PostMapping(value = AUTO_ASSIGNMENTS_V1 + "/{id}/approve", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
