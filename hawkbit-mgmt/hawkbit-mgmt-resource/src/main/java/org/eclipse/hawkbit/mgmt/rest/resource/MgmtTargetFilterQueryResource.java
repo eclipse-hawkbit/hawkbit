@@ -29,6 +29,7 @@ import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtDistributionSetMapper;
 import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtTargetFilterQueryMapper;
 import org.eclipse.hawkbit.mgmt.rest.resource.util.PagingUtility;
 import org.eclipse.hawkbit.repository.AutoAssignmentManagement;
+import org.eclipse.hawkbit.repository.AutoAssignmentManagement.Create;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -127,6 +128,7 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
     }
 
     @Override
+    @SuppressWarnings("removal")
     public ResponseEntity<MgmtDistributionSet> getAssignedDistributionSet(final Long filterId) {
         return filterManagement.findLinkedAutoAssignment(filterId)
                 .map(AutoAssignment::getDistributionSet)
@@ -139,6 +141,7 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
     }
 
     @Override
+    @SuppressWarnings("removal")
     public ResponseEntity<MgmtTargetFilterQuery> postAssignedDistributionSet(
             final Long filterId, final MgmtDistributionSetAutoAssignment autoAssignRequest) {
         final TargetFilterQuery filter = filterManagement.get(filterId);
@@ -151,7 +154,7 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
         body.setWeight(autoAssignRequest.getWeight());
         body.setConfirmationRequired(autoAssignRequest.getConfirmationRequired());
 
-        final AutoAssignmentManagement.Create create = MgmtAutoAssignmentMapper.fromRequest(body, distributionSetManagement.get(autoAssignRequest.getId()));
+        final Create create = MgmtAutoAssignmentMapper.fromRequest(body, distributionSetManagement.get(autoAssignRequest.getId()));
         final AutoAssignment created = filterManagement.createLinkedAutoAssignment(filterId, create);
         final MgmtTargetFilterQuery response = MgmtTargetFilterQueryMapper.toResponse(filterManagement.get(filterId), Optional.of(created),
                 TenantConfigHelper.isUserConfirmationFlowEnabled(), false);
@@ -162,6 +165,7 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
 
     @Override
     @AuditLog(entity = "TargetFilter", type = AuditLog.Type.DELETE, description = "Delete Target Filter Assigned Distribution Set")
+    @SuppressWarnings("removal")
     public ResponseEntity<Void> deleteAssignedDistributionSet(final Long filterId) {
         filterManagement.deleteLinkedAutoAssignment(filterId);
         return ResponseEntity.noContent().build();

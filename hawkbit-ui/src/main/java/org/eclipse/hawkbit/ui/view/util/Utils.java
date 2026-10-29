@@ -260,6 +260,8 @@ public class Utils {
 
         protected final transient CompletableFuture<T> result = new CompletableFuture<>();
 
+        // this-escape: base class for dialogs, the common dialog setup calls inherited Dialog methods
+        @SuppressWarnings("this-escape")
         protected BaseDialog(final String headerTitle) {
             setHeaderTitle(headerTitle);
             setMinWidth(640, Unit.PIXELS);

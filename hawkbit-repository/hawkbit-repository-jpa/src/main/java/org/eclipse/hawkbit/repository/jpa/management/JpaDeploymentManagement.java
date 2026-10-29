@@ -414,6 +414,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     // TODO - since Spring 4.x migration, reconsider if it is the best way
+    @SuppressWarnings("unchecked")
     private static <T> PredicateSpecification<T> predicateSpec(final Specification<T> spec) {
         return (from, cb) -> spec.toPredicate((Root<T>) from, cb.createQuery(), cb);
     }
@@ -481,7 +482,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
                 startScheduledActions0(groupScheduledActions.getContent());
                 return groupScheduledActions.getTotalElements();
             }
-        }, txManager) > 0);
+        }, txManager) > 0) ;
     }
 
     @Override

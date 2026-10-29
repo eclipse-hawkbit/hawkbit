@@ -134,6 +134,9 @@ public class TargetFilterQueryView extends TableView<TargetFilterQueryView.Targe
 
     private static class QueryCell extends Div {
 
+        @Serial
+        private static final long serialVersionUID = 1L;
+
         private QueryCell(final TargetFilterQueryGridItem filterQuery) {
             String query = filterQuery.getQuery();
             if (query != null) {
@@ -148,6 +151,9 @@ public class TargetFilterQueryView extends TableView<TargetFilterQueryView.Targe
     }
 
     private static class Actions extends HorizontalLayout {
+
+        @Serial
+        private static final long serialVersionUID = 1L;
 
         private final Grid<TargetFilterQueryGridItem> grid;
         private final transient HawkbitMgmtClient hawkbitClient;
@@ -177,6 +183,9 @@ public class TargetFilterQueryView extends TableView<TargetFilterQueryView.Targe
 
     private static class TargetFilterQueryDetailedView extends VerticalLayout {
 
+        @Serial
+        private static final long serialVersionUID = 1L;
+
         private final Span filterName;
         private final TargetFilterQueryDetails details;
 
@@ -201,6 +210,9 @@ public class TargetFilterQueryView extends TableView<TargetFilterQueryView.Targe
     }
 
     private static class TargetFilterQueryDetails extends FormLayout {
+
+        @Serial
+        private static final long serialVersionUID = 1L;
 
         private final TextArea query = new TextArea("Query");
         private final TextField createdBy = Utils.textField(Constants.CREATED_BY);
@@ -294,7 +306,7 @@ public class TargetFilterQueryView extends TableView<TargetFilterQueryView.Targe
 
         private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-        public static TargetFilterQueryGridItem from(   MgmtTargetFilterQuery filter) {
+        public static TargetFilterQueryGridItem from(MgmtTargetFilterQuery filter) {
             return OBJECT_MAPPER.convertValue(filter, TargetFilterQueryGridItem.class);
         }
 

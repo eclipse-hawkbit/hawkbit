@@ -402,10 +402,10 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
                 mvcResult.getResponse().getContentAsString());
         final Long artId = softwareModuleManagement.find(sm.getId()).get().getArtifacts().get(0).getId();
         assertThat(artResult.getId()).as("Wrong artifact id").isEqualTo(artId);
-        assertThat((Object) JsonPath.compile("$._links.self.href").read(mvcResult.getResponse().getContentAsString()))
+        assertThat(JsonPath.compile("$._links.self.href").<Object> read(mvcResult.getResponse().getContentAsString()))
                 .as("Link contains no self url")
                 .hasToString("http://localhost/rest/v1/softwaremodules/" + sm.getId() + "/artifacts/" + artId);
-        assertThat((Object) JsonPath.compile("$._links.download.href").read(mvcResult.getResponse().getContentAsString()))
+        assertThat(JsonPath.compile("$._links.download.href").<Object> read(mvcResult.getResponse().getContentAsString()))
                 .as("response contains no download url ")
                 .hasToString("http://localhost/rest/v1/softwaremodules/" + sm.getId() + "/artifacts/" + artId + "/download");
 

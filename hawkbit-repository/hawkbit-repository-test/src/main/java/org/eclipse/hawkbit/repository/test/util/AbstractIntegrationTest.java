@@ -505,7 +505,9 @@ public abstract class AbstractIntegrationTest {
     @SafeVarargs
     protected static <T> Collection<T> concat(final Collection<T>... targets) {
         final List<T> result = new ArrayList<>();
-        List.of(targets).forEach(result::addAll);
+        for (final Collection<T> target : targets) {
+            result.addAll(target);
+        }
         return result;
     }
 

@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.auth;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -138,6 +139,9 @@ public class StaticAuthenticationProvider extends DaoAuthenticationProvider {
     @Data
     @EqualsAndHashCode(callSuper = true)
     private static class TenantAwareUser extends User {
+
+        @Serial
+        private static final long serialVersionUID = 1L;
 
         private final String tenant;
 

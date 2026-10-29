@@ -240,6 +240,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public ResponseEntity<PagedList<MgmtTargetFilterQuery>> getAutoAssignTargetFilterQueries(
             final Long distributionSetId, final String rsqlParam,
             final int pagingOffsetParam, final int pagingLimitParam, final String sortParam) {

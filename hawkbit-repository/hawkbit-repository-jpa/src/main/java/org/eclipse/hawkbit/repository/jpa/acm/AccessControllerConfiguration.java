@@ -85,7 +85,7 @@ public class AccessControllerConfiguration {
                     final EntityType<JpaTarget> targetModel = query.from(JpaTarget.class).getModel();
                     final Root<JpaTarget> targetRoot = (Root<JpaTarget>) Proxy.newProxyInstance(
                             actionRoot.getClass().getClassLoader(),
-                            new Class[] { Root.class },
+                            new Class<?>[] { Root.class },
                             (proxy, method, args) -> {
                                 if (method.getName().equals("getModel") && method.getParameterCount() == 0) {
                                     return targetModel;

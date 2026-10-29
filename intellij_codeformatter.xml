@@ -1,5 +1,10 @@
 <code_scheme name="hawkBit" version="173">
   <option name="FORMATTER_TAGS_ENABLED" value="true" />
+  <option name="DO_NOT_FORMAT">
+    <list>
+      <fileSet type="globPattern" pattern="*.sql" />
+    </list>
+  </option>
   <HTMLCodeStyleSettings>
     <option name="HTML_ATTRIBUTE_WRAP" value="0" />
     <option name="HTML_TEXT_WRAP" value="0" />
@@ -45,6 +50,7 @@
     <option name="KEEP_BLANK_LINES" value="true" />
   </Properties>
   <SqlCodeStyleSettings version="7">
+    <option name="DISABLE_FORMATTING" value="true" />
     <option name="KEYWORD_CASE" value="2" />
     <option name="TYPE_CASE" value="2" />
     <option name="CUSTOM_TYPE_CASE" value="0" />

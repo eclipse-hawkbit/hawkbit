@@ -55,7 +55,6 @@ import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.tabs.TabSheet;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
@@ -194,12 +193,16 @@ public final class TargetView extends TableView<TargetView.TargetWithDs, String>
         public List<Component> components() {
             final List<Component> components = new LinkedList<>();
             components.add(textFilter);
-            type.setItems(hawkbitClient.getTargetTypeRestApi().getTargetTypes(null, 0, 20, Constants.NAME_ASC).getBody().getContent());
-            if (!((ListDataProvider<MgmtTargetType>) type.getDataProvider()).getItems().isEmpty()) {
+            final List<MgmtTargetType> types = hawkbitClient.getTargetTypeRestApi()
+                    .getTargetTypes(null, 0, 20, Constants.NAME_ASC).getBody().getContent();
+            type.setItems(types);
+            if (!types.isEmpty()) {
                 components.add(type);
             }
-            tag.setItems(hawkbitClient.getTargetTagRestApi().getTargetTags(null, 0, 20, Constants.NAME_ASC).getBody().getContent());
-            if (!((ListDataProvider<MgmtTag>) tag.getDataProvider()).getItems().isEmpty()) {
+            final List<MgmtTag> tags = hawkbitClient.getTargetTagRestApi()
+                    .getTargetTags(null, 0, 20, Constants.NAME_ASC).getBody().getContent();
+            tag.setItems(tags);
+            if (!tags.isEmpty()) {
                 components.add(tag);
             }
             return components;

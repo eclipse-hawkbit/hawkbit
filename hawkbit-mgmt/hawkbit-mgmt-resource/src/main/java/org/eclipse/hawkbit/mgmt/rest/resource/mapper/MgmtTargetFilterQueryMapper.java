@@ -32,6 +32,7 @@ import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class MgmtTargetFilterQueryMapper {
 
+    @SuppressWarnings("deprecation")
     public static MgmtTargetFilterQuery toResponse(
             final TargetFilterQuery filter, final Optional<AutoAssignment> autoAssignment,
             final boolean confirmationFlowEnabled, final boolean isRepresentationFull) {
@@ -70,6 +71,7 @@ public final class MgmtTargetFilterQueryMapper {
         return targetRest;
     }
 
+    @SuppressWarnings("removal")
     public static void addLinks(final MgmtTargetFilterQuery targetRest) {
         targetRest.add(linkTo(methodOn(MgmtTargetFilterQueryRestApi.class)
                 .postAssignedDistributionSet(targetRest.getId(), null)).withRel("autoAssignDS").expand());

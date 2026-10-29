@@ -260,8 +260,8 @@ class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
         <T> T waitForEvent(final Class<T> eventType) throws InterruptedException {
             TenantAwareEvent event = null;
             while ((event = queue.poll(5, TimeUnit.SECONDS)) != null) {
-                if (event.getClass().isAssignableFrom(eventType)) {
-                    return (T) event;
+                if (eventType.isInstance(event)) {
+                    return eventType.cast(event);
                 }
             }
             Assertions.fail("Missing event " + eventType + " within timeout.");

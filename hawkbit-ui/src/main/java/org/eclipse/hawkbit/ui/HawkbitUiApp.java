@@ -20,9 +20,10 @@ import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
 
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.page.AppShellConfigurator;
 import com.vaadin.flow.server.PWA;
-import com.vaadin.flow.theme.Theme;
+import com.vaadin.flow.theme.lumo.Lumo;
 import feign.RequestInterceptor;
 import feign.codec.ErrorDecoder;
 import lombok.extern.slf4j.Slf4j;
@@ -49,7 +50,11 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 
 @Slf4j
-@Theme("hawkbit")
+// Lumo (includes the badge styles), Lumo utility classes (used via LumoUtility) and the custom styles
+// from META-INF/resources/styles.css - order matters, custom styles must come last to override Lumo
+@StyleSheet(Lumo.STYLESHEET)
+@StyleSheet(Lumo.UTILITY_STYLESHEET)
+@StyleSheet("styles.css")
 @PWA(name = "hawkBit UI", shortName = "hawkBit UI")
 @EnableCaching
 @EnableScheduling

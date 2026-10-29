@@ -150,7 +150,7 @@ at: [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-
 ## Start hawkBit [UI](hawkbit-ui)
 
 ```bash
-java -jar ./hawkbit-ui/target/hawkbit-ui.jar
+java -jar ./hawkbit-ui/target/hawkbit-ui-0-SNAPSHOT.jar
 ```
 
 Log in to [hawkbit UI](http://localhost:8088) with default `admin:admin` user.
@@ -194,8 +194,9 @@ The former `hawkbit-example-mgmt-simulator` (in the archived
 mvn -pl hawkbit-repository/hawkbit-repository-jpa -am test -Dtest=ClassName -Dsurefire.failIfNoSpecifiedTests=false
 ```
 
-* Code format (Spotless with [eclipse_codeformatter.xml](eclipse_codeformatter.xml), only files changed against
-  `origin/master` - `ratchetFrom`): `mvn spotless:apply` / `mvn spotless:check`
+* Code format (Spotless with the IntelliJ IDEA formatter and [intellij_codeformatter.xml](intellij_codeformatter.xml),
+  only files changed against `origin/master` - `ratchetFrom`): `mvn spotless:apply` / `mvn spotless:check`. Needs a
+  local IntelliJ IDEA, see [CONTRIBUTING.md](CONTRIBUTING.md#code-style) (`-Dspotless.idea.binary=<launcher>`)
 * License headers: `mvn license:check -PcheckLicense`
 * Tests use embedded H2 by default. To run against PostgreSQL:
 

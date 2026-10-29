@@ -48,4 +48,19 @@
             <optional>true</optional>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <compilerArgs>
+                        <!-- -options: Java 8 target is intentional, hide the "obsolete source/target" warning -->
+                        <arg>-Xlint:all,-processing,-classfile,-dangling-doc-comments,-options</arg>
+                    </compilerArgs>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>
