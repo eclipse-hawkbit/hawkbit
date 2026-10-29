@@ -47,6 +47,12 @@
             <optional>true</optional>
         </dependency>
 
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-micrometer-metrics</artifactId>
+            <scope>test</scope>
+        </dependency>
+
         <dependency> <!-- Static class generation -->
             <groupId>org.hibernate.orm</groupId>
             <artifactId>hibernate-processor</artifactId>
