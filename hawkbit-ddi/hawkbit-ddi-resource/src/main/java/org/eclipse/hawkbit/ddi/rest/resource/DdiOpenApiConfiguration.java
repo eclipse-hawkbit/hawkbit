@@ -9,9 +9,12 @@
  */
 package org.eclipse.hawkbit.ddi.rest.resource;
 
+import java.util.List;
+
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.servers.Server;
 import org.eclipse.hawkbit.rest.OpenApi;
 import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -42,6 +45,7 @@ public class DdiOpenApiConfiguration {
                                         .version("v1")
                                         .description(
                                                 "The Direct Device Integration (DDI) API provides a way for devices to interact directly with the hawkBit."))
+                                .servers(List.of(new Server().url("/")))
                                 .addSecurityItem(new SecurityRequirement().addList(DDI_TOKEN_SEC_SCHEME_NAME))
                                 .components(
                                         openApi

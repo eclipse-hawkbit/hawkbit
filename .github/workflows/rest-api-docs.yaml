@@ -1,0 +1,99 @@
+name: REST API Docs
+
+# Regenerates the OpenAPI specs rendered by the GitHub Pages docs (docs/rest-api/mgmt.json, ddi.json - loaded by
+# docs/rest-api/mgmt.html, ddi.html) and commits them if they have changed.
+# Triggered only by changes in the inputs the Management and DDI API specs are generated from.
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+    paths:
+      # dependency versions (springdoc, Spring Boot)
+      - 'pom.xml'
+      # permissions and role hierarchy - rendered as "Required Permission: X (or implied by ...)" in the Mgmt API spec
+      - 'hawkbit-core/src/main/java/org/eclipse/hawkbit/auth/**'
+      # shared REST API (@RequiredPermissions, ApiPermission) and REST core (springdoc setup, OpenApi, error model)
+      - 'hawkbit-rest/hawkbit-rest-api/src/main/**'
+      - 'hawkbit-rest/hawkbit-rest-core/src/main/**'
+      - 'hawkbit-mgmt/hawkbit-mgmt-api/src/main/**'
+      - 'hawkbit-mgmt/hawkbit-mgmt-resource/src/main/**'
+      - 'hawkbit-mgmt/hawkbit-mgmt-resource/src/test/java/org/eclipse/hawkbit/mgmt/rest/resource/MgmtOpenApiSpecExportTest.java'
+      - 'hawkbit-ddi/hawkbit-ddi-api/src/main/**'
+      - 'hawkbit-ddi/hawkbit-ddi-resource/src/main/**'
+      - 'hawkbit-ddi/hawkbit-ddi-resource/src/test/java/org/eclipse/hawkbit/ddi/rest/resource/DdiOpenApiSpecExportTest.java'
+      - 'hawkbit-rest/hawkbit-rest-core/src/test/java/org/eclipse/hawkbit/rest/util/OpenApiSpecExporter.java'
+      - '.github/workflows/rest-api-docs.yaml'
+
+permissions:
+  contents: read
+
+# a newer run supersedes an older one - it generates the specs from a newer state
+concurrency:
+  group: rest-api-docs
+  cancel-in-progress: true
+
+jobs:
+  rest-api-docs:
+    # only on original eclipse-hawkbit/hawkbit repo or when manually triggered
+    if: github.repository == 'eclipse-hawkbit/hawkbit' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      # the branch (not the detached commit) is checked out, so the changes could be pushed to it
+      - uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+
+      - name: Set up JDK
+        uses: actions/setup-java@v6.1.0
+        with:
+          distribution: 'temurin'
+          java-version: '25'
+          cache: 'maven'
+
+      - name: Cache local Maven repository
+        uses: actions/cache@v6.1.0
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      # the export tests write the specs (as served by /v3/api-docs/{group}) to <module>/target/openapi/
+      - name: Generate OpenAPI specs
+        run: >-
+          mvn test --batch-mode
+          -pl hawkbit-mgmt/hawkbit-mgmt-resource,hawkbit-ddi/hawkbit-ddi-resource -am
+          -Dtest=MgmtOpenApiSpecExportTest,DdiOpenApiSpecExportTest -Dsurefire.failIfNoSpecifiedTests=false
+
+      # committed directly if changed. Pushes with GITHUB_TOKEN don't trigger workflows, so no loop.
+      - name: Commit changed OpenAPI specs
+        run: |
+          cp hawkbit-mgmt/hawkbit-mgmt-resource/target/openapi/mgmt.json docs/rest-api/mgmt.json
+          cp hawkbit-ddi/hawkbit-ddi-resource/target/openapi/ddi.json docs/rest-api/ddi.json
+          # git status (not git diff) - lists new (untracked) files as well. The whole tree is checked - any change besides
+          # the specs (e.g. the build modifying tracked files) is unexpected, fails, and would also block the rebase below
+          CHANGED_FILES=$(git status --porcelain --untracked-files=all)
+          if [ -z "${CHANGED_FILES}" ]; then
+            echo "OpenAPI specs unchanged"
+            exit 0
+          fi
+          echo "Changed files:"
+          echo "${CHANGED_FILES}"
+          UNEXPECTED_FILES=$(echo "${CHANGED_FILES}" | grep -v -E '^.. docs/rest-api/(mgmt|ddi)\.json$' || true)
+          if [ -n "${UNEXPECTED_FILES}" ]; then
+            echo "Unexpected changes:"
+            echo "${UNEXPECTED_FILES}"
+            exit 1
+          fi
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/rest-api/mgmt.json docs/rest-api/ddi.json
+          git commit -m "[Docs] Automated commit of REST API docs (OpenAPI specs) changes"
+          # the branch may have moved meanwhile - conflicts (and fails) only if the specs have been committed meanwhile too
+          git pull --rebase
+          git push
