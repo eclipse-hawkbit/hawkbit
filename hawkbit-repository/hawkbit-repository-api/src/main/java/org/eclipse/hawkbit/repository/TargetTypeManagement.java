@@ -89,10 +89,10 @@ public interface TargetTypeManagement<T extends TargetType>
 
         @SuppressWarnings("java:S1144") // java:S1144 - constructor is actually used by SuperBuilder's build() method
         private Create(final CreateBuilder<?, ?> builder) {
-            super(builder);
             if (builder.key == null && builder.name == null) {
                 throw new TargetTypeKeyOrNameRequiredException("Key or name of the target type shall be specified!");
             }
+            super(builder);
             key = builder.key == null ? builder.name : builder.key;
             name = builder.name == null ? builder.key : builder.name;
             distributionSetTypes = builder.distributionSetTypes == null ? Collections.emptySet() : builder.distributionSetTypes;

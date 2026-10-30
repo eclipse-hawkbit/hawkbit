@@ -193,14 +193,18 @@ public final class TargetView extends TableView<TargetView.TargetWithDs, String>
         public List<Component> components() {
             final List<Component> components = new LinkedList<>();
             components.add(textFilter);
-            final List<MgmtTargetType> types = hawkbitClient.getTargetTypeRestApi()
-                    .getTargetTypes(null, 0, 20, Constants.NAME_ASC).getBody().getContent();
+            final List<MgmtTargetType> types = Optional.ofNullable(hawkbitClient.getTargetTypeRestApi()
+                            .getTargetTypes(null, 0, 20, Constants.NAME_ASC).getBody())
+                    .map(PagedList::getContent)
+                    .orElseGet(List::of);
             type.setItems(types);
             if (!types.isEmpty()) {
                 components.add(type);
             }
-            final List<MgmtTag> tags = hawkbitClient.getTargetTagRestApi()
-                    .getTargetTags(null, 0, 20, Constants.NAME_ASC).getBody().getContent();
+            final List<MgmtTag> tags = Optional.ofNullable(hawkbitClient.getTargetTagRestApi()
+                            .getTargetTags(null, 0, 20, Constants.NAME_ASC).getBody())
+                    .map(PagedList::getContent)
+                    .orElseGet(List::of);
             tag.setItems(tags);
             if (!tags.isEmpty()) {
                 components.add(tag);
@@ -633,7 +637,7 @@ public final class TargetView extends TableView<TargetView.TargetWithDs, String>
             int fetched = 0;
             int offset = 0;
             do {
-                List<MgmtTag> page = Optional.ofNullable(
+                final List<MgmtTag> page = Optional.ofNullable(
                                 hawkbitClient.getTargetTagRestApi().getTargetTags(null, offset, 50, Constants.NAME_ASC).getBody())
                         .map(PagedList::getContent)
                         .orElse(Collections.emptyList());
@@ -768,8 +772,10 @@ public final class TargetView extends TableView<TargetView.TargetWithDs, String>
                 if (actionId == null) {
                     return new ArrayList<>();
                 }
-                return hawkbitClient.getTargetRestApi()
-                        .getActionStatusList(target.getControllerId(), actionId, 0, 30, null).getBody().getContent()
+                return Optional.ofNullable(hawkbitClient.getTargetRestApi()
+                                .getActionStatusList(target.getControllerId(), actionId, 0, 30, null).getBody())
+                        .map(PagedList::getContent)
+                        .orElseGet(List::of)
                         .stream().map(ActionStepEntry::new)
                         .toList();
             }
@@ -855,12 +861,10 @@ public final class TargetView extends TableView<TargetView.TargetWithDs, String>
             type = new Select<>(
                     "Type",
                     e -> {},
-                    hawkbitClient.getTargetTypeRestApi()
-                            .getTargetTypes(null, 0, 30, Constants.NAME_ASC)
-                            .getBody()
-                            .getContent()
-                            .toArray(new MgmtTargetType[0])
-            );
+                    Optional.ofNullable(hawkbitClient.getTargetTypeRestApi().getTargetTypes(null, 0, 30, Constants.NAME_ASC).getBody())
+                            .map(PagedList::getContent)
+                            .orElseGet(List::of)
+                            .toArray(new MgmtTargetType[0]));
             type.setWidthFull();
             type.setEmptySelectionAllowed(true);
             type.setItemLabelGenerator(item -> item == null ? "" : item.getName());
@@ -949,10 +953,10 @@ public final class TargetView extends TableView<TargetView.TargetWithDs, String>
             controllerId.setReadOnly(true);
             controllerId.setWidthFull();
 
-            final MgmtTargetType[] types = hawkbitClient.getTargetTypeRestApi()
-                    .getTargetTypes(null, 0, 30, Constants.NAME_ASC)
-                    .getBody()
-                    .getContent()
+            final MgmtTargetType[] types = Optional.ofNullable(hawkbitClient.getTargetTypeRestApi()
+                            .getTargetTypes(null, 0, 30, Constants.NAME_ASC).getBody())
+                    .map(PagedList::getContent)
+                    .orElseGet(List::of)
                     .toArray(new MgmtTargetType[0]);
             type = new Select<>("Type", e -> {}, types);
             type.setWidthFull();
