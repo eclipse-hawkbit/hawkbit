@@ -1,0 +1,2623 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Direct Device Integration API",
+    "description": "The Direct Device Integration (DDI) API provides a way for devices to interact directly with the hawkBit.",
+    "version": "v1"
+  },
+  "servers": [
+    {
+      "url": "/"
+    }
+  ],
+  "security": [
+    {
+      "Token": [ ]
+    }
+  ],
+  "tags": [
+    {
+      "name": "DDI Root Controller",
+      "description": "REST resource handling for root controller CRUD operations"
+    }
+  ],
+  "paths": {
+    "/{tenant}/controller/v1/{controllerId}/installedBase": {
+      "put": {
+        "tags": [
+          "DDI Root Controller"
+        ],
+        "summary": "Set offline assigned version",
+        "description": "Allow to set current running version.\nThis method is EXPERIMENTAL and may change in future releases.\n",
+        "operationId": "setAssignedOfflineVersion",
+        "parameters": [
+          {
+            "name": "tenant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "controllerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DdiAssignedVersion"
+              }
+            },
+            "application/cbor": {
+              "schema": {
+                "$ref": "#/components/schemas/DdiAssignedVersion"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "410": {
+            "description": "Action is not active anymore.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "200": {
+            "description": "Successfully updated"
+          },
+          "404": {
+            "description": "Requested (or referenced) resource not found.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "409": {
+            "description": "E.g. in case an entity is created or modified by another user in another request at the same time. You may retry your modification request.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "415": {
+            "description": "The request was attempt with a media-type which is not supported by the server for this resource.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "429": {
+            "description": "Too many requests. The server will refuse further attempts and the client has to wait another second.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "400": {
+            "description": "Bad Request - e.g. invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionInfo"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The request requires user auth.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "403": {
+            "description": "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "406": {
+            "description": "In case accept header is specified and not application/json.",
+            "content": {
+              "application/json": { }
+            }
+          }
+        }
+      }
+    },
+    "/{tenant}/controller/v1/{controllerId}/configData": {
+      "put": {
+        "tags": [
+          "DDI Root Controller"
+        ],
+        "summary": "Feedback channel for the config data action",
+        "description": "The usual behaviour is that when a new device registers at the server it is requested to provide the meta\ninformation that will allow the server to identify the device on a hardware level (e.g. hardware revision,\nmac address, serial number etc.).",
+        "operationId": "putConfigData",
+        "parameters": [
+          {
+            "name": "tenant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "controllerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DdiConfigData"
+              }
+            },
+            "application/cbor": {
+              "schema": {
+                "$ref": "#/components/schemas/DdiConfigData"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully updated"
+          },
+          "404": {
+            "description": "Requested (or referenced) resource not found.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "409": {
+            "description": "E.g. in case an entity is created or modified by another user in another request at the same time. You may retry your modification request.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "415": {
+            "description": "The request was attempt with a media-type which is not supported by the server for this resource.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "429": {
+            "description": "Too many requests. The server will refuse further attempts and the client has to wait another second.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "400": {
+            "description": "Bad Request - e.g. invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionInfo"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The request requires user auth.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "403": {
+            "description": "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "406": {
+            "description": "In case accept header is specified and not application/json.",
+            "content": {
+              "application/json": { }
+            }
+          }
+        }
+      }
+    },
+    "/{tenant}/controller/v1/{controllerId}/deploymentBase/{actionId}/feedback": {
+      "post": {
+        "tags": [
+          "DDI Root Controller"
+        ],
+        "summary": "Feedback channel for the DeploymentBase action",
+        "description": "Feedback channel. It is up to the device how much intermediate feedback is provided.\nHowever, the action will be kept open until the controller on the device reports a finished (either successful\nor error).\n",
+        "operationId": "postDeploymentBaseActionFeedback",
+        "parameters": [
+          {
+            "name": "tenant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "controllerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "actionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DdiActionFeedback"
+              }
+            },
+            "application/cbor": {
+              "schema": {
+                "$ref": "#/components/schemas/DdiActionFeedback"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "410": {
+            "description": "Action is not active anymore.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "200": {
+            "description": "Successfully updated"
+          },
+          "404": {
+            "description": "Requested (or referenced) resource not found.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "409": {
+            "description": "E.g. in case an entity is created or modified by another user in another request at the same time. You may retry your modification request.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "415": {
+            "description": "The request was attempt with a media-type which is not supported by the server for this resource.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "400": {
+            "description": "Bad Request - e.g. invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionInfo"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The request requires user auth.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "403": {
+            "description": "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "406": {
+            "description": "In case accept header is specified and not application/json.",
+            "content": {
+              "application/json": { }
+            }
+          }
+        }
+      }
+    },
+    "/{tenant}/controller/v1/{controllerId}/confirmationBase/{actionId}/feedback": {
+      "post": {
+        "tags": [
+          "DDI Root Controller"
+        ],
+        "summary": "Feedback channel for actions waiting for confirmation",
+        "description": "The device will use this resource to either confirm or deny an action which is waiting for confirmation. The\naction will be transferred into the RUNNING state in case the device is confirming it. Afterwards it will be\nexposed by the deploymentBase.\n",
+        "operationId": "postConfirmationActionFeedback",
+        "parameters": [
+          {
+            "name": "tenant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "controllerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "actionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DdiConfirmationFeedback"
+              }
+            },
+            "application/cbor": {
+              "schema": {
+                "$ref": "#/components/schemas/DdiConfirmationFeedback"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "410": {
+            "description": "Action is not active anymore.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "200": {
+            "description": "Successfully updated"
+          },
+          "404": {
+            "description": "Requested (or referenced) resource not found.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "409": {
+            "description": "E.g. in case an entity is created or modified by another user in another request at the same time. You may retry your modification request.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "415": {
+            "description": "The request was attempt with a media-type which is not supported by the server for this resource.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "400": {
+            "description": "Bad Request - e.g. invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionInfo"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The request requires user auth.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "403": {
+            "description": "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "406": {
+            "description": "In case accept header is specified and not application/json.",
+            "content": {
+              "application/json": { }
+            }
+          }
+        }
+      }
+    },
+    "/{tenant}/controller/v1/{controllerId}/confirmationBase/deactivateAutoConfirm": {
+      "post": {
+        "tags": [
+          "DDI Root Controller"
+        ],
+        "summary": "Interface to deactivate auto-confirmation for a specific controller",
+        "description": "The device can use this resource to deactivate auto-confirmation. All active actions will remain unchanged\nwhile all future actions need to be confirmed, before processing with the deployment.\n",
+        "operationId": "deactivateAutoConfirmation",
+        "parameters": [
+          {
+            "name": "tenant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "controllerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully updated"
+          },
+          "404": {
+            "description": "Requested (or referenced) resource not found.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "409": {
+            "description": "E.g. in case an entity is created or modified by another user in another request at the same time. You may retry your modification request.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "415": {
+            "description": "The request was attempt with a media-type which is not supported by the server for this resource.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "400": {
+            "description": "Bad Request - e.g. invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionInfo"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The request requires user auth.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "403": {
+            "description": "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "406": {
+            "description": "In case accept header is specified and not application/json.",
+            "content": {
+              "application/json": { }
+            }
+          }
+        }
+      }
+    },
+    "/{tenant}/controller/v1/{controllerId}/confirmationBase/activateAutoConfirm": {
+      "post": {
+        "tags": [
+          "DDI Root Controller"
+        ],
+        "summary": "Interface to activate auto-confirmation for a specific device",
+        "description": "The device can use this resource to activate auto-confirmation. As a result all current active as well as\nfuture actions will automatically be confirmed by mentioning the initiator as triggered person. Actions will\nbe automatically confirmed, as long as auto-confirmation is active.\n",
+        "operationId": "activateAutoConfirmation",
+        "parameters": [
+          {
+            "name": "tenant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "controllerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DdiActivateAutoConfirmation"
+              }
+            },
+            "application/cbor": {
+              "schema": {
+                "$ref": "#/components/schemas/DdiActivateAutoConfirmation"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully updated"
+          },
+          "404": {
+            "description": "Requested (or referenced) resource not found.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "409": {
+            "description": "E.g. in case an entity is created or modified by another user in another request at the same time. You may retry your modification request.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "415": {
+            "description": "The request was attempt with a media-type which is not supported by the server for this resource.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "400": {
+            "description": "Bad Request - e.g. invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionInfo"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The request requires user auth.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "403": {
+            "description": "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "406": {
+            "description": "In case accept header is specified and not application/json.",
+            "content": {
+              "application/json": { }
+            }
+          }
+        }
+      }
+    },
+    "/{tenant}/controller/v1/{controllerId}/cancelAction/{actionId}/feedback": {
+      "post": {
+        "tags": [
+          "DDI Root Controller"
+        ],
+        "summary": "Feedback channel for cancel actions",
+        "description": "It is up to the device how much intermediate feedback is provided. However, the action will be kept open\nuntil the controller on the device reports a finished (either successful or error) or rejects the action,\ne.g. the canceled actions have been started already.",
+        "operationId": "postCancelActionFeedback",
+        "parameters": [
+          {
+            "name": "tenant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "controllerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "name": "actionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DdiActionFeedback"
+              }
+            },
+            "application/cbor": {
+              "schema": {
+                "$ref": "#/components/schemas/DdiActionFeedback"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "405": {
+            "description": "The action is not cancelable / force quitable",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "200": {
+            "description": "Successfully updated"
+          },
+          "404": {
+            "description": "Requested (or referenced) resource not found.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "409": {
+            "description": "E.g. in case an entity is created or modified by another user in another request at the same time. You may retry your modification request.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "415": {
+            "description": "The request was attempt with a media-type which is not supported by the server for this resource.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "400": {
+            "description": "Bad Request - e.g. invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionInfo"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The request requires user auth.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "403": {
+            "description": "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "406": {
+            "description": "In case accept header is specified and not application/json.",
+            "content": {
+              "application/json": { }
+            }
+          }
+        }
+      }
+    },
+    "/{tenant}/controller/v1/{controllerId}": {
+      "get": {
+        "tags": [
+          "DDI Root Controller"
+        ],
+        "summary": "Root resource for an individual Target",
+        "description": "This base resource can be regularly polled by the controller on the provisioning target or device in order to\nretrieve actions that need to be executed. Those are provided as a list of links to give more detailed\ninformation about the action. Links are only available for initial configuration, open actions, or the latest\ninstalled action, respectively. The resource supports Etag based modification checks in order to save traffic.\n\nNote: deployments have to be confirmed in order to move on to the next action. Cancellations have to be\nconfirmed or rejected.",
+        "operationId": "getControllerBase",
+        "parameters": [
+          {
+            "name": "tenant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "controllerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved",
+            "content": {
+              "application/hal+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DdiControllerBase"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DdiControllerBase"
+                }
+              },
+              "application/cbor": {
+                "schema": {
+                  "$ref": "#/components/schemas/DdiControllerBase"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Requested resource not found.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "400": {
+            "description": "Bad Request - e.g. invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionInfo"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The request requires user auth.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "403": {
+            "description": "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "406": {
+            "description": "In case accept header is specified and not application/json.",
+            "content": {
+              "application/json": { }
+            }
+          }
+        }
+      }
+    },
+    "/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts": {
+      "get": {
+        "tags": [
+          "DDI Root Controller"
+        ],
+        "summary": "Return all artifacts of a given software module and target",
+        "description": "Returns all artifacts that are assigned to the software module",
+        "operationId": "getSoftwareModulesArtifacts",
+        "parameters": [
+          {
+            "name": "tenant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "controllerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "softwareModuleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved",
+            "content": {
+              "application/hal+json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DdiArtifact"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DdiArtifact"
+                  }
+                }
+              },
+              "application/cbor": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DdiArtifact"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - e.g. invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionInfo"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The request requires user auth.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "403": {
+            "description": "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "406": {
+            "description": "In case accept header is specified and not application/json.",
+            "content": {
+              "application/json": { }
+            }
+          }
+        }
+      }
+    },
+    "/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{fileName}": {
+      "get": {
+        "tags": [
+          "DDI Root Controller"
+        ],
+        "summary": "Artifact download",
+        "description": "Handles GET DdiArtifact download request. This could be full or partial (as specified by RFC7233 (Range Requests)) download request.",
+        "operationId": "downloadArtifact",
+        "parameters": [
+          {
+            "name": "tenant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "controllerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "softwareModuleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "fileName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "500": {
+            "description": "Artifact download or decryption failed",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "200": {
+            "description": "Successfully retrieved",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Requested resource not found.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "400": {
+            "description": "Bad Request - e.g. invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionInfo"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The request requires user auth.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "403": {
+            "description": "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "406": {
+            "description": "In case accept header is specified and not application/json.",
+            "content": {
+              "application/json": { }
+            }
+          }
+        }
+      }
+    },
+    "/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{fileName}.MD5SUM": {
+      "get": {
+        "tags": [
+          "DDI Root Controller"
+        ],
+        "summary": "MD5 checksum download",
+        "description": "Handles GET {@link DdiArtifact} MD5 checksum file download request.",
+        "operationId": "downloadArtifactMd5",
+        "parameters": [
+          {
+            "name": "tenant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "controllerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "softwareModuleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "fileName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved"
+          },
+          "404": {
+            "description": "Requested resource not found.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "400": {
+            "description": "Bad Request - e.g. invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionInfo"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The request requires user auth.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "403": {
+            "description": "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "406": {
+            "description": "In case accept header is specified and not application/json.",
+            "content": {
+              "application/json": { }
+            }
+          }
+        }
+      }
+    },
+    "/{tenant}/controller/v1/{controllerId}/installedBase/{actionId}": {
+      "get": {
+        "tags": [
+          "DDI Root Controller"
+        ],
+        "summary": "Previously installed action",
+        "description": "Resource to receive information of the previous installation. Can be used to re-retrieve artifacts of\nthe already finished action, for example in case a re-installation is necessary. The response will be of\nthe same format as the deploymentBase operation, providing the previous action that has been finished\nsuccessfully. As the action is already finished, no further feedback is expected.\n\nKeep in mind that the provided download links for the artifacts are generated dynamically by the update server.\nHost, port and path are not guaranteed to be similar to the provided examples below but will be defined at\nruntime.\n",
+        "operationId": "getControllerInstalledAction",
+        "parameters": [
+          {
+            "name": "tenant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "controllerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "name": "actionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "actionHistory",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved",
+            "content": {
+              "application/hal+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DdiDeploymentBase"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DdiDeploymentBase"
+                }
+              },
+              "application/cbor": {
+                "schema": {
+                  "$ref": "#/components/schemas/DdiDeploymentBase"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Requested resource not found.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "400": {
+            "description": "Bad Request - e.g. invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionInfo"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The request requires user auth.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "403": {
+            "description": "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "406": {
+            "description": "In case accept header is specified and not application/json.",
+            "content": {
+              "application/json": { }
+            }
+          }
+        }
+      }
+    },
+    "/{tenant}/controller/v1/{controllerId}/deploymentBase/{actionId}": {
+      "get": {
+        "tags": [
+          "DDI Root Controller"
+        ],
+        "summary": "Resource for software module (Deployment Base)",
+        "description": "Core resource for deployment operations. Contains all information necessary in order to execute the operation.\n\nKeep in mind that the provided download links for the artifacts are generated dynamically by the update server.\nHost, port and path and not guaranteed to be similar to the provided examples below but will be defined at\nruntime.\n",
+        "operationId": "getControllerDeploymentBaseAction",
+        "parameters": [
+          {
+            "name": "tenant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "controllerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "name": "actionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "c",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": -1
+            }
+          },
+          {
+            "name": "actionHistory",
+            "in": "query",
+            "description": "(Optional) GET parameter to retrieve a given number of messages which are previously provided by the\ndevice. Useful if the devices sent state information to the feedback channel and never stored them\nlocally.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "description": "(Optional) GET parameter to retrieve a given number of messages which are previously provided by the\ndevice. Useful if the devices sent state information to the feedback channel and never stored them\nlocally.",
+              "format": "int32",
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved",
+            "content": {
+              "application/hal+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DdiDeploymentBase"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DdiDeploymentBase"
+                }
+              },
+              "application/cbor": {
+                "schema": {
+                  "$ref": "#/components/schemas/DdiDeploymentBase"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Requested resource not found.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "400": {
+            "description": "Bad Request - e.g. invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionInfo"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The request requires user auth.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "403": {
+            "description": "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "406": {
+            "description": "In case accept header is specified and not application/json.",
+            "content": {
+              "application/json": { }
+            }
+          }
+        }
+      }
+    },
+    "/{tenant}/controller/v1/{controllerId}/confirmationBase": {
+      "get": {
+        "tags": [
+          "DDI Root Controller"
+        ],
+        "summary": "Resource to request confirmation specific information for the controller",
+        "description": "Core resource for confirmation related operations. While active actions awaiting confirmation will be\nreferenced, the current auto-confirmation status will be shown. In case auto-confirmation is active, details\nlike the initiator, remark and date of activation (as unix timestamp) will be provided.\nReference links to switch the auto-confirmation state are exposed as well.\n",
+        "operationId": "getConfirmationBase",
+        "parameters": [
+          {
+            "name": "tenant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "controllerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved",
+            "content": {
+              "application/hal+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DdiConfirmationBase"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DdiConfirmationBase"
+                }
+              },
+              "application/cbor": {
+                "schema": {
+                  "$ref": "#/components/schemas/DdiConfirmationBase"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Requested resource not found.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "400": {
+            "description": "Bad Request - e.g. invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionInfo"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The request requires user auth.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "403": {
+            "description": "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "406": {
+            "description": "In case accept header is specified and not application/json.",
+            "content": {
+              "application/json": { }
+            }
+          }
+        }
+      }
+    },
+    "/{tenant}/controller/v1/{controllerId}/confirmationBase/{actionId}": {
+      "get": {
+        "tags": [
+          "DDI Root Controller"
+        ],
+        "summary": "Confirmation status of an action",
+        "description": "Resource to receive information about a pending confirmation. The response will be of the same format as the\ndeploymentBase operation. The controller should provide feedback about the confirmation first, before\nprocessing the deployment.\n\nKeep in mind that the provided download links for the artifacts are generated dynamically by the update server.\nHost, port and path are not guaranteed to be similar to the provided examples below but will be defined at\nruntime.\n",
+        "operationId": "getConfirmationBaseAction",
+        "parameters": [
+          {
+            "name": "tenant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "controllerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "name": "actionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "c",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": -1
+            }
+          },
+          {
+            "name": "actionHistory",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved",
+            "content": {
+              "application/hal+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DdiConfirmationBaseAction"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DdiConfirmationBaseAction"
+                }
+              },
+              "application/cbor": {
+                "schema": {
+                  "$ref": "#/components/schemas/DdiConfirmationBaseAction"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Requested resource not found.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "400": {
+            "description": "Bad Request - e.g. invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionInfo"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The request requires user auth.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "403": {
+            "description": "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "406": {
+            "description": "In case accept header is specified and not application/json.",
+            "content": {
+              "application/json": { }
+            }
+          }
+        }
+      }
+    },
+    "/{tenant}/controller/v1/{controllerId}/cancelAction/{actionId}": {
+      "get": {
+        "tags": [
+          "DDI Root Controller"
+        ],
+        "summary": "Cancel an action",
+        "description": "The Hawkbit server might cancel an operation, e.g. an unfinished update has a successor. It is up to the\nprovisioning target to decide to accept the cancellation or reject it.",
+        "operationId": "getControllerCancelAction",
+        "parameters": [
+          {
+            "name": "tenant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "controllerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "name": "actionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved",
+            "content": {
+              "application/hal+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DdiCancel"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DdiCancel"
+                }
+              },
+              "application/cbor": {
+                "schema": {
+                  "$ref": "#/components/schemas/DdiCancel"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Requested resource not found.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "400": {
+            "description": "Bad Request - e.g. invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionInfo"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The request requires user auth.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "403": {
+            "description": "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "406": {
+            "description": "In case accept header is specified and not application/json.",
+            "content": {
+              "application/json": { }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "DdiAssignedVersion": {
+        "required": [
+          "name",
+          "version"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Distribution Set name",
+            "example": "linux"
+          },
+          "version": {
+            "type": "string",
+            "description": "Distribution set version",
+            "example": "1.2.3"
+          }
+        }
+      },
+      "ExceptionInfo": {
+        "type": "object",
+        "properties": {
+          "exceptionClass": {
+            "type": "string"
+          },
+          "errorCode": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "info": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
+            }
+          }
+        }
+      },
+      "DdiConfigData": {
+        "required": [
+          "data"
+        ],
+        "type": "object",
+        "properties": {
+          "data": {
+            "minProperties": 1,
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "description": "Link which is provided whenever the provisioning target or device is supposed to push its configuration data (aka. \"controller attributes\") to the server. Only shown for the initial configuration, after a successful update action, or if requested explicitly (e.g. via the management UI)."
+            },
+            "description": "Link which is provided whenever the provisioning target or device is supposed to push its configuration data (aka. \"controller attributes\") to the server. Only shown for the initial configuration, after a successful update action, or if requested explicitly (e.g. via the management UI)."
+          },
+          "mode": {
+            "type": "string",
+            "description": "Optional parameter to specify the update mode that should be applied when updating target attributes. Valid values are 'merge', 'replace', and 'remove'. Defaults to 'merge'.",
+            "enum": [
+              "merge",
+              "replace",
+              "remove"
+            ]
+          }
+        },
+        "example": {
+          "mode": "merge",
+          "data": {
+            "VIN": "JH4TB2H26CC000000",
+            "hwRevision": "2"
+          }
+        }
+      },
+      "DdiActionFeedback": {
+        "required": [
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/DdiStatus"
+          },
+          "timestamp": {
+            "type": "integer",
+            "description": "Timestamp (in milliseconds) when this status change occurred on Device.",
+            "format": "int64",
+            "example": 1627997501890
+          }
+        }
+      },
+      "DdiProgress": {
+        "required": [
+          "cnt"
+        ],
+        "type": "object",
+        "properties": {
+          "cnt": {
+            "type": "integer",
+            "description": "Achieved amount",
+            "format": "int32",
+            "example": 2
+          },
+          "of": {
+            "type": "integer",
+            "description": "Maximum levels",
+            "format": "int32",
+            "example": 5
+          }
+        },
+        "description": "Progress assumption of the device (currently not supported)"
+      },
+      "DdiResult": {
+        "required": [
+          "finished"
+        ],
+        "type": "object",
+        "properties": {
+          "finished": {
+            "type": "string",
+            "description": "Result of the action execution",
+            "enum": [
+              "success",
+              "failure",
+              "none"
+            ]
+          },
+          "progress": {
+            "$ref": "#/components/schemas/DdiProgress"
+          }
+        },
+        "description": "Result of the action execution"
+      },
+      "DdiStatus": {
+        "required": [
+          "execution",
+          "result"
+        ],
+        "type": "object",
+        "properties": {
+          "execution": {
+            "type": "string",
+            "description": "Status of the action execution",
+            "enum": [
+              "closed",
+              "proceeding",
+              "canceled",
+              "scheduled",
+              "rejected",
+              "resumed",
+              "downloaded",
+              "download"
+            ]
+          },
+          "result": {
+            "$ref": "#/components/schemas/DdiResult"
+          },
+          "code": {
+            "type": "integer",
+            "description": "(Optional) Individual status code",
+            "format": "int32",
+            "example": 200
+          },
+          "details": {
+            "type": "array",
+            "description": "List of details message information",
+            "example": [
+              "Some feedback"
+            ],
+            "items": {
+              "type": "string",
+              "description": "List of details message information",
+              "example": "[\"Some feedback\"]"
+            }
+          }
+        },
+        "description": "Target action status"
+      },
+      "DdiConfirmationFeedback": {
+        "required": [
+          "confirmation"
+        ],
+        "type": "object",
+        "properties": {
+          "confirmation": {
+            "type": "string",
+            "description": "Action confirmation state",
+            "enum": [
+              "confirmed",
+              "denied"
+            ]
+          },
+          "code": {
+            "type": "integer",
+            "description": "(Optional) Individual status code",
+            "format": "int32",
+            "example": 200
+          },
+          "details": {
+            "type": "array",
+            "description": "List of detailed message information",
+            "example": [
+              "Feedback message"
+            ],
+            "items": {
+              "type": "string",
+              "description": "List of detailed message information",
+              "example": "[\"Feedback message\"]"
+            }
+          }
+        }
+      },
+      "DdiActivateAutoConfirmation": {
+        "type": "object",
+        "properties": {
+          "initiator": {
+            "type": "string",
+            "description": "Individual value (e.g. username) stored as initiator and automatically used as confirmed user in future actions",
+            "example": "exampleUser"
+          },
+          "remark": {
+            "type": "string",
+            "description": "Individual value to attach a remark which will be persisted when automatically confirming future actions",
+            "example": "exampleRemark"
+          }
+        }
+      },
+      "DdiConfig": {
+        "type": "object",
+        "properties": {
+          "polling": {
+            "$ref": "#/components/schemas/DdiPolling"
+          }
+        },
+        "description": "DDI controller configuration"
+      },
+      "DdiControllerBase": {
+        "type": "object",
+        "properties": {
+          "config": {
+            "$ref": "#/components/schemas/DdiConfig"
+          },
+          "_links": {
+            "$ref": "#/components/schemas/Links"
+          }
+        },
+        "description": "**_links**: Actions that the server has for the target\n* **deploymentBase** - Detailed deployment operation\n* **installedBase** - Detailed operation of last successfully finished action\n* **configData** - Link which is provided whenever the provisioning target or device is supposed to push its configuration data (aka. \"controller attributes\") to the server. Only shown for the initial configuration, after a successful update action, or if requested explicitly (e.g. via the management UI)\n",
+        "example": {
+          "config": {
+            "polling": {
+              "sleep": "12:00:00"
+            }
+          },
+          "_links": {
+            "deploymentBase": {
+              "href": "https://management-api.host.com/TENANT_ID/controller/v1/CONTROLLER_ID/deploymentBase/5?c=-2127183556"
+            },
+            "installedBase": {
+              "href": "https://management-api.host.com/TENANT_ID/controller/v1/CONTROLLER_ID/installedBase/4"
+            },
+            "configData": {
+              "href": "https://management-api.host.com/TENANT_ID/controller/v1/CONTROLLER_ID/configData"
+            }
+          }
+        }
+      },
+      "DdiPolling": {
+        "type": "object",
+        "properties": {
+          "sleep": {
+            "pattern": "HH:mm:ss",
+            "type": "string",
+            "description": "Sleep time in HH:mm:ss notation",
+            "example": "12:00:00"
+          }
+        },
+        "description": "Suggested sleep time between polls"
+      },
+      "DdiArtifact": {
+        "required": [
+          "filename"
+        ],
+        "type": "object",
+        "properties": {
+          "filename": {
+            "type": "string",
+            "description": "File name",
+            "example": "binary.tgz"
+          },
+          "hashes": {
+            "$ref": "#/components/schemas/DdiArtifactHash"
+          },
+          "size": {
+            "type": "integer",
+            "description": "Artifact size",
+            "format": "int64",
+            "example": 3
+          },
+          "_links": {
+            "$ref": "#/components/schemas/Links"
+          }
+        },
+        "description": "**_links**:\n* **download** - HTTPs Download resource for artifacts. The resource supports partial download as specified by RFC7233 (range requests). Keep in mind that the target needs to have the artifact assigned in order to be granted permission to download.\n* **md5sum** - HTTPs Download resource for MD5SUM file is an optional auto generated artifact that is especially useful for Linux based devices on order to check artifact consistency after download by using the md5sum command line tool. The MD5 and SHA1 are in addition available as metadata in the deployment command itself.\n* **download-http** - HTTP Download resource for artifacts. The resource supports partial download as specified by RFC7233 (range requests). Keep in mind that the target needs to have the artifact assigned in order to be granted permission to download. (note: anonymous download needs to be enabled on the service account for non-TLS access)\n* **md5sum-http** - HTTP Download resource for MD5SUM file is an optional auto generated artifact that is especially useful for Linux based devices on order to check artifact consistency after download by using the md5sum command line tool. The MD5 and SHA1 are in addition available as metadata in the deployment command itself. (note: anonymous download needs to be enabled on the service account for non-TLS access)\n",
+        "example": {
+          "filename": "binaryFile",
+          "hashes": {
+            "sha1": "e4e667b70ff652cb9d9c8a49f141bd68e06cec6f",
+            "md5": "13793b0e3a7830ed685d3ede7ff93048",
+            "sha256": "c51368bf045803b429a67bdf04539a373d9fb8caa310fe0431265e6871b4f07a"
+          },
+          "size": 11,
+          "_links": {
+            "download": {
+              "href": "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/40/filename/binaryFile"
+            },
+            "download-http": {
+              "href": "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/40/filename/binaryFile"
+            },
+            "md5sum-http": {
+              "href": "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/40/filename/binaryFile.MD5SUM"
+            },
+            "md5sum": {
+              "href": "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/40/filename/binaryFile.MD5SUM"
+            }
+          }
+        }
+      },
+      "DdiArtifactHash": {
+        "type": "object",
+        "properties": {
+          "sha1": {
+            "type": "string",
+            "description": "SHA1 hash of the artifact in Base 16 format",
+            "example": "2d86c2a659e364e9abba49ea6ffcd53dd5559f05"
+          },
+          "md5": {
+            "type": "string",
+            "description": "MD5 hash of the artifact",
+            "example": "0d1b08c34858921bc7c662b228acb7ba"
+          },
+          "sha256": {
+            "type": "string",
+            "description": "SHA-256 hash of the artifact in Base 16 format",
+            "example": "a03b221c6c6eae7122ca51695d456d5222e524889136394944b2f9763b483615"
+          }
+        },
+        "description": "Artifact hashes"
+      },
+      "DdiActionHistory": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "Status of the deployment based on previous feedback by the device",
+            "example": "RUNNING"
+          },
+          "messages": {
+            "type": "array",
+            "description": "Messages are previously sent to the feedback channel in LIFO order by the device. Note: The first status message is set by the system and describes the trigger of the deployment",
+            "items": {
+              "type": "string",
+              "description": "Messages are previously sent to the feedback channel in LIFO order by the device. Note: The first status message is set by the system and describes the trigger of the deployment"
+            }
+          }
+        },
+        "description": "Current deployment state"
+      },
+      "DdiChunk": {
+        "required": [
+          "name",
+          "part",
+          "version"
+        ],
+        "type": "object",
+        "properties": {
+          "part": {
+            "type": "string",
+            "description": "Type of the chunk, e.g. firmware, bundle, app. In update server mapped to Software Module Type"
+          },
+          "version": {
+            "type": "string",
+            "description": "Software version of the chunk",
+            "example": "1.2.0"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the chunk"
+          },
+          "encrypted": {
+            "type": "boolean",
+            "description": "If encrypted"
+          },
+          "artifacts": {
+            "type": "array",
+            "description": "List of artifacts",
+            "items": {
+              "$ref": "#/components/schemas/DdiArtifact"
+            }
+          },
+          "metadata": {
+            "type": "array",
+            "description": "Meta data of the respective software module that has been marked with 'target visible'",
+            "items": {
+              "$ref": "#/components/schemas/DdiMetadata"
+            }
+          }
+        },
+        "description": "Software chunks of an update. In server mapped by Software Module"
+      },
+      "DdiDeployment": {
+        "required": [
+          "chunks"
+        ],
+        "type": "object",
+        "properties": {
+          "download": {
+            "type": "string",
+            "description": "Handling for the download part of the provisioning process ('skip': do not download yet, 'attempt': server asks\nto download, 'forced': server requests immediate download)",
+            "enum": [
+              "skip",
+              "attempt",
+              "forced"
+            ]
+          },
+          "update": {
+            "type": "string",
+            "description": "Handling for the update part of the provisioning process ('skip': do not update yet,\n'attempt': server asks to update, 'forced': server requests immediate update)",
+            "enum": [
+              "skip",
+              "attempt",
+              "forced"
+            ]
+          },
+          "chunks": {
+            "type": "array",
+            "description": "Software chunks of an update. In server mapped by Software Module",
+            "items": {
+              "$ref": "#/components/schemas/DdiChunk"
+            }
+          },
+          "maintenanceWindow": {
+            "type": "string",
+            "description": "Separation of download and installation by defining a maintenance window for the installation. Status shows if\ncurrently in a window",
+            "enum": [
+              "available",
+              "unavailable"
+            ]
+          }
+        },
+        "description": "Detailed deployment operation"
+      },
+      "DdiDeploymentBase": {
+        "required": [
+          "deployment",
+          "id"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Id of the action",
+            "example": "8"
+          },
+          "deployment": {
+            "$ref": "#/components/schemas/DdiDeployment"
+          },
+          "actionHistory": {
+            "$ref": "#/components/schemas/DdiActionHistory"
+          },
+          "_links": {
+            "$ref": "#/components/schemas/Links"
+          }
+        },
+        "example": {
+          "id": "8",
+          "deployment": {
+            "download": "forced",
+            "update": "forced",
+            "maintenanceWindow": "available",
+            "chunks": [
+              {
+                "part": "jvm",
+                "version": "1.0.75",
+                "name": "oneapp runtime",
+                "artifacts": [
+                  {
+                    "filename": "binary.tgz",
+                    "hashes": {
+                      "sha1": "986a1ade8b8a2f758ce951340cc5e21335cc2a00",
+                      "md5": "d04440e6533863247655ac5fd4345bcc",
+                      "sha256": "b3a04740a19e36057ccf258701922f3cd2f1a880536be53a3ca8d50f6b615975"
+                    },
+                    "size": 13,
+                    "_links": {
+                      "download": {
+                        "href": "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/23/filename/binary.tgz"
+                      },
+                      "download-http": {
+                        "href": "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/23/filename/binary.tgz"
+                      },
+                      "md5sum-http": {
+                        "href": "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/23/filename/binary.tgz.MD5SUM"
+                      },
+                      "md5sum": {
+                        "href": "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/23/filename/binary.tgz.MD5SUM"
+                      }
+                    }
+                  },
+                  {
+                    "filename": "file.signature",
+                    "hashes": {
+                      "sha1": "986a1ade8b8a2f758ce951340cc5e21335cc2a00",
+                      "md5": "d04440e6533863247655ac5fd4345bcc",
+                      "sha256": "b3a04740a19e36057ccf258701922f3cd2f1a880536be53a3ca8d50f6b615975"
+                    },
+                    "size": 13,
+                    "_links": {
+                      "download": {
+                        "href": "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/23/filename/file.signature"
+                      },
+                      "download-http": {
+                        "href": "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/23/filename/file.signature"
+                      },
+                      "md5sum-http": {
+                        "href": "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/23/filename/file.signature.MD5SUM"
+                      },
+                      "md5sum": {
+                        "href": "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/23/filename/file.signature.MD5SUM"
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "part": "os",
+                "version": "1.0.79",
+                "name": "one Firmware",
+                "artifacts": [
+                  {
+                    "filename": "binary.tgz",
+                    "hashes": {
+                      "sha1": "574cd34be20f75d101ed23518339cc38c5157bdb",
+                      "md5": "a0637c1ccb9fd53e2ba6f45712516989",
+                      "sha256": "498014801aab66be1d7fbea56b1aa5959651b6fd710308e196a8c414029e7291"
+                    },
+                    "size": 13,
+                    "_links": {
+                      "download": {
+                        "href": "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/24/filename/binary.tgz"
+                      },
+                      "download-http": {
+                        "href": "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/24/filename/binary.tgz"
+                      },
+                      "md5sum-http": {
+                        "href": "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/24/filename/binary.tgz.MD5SUM"
+                      },
+                      "md5sum": {
+                        "href": "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/24/filename/binary.tgz.MD5SUM"
+                      }
+                    }
+                  },
+                  {
+                    "filename": "file.signature",
+                    "hashes": {
+                      "sha1": "574cd34be20f75d101ed23518339cc38c5157bdb",
+                      "md5": "a0637c1ccb9fd53e2ba6f45712516989",
+                      "sha256": "498014801aab66be1d7fbea56b1aa5959651b6fd710308e196a8c414029e7291"
+                    },
+                    "size": 13,
+                    "_links": {
+                      "download": {
+                        "href": "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/24/filename/file.signature"
+                      },
+                      "download-http": {
+                        "href": "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/24/filename/file.signature"
+                      },
+                      "md5sum-http": {
+                        "href": "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/24/filename/file.signature.MD5SUM"
+                      },
+                      "md5sum": {
+                        "href": "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/24/filename/file.signature.MD5SUM"
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "part": "bApp",
+                "version": "1.0.91",
+                "name": "oneapplication",
+                "artifacts": [
+                  {
+                    "filename": "binary.tgz",
+                    "hashes": {
+                      "sha1": "e3ba7ff5839c210c98e254dde655147ffc49f5c9",
+                      "md5": "020017c498e6b0b8f76168fd55fa6fd1",
+                      "sha256": "80406288820379a82bbcbfbf7e8690146e46256f505de1c6d430c0168a74f6dd"
+                    },
+                    "size": 11,
+                    "_links": {
+                      "download": {
+                        "href": "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/22/filename/binary.tgz"
+                      },
+                      "download-http": {
+                        "href": "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/22/filename/binary.tgz"
+                      },
+                      "md5sum-http": {
+                        "href": "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/22/filename/binary.tgz.MD5SUM"
+                      },
+                      "md5sum": {
+                        "href": "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/22/filename/binary.tgz.MD5SUM"
+                      }
+                    }
+                  },
+                  {
+                    "filename": "file.signature",
+                    "hashes": {
+                      "sha1": "e3ba7ff5839c210c98e254dde655147ffc49f5c9",
+                      "md5": "020017c498e6b0b8f76168fd55fa6fd1",
+                      "sha256": "80406288820379a82bbcbfbf7e8690146e46256f505de1c6d430c0168a74f6dd"
+                    },
+                    "size": 11,
+                    "_links": {
+                      "download": {
+                        "href": "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/22/filename/file.signature"
+                      },
+                      "download-http": {
+                        "href": "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/22/filename/file.signature"
+                      },
+                      "md5sum-http": {
+                        "href": "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/22/filename/file.signature.MD5SUM"
+                      },
+                      "md5sum": {
+                        "href": "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/22/filename/file.signature.MD5SUM"
+                      }
+                    }
+                  }
+                ],
+                "metadata": [
+                  {
+                    "key": "aMetadataKey",
+                    "value": "Metadata value as defined in software module"
+                  }
+                ]
+              }
+            ]
+          },
+          "actionHistory": {
+            "status": "RUNNING",
+            "messages": [
+              "Reboot",
+              "Write firmware",
+              "Download done",
+              "Download failed. ErrorCode #5876745. Retry",
+              "Started download",
+              "Assignment initiated by user 'TestPrincipal'"
+            ]
+          }
+        }
+      },
+      "DdiMetadata": {
+        "required": [
+          "key",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "Key of meta data entry"
+          },
+          "value": {
+            "type": "string",
+            "description": "Value of meta data entry"
+          }
+        },
+        "description": "Meta data of the respective software module that has been marked with 'target visible'"
+      },
+      "DdiAutoConfirmationState": {
+        "required": [
+          "active"
+        ],
+        "type": "object",
+        "properties": {
+          "active": {
+            "type": "boolean",
+            "example": true
+          },
+          "initiator": {
+            "type": "string",
+            "example": "exampleUserId"
+          },
+          "remark": {
+            "type": "string",
+            "example": "exampleRemark"
+          },
+          "activatedAt": {
+            "type": "integer",
+            "format": "int64",
+            "example": 1691065895439
+          },
+          "_links": {
+            "$ref": "#/components/schemas/Links"
+          }
+        }
+      },
+      "DdiConfirmationBase": {
+        "required": [
+          "autoConfirm"
+        ],
+        "type": "object",
+        "properties": {
+          "autoConfirm": {
+            "$ref": "#/components/schemas/DdiAutoConfirmationState"
+          },
+          "_links": {
+            "$ref": "#/components/schemas/Links"
+          }
+        },
+        "description": "**_links**:\n* **confirmationBase** - confirmation base\n* **deactivateAutoConfirm** - where to deactivate auto confirm\n* **activateAutoConfirm** - where to activate auto confirm\n",
+        "example": {
+          "autoConfirm": {
+            "active": false
+          },
+          "_links": {
+            "activateAutoConfirm": {
+              "href": "https://management-api.host.com/TENANT_ID/controller/v1/CONTROLLER_ID/confirmationBase/activateAutoConfirm"
+            },
+            "confirmationBase": {
+              "href": "https://management-api.host.com/TENANT_ID/controller/v1/CONTROLLER_ID/confirmationBase/10?c=-2122565939"
+            }
+          }
+        }
+      },
+      "DdiConfirmationBaseAction": {
+        "required": [
+          "confirmation",
+          "id"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Id of the action",
+            "example": "6"
+          },
+          "confirmation": {
+            "$ref": "#/components/schemas/DdiDeployment"
+          },
+          "actionHistory": {
+            "$ref": "#/components/schemas/DdiActionHistory"
+          },
+          "_links": {
+            "$ref": "#/components/schemas/Links"
+          }
+        },
+        "description": "The response body includes the detailed information about the action awaiting confirmation in the same format as\nfor the deploymentBase operation.",
+        "example": {
+          "id": "6",
+          "confirmation": {
+            "download": "forced",
+            "update": "forced",
+            "maintenanceWindow": "available",
+            "chunks": [
+              {
+                "part": "jvm",
+                "version": "1.0.62",
+                "name": "oneapp runtime",
+                "artifacts": [
+                  {
+                    "filename": "binary.tgz",
+                    "hashes": {
+                      "sha1": "3dceccec02e7626184bdbba12b247b67ff04c363",
+                      "md5": "a9a7df0aa4c72b3b03b654c42d29744b",
+                      "sha256": "971d8db88fef8e7a3e6d5bbf501d69b07d0c300d9be948aff8b52960ef039358"
+                    },
+                    "size": 11,
+                    "_links": {
+                      "download": {
+                        "href": "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/17/filename/binary.tgz"
+                      },
+                      "download-http": {
+                        "href": "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/17/filename/binary.tgz"
+                      },
+                      "md5sum-http": {
+                        "href": "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/17/filename/binary.tgz.MD5SUM"
+                      },
+                      "md5sum": {
+                        "href": "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/17/filename/binary.tgz.MD5SUM"
+                      }
+                    }
+                  },
+                  {
+                    "filename": "file.signature",
+                    "hashes": {
+                      "sha1": "3dceccec02e7626184bdbba12b247b67ff04c363",
+                      "md5": "a9a7df0aa4c72b3b03b654c42d29744b",
+                      "sha256": "971d8db88fef8e7a3e6d5bbf501d69b07d0c300d9be948aff8b52960ef039358"
+                    },
+                    "size": 11,
+                    "_links": {
+                      "download": {
+                        "href": "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/17/filename/file.signature"
+                      },
+                      "download-http": {
+                        "href": "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/17/filename/file.signature"
+                      },
+                      "md5sum-http": {
+                        "href": "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/17/filename/file.signature.MD5SUM"
+                      },
+                      "md5sum": {
+                        "href": "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/17/filename/file.signature.MD5SUM"
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "part": "bApp",
+                "version": "1.0.96",
+                "name": "oneapplication",
+                "artifacts": [
+                  {
+                    "filename": "binary.tgz",
+                    "hashes": {
+                      "sha1": "701c0c0fcbee5e96fa5c5b819cb519686940ade3",
+                      "md5": "f0f6a34c4c9e79d07c2d92c3c3d88560",
+                      "sha256": "cff472a07c3143741fb03ac6c577acabef72a186a8bfaab00bbb47ca5ebbe554"
+                    },
+                    "size": 11,
+                    "_links": {
+                      "download": {
+                        "href": "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/16/filename/binary.tgz"
+                      },
+                      "download-http": {
+                        "href": "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/16/filename/binary.tgz"
+                      },
+                      "md5sum-http": {
+                        "href": "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/16/filename/binary.tgz.MD5SUM"
+                      },
+                      "md5sum": {
+                        "href": "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/16/filename/binary.tgz.MD5SUM"
+                      }
+                    }
+                  },
+                  {
+                    "filename": "file.signature",
+                    "hashes": {
+                      "sha1": "701c0c0fcbee5e96fa5c5b819cb519686940ade3",
+                      "md5": "f0f6a34c4c9e79d07c2d92c3c3d88560",
+                      "sha256": "cff472a07c3143741fb03ac6c577acabef72a186a8bfaab00bbb47ca5ebbe554"
+                    },
+                    "size": 11,
+                    "_links": {
+                      "download": {
+                        "href": "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/16/filename/file.signature"
+                      },
+                      "download-http": {
+                        "href": "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/16/filename/file.signature"
+                      },
+                      "md5sum-http": {
+                        "href": "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/16/filename/file.signature.MD5SUM"
+                      },
+                      "md5sum": {
+                        "href": "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/16/filename/file.signature.MD5SUM"
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "part": "os",
+                "version": "1.0.44",
+                "name": "one Firmware",
+                "artifacts": [
+                  {
+                    "filename": "binary.tgz",
+                    "hashes": {
+                      "sha1": "2b09765e953cd138b7da8f4725e48183dab62aec",
+                      "md5": "9b0aa2f51379cb4a5e0b7d026c2605c9",
+                      "sha256": "618faa741070b3f8148bad06f088e537a8f7913e734df4dde61fb163725cb4ee"
+                    },
+                    "size": 15,
+                    "_links": {
+                      "download": {
+                        "href": "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/18/filename/binary.tgz"
+                      },
+                      "download-http": {
+                        "href": "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/18/filename/binary.tgz"
+                      },
+                      "md5sum-http": {
+                        "href": "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/18/filename/binary.tgz.MD5SUM"
+                      },
+                      "md5sum": {
+                        "href": "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/18/filename/binary.tgz.MD5SUM"
+                      }
+                    }
+                  },
+                  {
+                    "filename": "file.signature",
+                    "hashes": {
+                      "sha1": "2b09765e953cd138b7da8f4725e48183dab62aec",
+                      "md5": "9b0aa2f51379cb4a5e0b7d026c2605c9",
+                      "sha256": "618faa741070b3f8148bad06f088e537a8f7913e734df4dde61fb163725cb4ee"
+                    },
+                    "size": 15,
+                    "_links": {
+                      "download": {
+                        "href": "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/18/filename/file.signature"
+                      },
+                      "download-http": {
+                        "href": "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/18/filename/file.signature"
+                      },
+                      "md5sum-http": {
+                        "href": "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/18/filename/file.signature.MD5SUM"
+                      },
+                      "md5sum": {
+                        "href": "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/18/filename/file.signature.MD5SUM"
+                      }
+                    }
+                  }
+                ],
+                "metadata": [
+                  {
+                    "key": "aMetadataKey",
+                    "value": "Metadata value as defined in software module"
+                  }
+                ]
+              }
+            ]
+          },
+          "actionHistory": {
+            "status": "WAIT_FOR_CONFIRMATION",
+            "messages": [
+              "Assignment initiated by user 'TestPrincipal'",
+              "Waiting for the confirmation by the device before processing with the deployment"
+            ]
+          }
+        }
+      },
+      "DdiCancel": {
+        "required": [
+          "cancelAction"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Id of the action",
+            "example": "11"
+          },
+          "cancelAction": {
+            "$ref": "#/components/schemas/DdiCancelActionToStop"
+          }
+        }
+      },
+      "DdiCancelActionToStop": {
+        "required": [
+          "stopId"
+        ],
+        "type": "object",
+        "properties": {
+          "stopId": {
+            "type": "string",
+            "description": "Id of the action that needs to be canceled (typically identical to id field on the cancel action itself)",
+            "example": "11"
+          }
+        },
+        "description": "Action that needs to be canceled"
+      },
+      "Link": {
+        "type": "object",
+        "properties": {
+          "href": {
+            "type": "string"
+          },
+          "hreflang": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "deprecation": {
+            "type": "string"
+          },
+          "profile": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "templated": {
+            "type": "boolean"
+          }
+        }
+      },
+      "Links": {
+        "type": "object",
+        "additionalProperties": {
+          "$ref": "#/components/schemas/Link"
+        }
+      }
+    },
+    "securitySchemes": {
+      "Token": {
+        "type": "apiKey",
+        "description": "Format: (Target|Gateway)Token &lt;token&gt;",
+        "name": "Authorization",
+        "in": "header"
+      }
+    }
+  }
+}
