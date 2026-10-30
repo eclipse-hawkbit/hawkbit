@@ -72,29 +72,29 @@ jobs:
             echo "ClearlyDefined unavailable (attempt ${attempt}/3) - retrying in 60s"
             sleep 60
           done
-          CHANGED_FILES_COUNT=$(git status --short | wc -l)
-          CHANGED_FILES_COUNT=${CHANGED_FILES_COUNT//[[:space:]]/}
-          echo "Number of changed files: ${CHANGED_FILES_COUNT}"
-          if [ "${CHANGED_FILES_COUNT}" -ne 0 ]; then
-            if [ "${CHANGED_FILES_COUNT}" -eq 1 ]; then
-              DEPENDENCY_FILE=".3rd-party/DEPENDENCIES"
-              DEPENDENCIES_MODIFIED=$(git status --short | grep ".3rd-party/DEPENDENCIES")
-              # Check if the file is modified
-              if [[ -n "$DEPENDENCIES_MODIFIED" ]]; then
-                echo "${DEPENDENCY_FILE} changed - commit it"
-                git config --local user.name "github-actions[bot]"
-                git config --local user.email "github-actions[bot]@users.noreply.github.com"
-                git add ${DEPENDENCY_FILE} && git commit -m "[Release] Automated commit of ${DEPENDENCY_FILE} changes" && git push
-              else
-                echo "Unexpected changes:"
-                git status --short
-                exit 1
-              fi
-            else
-              echo "More than one file has changed:"
-              git status --short
+          DEPENDENCY_FILE=".3rd-party/DEPENDENCIES"
+          # the whole tree is checked - any change besides the dependency file is unexpected, fails, and would also block
+          # the rebase below
+          CHANGED_FILES=$(git status --porcelain --untracked-files=all)
+          if [ -z "${CHANGED_FILES}" ]; then
+            echo "${DEPENDENCY_FILE} unchanged"
+          else
+            echo "Changed files:"
+            echo "${CHANGED_FILES}"
+            UNEXPECTED_FILES=$(echo "${CHANGED_FILES}" | grep -v -F -x " M ${DEPENDENCY_FILE}" || true)
+            if [ -n "${UNEXPECTED_FILES}" ]; then
+              echo "Unexpected changes:"
+              echo "${UNEXPECTED_FILES}"
               exit 1
             fi
+            git config --local user.name "github-actions[bot]"
+            git config --local user.email "github-actions[bot]@users.noreply.github.com"
+            git add "${DEPENDENCY_FILE}"
+            git commit -m "[Release] Automated commit of ${DEPENDENCY_FILE} changes"
+            # the branch may have moved meanwhile (the scans take long) - conflicts (and fails) only if the dependency file
+            # has been committed meanwhile too
+            git pull --rebase
+            git push
           fi
 
       - name: Check dependency licenses with dash tool (and fail if there are restricted dependencies)
