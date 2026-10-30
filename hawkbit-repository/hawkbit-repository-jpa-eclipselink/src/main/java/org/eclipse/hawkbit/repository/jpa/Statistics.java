@@ -200,7 +200,7 @@ public class Statistics {
     // has already been registered / resolved (if it is to be registered at all) - otherwise @ConditionalOnBean(MeterRegistry.class) may not be
     // met event if the MeterRegistry is registered (if resolved later).
     // 'autoconfigure after' relies on this is being an AutoConfiguration
-    @AutoConfiguration(afterName = "org.springframework.boot.actuate.autoconfigure.metrics.CompositeMeterRegistryAutoConfiguration")
+    @AutoConfiguration(afterName = "org.springframework.boot.micrometer.metrics.autoconfigure.CompositeMeterRegistryAutoConfiguration")
     @Configuration
     public static class StatisticsAutoConfiguration {
 
