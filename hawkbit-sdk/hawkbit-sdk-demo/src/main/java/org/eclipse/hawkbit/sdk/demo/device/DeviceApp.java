@@ -30,13 +30,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Abstract class representing DDI device connecting directly to hawkVit.
+ * Class representing DDI device connecting directly to hawkBit.
  */
 @Slf4j
 @SpringBootApplication
 public class DeviceApp {
 
-    public static void main(String[] args) {
+    // compiled vs java 17
+    public static void main(final String[] args) {
         SpringApplication.run(DeviceApp.class, args);
     }
 
