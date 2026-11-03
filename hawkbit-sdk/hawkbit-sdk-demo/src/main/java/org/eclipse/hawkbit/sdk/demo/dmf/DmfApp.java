@@ -30,13 +30,14 @@ import org.springframework.shell.core.command.annotation.Option;
 import org.springframework.stereotype.Component;
 
 /**
- * Abstract class representing DDI device connecting directly to hawkBit.
+ * Class representing DDI device connecting directly to hawkBit.
  */
 @Slf4j
 @EnableConfigurationProperties({ RabbitProperties.class, AmqpProperties.class })
 @SpringBootApplication
 public class DmfApp {
 
+    // compiled vs java 17
     public static void main(final String[] args) {
         SpringApplication.run(DmfApp.class, args);
     }

@@ -29,12 +29,13 @@ import org.springframework.shell.core.command.annotation.Option;
 import org.springframework.stereotype.Component;
 
 /**
- * Abstract class representing DDI device connecting directly to hawkBit.
+ * Class representing DDI device connecting directly to hawkBit.
  */
 @Slf4j
 @SpringBootApplication
 public class MultiDeviceApp {
 
+    // compiled vs java 17
     public static void main(final String[] args) {
         SpringApplication.run(MultiDeviceApp.class, args);
     }

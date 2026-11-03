@@ -40,10 +40,8 @@ Learn more in the [DDI API documentation](direct-device-integration-api.md)
 
 The Device Management Federation (DMF) API enables indirect device integration via a device management service into
 hawkBit. It is a message-based, asynchronous API optimized for high-throughput cloud service-to-service communication.
-The DMF API leverages RabbitMQ messaging. Out of the box hawkBit supports a single DM server trusted for all tenants
-(_DM server for all_). The protocol allows isolating tenants by dedicated AMQP virtual hosts (_DM server per tenant_),
-but this is not (yet) provided by hawkBit and is up to integrators / extenders (see
-[deployment models](device-management-federation-api.md#deployment-models)).
+The DMF API leverages RabbitMQ messaging and provides strong tenant isolation through dedicated AMQP virtual hosts per
+tenant.
 
 For a detailed description and usage examples, see
 the [Device Management Federation (DMF) API documentation](device-management-federation-api.md)
