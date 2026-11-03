@@ -92,7 +92,7 @@
 
         <!-- test -->
         <rabbitmq-http-client.version>5.7.0</rabbitmq-http-client.version>
-        <classgraph.version>5.0.0</classgraph.version>
+        <classgraph.version>6.0.1</classgraph.version>
         <awaitility.version>4.3.0</awaitility.version>
         <!-- Misc libraries versions - END -->
 
