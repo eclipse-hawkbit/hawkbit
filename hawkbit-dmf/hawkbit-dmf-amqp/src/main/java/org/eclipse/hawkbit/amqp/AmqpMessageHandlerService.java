@@ -109,6 +109,10 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
     /**
      * Executed if a amqp message arrives.
+     * <p/>
+     * Note: the <code>tenant</code> header is trusted as is - hawkBit supports a single DM server trusted for all tenants
+     * (DM server for all). It is not verified that the tenant belongs to the virtual host. DM servers per tenant (on dedicated
+     * virtual hosts) are not supported out of the box - extenders shall do such a check themselves.
      *
      * @param message the message
      * @param type the type
@@ -120,7 +124,6 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         if (ObjectUtils.isEmpty(type) || ObjectUtils.isEmpty(tenant)) {
             throw new AmqpRejectAndDontRequeueException("Invalid message! tenant and type header are mandatory!");
         }
-        // checked before any message type handling - so PING is rejected too
         if (Boolean.TRUE.equals(asSystemAsTenant(tenant, () -> { // return if soft deleted
             if (SystemManagementHolder.getInstance().isTenantSoftDeleted()) {
                 log.warn("Soft deleted tenant access attempted via DMF");
@@ -129,7 +132,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
                 return Boolean.FALSE;
             }
         }))) {
-            throw new AmqpRejectAndDontRequeueException("Tenant " + tenant + " is soft deleted!");
+            throw new AmqpRejectAndDontRequeueException(String.format("Tenant %s is soft deleted!", tenant));
         }
 
         final SecurityContext oldContext = SecurityContextHolder.getContext();
@@ -277,8 +280,8 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     }
 
     /**
-     * Method to create a new target or to find the target if it already exists
-     * and update its poll time, status and optionally its name and attributes.
+     * Method to create a new target or to find the target if it already exists and update its poll time, status and optionally its name and
+     * attributes.
      *
      * @param message the message that contains replyTo property and optionally the name and attributes in body
      * @param virtualHost the virtual host

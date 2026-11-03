@@ -86,7 +86,7 @@ public class HawkbitFlywayDbInit {
     // java:S3776 - better be at one place. not so complex
     // java:S1181 - we want to catch Throwable to log it and exit with proper exit code
     @SuppressWarnings({ "java:S3776", "java:S1181" })
-    public static void main(final String[] args) {
+    static void main(final String[] args) {
         log.info("Start ({}): {}@{}, table: {}, locations: {}, sql-migration-suffixes: {}",
                 MODE, USER, URL, TABLE, LOCATIONS, SQL_MIGRATION_SUFFIXES);
 

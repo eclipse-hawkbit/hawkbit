@@ -31,7 +31,7 @@ public class Start {
      */
     // Exception squid:S2095 - Spring boot standard behavior
     @SuppressWarnings({ "squid:S2095" })
-    public static void main(final String[] args) {
+    static void main(final String[] args) {
         SpringApplication.run(Start.class, args);
     }
 

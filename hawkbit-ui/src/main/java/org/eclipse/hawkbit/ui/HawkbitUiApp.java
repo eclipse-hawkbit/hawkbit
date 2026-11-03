@@ -100,7 +100,7 @@ public class HawkbitUiApp implements AppShellConfigurator {
         return e;
     };
 
-    public static void main(String[] args) {
+    static void main(final String[] args) {
         SpringApplication.run(HawkbitUiApp.class, args);
     }
 

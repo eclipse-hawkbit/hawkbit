@@ -27,7 +27,7 @@ public class MgmtServerStart {
      *
      * @param args the VM arguments.
      */
-    public static void main(final String[] args) {
+    static void main(final String[] args) {
         SpringApplication.run(MgmtServerStart.class, args);
     }
 
