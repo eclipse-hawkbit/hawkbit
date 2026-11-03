@@ -31,6 +31,20 @@ The following chapter describes the message body, header and properties.
 Note: the DMF protocol was intended to be compatible to other use cases by design. As a result, DMF uses the term *
 *thing** and not **target** but they are actually synonyms in this case.
 
+## Deployment models
+
+There are two ways to integrate DM (device manager) servers via DMF:
+
+- **DM server for all** (supported out of the box) - a single DM server, trusted for all tenants, connected to the
+  hawkBit DMF virtual host. The DM server authenticates the devices and resolves their tenants. hawkBit trusts the
+  `tenant` header of the incoming messages, so whoever is allowed to publish to the hawkBit DMF exchange can act on
+  (create, update, delete targets, send events for) any tenant. RabbitMQ credentials for that virtual host must be given
+  only to such trusted DM servers - never to devices or tenant-scoped parties.
+- **DM server per tenant** (not supported out of the box) - multiple DM servers, each trusted only for a tenant (or a
+  tenant set) and connected to a dedicated virtual host. This is not (yet) in the scope of hawkBit. Integrators /
+  extenders implementing it have to listen on the respective virtual hosts and to verify that the `tenant` header of
+  each message belongs to the virtual host it came from.
+
 ## Messages sent **to** hawkBit
 
 ### THING_CREATED
@@ -59,15 +73,15 @@ Payload Template (optional):
 
 ```json
 {
-    "name": "String",
-    "type": "String",
-    "attributeUpdate": {
-        "attributes": {
-            "exampleKey1" : "exampleValue1",
-            "exampleKey2" : "exampleValue2"
-        },
-        "mode": "String"
-    }
+  "name": "String",
+  "type": "String",
+  "attributeUpdate": {
+    "attributes": {
+      "exampleKey1": "exampleValue1",
+      "exampleKey2": "exampleValue2"
+    },
+    "mode": "String"
+  }
 }
 ```
 
@@ -134,11 +148,11 @@ Payload Template:
 
 ```json
 {
-    "attributes": {
-        "exampleKey1" : "exampleValue1",
-        "exampleKey2" : "exampleValue2"
-    },
-    "mode": "String"
+  "attributes": {
+    "exampleKey1": "exampleValue1",
+    "exampleKey2": "exampleValue2"
+  },
+  "mode": "String"
 }
 ```
 
@@ -173,8 +187,10 @@ is [ActionUpdateStatus](https://github.com/eclipse-hawkbit/hawkbit/tree/master/h
 {
   "actionId": long,
   "softwareModuleId": long,
-  "actionStatus":"String",
-  "message":["String"],
+  "actionStatus": "String",
+  "message": [
+    "String"
+  ],
   "timestamp": long
 }
 ```
@@ -202,10 +218,12 @@ Example header and payload:
 
 ```json
 {
-  "actionId":137,
-  "softwareModuleId":17,
-  "actionStatus":"DOWNLOAD",
-  "message":["The download has started"],
+  "actionId": 137,
+  "softwareModuleId": 17,
+  "actionStatus": "DOWNLOAD",
+  "message": [
+    "The download has started"
+  ],
   "timestamp": 1704070800000
 }
 ```
@@ -262,8 +280,8 @@ Payload template:
 
 ```json
 {
-    "actionId": long,
-    "externalRef": "String"
+  "actionId": long,
+  "externalRef": "String"
 }
 ```
 
@@ -275,8 +293,8 @@ Example Headers and Payload:
 
 ```json
 {
-"actionId":137,
-"externalRef":"deployment-42"
+  "actionId": 137,
+  "externalRef": "deployment-42"
 }
 ```
 
@@ -291,10 +309,12 @@ Example header and payload when cancellation is successful:
 
 ```json
 {
-  "actionId":137,
-  "softwareModuleId":17,
-  "actionStatus":"CANCELED",
-  "message":["The update was canceled."],
+  "actionId": 137,
+  "softwareModuleId": 17,
+  "actionStatus": "CANCELED",
+  "message": [
+    "The update was canceled."
+  ],
   "timestamp": 1704070800000
 }
 ```
@@ -307,10 +327,12 @@ Example header and payload when cancellation is rejected:
 
 ```json
 {
-  "actionId":137,
-  "softwareModuleId":17,
-  "actionStatus":"CANCEL_REJECTED",
-  "message":["The cancellation was not possible since the target sent an unexpected response."],
+  "actionId": 137,
+  "softwareModuleId": 17,
+  "actionStatus": "CANCEL_REJECTED",
+  "message": [
+    "The cancellation was not possible since the target sent an unexpected response."
+  ],
   "timestamp": 1704070800000
 }
 ```
@@ -336,34 +358,36 @@ is [DmfDownloadAndUpdateRequest](https://github.com/eclipse-hawkbit/hawkbit/tree
 
 ```json
 {
-"actionId": long,
-"externalRef": "String",
-"targetSecurityToken": "String",
-"softwareModules":[
+  "actionId": long,
+  "externalRef": "String",
+  "targetSecurityToken": "String",
+  "softwareModules": [
     {
-    "moduleId": long,
-    "moduleType":"String",
-    "moduleVersion":"String",
-    "artifacts":[
+      "moduleId": long,
+      "moduleType": "String",
+      "moduleVersion": "String",
+      "artifacts": [
         {
-        "filename":"String",
-        "urls":{
-            "HTTP":"String",
-            "HTTPS":"String"
-            },
-        "hashes":{
-            "md5":"String",
-            "sha1":"String"
-            },
-        "size":long
-        }],
-    "metadata":[
-        {
-            "key":"String",
-            "value":"String"
+          "filename": "String",
+          "urls": {
+            "HTTP": "String",
+            "HTTPS": "String"
+          },
+          "hashes": {
+            "md5": "String",
+            "sha1": "String"
+          },
+          "size": long
         }
-    ]
-    }]
+      ],
+      "metadata": [
+        {
+          "key": "String",
+          "value": "String"
+        }
+      ]
+    }
+  ]
 }
 ```
 
@@ -375,34 +399,36 @@ Example header and payload:
 
 ```json
 {
-"actionId":137,
-"externalRef":"deployment-42",
-"targetSecurityToken":"bH7XXAprK1ChnLfKSdtlsp7NOlPnZAYY",
-"softwareModules":[
+  "actionId": 137,
+  "externalRef": "deployment-42",
+  "targetSecurityToken": "bH7XXAprK1ChnLfKSdtlsp7NOlPnZAYY",
+  "softwareModules": [
     {
-    "moduleId":7,
-    "moduleType":"firmware",
-    "moduleVersion":"7.7.7",
-    "artifacts":[
+      "moduleId": 7,
+      "moduleType": "firmware",
+      "moduleVersion": "7.7.7",
+      "artifacts": [
         {
-        "filename":"artifact.zip",
-        "urls":{
-            "HTTP":"http://download-from-url.com",
-            "HTTPS":"https://download-from-url.com"
-            },
-        "hashes":{
-            "md5":"md5hash",
-            "sha1":"sha1hash"
-            },
-        "size":512
-        }],
-    "metadata":[
-        {
-            "key":"installationType",
-            "value":"5784K#"
+          "filename": "artifact.zip",
+          "urls": {
+            "HTTP": "http://download-from-url.com",
+            "HTTPS": "https://download-from-url.com"
+          },
+          "hashes": {
+            "md5": "md5hash",
+            "sha1": "sha1hash"
+          },
+          "size": 512
         }
-    ]
-    }]
+      ],
+      "metadata": [
+        {
+          "key": "installationType",
+          "value": "5784K#"
+        }
+      ]
+    }
+  ]
 }
 ```
 
@@ -465,72 +491,78 @@ Payload Template (the Java representation
 is [DmfMultiActionRequest](https://github.com/eclipse-hawkbit/hawkbit/tree/master/hawkbit-dmf/hawkbit-dmf-api/src/main/java/org/eclipse/hawkbit/dmf/json/model/DmfMultiActionRequest.java)):
 
 ```json
-[{
-"topic": "String",
-"weight": long,
-"action": {
-  "actionId": long,
-  "targetSecurityToken": "String",
-  "softwareModules":[
-      {
-      "moduleId": long,
-      "moduleType":"String",
-      "moduleVersion":"String",
-      "artifacts":[
-          {
-          "filename":"String",
-          "urls":{
-              "HTTP":"String",
-              "HTTPS":"String"
+[
+  {
+    "topic": "String",
+    "weight": long,
+    "action": {
+      "actionId": long,
+      "targetSecurityToken": "String",
+      "softwareModules": [
+        {
+          "moduleId": long,
+          "moduleType": "String",
+          "moduleVersion": "String",
+          "artifacts": [
+            {
+              "filename": "String",
+              "urls": {
+                "HTTP": "String",
+                "HTTPS": "String"
               },
-          "hashes":{
-              "md5":"String",
-              "sha1":"String"
+              "hashes": {
+                "md5": "String",
+                "sha1": "String"
               },
-          "size":long
-          }],
-      "metadata":[
-          {
-              "key":"String",
-              "value":"String"
-          }
+              "size": long
+            }
+          ],
+          "metadata": [
+            {
+              "key": "String",
+              "value": "String"
+            }
+          ]
+        }
       ]
-      }]
-  }
-},
-{
-"topic": "String",
-"weight": long,
-"action": {
-  "actionId": long,
-  "targetSecurityToken": "String",
-  "softwareModules":[
-      {
-      "moduleId": long,
-      "moduleType":"String",
-      "moduleVersion":"String",
-      "artifacts":[
-          {
-          "filename":"String",
-          "urls":{
-              "HTTP":"String",
-              "HTTPS":"String"
+    }
+  },
+  {
+    "topic": "String",
+    "weight": long,
+    "action": {
+      "actionId": long,
+      "targetSecurityToken": "String",
+      "softwareModules": [
+        {
+          "moduleId": long,
+          "moduleType": "String",
+          "moduleVersion": "String",
+          "artifacts": [
+            {
+              "filename": "String",
+              "urls": {
+                "HTTP": "String",
+                "HTTPS": "String"
               },
-          "hashes":{
-              "md5":"String",
-              "sha1":"String"
+              "hashes": {
+                "md5": "String",
+                "sha1": "String"
               },
-          "size":long
-          }],
-      "metadata":[
-          {
-              "key":"String",
-              "value":"String"
-          }
+              "size": long
+            }
+          ],
+          "metadata": [
+            {
+              "key": "String",
+              "value": "String"
+            }
+          ]
+        }
       ]
-      }]
+    }
   }
-}]
+]
 ```
 
 Example header and payload:
@@ -540,72 +572,78 @@ Example header and payload:
 | type=EVENT  <br /> tenant=default <br /> thingId=abc  <br /> topic=MULTI\_ACTION | content_type=application/json |
 
 ```json
-[{
-"topic": "DOWNLOAD_AND_INSTALL",
-"weight": 600,
-"action": {
-  "actionId":137,
-  "targetSecurityToken":"bH7XXAprK1ChnLfKSdtlsp7NOlPnZAYY",
-  "softwareModules":[
-      {
-      "moduleId":7,
-      "moduleType":"firmware",
-      "moduleVersion":"7.7.7",
-      "artifacts":[
-          {
-          "filename":"artifact.zip",
-          "urls":{
-              "HTTP":"http://download-from-url.com",
-              "HTTPS":"https://download-from-url.com"
+[
+  {
+    "topic": "DOWNLOAD_AND_INSTALL",
+    "weight": 600,
+    "action": {
+      "actionId": 137,
+      "targetSecurityToken": "bH7XXAprK1ChnLfKSdtlsp7NOlPnZAYY",
+      "softwareModules": [
+        {
+          "moduleId": 7,
+          "moduleType": "firmware",
+          "moduleVersion": "7.7.7",
+          "artifacts": [
+            {
+              "filename": "artifact.zip",
+              "urls": {
+                "HTTP": "http://download-from-url.com",
+                "HTTPS": "https://download-from-url.com"
               },
-          "hashes":{
-              "md5":"md5hash",
-              "sha1":"sha1hash"
+              "hashes": {
+                "md5": "md5hash",
+                "sha1": "sha1hash"
               },
-          "size":512
-          }],
-      "metadata":[
-          {
-              "key":"installationType",
-              "value":"5784K#"
-          }
+              "size": 512
+            }
+          ],
+          "metadata": [
+            {
+              "key": "installationType",
+              "value": "5784K#"
+            }
+          ]
+        }
       ]
-      }]
-  }
-},
-{
-"topic": "DOWNLOAD",
-"weight": 500,
-"action": {
-  "actionId":138,
-  "targetSecurityToken":"bH7XXAprK1ChnLfKSdtlsp7NOlPnZAYY",
-  "softwareModules":[
-      {
-      "moduleId":4,
-      "moduleType":"firmware",
-      "moduleVersion":"7.7.9",
-      "artifacts":[
-          {
-          "filename":"artifact.zip",
-          "urls":{
-              "HTTP":"http://download-from-url.com",
-              "HTTPS":"https://download-from-url.com"
+    }
+  },
+  {
+    "topic": "DOWNLOAD",
+    "weight": 500,
+    "action": {
+      "actionId": 138,
+      "targetSecurityToken": "bH7XXAprK1ChnLfKSdtlsp7NOlPnZAYY",
+      "softwareModules": [
+        {
+          "moduleId": 4,
+          "moduleType": "firmware",
+          "moduleVersion": "7.7.9",
+          "artifacts": [
+            {
+              "filename": "artifact.zip",
+              "urls": {
+                "HTTP": "http://download-from-url.com",
+                "HTTPS": "https://download-from-url.com"
               },
-          "hashes":{
-              "md5":"md5hash",
-              "sha1":"sha1hash"
+              "hashes": {
+                "md5": "md5hash",
+                "sha1": "sha1hash"
               },
-          "size":512
-          }],
-      "metadata":[
-          {
-              "key":"installationType",
-              "value":"5784K#"
-          }
+              "size": 512
+            }
+          ],
+          "metadata": [
+            {
+              "key": "installationType",
+              "value": "5784K#"
+            }
+          ]
+        }
       ]
-      }]
+    }
   }
-}]
+]
 ```
 
 ### THING_DELETED
