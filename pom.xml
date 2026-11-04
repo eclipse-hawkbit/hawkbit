@@ -44,6 +44,7 @@
         <jackson-2-bom.version>2.22.4</jackson-2-bom.version>
         <jackson-bom.version>3.2.4</jackson-bom.version>
         <logback.version>1.6.6</logback.version>
+        <mariadb.version>3.5.11</mariadb.version>
         <rabbit-amqp-client.version>5.37.0</rabbit-amqp-client.version>
         <!-- END -->
 
