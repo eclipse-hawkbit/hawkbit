@@ -28,8 +28,8 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          repository: ${{ inputs.repository }}
-          ref: ${{ inputs.ref }}
+          # runs PR code - don't leave the GITHUB_TOKEN in .git/config (fetches below work anonymously, public repo)
+          persist-credentials: false
 
       # scripts/IdeaFormat is a java single-file program (JDK 25, no maven needed)
       - name: Set up JDK

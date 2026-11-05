@@ -1,0 +1,46 @@
+name: Upload changes
+description: Uploads (generated) files as an artifact, with their paths relative to the repository root, to be committed by reusable_workflow_commit-changes.yaml in a separate job
+
+inputs:
+  files:
+    description: The files to upload, one per line (paths relative to the repository root)
+    required: true
+  artifact:
+    description: The artifact name
+    default: changes
+
+outputs:
+  base:
+    description: The checked out commit (SHA) the files are generated from
+    value: ${{ steps.stage.outputs.base }}
+
+runs:
+  using: composite
+  steps:
+    # upload-artifact strips the least common ancestor directory of the paths - so the files are copied with their paths
+    # relative to the repository root into a staging directory, which is uploaded
+    - name: Stage files
+      id: stage
+      shell: bash
+      env:
+        FILES: ${{ inputs.files }}
+        ARTIFACT: ${{ inputs.artifact }}
+      run: |
+        STAGING_DIR="${RUNNER_TEMP}/upload-changes/${ARTIFACT}"
+        while IFS= read -r FILE; do
+          mkdir -p "${STAGING_DIR}/$(dirname "${FILE}")"
+          cp "${FILE}" "${STAGING_DIR}/${FILE}"
+        done < <(echo "${FILES}" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e '/^$/d')
+        echo "dir=${STAGING_DIR}" >> "$GITHUB_OUTPUT"
+        BASE=$(git rev-parse HEAD)
+        echo "base=${BASE}" >> "$GITHUB_OUTPUT"
+
+    - name: Upload files
+      uses: actions/upload-artifact@v7.0.2
+      with:
+        name: ${{ inputs.artifact }}
+        path: ${{ steps.stage.outputs.dir }}
+        if-no-files-found: error
+        # e.g. .3rd-party/DEPENDENCIES - hidden files are excluded by default
+        include-hidden-files: true
+        retention-days: 1

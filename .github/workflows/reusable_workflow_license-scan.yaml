@@ -23,42 +23,48 @@ jobs:
   reusable_workflow_license-scan:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: read
+
+    outputs:
+      # the outcome of the upload of the changed dependency file - 'success' if uploaded
+      changes: ${{ steps.upload-changes.outcome }}
+      base: ${{ steps.upload-changes.outputs.base }}
+
     steps:
       - uses: actions/checkout@v7.0.1
         with:
           ref: ${{ inputs.ref }}
+          # the build runs maven plugins - don't leave the GITHUB_TOKEN in .git/config
+          persist-credentials: false
 
       - name: Set up JDK & Maven Central credentials
         uses: actions/setup-java@v6.1.0
         with:
           distribution: 'temurin'
           java-version: '25'
-          cache: 'maven'
 
-      - name: Cache local Maven repository
-        uses: actions/cache@v6.1.0
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
+      - name: Cache maven repository
+        uses: ./.github/actions/maven-cache
 
       - name: Check file license headers
         run: mvn license:check -PcheckLicense --batch-mode
 
-      - name: Build (needed for dash tool scans
+      - name: Build (needed for dash tool scans)
         run: |
           mvn clean install -DskipTests -DskipJavadoc --batch-mode
 
       - name: Check dependency licenses with dash tool (and open issues to Dash IP lab, doesn't fail)
         if: ${{ inputs.open_tickets }}
+        env:
+          DASH_TOKEN: ${{ secrets.GITLAB_API_TOKEN }}
         run: |
           set -o pipefail
           # The dash license-tool aborts the whole scan when ClearlyDefined answers with a
           # gateway error (it only recovers from HTTP 500), so retry the goal itself.
           # Failures for any other reason are reported immediately.
           for attempt in 1 2 3; do
-            if mvn license-tool:license-check -Ddash.batch=50 -Dorg.eclipse.dash.timeout=300 -Ddash.fail=false -PcheckLicense -Ddash.iplab.token=${{ secrets.GITLAB_API_TOKEN }} 2>&1 | tee /tmp/dash-iplab.log; then
+            if mvn license-tool:license-check -Ddash.batch=50 -Dorg.eclipse.dash.timeout=300 -Ddash.fail=false -PcheckLicense "-Ddash.iplab.token=${DASH_TOKEN}" 2>&1 | tee /tmp/dash-iplab.log; then
               break
             fi
             if ! grep -qE 'response from ClearlyDefined|contacting ClearlyDefined|HttpTimeoutException' /tmp/dash-iplab.log; then
@@ -72,30 +78,14 @@ jobs:
             echo "ClearlyDefined unavailable (attempt ${attempt}/3) - retrying in 60s"
             sleep 60
           done
-          DEPENDENCY_FILE=".3rd-party/DEPENDENCIES"
-          # the whole tree is checked - any change besides the dependency file is unexpected, fails, and would also block
-          # the rebase below
-          CHANGED_FILES=$(git status --porcelain --untracked-files=all)
-          if [ -z "${CHANGED_FILES}" ]; then
-            echo "${DEPENDENCY_FILE} unchanged"
-          else
-            echo "Changed files:"
-            echo "${CHANGED_FILES}"
-            UNEXPECTED_FILES=$(echo "${CHANGED_FILES}" | grep -v -F -x " M ${DEPENDENCY_FILE}" || true)
-            if [ -n "${UNEXPECTED_FILES}" ]; then
-              echo "Unexpected changes:"
-              echo "${UNEXPECTED_FILES}"
-              exit 1
-            fi
-            git config --local user.name "github-actions[bot]"
-            git config --local user.email "github-actions[bot]@users.noreply.github.com"
-            git add "${DEPENDENCY_FILE}"
-            git commit -m "[Release] Automated commit of ${DEPENDENCY_FILE} changes"
-            # the branch may have moved meanwhile (the scans take long) - conflicts (and fails) only if the dependency file
-            # has been committed meanwhile too
-            git pull --rebase
-            git push
-          fi
+
+      # before the restricted dependencies check - the dependency file is committed even if that check fails
+      - name: Upload dependency file
+        id: upload-changes
+        if: ${{ inputs.open_tickets }}
+        uses: ./.github/actions/upload-changes
+        with:
+          files: .3rd-party/DEPENDENCIES
 
       - name: Check dependency licenses with dash tool (and fail if there are restricted dependencies)
         run: |
@@ -115,3 +105,16 @@ jobs:
           done
           echo "ClearlyDefined still unavailable after 3 attempts."
           exit 1
+
+  # committed in a separate job, without the build. Also, if the scan job failed after the upload (restricted dependencies)
+  commit:
+    needs: reusable_workflow_license-scan
+    if: ${{ !cancelled() && needs.reusable_workflow_license-scan.outputs.changes == 'success' }}
+    uses: ./.github/workflows/reusable_workflow_commit-changes.yaml
+    permissions:
+      contents: write
+    with:
+      ref: ${{ inputs.ref }}
+      base: ${{ needs.reusable_workflow_license-scan.outputs.base }}
+      files: .3rd-party/DEPENDENCIES
+      message: "[Release] Automated commit of .3rd-party/DEPENDENCIES changes"

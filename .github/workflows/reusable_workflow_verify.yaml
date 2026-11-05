@@ -3,14 +3,6 @@ name: Verify (Reusable Workflow)
 on:
   workflow_call:
     inputs:
-      repository:
-        description: 'The repository to checkout, e.g. eclipse-hawkbit/hawkbit'
-        type: string
-        default: 'eclipse-hawkbit/hawkbit'
-      ref:
-        description: 'The branch, tag or SHA to checkout, e.g. master'
-        type: string
-        default: 'master'
       maven_properties:
         type: string
         default: ''
@@ -48,36 +40,19 @@ jobs:
           - 5432:5432
 
     steps:
-      # inputs are passed via env (not ${{ }} in run:) so they can't inject shell code
-      - name: Parameters
-        env:
-          REPOSITORY: ${{ inputs.repository }}
-          REF: ${{ inputs.ref }}
-          MAVEN_PROPERTIES: ${{ inputs.maven_properties }}
-        run: |
-          echo "Repository: $REPOSITORY,"
-          echo "Ref: $REF,"
-          echo "Maven Properties: $MAVEN_PROPERTIES"
-
       - uses: actions/checkout@v7.0.1
         with:
-          repository: ${{ inputs.repository }}
-          ref: ${{ inputs.ref }}
+          # the build runs PR code - don't leave the GITHUB_TOKEN in .git/config
+          persist-credentials: false
 
       - name: Set up JDK
         uses: actions/setup-java@v6.1.0
         with:
           distribution: 'temurin'
           java-version: '25'
-          cache: 'maven'
 
-      - name: Cache local Maven repository
-        uses: actions/cache@v6.1.0
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
+      - name: Cache maven repository
+        uses: ./.github/actions/maven-cache
 
       - name: Check file license headers
         run: mvn license:check -PcheckLicense --batch-mode
