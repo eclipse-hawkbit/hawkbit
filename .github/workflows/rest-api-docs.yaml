@@ -39,61 +39,54 @@ jobs:
     if: github.repository == 'eclipse-hawkbit/hawkbit' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
+
+    outputs:
+      base: ${{ steps.upload-changes.outputs.base }}
 
     steps:
-      # the branch (not the detached commit) is checked out, so the changes could be pushed to it
       - uses: actions/checkout@v7.0.1
         with:
           ref: ${{ github.ref }}
-          fetch-depth: 0
+          # the build runs tests - don't leave the GITHUB_TOKEN in .git/config
+          persist-credentials: false
 
       - name: Set up JDK
         uses: actions/setup-java@v6.1.0
         with:
           distribution: 'temurin'
           java-version: '25'
-          cache: 'maven'
 
-      - name: Cache local Maven repository
-        uses: actions/cache@v6.1.0
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
+      - name: Cache maven repository
+        uses: ./.github/actions/maven-cache
 
       # the export tests write the specs (as served by /v3/api-docs/{group}) to <module>/target/openapi/
       - name: Generate OpenAPI specs
-        run: >-
-          mvn test --batch-mode
-          -pl hawkbit-mgmt/hawkbit-mgmt-resource,hawkbit-ddi/hawkbit-ddi-resource -am
-          -Dtest=MgmtOpenApiSpecExportTest,DdiOpenApiSpecExportTest -Dsurefire.failIfNoSpecifiedTests=false
-
-      # committed directly if changed. Pushes with GITHUB_TOKEN don't trigger workflows, so no loop.
-      - name: Commit changed OpenAPI specs
         run: |
+          mvn test --batch-mode \
+            -pl hawkbit-mgmt/hawkbit-mgmt-resource,hawkbit-ddi/hawkbit-ddi-resource -am \
+            -Dtest=MgmtOpenApiSpecExportTest,DdiOpenApiSpecExportTest -Dsurefire.failIfNoSpecifiedTests=false
           cp hawkbit-mgmt/hawkbit-mgmt-resource/target/openapi/mgmt.json docs/rest-api/mgmt.json
           cp hawkbit-ddi/hawkbit-ddi-resource/target/openapi/ddi.json docs/rest-api/ddi.json
-          # git status (not git diff) - lists new (untracked) files as well. The whole tree is checked - any change besides
-          # the specs (e.g. the build modifying tracked files) is unexpected, fails, and would also block the rebase below
-          CHANGED_FILES=$(git status --porcelain --untracked-files=all)
-          if [ -z "${CHANGED_FILES}" ]; then
-            echo "OpenAPI specs unchanged"
-            exit 0
-          fi
-          echo "Changed files:"
-          echo "${CHANGED_FILES}"
-          UNEXPECTED_FILES=$(echo "${CHANGED_FILES}" | grep -v -E '^.. docs/rest-api/(mgmt|ddi)\.json$' || true)
-          if [ -n "${UNEXPECTED_FILES}" ]; then
-            echo "Unexpected changes:"
-            echo "${UNEXPECTED_FILES}"
-            exit 1
-          fi
-          git config --local user.name "github-actions[bot]"
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git add docs/rest-api/mgmt.json docs/rest-api/ddi.json
-          git commit -m "[Docs] Automated commit of REST API docs (OpenAPI specs) changes"
-          # the branch may have moved meanwhile - conflicts (and fails) only if the specs have been committed meanwhile too
-          git pull --rebase
-          git push
+
+      - name: Upload OpenAPI specs
+        id: upload-changes
+        uses: ./.github/actions/upload-changes
+        with:
+          files: |
+            docs/rest-api/mgmt.json
+            docs/rest-api/ddi.json
+
+  # committed directly if changed - in a separate job, without the build
+  commit:
+    needs: rest-api-docs
+    uses: ./.github/workflows/reusable_workflow_commit-changes.yaml
+    permissions:
+      contents: write
+    with:
+      ref: ${{ github.ref }}
+      base: ${{ needs.rest-api-docs.outputs.base }}
+      files: |
+        docs/rest-api/mgmt.json
+        docs/rest-api/ddi.json
+      message: "[Docs] Automated commit of REST API docs (OpenAPI specs) changes"

@@ -84,7 +84,7 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      contents: write
+      contents: read
 
     services:
       rabbitmq:
@@ -101,26 +101,22 @@ jobs:
       - uses: actions/checkout@v7.0.1
         with:
           ref: ${{ inputs.revision == '0-SNAPSHOT' && github.ref || inputs.revision }}
+          # the build runs tests and doesn't push - don't leave the write GITHUB_TOKEN in .git/config
+          persist-credentials: false
 
       - name: Set up JDK & Maven Central credentials
         uses: actions/setup-java@v6.1.0
         with:
           distribution: 'temurin'
           java-version: '25'
-          cache: 'maven'
           server-id: central
           server-username: MAVEN_USERNAME
           server-password: MAVEN_PASSWORD
           gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
           gpg-passphrase: MAVEN_GPG_PASSPHRASE
 
-      - name: Cache local Maven repository
-        uses: actions/cache@v6.1.0
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
+      - name: Cache maven repository
+        uses: ./.github/actions/maven-cache
 
       - name: Run build javadoc, verify (test)
         env:
