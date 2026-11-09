@@ -19,7 +19,6 @@ import org.eclipse.hawkbit.repository.model.ActionStatusCode;
 import org.eclipse.hawkbit.repository.qfields.ActionStatusCodeFields;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
@@ -27,9 +26,6 @@ import org.springframework.data.domain.PageRequest;
  * Test for RSQL queries on {@link ActionStatusCodeFields}.
  */
 class RsqlActionStatusCodeFieldsTest extends AbstractJpaIntegrationTest {
-
-    @Autowired
-    private ActionStatusCodeManagement<ActionStatusCode> actionStatusCodeManagement;
 
     @BeforeEach
     void setup() {
@@ -68,7 +64,7 @@ class RsqlActionStatusCodeFieldsTest extends AbstractJpaIntegrationTest {
     }
 
     private void assertRSQLQuery(final String rsql, final long expectedCount) {
-        final Page<ActionStatusCode> result = actionStatusCodeManagement.findByRsql(
+        final Page<? extends ActionStatusCode> result = actionStatusCodeManagement.findByRsql(
                 rsql,
                 PageRequest.of(0, 100)
         );

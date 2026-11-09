@@ -46,9 +46,6 @@ import java.util.List;
 class ActionStatusCodeManagementTest extends AbstractJpaIntegrationTest {
 
     @Autowired
-    private ActionStatusCodeManagement<ActionStatusCode> actionStatusCodeManagement;
-
-    @Autowired
     private TestdataFactory testdataFactory;
 
     @Test
@@ -173,21 +170,21 @@ class ActionStatusCodeManagementTest extends AbstractJpaIntegrationTest {
                         .build()
         );
 
-        final Page<ActionStatusCode> errorCodes = actionStatusCodeManagement.findByRsql(
+        final Page<? extends ActionStatusCode> errorCodes = actionStatusCodeManagement.findByRsql(
                 "severity==ERROR",
                 PageRequest.of(0, 100)
         );
         assertThat(errorCodes.getTotalElements()).isEqualTo(2);
         assertThat(errorCodes.getContent()).extracting(ActionStatusCode::getCode).containsExactlyInAnyOrder(2, 3);
 
-        final Page<ActionStatusCode> codeTwo = actionStatusCodeManagement.findByRsql(
+        final Page<? extends ActionStatusCode> codeTwo = actionStatusCodeManagement.findByRsql(
                 "code=ge=2;code=le=2",
                 PageRequest.of(0, 100)
         );
         assertThat(codeTwo.getTotalElements()).isEqualTo(1);
         assertThat(codeTwo.getContent()).extracting(ActionStatusCode::getCode).containsExactly(2);
 
-        final Page<ActionStatusCode> nameA = actionStatusCodeManagement.findByRsql(
+        final Page<? extends ActionStatusCode> nameA = actionStatusCodeManagement.findByRsql(
                 "name==T*",
                 PageRequest.of(0, 100)
         );
