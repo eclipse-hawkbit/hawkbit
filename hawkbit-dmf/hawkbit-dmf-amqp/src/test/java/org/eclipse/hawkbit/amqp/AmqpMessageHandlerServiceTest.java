@@ -24,6 +24,8 @@ import java.net.URI;
 import java.util.Map;
 import java.util.Optional;
 
+import org.eclipse.hawkbit.amqp.DmfApiConfiguration.DmfProperties;
+import org.eclipse.hawkbit.amqp.DmfApiConfiguration.DmfProperties.DeploymentModel;
 import org.eclipse.hawkbit.dmf.DmfMessageConverter;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
@@ -57,12 +59,16 @@ import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.MessageConversionException;
 import org.springframework.amqp.support.converter.MessageConverter;
+import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.boot.context.properties.source.MapConfigurationPropertySource;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 
 /**
  * Feature: Component Tests - Device Management Federation API<br/>
  * Story: AmqpMessage Handler Service Test
  */
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({ MockitoExtension.class, OutputCaptureExtension.class })
 class AmqpMessageHandlerServiceTest {
 
     private static final String FAIL_MESSAGE_AMQP_REJECT_REASON = AmqpRejectAndDontRequeueException.class.getSimpleName() + " was expected, ";
@@ -111,8 +117,72 @@ class AmqpMessageHandlerServiceTest {
         messageConverter = new DmfMessageConverter();
         lenient().when(rabbitTemplate.getMessageConverter()).thenReturn(messageConverter);
 
-        amqpMessageHandlerService = new AmqpMessageHandlerService(
-                rabbitTemplate, amqpMessageDispatcherServiceMock, controllerManagementMock, confirmationManagementMock);
+        amqpMessageHandlerService = newAmqpMessageHandlerService(dmfProperties(DeploymentModel.DM_SERVER_FOR_ALL));
+    }
+
+    /**
+     * Verifies that the handler is created only if the deployment model is explicitly set to DM_SERVER_FOR_ALL.
+     */
+    @Test
+    void deploymentModelDmServerForAllIsAccepted() {
+        assertThat(newAmqpMessageHandlerService(dmfProperties(DeploymentModel.DM_SERVER_FOR_ALL))).isNotNull();
+    }
+
+    /**
+     * Verifies that, for backward compatibility, the handler is created if the deployment model is not set, but a (big) warning,
+     * explaining how to configure it, is logged.
+     */
+    @Test
+    void deploymentModelNotSetWarns(final CapturedOutput output) {
+        assertThat(newAmqpMessageHandlerService(dmfProperties(null))).isNotNull();
+        assertThat(output.getOut())
+                .contains("is not set - DMF works as DM server for all")
+                .contains("hawkbit.dmf.deployment-model=DM_SERVER_FOR_ALL")
+                .contains("#deployment-models")
+                .contains("Starting with hawkBit 1.2.0 the startup fails if it is not set!");
+    }
+
+    /**
+     * Verifies that an empty value (e.g. a passed through, but not set, environment variable in docker compose) is handled as not set.
+     */
+    @Test
+    void deploymentModelEmptyValueWarns(final CapturedOutput output) {
+        final DmfProperties dmfProperties = new Binder(new MapConfigurationPropertySource(Map.of("hawkbit.dmf.deployment-model", "")))
+                .bindOrCreate("hawkbit.dmf", DmfProperties.class);
+        assertThat(dmfProperties.getDeploymentModel()).isNull();
+        assertThat(newAmqpMessageHandlerService(dmfProperties)).isNotNull();
+        assertThat(output.getOut()).contains("is not set - DMF works as DM server for all");
+    }
+
+    /**
+     * Verifies that no warning is logged if the deployment model is explicitly set to DM_SERVER_FOR_ALL.
+     */
+    @Test
+    void deploymentModelDmServerForAllDoesNotWarn(final CapturedOutput output) {
+        newAmqpMessageHandlerService(dmfProperties(DeploymentModel.DM_SERVER_FOR_ALL));
+        assertThat(output.getOut()).doesNotContain("DMF deployment model");
+    }
+
+    /**
+     * Verifies that the handler creation fails for DM_SERVER_PER_TENANT, which is not supported out of the box.
+     */
+    @Test
+    void deploymentModelDmServerPerTenantFails() {
+        final DmfProperties dmfProperties = dmfProperties(DeploymentModel.DM_SERVER_PER_TENANT);
+        assertThatExceptionOfType(IllegalStateException.class)
+                .isThrownBy(() -> newAmqpMessageHandlerService(dmfProperties))
+                .withMessageContaining("DM_SERVER_PER_TENANT is not supported out of the box");
+    }
+
+    private AmqpMessageHandlerService newAmqpMessageHandlerService(final DmfProperties dmfProperties) {
+        return new AmqpMessageHandlerService(
+                rabbitTemplate, amqpMessageDispatcherServiceMock, controllerManagementMock, confirmationManagementMock, dmfProperties);
+    }
+
+    private static DmfProperties dmfProperties(final DeploymentModel deploymentModel) {
+        final DmfProperties dmfProperties = new DmfProperties();
+        dmfProperties.setDeploymentModel(deploymentModel);
+        return dmfProperties;
     }
 
     /**

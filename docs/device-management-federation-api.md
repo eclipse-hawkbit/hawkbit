@@ -31,6 +31,29 @@ The following chapter describes the message body, header and properties.
 Note: the DMF protocol was intended to be compatible to other use cases by design. As a result, DMF uses the term *
 *thing** and not **target** but they are actually synonyms in this case.
 
+## Deployment models
+
+There are two ways to integrate DM (device manager) servers via DMF:
+
+- **DM server for all** (supported out of the box) - a single DM server, trusted for all tenants, connected to the
+  hawkBit DMF virtual host. The DM server authenticates the devices and resolves their tenants. hawkBit trusts the
+  `tenant` header of the incoming messages, so whoever is allowed to publish to the hawkBit DMF exchange can act on
+  (create, update, delete targets, send events for) any tenant. RabbitMQ credentials for that virtual host must be given
+  only to such trusted DM servers - never to devices or tenant-scoped parties.
+- **DM server per tenant** (not supported out of the box) - multiple DM servers, each trusted only for a tenant (or a
+  tenant set) and connected to a dedicated virtual host. This is not (yet) in the scope of hawkBit. Integrators /
+  extenders implementing it have to listen on the respective virtual hosts and to verify that the `tenant` header of
+  each message belongs to the virtual host it came from.
+
+The deployment model is configured with `hawkbit.dmf.deployment-model` (env `HAWKBIT_DMF_DEPLOYMENTMODEL`):
+`DM_SERVER_FOR_ALL` or `DM_SERVER_PER_TENANT`. Set `DM_SERVER_FOR_ALL` explicitly, and only if your DM server is trusted
+for any tenant. When DMF is enabled (`hawkbit.dmf.enabled`, default `true`) and it is not set, hawkBit 1.1.x logs a
+warning at every startup and keeps working as before (as _DM server for all_). Starting with 1.2.0 it is mandatory - the
+startup fails unless it is `DM_SERVER_FOR_ALL`. `DM_SERVER_PER_TENANT` fails, since it is not supported out of the box -
+extenders disable the hawkBit DMF (`hawkbit.dmf.enabled=false`) or override the deployment model verification of the
+`AmqpMessageHandlerService`, and provide virtual host / tenant verification. hawkBit never sets it by default (not in
+the jars, Docker images or compose files).
+
 ## Messages sent **to** hawkBit
 
 ### THING_CREATED

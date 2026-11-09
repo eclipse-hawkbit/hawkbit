@@ -138,6 +138,10 @@ And (only if you want to use the DMF feature):
 $ java -jar ./hawkbit-monolith/hawkbit-update-server/target/hawkbit-update-server-0-SNAPSHOT.jar
 ```
 
+**Note:** when DMF is enabled, set `hawkbit.dmf.deployment-model=DM_SERVER_FOR_ALL` - only if your DM server is
+trusted for any tenant (see [deployment models](device-management-federation-api.md#deployment-models)). Otherwise a
+warning is logged at startup (and starting with 1.2.0 the startup fails).
+
 **Note:** You could also start with H2 console enabled with:
 
 ```bash

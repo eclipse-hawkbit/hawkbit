@@ -3,6 +3,11 @@
 This is the AMQP implementation for the device management federation API. The implementation uses the spring-amqp
 project.
 
+When DMF is enabled (`hawkbit.dmf.enabled`, default `true`), `hawkbit.dmf.deployment-model` shall be set to
+`DM_SERVER_FOR_ALL`, otherwise a warning is logged at startup (starting with 1.2.0 the startup fails). hawkBit trusts the `tenant` header of the incoming messages, so set it
+only if the DM server is trusted for any tenant. See
+[deployment models](../docs/device-management-federation-api.md#deployment-models).
+
 # Integration Test
 
 This modules contains some integration tests for the device management federation API implementation which uses a

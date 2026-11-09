@@ -22,6 +22,8 @@ import java.util.stream.Collectors;
 import jakarta.validation.constraints.NotNull;
 
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.hawkbit.amqp.DmfApiConfiguration.DmfProperties;
+import org.eclipse.hawkbit.amqp.DmfApiConfiguration.DmfProperties.DeploymentModel;
 import org.eclipse.hawkbit.audit.AuditLog;
 import org.eclipse.hawkbit.auth.SpRole;
 import org.eclipse.hawkbit.context.Principal;
@@ -72,20 +74,26 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
     private static final String THING_ID_NULL = "ThingId is null";
     private static final String EMPTY_MESSAGE_BODY = "\"\"";
+    private static final String DEPLOYMENT_MODEL_DOC =
+            "https://github.com/eclipse-hawkbit/hawkbit/blob/master/docs/device-management-federation-api.md#deployment-models";
 
     private final AmqpMessageDispatcherService amqpMessageDispatcherService;
     private final ConfirmationManagement confirmationManagement;
     private ControllerManagement controllerManagement;
 
+    // java:S1699 - verifyDeploymentModel is intentionally overridable (extension point), overrides must not rely on subclass state
+    @SuppressWarnings("java:S1699")
     public AmqpMessageHandlerService(
             final RabbitTemplate rabbitTemplate,
             final AmqpMessageDispatcherService amqpMessageDispatcherService,
             final ControllerManagement controllerManagement,
-            final ConfirmationManagement confirmationManagement) {
+            final ConfirmationManagement confirmationManagement,
+            final DmfProperties dmfProperties) {
         super(rabbitTemplate);
         this.amqpMessageDispatcherService = amqpMessageDispatcherService;
         this.controllerManagement = controllerManagement;
         this.confirmationManagement = confirmationManagement;
+        verifyDeploymentModel(dmfProperties);
     }
 
     /**
@@ -106,6 +114,10 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
     /**
      * Executed if a amqp message arrives.
+     * <p/>
+     * Note: the <code>tenant</code> header is trusted as is - hawkBit supports a single DM server trusted for all tenants
+     * (DM server for all). It is not verified that the tenant belongs to the virtual host. DM servers per tenant (on dedicated
+     * virtual hosts) are not supported out of the box - extenders shall do such a check themselves.
      *
      * @param message the message
      * @param type the type
@@ -161,6 +173,45 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     // for testing
     public void setControllerManagement(final ControllerManagement controllerManagement) {
         this.controllerManagement = controllerManagement;
+    }
+
+    /**
+     * Verifies that the deployment model is explicitly set to {@link DeploymentModel#DM_SERVER_FOR_ALL} - the only one hawkBit supports.
+     * The DMF handler trusts the tenant header of the incoming messages, so running DMF without an explicit confirmation could let
+     * DM servers (or whoever has access to the DMF virtual host), trusted only for some tenants, act on any tenant.
+     * <p/>
+     * For backward compatibility (1.1.x), if not set, it only logs a (big) warning and DMF works as before (as DM server for all).
+     * Starting with 1.2.0 the startup fails if not set.
+     * <p/>
+     * Extenders implementing another deployment model (e.g. {@link DeploymentModel#DM_SERVER_PER_TENANT}) could override it, together
+     * with the message handling (e.g. verifying that the tenant belongs to the virtual host). Note: it is called from the constructor, so
+     * an override runs before the subclass fields are initialized - it shall use only the passed properties (and constants).
+     *
+     * @param dmfProperties the DMF properties
+     * @throws IllegalStateException if the deployment model is not supported
+     */
+    protected void verifyDeploymentModel(final DmfProperties dmfProperties) {
+        final DeploymentModel deploymentModel = dmfProperties.getDeploymentModel();
+        if (deploymentModel == null) {
+            log.warn("""
+
+                    ****************************************************************************************************
+                    {}
+                    Starting with hawkBit 1.2.0 the startup fails if it is not set!
+                    ****************************************************************************************************""",
+                    deploymentModelMessage("is not set - DMF works as DM server for all"));
+        } else if (deploymentModel != DeploymentModel.DM_SERVER_FOR_ALL) {
+            throw new IllegalStateException(deploymentModelMessage(deploymentModel + " is not supported out of the box"));
+        }
+    }
+
+    private static String deploymentModelMessage(final String state) {
+        return String.format(
+                "DMF deployment model %s (hawkbit.dmf.deployment-model). hawkBit trusts the 'tenant' header of the incoming " +
+                        "DMF messages - it supports only a DM server trusted for all tenants. Set " +
+                        "hawkbit.dmf.deployment-model=DM_SERVER_FOR_ALL (env HAWKBIT_DMF_DEPLOYMENTMODEL=DM_SERVER_FOR_ALL) only if " +
+                        "your DM server is trusted for any tenant, or disable DMF with hawkbit.dmf.enabled=false. Read more at %s",
+                state, DEPLOYMENT_MODEL_DOC);
     }
 
     private static void setSecurityContext(final Authentication authentication) {
