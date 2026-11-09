@@ -16,6 +16,8 @@ import static org.eclipse.hawkbit.repository.model.Action.Status.DOWNLOADED;
 import static org.eclipse.hawkbit.repository.model.Action.Status.FINISHED;
 import static org.eclipse.hawkbit.repository.model.Target.CONTROLLER_ATTRIBUTE_MAX_KEY_SIZE;
 import static org.eclipse.hawkbit.repository.model.Target.CONTROLLER_ATTRIBUTE_MAX_VALUE_SIZE;
+import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.ACTION_STATUS_CODE_CANCELING;
+import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.ACTION_STATUS_CODE_RETRIEVED;
 
 import java.net.URI;
 import java.time.Duration;
@@ -91,6 +93,7 @@ import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetTypeSpecification;
 import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
+import org.eclipse.hawkbit.repository.jpa.utils.ServerActionStatusCode;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -497,8 +500,10 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
 
             jpaAction.setStatus(Status.CANCELING);
             // document that the status has been retrieved
-            actionStatusRepository.save(
-                    new JpaActionStatus(jpaAction, Status.CANCELING, System.currentTimeMillis(), "manual cancelation requested"));
+            final JpaActionStatus actionStatus = new JpaActionStatus(jpaAction, Status.CANCELING, System.currentTimeMillis(),
+                    RepositoryConstants.SERVER_MESSAGE_PREFIX + "cancelation requested due to lapsed maintenance window");
+            ServerActionStatusCode.apply(actionStatus, ServerActionStatusCode.resolve(ACTION_STATUS_CODE_CANCELING));
+            actionStatusRepository.save(actionStatus);
             final Action saveAction = actionRepository.save(jpaAction);
 
             cancelAssignDistributionSetEvent(jpaAction);
@@ -922,15 +927,21 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         // case controller retrieves a action multiple times.
         if (resultList.isEmpty() || (Status.RETRIEVED != resultList.get(0)[1])) {
             // document that the status has been retrieved
-            actionStatusRepository.save(new JpaActionStatus(action, Status.RETRIEVED, System.currentTimeMillis(), message));
+            final JpaActionStatus actionStatus = new JpaActionStatus(action, Status.RETRIEVED, System.currentTimeMillis(), message);
+            final Integer retrievedCode = ServerActionStatusCode.resolve(ACTION_STATUS_CODE_RETRIEVED);
 
             // don't change the action status itself in case the action is in
             // canceling state otherwise
             // we modify the action status and the controller won't get the
             // cancel job anymore.
-            if (!action.isCancelingOrCanceled()) {
+            if (action.isCancelingOrCanceled()) {
+                ServerActionStatusCode.applyToStatusOnly(actionStatus, retrievedCode);
+            } else {
                 action.setStatus(Status.RETRIEVED);
+                // action is managed (loaded in this transaction) - the changed last action status code is flushed with it
+                ServerActionStatusCode.apply(actionStatus, retrievedCode);
             }
+            actionStatusRepository.save(actionStatus);
         }
     }
 

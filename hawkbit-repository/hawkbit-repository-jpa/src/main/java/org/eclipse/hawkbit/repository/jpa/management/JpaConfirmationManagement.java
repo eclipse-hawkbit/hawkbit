@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.repository.jpa.management;
 
 import static org.eclipse.hawkbit.repository.RepositoryConstants.SERVER_MESSAGE_PREFIX;
+import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.ACTION_STATUS_CODE_AUTO_CONFIRMATION;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -36,6 +37,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionStatusRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
+import org.eclipse.hawkbit.repository.jpa.utils.ServerActionStatusCode;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.model.Action.ActionStatusCreate.ActionStatusCreateBuilder;
@@ -274,6 +276,7 @@ public class JpaConfirmationManagement extends JpaActionManagement implements Co
         // to bypass the quota check. Otherwise, the action will not be confirmed in case of exceeded action status quota.
         action.setStatus(Status.RUNNING);
         actionStatus.setAction(action);
+        ServerActionStatusCode.apply(actionStatus, ServerActionStatusCode.resolve(ACTION_STATUS_CODE_AUTO_CONFIRMATION));
 
         actionStatusRepository.save(actionStatus);
         return actionRepository.save(action);

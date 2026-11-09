@@ -36,6 +36,7 @@ import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTenantMetaData;
+import org.eclipse.hawkbit.repository.jpa.repository.ActionStatusCodeRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetTagRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetTypeRepository;
@@ -84,6 +85,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
 
     private static final int MAX_TENANTS_QUERY = 1000;
 
+    private final ActionStatusCodeRepository actionStatusCodeRepository;
     private final TargetRepository targetRepository;
     private final TargetTypeRepository targetTypeRepository;
     private final TargetTagRepository targetTagRepository;
@@ -106,6 +108,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
 
     @SuppressWarnings("squid:S00107")
     protected JpaSystemManagement(
+            final ActionStatusCodeRepository actionStatusCodeRepository,
             final TargetRepository targetRepository, final TargetTypeRepository targetTypeRepository,
             final TargetTagRepository targetTagRepository, final TargetFilterQueryRepository targetFilterQueryRepository,
             final SoftwareModuleRepository softwareModuleRepository, final SoftwareModuleTypeRepository softwareModuleTypeRepository,
@@ -116,6 +119,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
             final PlatformTransactionManager txManager,
             final EntityManager entityManager, final RepositoryProperties repositoryProperties,
             final JpaProperties properties) {
+        this.actionStatusCodeRepository = actionStatusCodeRepository;
         this.targetRepository = targetRepository;
         this.targetTypeRepository = targetTypeRepository;
         this.targetTagRepository = targetTagRepository;
@@ -254,6 +258,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
         asTenant(tenant, () -> DeploymentHelper.runInNewTransaction("deleteTenant", status -> {
             tenantMetaDataRepository.deleteByTenant(tenant);
             tenantConfigurationRepository.deleteByTenant(tenant);
+            actionStatusCodeRepository.deleteByTenant(tenant);
             targetRepository.deleteByTenant(tenant);
             targetFilterQueryRepository.deleteByTenant(tenant);
             rolloutRepository.deleteByTenant(tenant);

@@ -10,6 +10,8 @@
 package org.eclipse.hawkbit.repository.jpa.management;
 
 import static org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor.afterCommit;
+import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.ACTION_STATUS_CODE_CANCELED;
+import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.ACTION_STATUS_CODE_CANCELING;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -72,6 +74,7 @@ import org.eclipse.hawkbit.repository.jpa.rollout.condition.StartNextGroupRollou
 import org.eclipse.hawkbit.repository.jpa.specifications.ActionSpecifications;
 import org.eclipse.hawkbit.repository.jpa.specifications.RolloutSpecification;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
+import org.eclipse.hawkbit.repository.jpa.utils.ServerActionStatusCode;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.ActionCancellationType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -589,6 +592,7 @@ public class JpaRolloutManagement implements RolloutManagement {
         final long currentTimestamp = System.currentTimeMillis();
         final boolean active = Action.Status.CANCELING.equals(status);
         final String typeOfCancellation = active ? "cancellation" : "force quit";
+        final Integer code = ServerActionStatusCode.resolve(active ? ACTION_STATUS_CODE_CANCELING : ACTION_STATUS_CODE_CANCELED);
 
         actions.forEach(action -> {
             action.setStatus(status);
@@ -599,6 +603,7 @@ public class JpaRolloutManagement implements RolloutManagement {
             actionStatus.setStatus(status);
             actionStatus.setTimestamp(currentTimestamp);
             actionStatus.addMessage(RepositoryConstants.SERVER_MESSAGE_PREFIX + "A " + typeOfCancellation + " has been performed by server.");
+            ServerActionStatusCode.apply(actionStatus, code);
             cancellingStatuses.add(actionStatus);
         });
 

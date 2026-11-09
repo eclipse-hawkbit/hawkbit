@@ -10,6 +10,8 @@
 package org.eclipse.hawkbit.repository.jpa.management;
 
 import static org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor.afterCommit;
+import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.ACTION_STATUS_CODE_CANCELED;
+import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.ACTION_STATUS_CODE_CANCELING;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -37,6 +39,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionStatusRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
+import org.eclipse.hawkbit.repository.jpa.utils.ServerActionStatusCode;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -155,12 +158,15 @@ public abstract class AbstractDsAssignmentStrategy {
             );
         });
 
+        final Integer cancelingCode = ServerActionStatusCode.resolve(ACTION_STATUS_CODE_CANCELING);
         activeActions.forEach(action -> {
             action.setStatus(Status.CANCELING);
 
             // document that the status has been retrieved
-            actionStatusRepository.save(new JpaActionStatus(action, Status.CANCELING, System.currentTimeMillis(),
-                    RepositoryConstants.SERVER_MESSAGE_PREFIX + "cancel obsolete action due to new update"));
+            final JpaActionStatus actionStatus = new JpaActionStatus(action, Status.CANCELING, System.currentTimeMillis(),
+                    RepositoryConstants.SERVER_MESSAGE_PREFIX + "cancel obsolete action due to new update");
+            ServerActionStatusCode.apply(actionStatus, cancelingCode);
+            actionStatusRepository.save(actionStatus);
             actionRepository.save(action);
         });
 
@@ -189,13 +195,16 @@ public abstract class AbstractDsAssignmentStrategy {
             );
         });
 
+        final Integer canceledCode = ServerActionStatusCode.resolve(ACTION_STATUS_CODE_CANCELED);
         activeActions.forEach(action -> {
             action.setStatus(Status.CANCELED);
             action.setActive(false);
 
             // document that the status has been retrieved
-            actionStatusRepository.save(new JpaActionStatus(action, Status.CANCELED, System.currentTimeMillis(),
-                    RepositoryConstants.SERVER_MESSAGE_PREFIX + "close obsolete action due to new update"));
+            final JpaActionStatus actionStatus = new JpaActionStatus(action, Status.CANCELED, System.currentTimeMillis(),
+                    RepositoryConstants.SERVER_MESSAGE_PREFIX + "close obsolete action due to new update");
+            ServerActionStatusCode.apply(actionStatus, canceledCode);
+            actionStatusRepository.save(actionStatus);
             actionRepository.save(action);
         });
     }

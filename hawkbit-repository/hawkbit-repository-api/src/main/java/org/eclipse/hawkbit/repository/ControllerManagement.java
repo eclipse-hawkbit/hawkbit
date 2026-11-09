@@ -295,7 +295,8 @@ public interface ControllerManagement {
     List<String> getActionHistoryMessages(long actionId, int messageCount);
 
     /**
-     * Cancels given {@link Action} for this {@link Target}. The method will immediately add a {@link Status#CANCELED}.
+     * Cancels given {@link Action} for this {@link Target} because its maintenance window has lapsed (called by the DDI API when the
+     * maintenance schedule of the action is no longer valid). The method will immediately add a {@link Status#CANCELING} status.
      * However, it might be possible that the controller will continue to work on the cancellation. The controller needs to acknowledge or
      * reject the cancellation using DdiRootController#postCancelActionFeedback
      *
