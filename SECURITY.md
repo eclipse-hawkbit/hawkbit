@@ -6,12 +6,10 @@ vulnerabilities is taken care of by the hawkBit project committers, with assista
 
 ## Supported Versions
 
-Eclipse hawkBit provides security updates for the two most recent minor versions.  
 These versions of Eclipse hawkBit are currently being supported with security updates.
 
 | Version | Supported          |
 |---------|--------------------|
-| 1.0.x   | :white_check_mark: |
 | 1.1.x   | :white_check_mark: |
 
 ## Reporting a Vulnerability
