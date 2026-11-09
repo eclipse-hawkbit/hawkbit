@@ -55,8 +55,8 @@ public interface ActionStatusCodeRepository extends BaseEntityRepository<JpaActi
     // Tenant filtering is applied implicitly to the main query and the subquery (EclipseLink @Multitenant / Hibernate @TenantId).
     @Query(value = "SELECT DISTINCT s.code FROM JpaActionStatus s WHERE s.code IS NOT NULL "
             + "AND NOT EXISTS (SELECT c.id FROM JpaActionStatusCode c WHERE c.code = s.code) ORDER BY s.code",
-           countQuery = "SELECT COUNT(DISTINCT s.code) FROM JpaActionStatus s WHERE s.code IS NOT NULL "
-            + "AND NOT EXISTS (SELECT c.id FROM JpaActionStatusCode c WHERE c.code = s.code)")
+            countQuery = "SELECT COUNT(DISTINCT s.code) FROM JpaActionStatus s WHERE s.code IS NOT NULL "
+                    + "AND NOT EXISTS (SELECT c.id FROM JpaActionStatusCode c WHERE c.code = s.code)")
     Page<Integer> findUndocumentedCodes(Pageable pageable);
 
     /**

@@ -45,6 +45,7 @@ public class JpaActionStatusCode extends AbstractJpaNamedEntity implements Actio
 
         public SeverityConverter() {
             super(new EnumMap<>(Severity.class) {
+
                 {
                     put(Severity.TRACE, 0);
                     put(Severity.DEBUG, 1);

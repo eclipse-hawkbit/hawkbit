@@ -210,15 +210,16 @@ lastStatusCode=ge=200;lastStatusCode=le=299
 
 ## Action Status Code
 
-Action Status Codes define a per-tenant catalogue of numeric status codes that can be reported by devices or written by the server on action statuses.
+Action Status Codes define a per-tenant catalogue of numeric status codes that can be reported by devices or written by
+the server on action statuses.
 
 **Filterable/Sortable Fields:**
 
-| Field    | Description                                          | Type    |
-|----------|------------------------------------------------------|---------|
-| code     | Numeric status code (unique per tenant)              | Integer |
-| name     | Status code name                                     | String  |
-| severity | Severity level (TRACE, DEBUG, INFO, WARN, ERROR)     | Enum    |
+| Field    | Description                                      | Type    |
+|----------|--------------------------------------------------|---------|
+| code     | Numeric status code (unique per tenant)          | Integer |
+| name     | Status code name                                 | String  |
+| severity | Severity level (TRACE, DEBUG, INFO, WARN, ERROR) | Enum    |
 
 **Example Queries:**
 
