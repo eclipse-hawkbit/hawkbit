@@ -103,6 +103,9 @@ CI (`.github/workflows/reusable_workflow_verify.yaml`) runs `license:check`, the
 - **Schedulers** (rollout, auto-assign, auto-cleanup, tenant hard-delete) are off by default. They are enabled via
   `hawkbit.<name>.scheduler.enabled`, and only mgmt-server and the monolith set them.
 - **Monolith defaults:** RabbitMQ and DMF are off (`hawkbit.dmf.enabled=false`, Rabbit autoconfig excluded).
+- **DMF deployment model:** with DMF enabled, startup fails unless `hawkbit.dmf.deployment-model=DM_SERVER_FOR_ALL`.
+  Never set it in shipped defaults (properties, images, compose - the compose DMF services are in the `dmf` profile).
+  See `docs/device-management-federation-api.md#deployment-models`.
 - **AMQP tests** need RabbitMQ on localhost:5672 with the management plugin on :15672 (guest/guest). Without it they are
   skipped.
 - **Default ports:**

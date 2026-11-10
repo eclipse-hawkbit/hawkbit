@@ -65,8 +65,11 @@ services:
   # ---------------------
   # HawkBit DMF
   # ---------------------
+  # Not started by default - start with "--profile dmf" (hawkbit.dmf.deployment-model must be set, see
+  # https://github.com/eclipse-hawkbit/hawkbit/blob/master/docs/device-management-federation-api.md#deployment-models)
   hawkbit-dmf:
     image: "hawkbit/hawkbit-dmf-server:latest"
+    profiles: [ dmf ]
     environment:
       - 'PROFILES=postgresql'
       - 'SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/hawkbit'
@@ -75,6 +78,8 @@ services:
       - 'SPRING_RABBITMQ_HOST=rabbitmq'
       - 'SPRING_RABBITMQ_USERNAME=guest'
       - 'SPRING_RABBITMQ_PASSWORD=guest'
+      # set to DM_SERVER_FOR_ALL only if your DM server is trusted for any tenant (see the deployment models doc above)
+      - 'HAWKBIT_DMF_DEPLOYMENTMODEL=${HAWKBIT_DMF_DEPLOYMENTMODEL:-}'
     restart: always
     depends_on:
       hawkbit-db-init:

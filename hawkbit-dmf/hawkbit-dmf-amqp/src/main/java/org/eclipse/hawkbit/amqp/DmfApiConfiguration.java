@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import lombok.Data;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.artifact.urlresolver.ArtifactUrlResolver;
@@ -42,6 +43,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.amqp.autoconfigure.SimpleRabbitListenerContainerFactoryConfigurer;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -59,17 +61,15 @@ import tools.jackson.databind.json.JsonMapper;
 @Slf4j
 @ComponentScan
 @Import(DmfAmqpDeclarationConfiguration.class)
-@EnableConfigurationProperties(AmqpProperties.class)
+@EnableConfigurationProperties({ AmqpProperties.class, DmfApiConfiguration.DmfProperties.class })
 @ConditionalOnProperty(prefix = "hawkbit.dmf", name = "enabled", matchIfMissing = true)
 @PropertySource("classpath:/hawkbit-dmf-defaults.properties")
 public class DmfApiConfiguration {
 
-    private final AmqpProperties amqpProperties;
     private final ConnectionFactory rabbitConnectionFactory;
+    private final AmqpProperties amqpProperties;
 
-    public DmfApiConfiguration(
-            final AmqpProperties amqpProperties,
-            final ConnectionFactory rabbitConnectionFactory) {
+    public DmfApiConfiguration(final ConnectionFactory rabbitConnectionFactory, final AmqpProperties amqpProperties) {
         this.amqpProperties = amqpProperties;
         this.rabbitConnectionFactory = rabbitConnectionFactory;
     }
@@ -146,9 +146,10 @@ public class DmfApiConfiguration {
             final RabbitTemplate rabbitTemplate,
             final AmqpMessageDispatcherService amqpMessageDispatcherService,
             final ControllerManagement controllerManagement,
-            final ConfirmationManagement confirmationManagement) {
+            final ConfirmationManagement confirmationManagement,
+            final DmfProperties dmfProperties) {
         return new AmqpMessageHandlerService(
-                rabbitTemplate, amqpMessageDispatcherService, controllerManagement, confirmationManagement);
+                rabbitTemplate, amqpMessageDispatcherService, controllerManagement, confirmationManagement, dmfProperties);
     }
 
     /**
@@ -224,6 +225,29 @@ public class DmfApiConfiguration {
                 }
             }
             return false;
+        }
+    }
+
+    @Data
+    @ConfigurationProperties("hawkbit.dmf")
+    public static class DmfProperties {
+
+        /**
+         * How the DM (device manager) servers integrated via DMF are deployed and trusted. Mandatory if DMF is enabled - there is
+         * intentionally no default, so that it is an explicit decision of whoever runs hawkBit.
+         */
+        private DeploymentModel deploymentModel;
+
+        public enum DeploymentModel {
+
+            /**
+             * A single DM server trusted for all tenants - the tenant header of the incoming DMF messages is trusted as is.
+             */
+            DM_SERVER_FOR_ALL,
+            /**
+             * DM servers trusted per tenant (or tenant set), connected via dedicated virtual hosts - not supported out of the box.
+             */
+            DM_SERVER_PER_TENANT
         }
     }
 }
