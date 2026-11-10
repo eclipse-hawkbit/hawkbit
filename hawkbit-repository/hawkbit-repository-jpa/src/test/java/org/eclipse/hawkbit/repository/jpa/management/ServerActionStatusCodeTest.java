@@ -367,6 +367,22 @@ class ServerActionStatusCodeTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
+    void retrievedAgainAfterDeviceFeedbackKeepsDeviceCode() {
+        setCode(ACTION_STATUS_CODE_RETRIEVED, RETRIEVED_CODE);
+        final Long actionId = assignToNewTarget("retrievedagain");
+        controllerManagement.registerRetrieved(actionId, "retrieved");
+        controllerManagement.addUpdateActionStatus(ActionStatusCreate.builder().actionId(actionId).status(Status.RUNNING).code(42).build());
+
+        controllerManagement.registerRetrieved(actionId, "retrieved again");
+
+        assertThat(deploymentManagement.findAction(actionId).orElseThrow().getStatus()).isEqualTo(Status.RETRIEVED);
+        final ActionStatus latest = latestStatus(actionId);
+        assertThat(latest.getStatus()).isEqualTo(Status.RETRIEVED);
+        assertThat(latest.getCode()).contains(RETRIEVED_CODE);
+        assertThat(lastStatusCode(actionId)).contains(42);
+    }
+
+    @Test
     void repeatedRetrieveWritesNoSecondStatus() {
         setCode(ACTION_STATUS_CODE_RETRIEVED, RETRIEVED_CODE);
         final Long actionId = assignToNewTarget("retrievedtwice");

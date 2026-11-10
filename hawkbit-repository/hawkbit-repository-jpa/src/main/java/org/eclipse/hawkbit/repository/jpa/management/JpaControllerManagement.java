@@ -936,6 +936,10 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
             // cancel job anymore.
             if (action.isCancelingOrCanceled()) {
                 ServerActionStatusCode.applyToStatusOnly(actionStatus, retrievedCode);
+            } else if (action.getStatus() == Status.RETRIEVED) {
+                // e.g. re-fetch after device feedback (which doesn't change the action status) - the action state doesn't
+                // change, so the last action status code (maybe reported by the device) is kept
+                ServerActionStatusCode.applyToStatusOnly(actionStatus, retrievedCode);
             } else {
                 action.setStatus(Status.RETRIEVED);
                 // action is managed (loaded in this transaction) - the changed last action status code is flushed with it
