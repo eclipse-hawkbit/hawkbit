@@ -20,37 +20,3 @@ updates:
     # Check daily
     schedule:
       interval: "daily"
-
-    # 1.0 release branch
-  - package-ecosystem: "maven"
-    directory: "/"
-    target-branch: "1.0"
-    schedule:
-      interval: "daily"
-    ignore:
-      - dependency-name: "org.springframework.boot:*"
-        update-types: [ "version-update:semver-major" ]
-      - dependency-name: "org.springframework.cloud:spring-cloud-dependencies"
-        update-types: [ "version-update:semver-minor" ]
-      - dependency-name: "org.springframework.cloud:spring-cloud-starter-openfeign"
-        update-types: [ "version-update:semver-major" ]
-      - dependency-name: "org.springdoc:*"
-        update-types: [ "version-update:semver-major" ]
-      - dependency-name: "org.springframework.shell:*"
-        update-types: [ "version-update:semver-major" ]
-      - dependency-name: "org.springframework.ai:*"
-        update-types: [ "version-update:semver-major" ]
-      - dependency-name: "org.eclipse.persistence:org.eclipse.persistence.jpa"
-        update-types: [ "version-update:semver-major" ]
-      - dependency-name: "io.github.classgraph:*"
-        update-types: [ "version-update:semver-major" ]
-  - package-ecosystem: "docker"
-    directory: "/docker"
-    target-branch: "1.0"
-    schedule:
-      interval: "daily"
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    target-branch: "1.0"
-    schedule:
-      interval: "daily"
