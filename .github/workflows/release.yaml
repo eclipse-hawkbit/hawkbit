@@ -115,6 +115,15 @@ jobs:
           gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
           gpg-passphrase: MAVEN_GPG_PASSPHRASE
 
+      # TODO: remove - debug for 'gpg: no default secret key' on deploy
+      - name: Debug GPG keyring
+        run: |
+          echo "GNUPGHOME=$GNUPGHOME"
+          gpg --version | head -n 2
+          gpg --list-keys --keyid-format long || true
+          gpg --list-secret-keys --keyid-format long || true
+          ls -la "$GNUPGHOME" "$GNUPGHOME/private-keys-v1.d" || true
+
       - name: Cache maven repository
         uses: ./.github/actions/maven-cache
 
