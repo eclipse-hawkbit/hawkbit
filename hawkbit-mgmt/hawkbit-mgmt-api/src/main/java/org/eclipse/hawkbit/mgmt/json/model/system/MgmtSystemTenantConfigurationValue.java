@@ -49,6 +49,15 @@ import org.springframework.hateoas.RepresentationModel;
         * **multi.assignments.enabled** - Boolean, The configuration key 'multi.assignments.enabled' defines if multiple distribution sets can be assigned to the same targets.
         * **batch.assignments.enabled** - Boolean, The configuration key 'batch.assignments.enabled' defines if distribution set can be assigned to multiple targets in a single batch message.
         * **implicit.lock.enabled** - Boolean (true by default), The configuration key 'implicit.lock.enabled' defines if distribution set and their software modules shall be implicitly locked when assigned to target, rollout or target filter.
+        * **action.status.code.assigned** - Integer, The configuration key 'action.status.code.assigned' defines the optional status code written on the initial action status of an online assignment that starts without waiting for confirmation.
+        * **action.status.code.offline-assigned** - Integer, The configuration key 'action.status.code.offline-assigned' defines the optional status code written on the initial action status of an offline assignment.
+        * **action.status.code.skipped** - Integer, The configuration key 'action.status.code.skipped' defines the optional status code written on the action status of a rollout action that is skipped because the distribution set is already assigned.
+        * **action.status.code.retrieved** - Integer, The configuration key 'action.status.code.retrieved' defines the optional status code written when the device retrieves a deployment or cancellation.
+        * **action.status.code.download** - Integer, The configuration key 'action.status.code.download' defines the optional status code written when the device downloads an artifact.
+        * **action.status.code.auto-confirmation** - Integer, The configuration key 'action.status.code.auto-confirmation' defines the optional status code written when an action is auto-confirmed.
+        * **action.status.code.wait-for-confirmation** - Integer, The configuration key 'action.status.code.wait-for-confirmation' defines the optional status code written on the initial action status of an action waiting for confirmation.
+        * **action.status.code.canceling** - Integer, The configuration key 'action.status.code.canceling' defines the optional status code written on all server-side cancellations.
+        * **action.status.code.canceled** - Integer, The configuration key 'action.status.code.canceled' defines the optional status code written on server-side closings.
         """, example = """
         {
           "value" : "",

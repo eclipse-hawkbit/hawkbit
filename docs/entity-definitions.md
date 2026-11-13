@@ -201,6 +201,37 @@ weight=gt=800
 
 # Find actions with specific status code
 lastStatusCode==200
+
+# Find actions with status codes in 2xx range
+lastStatusCode=ge=200;lastStatusCode=le=299
+```
+
+---
+
+## Action Status Code
+
+Action Status Codes define a per-tenant catalogue of numeric status codes that can be reported by devices or written by
+the server on action statuses.
+
+**Filterable/Sortable Fields:**
+
+| Field    | Description                                      | Type    |
+|----------|--------------------------------------------------|---------|
+| code     | Numeric status code (unique per tenant)          | Integer |
+| name     | Status code name                                 | String  |
+| severity | Severity level (TRACE, DEBUG, INFO, WARN, ERROR) | Enum    |
+
+**Example Queries:**
+
+```
+# Find error-level status codes
+severity==ERROR
+
+# Find status codes in a specific range
+code=ge=200;code=le=299
+
+# Find status codes by name pattern
+name==DOWNLOAD*
 ```
 
 ---

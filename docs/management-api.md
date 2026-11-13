@@ -63,6 +63,69 @@ A Distribution Set entity may have for example URIs to artifacts, Software Modul
 }
 ```
 
+## Action Status Code Catalogue
+
+The Action Status Code catalogue (`/rest/v1/action-status-codes`) provides a per-tenant registry of numeric status codes
+that can be reported by devices or written by the server on action statuses. Each catalogue entry documents the meaning
+and severity of a code.
+
+### API Endpoints
+
+- **GET /rest/v1/action-status-codes** - List all catalogue entries with support for RSQL filtering (`q`), pagination (
+  `offset`, `limit`), and sorting (`sort`). Filterable fields: `code`, `name`, `severity`.
+- **GET /rest/v1/action-status-codes/{id}** - Retrieve a single catalogue entry by its technical ID.
+- **POST /rest/v1/action-status-codes** - Create a new catalogue entry. The `code` field must be unique per tenant.
+- **PUT /rest/v1/action-status-codes/{id}** - Update an existing catalogue entry. The `code` field is immutable and
+  ignored in the request body.
+- **DELETE /rest/v1/action-status-codes/{id}** - Delete a catalogue entry. Action statuses and actions keep their
+  codes; a code that is still referenced by action statuses is listed under `/undocumented` again and can be
+  re-documented via POST.
+- **GET /rest/v1/action-status-codes/undocumented** - List status codes reported on action statuses (by devices or
+  written by the server) that have no catalogue entry (read-only; to document a code, POST it to the catalogue).
+
+Entries are addressed by technical `id` in the path (`/{id}`), consistent with all other hawkBit Management APIs. The
+`code` is a unique, immutable body field. The `severity` can be `TRACE`, `DEBUG`, `INFO`, `WARN`, or `ERROR` (default:
+`INFO`). Attempting to create a duplicate code returns HTTP 409. Since the `code` is immutable, a wrong code is corrected by
+deleting the entry and creating a new one.
+
+**Permissions:**
+
+- `READ_TARGET` - required for GET operations
+- `CREATE_TARGET` - required for POST operations
+- `UPDATE_TARGET` - required for PUT operations
+- `DELETE_TARGET` - required for DELETE operations
+
+### Server-Reported Status Codes
+
+The server can optionally write status codes on the action statuses it creates itself. Each code is configured via a
+tenant configuration key (set via `PUT /rest/v1/system/configs/{key}`):
+
+- **action.status.code.assigned** - Written on the initial action status of an online assignment that starts without
+  waiting for confirmation (direct assignment, rollout group start, or confirmation given by the initiator).
+- **action.status.code.offline-assigned** - Written on the initial (finished) action status of an offline assignment (
+  `?offline=true`).
+- **action.status.code.skipped** - Written on the action status of a rollout action that is skipped (closed) because the
+  distribution set is already assigned to the target.
+- **action.status.code.retrieved** - Written on the action status when the device retrieves a deployment or cancellation
+  via the DDI API.
+- **action.status.code.download** - Written on the action status when the device downloads an artifact. This is an
+  informational status and does not change the action's `lastStatusCode`.
+- **action.status.code.auto-confirmation** - Written on the action status when an action is auto-confirmed due to an
+  active auto-confirmation rule.
+- **action.status.code.wait-for-confirmation** - Written on the initial action status of an action waiting for
+  confirmation.
+- **action.status.code.canceling** - Written on the action status of all server-side cancellations (manual cancel,
+  cancel due to a new assignment, rollout or distribution set invalidation soft cancel, lapsed maintenance window).
+- **action.status.code.canceled** - Written on the action status of server-side closings (force quit, auto-close due to
+  a new assignment, rollout force cancel).
+
+A key that is not set means no code is written (default behaviour unchanged). There are no fallbacks between keys. When
+the server writes a status code, it also overwrites the action's `lastStatusCode` for all statuses except `download` and
+`retrieved` (when the action is already canceling). The device's previously reported code remains in the status history.
+
+Operators should choose server codes that do not collide with device-reported codes to avoid confusion in status
+analysis.
+
 ## REST Doc
 
 <div style="text-align: right; margin-bottom: 8px;">
