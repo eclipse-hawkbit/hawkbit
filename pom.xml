@@ -50,7 +50,7 @@
 
         <!-- Other Overrides START - to be reviewed regularly -->
         <!-- override of org.apache.commons:commons-lang3 - old version coming via spring cloud openfeign 5.0.4 and org.springdoc 3.2.0 -->
-        <commons-lang.version>3.21.0</commons-lang.version>
+        <commons-lang.version>3.22.0</commons-lang.version>
         <!-- override spring-boot-starter-test 4.1.2 → json-smart 2.6.0 → accessors-smart 2.6.0 → org.ow2.asm:asm:9.7.1 that doesn't support java 25
           ASM used by EclipseLink to read entity metadata, must support the class file version of java.version. -->
         <asm.version>9.11.1</asm.version>
