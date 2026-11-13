@@ -37,6 +37,16 @@ import org.springframework.web.util.UriUtils;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class AuthenticationFilters {
 
+    /**
+     * Request attribute with the IP address of the connection peer (e.g. the reverse proxy). Set by the servlet container
+     * (e.g. by a Tomcat valve) when the remote address is replaced by the client IP resolved from the forwarded headers.
+     *
+     * @deprecated since 1.2.1 - see {@link DdiSecurityProperties.Rp#getTrustedIPs()}. Will be removed.
+     */
+    @Deprecated(forRemoval = true, since = "1.2.1")
+    @SuppressWarnings("java:S1133")
+    public static final String PEER_ADDRESS_ATTRIBUTE = "org.eclipse.hawkbit.peerAddress";
+
     public static class GatewayTokenAuthenticationFilter extends AbstractAuthenticationFilter {
 
         public GatewayTokenAuthenticationFilter(
@@ -141,13 +151,18 @@ public class AuthenticationFilters {
             return securityToken;
         }
 
+        @SuppressWarnings("java:S5738")
         private boolean acceptIPAddress(final HttpServletRequest request) {
             if (authorizedSourceIps == null) {
                 // no trusted IP check, because no authorizedSourceIPs configuration
                 return true;
             }
 
-            final String remoteAddress = request.getRemoteAddr();
+            // the trusted IPs are reverse proxy IPs - so the connection peer is checked, not the client IP (e.g. resolved by the Tomcat
+            // RemoteIpValve from X-Forwarded-For), if the peer is provided by the servlet container
+            final String remoteAddress = request.getAttribute(PEER_ADDRESS_ATTRIBUTE) instanceof String peerAddress
+                    ? peerAddress
+                    : request.getRemoteAddr();
             if (authorizedSourceIps.contains(remoteAddress)) {
                 // source ip matches the given pattern -> authenticated
                 return true;

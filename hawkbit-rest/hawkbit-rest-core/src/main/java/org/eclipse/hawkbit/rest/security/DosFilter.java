@@ -43,8 +43,9 @@ public class DosFilter extends OncePerRequestFilter {
 
     private final Pattern ipAddressBlacklist;
 
+    // request counters per client IP - a counter is put once (by the first request) and only incremented after, so it expires one
+    // second after the first request, i.e. the requests are counted in fixed one-second windows
     private final Cache<String, AtomicInteger> readCountCache = Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.SECONDS).build();
-
     private final Cache<String, AtomicInteger> writeCountCache = Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.SECONDS).build();
 
     private final int maxRead;
@@ -103,14 +104,7 @@ public class DosFilter extends OncePerRequestFilter {
             processChain = checkAgainstBlacklist(response, ip);
 
             if (processChain && (whitelist == null || !whitelist.matcher(ip).find())) {
-                // read request
-                if (HttpMethod.valueOf(request.getMethod()) == HttpMethod.GET) {
-                    processChain = handleReadRequest(response, ip);
-                }
-                // write request
-                else {
-                    processChain = handleWriteRequest(response, ip);
-                }
+                processChain = handleRequest(response, ip, HttpMethod.valueOf(request.getMethod()) != HttpMethod.GET);
             }
         }
 
@@ -151,33 +145,20 @@ public class DosFilter extends OncePerRequestFilter {
         return true;
     }
 
-    private boolean handleWriteRequest(final HttpServletResponse response, final String ip) {
-        boolean processChain = true;
-        final AtomicInteger count = writeCountCache.getIfPresent(ip);
-
-        if (count == null) {
-            writeCountCache.put(ip, new AtomicInteger());
-        } else if (count.getAndIncrement() > maxWrite) {
-            LOGGER.info("[DOS] Registered DOS attack! Client {} is above configured WRITE request threshold ({})!", ip, maxWrite);
-            response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
-            processChain = false;
+    private boolean handleRequest(final HttpServletResponse response, final String ip, final boolean write) {
+        final int limit = write ? maxWrite : maxRead;
+        // atomically created by the first request of the window, so concurrent first requests are not lost
+        final int count = (write ? writeCountCache : readCountCache).get(ip, _ -> new AtomicInteger()).incrementAndGet();
+        if (count <= limit) {
+            return true;
         }
 
-        return processChain;
-    }
-
-    private boolean handleReadRequest(final HttpServletResponse response, final String ip) {
-        boolean processChain = true;
-        final AtomicInteger count = readCountCache.getIfPresent(ip);
-
-        if (count == null) {
-            readCountCache.put(ip, new AtomicInteger());
-        } else if (count.getAndIncrement() > maxRead) {
-            LOGGER.info("[DOS] Registered DOS attack! Client {} is above configured READ request threshold ({})!", ip, maxRead);
-            response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
-            processChain = false;
+        // logged once per window - by the first rejected request
+        if (count == limit + 1) {
+            LOGGER.info("[DOS] Registered DOS attack! Client {} is above configured {} request threshold ({})!",
+                    ip, write ? "WRITE" : "READ", limit);
         }
-
-        return processChain;
+        response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
+        return false;
     }
 }

@@ -163,7 +163,8 @@ public final class IpUtil {
     private static URI getClientIpFromRequest(final HttpServletRequest request, final String forwardHeader, final boolean trackRemoteIp) {
         String ip;
         if (trackRemoteIp) {
-            ip = request.getHeader(forwardHeader);
+            // no forward header - the remote address is used (e.g. already resolved by the servlet container)
+            ip = forwardHeader == null || forwardHeader.isBlank() ? null : request.getHeader(forwardHeader);
             if (ip == null || (ip = findClientIpAddress(ip)) == null) {
                 ip = request.getRemoteAddr();
             }
@@ -192,5 +193,4 @@ public final class IpUtil {
 
         return null;
     }
-
 }

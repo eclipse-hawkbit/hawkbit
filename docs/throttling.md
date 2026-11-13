@@ -18,35 +18,66 @@ and write (all other methods) requests. A client above the limit gets `429` unti
 
 It is applied to:
 
-- the Management API (`/rest/*`) and `/system/admin/*` (mgmt server / update server)
+- the Management API (`/rest/**`) (mgmt server / update server)
 - the DDI API (`/{tenant}/controller/v1/**`) and the DDI artifact download (DDI server / update server)
 - `/system/*`
 
-How the client IP is determined:
+The filter runs before the authentication, so requests with invalid credentials are throttled too, and rejected requests
+don't reach the authentication (e.g. DDI target token lookups in the database).
 
-- from the header `hawkbit.server.security.clients.remote-ip-header` (default `X-Forwarded-For`) if present, otherwise
-  from the remote address of the connection
+The first rejected request of a window is logged.
+
+How the client IP is determined (the same IP is stored as target address, see
+`hawkbit.server.security.clients.track-remote-ip`):
+
+hawkBit runs behind a reverse proxy and is designed for **embedded Tomcat** with these settings (the defaults, set by
+the hawkBit REST starters):
+
+```properties
+server.forward-headers-strategy=NATIVE
+server.tomcat.use-relative-redirects=true
+```
+
+- Tomcat's `RemoteIpValve` resolves the client IP from `X-Forwarded-For` only if the request comes from a trusted proxy
+  (`server.tomcat.remoteip.internal-proxies` - by default private / loopback addresses, and
+  `server.tomcat.remoteip.trusted-proxies`), processing it right to left. A proxy appends the address it got the request
+  from, so the values a client sends by itself can't be used to spoof its IP. hawkBit uses the IP resolved by Tomcat.
+  A proxy with a public IP has to be configured as trusted, otherwise all requests through it get the proxy IP
+- the valve also applies `X-Forwarded-Proto` / `-Host` / `-Port` from trusted proxies (used for generated links). They
+  are single values, so the proxy must set (overwrite) them
+- a custom client IP header (e.g. `X-Real-IP`) is configured with `server.tomcat.remoteip.remote-ip-header`
+- redirects are relative, so they don't contain the request host
+
+If an instance doesn't match (e.g. Jetty, whose forwarded headers processing doesn't check for trusted proxies and uses
+the first value, or another `server.forward-headers-strategy`), hawkBit logs a warning at startup. Then the client IP is
+read as is from the header `hawkbit.server.security.clients.remote-ip-header` (default `X-Forwarded-For`, first value),
+if present, otherwise from the remote address of the connection, and the users are responsible to ensure correct
+forwarded headers (e.g. the proxy sets / overwrites `X-Forwarded-For`) and redirect behavior.
+
 - clients matching `hawkbit.server.security.clients.blacklist` (regular expression) are rejected with `403 Forbidden`
 - clients matching `hawkbit.server.security.dos.filter.whitelist` (regular expression) are not limited. The default
   whitelist contains the private and loopback address ranges (`10.*`, `192.168.*`, `172.16-31.*`, `169.254.*`, `127.*`)
 - if the client IP can't be determined the request fails with `500`
 
-| Property                                           | Default                      | Description                                        |
-|----------------------------------------------------|------------------------------|----------------------------------------------------|
-| `hawkbit.server.security.dos.filter.enabled`       | `true`                       | enables the DoS filter                             |
-| `hawkbit.server.security.dos.filter.max-read`      | `200`                        | max read (`GET`) requests per second per client IP |
-| `hawkbit.server.security.dos.filter.max-write`     | `50`                         | max write requests per second per client IP        |
-| `hawkbit.server.security.dos.filter.whitelist`     | private / loopback IP ranges | IPs (regex) which are not limited                  |
-| `hawkbit.server.security.clients.blacklist`        | empty                        | IPs (regex) which are always rejected with `403`   |
-| `hawkbit.server.security.clients.remote-ip-header` | `X-Forwarded-For`            | header containing the client IP                    |
+| Property                                           | Default                      | Description                                                       |
+|----------------------------------------------------|------------------------------|-------------------------------------------------------------------|
+| `hawkbit.server.security.dos.filter.enabled`       | `true`                       | enables the DoS filter                                            |
+| `hawkbit.server.security.dos.filter.max-read`      | `200`                        | max read (`GET`) requests per second per client IP                |
+| `hawkbit.server.security.dos.filter.max-write`     | `50`                         | max write requests per second per client IP                       |
+| `hawkbit.server.security.dos.filter.whitelist`     | private / loopback IP ranges | IPs (regex) which are not limited                                 |
+| `hawkbit.server.security.clients.blacklist`        | empty                        | IPs (regex) which are always rejected with `403`                  |
+| `hawkbit.server.security.clients.remote-ip-header` | `X-Forwarded-For`            | header containing the client IP (not used with Tomcat + `NATIVE`) |
+| `server.forward-headers-strategy`                  | `NATIVE`                     | Spring Boot forwarded headers processing                          |
+| `server.tomcat.remoteip.internal-proxies`          | private / loopback IP ranges | trusted proxies (regex)                                           |
+| `server.tomcat.use-relative-redirects`             | `true`                       | relative redirects                                                |
 
-Example - stricter limits behind a reverse proxy, no whitelist:
+Example - stricter limits behind a reverse proxy with a public IP, no whitelist:
 
 ```properties
 hawkbit.server.security.dos.filter.max-read=50
 hawkbit.server.security.dos.filter.max-write=10
 hawkbit.server.security.dos.filter.whitelist=
-hawkbit.server.security.clients.remote-ip-header=X-Forwarded-For
+server.tomcat.remoteip.internal-proxies=203\\.0\\.113\\.10
 ```
 
 Usually DoS protection is an infrastructure topic (e.g. a Web Application Firewall). The filter could be disabled with
