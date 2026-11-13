@@ -35,6 +35,7 @@ public class MgmtTargetRequestBody {
 
     @Schema(description = "Pre-Shared key that allows targets to authenticate at Direct Device Integration API if " +
             "enabled in the tenant settings", example = "2345678DGGDGFTDzztgf")
+    @ToString.Exclude
     private String securityToken;
 
     @Schema(description = "Request re-transmission of target attributes", example = "true")
