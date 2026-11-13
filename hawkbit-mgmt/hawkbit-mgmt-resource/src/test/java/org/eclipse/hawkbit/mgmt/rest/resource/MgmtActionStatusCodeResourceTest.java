@@ -146,7 +146,7 @@ class MgmtActionStatusCodeResourceTest extends AbstractManagementApiIntegrationT
     }
 
     @Test
-    void deleteIsNotSupported() throws Exception {
+    void deleteReturns204AndEntryIsGone() throws Exception {
         final String response = mvc.perform(post("/rest/v1/action-status-codes")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"code\":1234,\"name\":\"TEST_CODE\"}"))
@@ -156,7 +156,67 @@ class MgmtActionStatusCodeResourceTest extends AbstractManagementApiIntegrationT
         final Long id = extractId(response);
 
         mvc.perform(delete("/rest/v1/action-status-codes/" + id))
-                .andExpect(status().isMethodNotAllowed());
+                .andExpect(status().isNoContent());
+        mvc.perform(get("/rest/v1/action-status-codes/" + id))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void deleteUnknownIdReturns404() throws Exception {
+        mvc.perform(delete("/rest/v1/action-status-codes/999999"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_REPO_ENTITY_NOT_EXISTS.getKey())));
+    }
+
+    @Test
+    @WithUser(authorities = { "READ_TARGET", "CREATE_TARGET", "UPDATE_TARGET" })
+    void deleteWithoutDeleteTargetReturns403() throws Exception {
+        final String response = mvc.perform(post("/rest/v1/action-status-codes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"code\":1234,\"name\":\"TEST_CODE\"}"))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+
+        mvc.perform(delete("/rest/v1/action-status-codes/" + extractId(response)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void deletedCodeInUseIsUndocumentedAgain() throws Exception {
+        final var target = testdataFactory.createTarget("target789");
+        final var ds = testdataFactory.createDistributionSet("ds3");
+        final long actionId = assignDistributionSet(ds, List.of(target))
+                .getAssignedEntity().get(0).getId();
+        controllerManagement.addUpdateActionStatus(
+                Action.ActionStatusCreate.builder()
+                        .actionId(actionId)
+                        .status(Action.Status.RUNNING)
+                        .code(100)
+                        .build()
+        );
+
+        final String response = mvc.perform(post("/rest/v1/action-status-codes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"code\":100,\"name\":\"DOCUMENTED\"}"))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+        mvc.perform(get("/rest/v1/action-status-codes/undocumented"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.total", equalTo(0)));
+
+        mvc.perform(delete("/rest/v1/action-status-codes/" + extractId(response)))
+                .andExpect(status().isNoContent());
+
+        mvc.perform(get("/rest/v1/action-status-codes/undocumented"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.total", equalTo(1)))
+                .andExpect(jsonPath("$.content[0].code", equalTo(100)));
+
+        // can be documented again
+        mvc.perform(post("/rest/v1/action-status-codes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"code\":100,\"name\":\"DOCUMENTED_AGAIN\"}"))
+                .andExpect(status().isCreated());
     }
 
     @Test

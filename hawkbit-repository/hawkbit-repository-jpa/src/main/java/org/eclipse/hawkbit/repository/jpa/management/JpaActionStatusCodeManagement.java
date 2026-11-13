@@ -93,6 +93,15 @@ public class JpaActionStatusCodeManagement implements ActionStatusCodeManagement
     }
 
     @Override
+    @Transactional
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
+    public void delete(final long id) {
+        final JpaActionStatusCode entity = actionStatusCodeRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(ActionStatusCode.class, id));
+        actionStatusCodeRepository.delete(entity);
+    }
+
+    @Override
     public ActionStatusCode get(final long id) {
         return find(id).orElseThrow(() -> new EntityNotFoundException(ActionStatusCode.class, id));
     }

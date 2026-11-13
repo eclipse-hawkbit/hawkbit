@@ -77,18 +77,23 @@ and severity of a code.
 - **POST /rest/v1/action-status-codes** - Create a new catalogue entry. The `code` field must be unique per tenant.
 - **PUT /rest/v1/action-status-codes/{id}** - Update an existing catalogue entry. The `code` field is immutable and
   ignored in the request body.
+- **DELETE /rest/v1/action-status-codes/{id}** - Delete a catalogue entry. Action statuses and actions keep their
+  codes; a code that is still referenced by action statuses is listed under `/undocumented` again and can be
+  re-documented via POST.
 - **GET /rest/v1/action-status-codes/undocumented** - List status codes reported on action statuses (by devices or
   written by the server) that have no catalogue entry (read-only; to document a code, POST it to the catalogue).
 
 Entries are addressed by technical `id` in the path (`/{id}`), consistent with all other hawkBit Management APIs. The
 `code` is a unique, immutable body field. The `severity` can be `TRACE`, `DEBUG`, `INFO`, `WARN`, or `ERROR` (default:
-`INFO`). Attempting to create a duplicate code returns HTTP 409. There is no DELETE operation.
+`INFO`). Attempting to create a duplicate code returns HTTP 409. Since the `code` is immutable, a wrong code is corrected by
+deleting the entry and creating a new one.
 
 **Permissions:**
 
 - `READ_TARGET` - required for GET operations
 - `CREATE_TARGET` - required for POST operations
 - `UPDATE_TARGET` - required for PUT operations
+- `DELETE_TARGET` - required for DELETE operations
 
 ### Server-Reported Status Codes
 

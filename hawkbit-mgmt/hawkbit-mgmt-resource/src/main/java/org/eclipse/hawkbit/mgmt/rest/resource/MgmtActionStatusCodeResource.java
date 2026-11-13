@@ -97,6 +97,14 @@ public class MgmtActionStatusCodeResource implements MgmtActionStatusCodeRestApi
     }
 
     @Override
+    @AuditLog(entity = "ActionStatusCode", type = AuditLog.Type.DELETE, description = "Delete Action Status Code")
+    public ResponseEntity<Void> delete(final long id) {
+        log.debug("Delete action status code {}", id);
+        actionStatusCodeManagement.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Override
     public ResponseEntity<PagedList<MgmtUndocumentedActionStatusCode>> getUndocumentedActionStatusCodes(
             final int pagingOffsetParam,
             final int pagingLimitParam) {

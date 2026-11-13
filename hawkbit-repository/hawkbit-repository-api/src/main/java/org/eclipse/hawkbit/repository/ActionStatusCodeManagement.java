@@ -59,6 +59,16 @@ public interface ActionStatusCodeManagement<T extends ActionStatusCode> extends 
     T update(@NotNull @Valid Update update);
 
     /**
+     * Deletes an action status code from the catalogue. Action statuses and actions referencing the code by value are not
+     * touched - if the code is still referenced it is reported as undocumented again.
+     *
+     * @param id the id
+     * @throws org.eclipse.hawkbit.repository.exception.EntityNotFoundException if not found
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_DELETE_REPOSITORY)
+    void delete(long id);
+
+    /**
      * Gets an action status code by id.
      *
      * @param id the id

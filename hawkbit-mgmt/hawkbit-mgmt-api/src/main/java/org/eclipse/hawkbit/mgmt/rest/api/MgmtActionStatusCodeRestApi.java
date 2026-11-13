@@ -31,6 +31,7 @@ import org.eclipse.hawkbit.mgmt.json.model.actionstatuscode.MgmtActionStatusCode
 import org.eclipse.hawkbit.mgmt.json.model.actionstatuscode.MgmtActionStatusCodeRequestBodyPut;
 import org.eclipse.hawkbit.mgmt.json.model.actionstatuscode.MgmtUndocumentedActionStatusCode;
 import org.eclipse.hawkbit.rest.ApiPermission;
+import org.eclipse.hawkbit.rest.ApiResponsesConstants.DeleteResponses;
 import org.eclipse.hawkbit.rest.ApiResponsesConstants.GetIfExistResponses;
 import org.eclipse.hawkbit.rest.ApiResponsesConstants.GetResponses;
 import org.eclipse.hawkbit.rest.ApiResponsesConstants.PostCreateResponses;
@@ -38,6 +39,7 @@ import org.eclipse.hawkbit.rest.ApiResponsesConstants.PutResponses;
 import org.eclipse.hawkbit.rest.OpenApi;
 import org.eclipse.hawkbit.rest.RequiredPermissions;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -128,6 +130,22 @@ public interface MgmtActionStatusCodeRestApi {
     ResponseEntity<MgmtActionStatusCode> update(
             @PathVariable("id") long id,
             @RequestBody MgmtActionStatusCodeRequestBodyPut body);
+
+    /**
+     * Handles the DELETE request for deleting an action status code from the catalogue. Action history is not touched - codes
+     * still referenced by action statuses are listed as undocumented again.
+     *
+     * @param id the id of the action status code
+     * @return status 204 if deleted successfully
+     */
+    @Operation(summary = "Delete an action status code",
+            description = "Handles the DELETE request for deleting an action status code from the catalogue. Action statuses keep " +
+                    "their codes; codes still referenced by action statuses are listed under /undocumented again and can be " +
+                    "re-documented via POST.")
+    @DeleteResponses
+    @RequiredPermissions({ ApiPermission.READ_TARGET, ApiPermission.DELETE_TARGET })
+    @DeleteMapping(value = ACTION_STATUS_CODES_V1 + "/{id}")
+    ResponseEntity<Void> delete(@PathVariable("id") long id);
 
     /**
      * Handles the GET request for retrieving undocumented action status codes.

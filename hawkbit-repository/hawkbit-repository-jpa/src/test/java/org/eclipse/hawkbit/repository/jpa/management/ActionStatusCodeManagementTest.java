@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.repository.jpa.management;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.eclipse.hawkbit.auth.SpPermission.CREATE_TARGET;
+import static org.eclipse.hawkbit.auth.SpPermission.DELETE_TARGET;
 import static org.eclipse.hawkbit.auth.SpPermission.READ_TARGET;
 
 import java.util.concurrent.Callable;
@@ -144,6 +145,120 @@ class ActionStatusCodeManagementTest extends AbstractJpaIntegrationTest {
         // Try to access it from the default tenant
         assertThatThrownBy(() -> actionStatusCodeManagement.get(idInTenantB))
                 .isInstanceOf(EntityNotFoundException.class);
+    }
+
+    @Test
+    void deleteRemovesEntry() {
+        final ActionStatusCode created = actionStatusCodeManagement.create(
+                ActionStatusCodeManagement.Create.builder()
+                        .code(1)
+                        .name("A")
+                        .build()
+        );
+
+        actionStatusCodeManagement.delete(created.getId());
+
+        assertThat(actionStatusCodeManagement.find(created.getId())).isEmpty();
+    }
+
+    @Test
+    void deleteUnknownIdFails() {
+        assertThatThrownBy(() -> actionStatusCodeManagement.delete(999_999L))
+                .isInstanceOf(EntityNotFoundException.class);
+    }
+
+    @Test
+    void deleteOtherTenantsIdFails() throws Exception {
+        final Long idInTenantB = runAsTenant("tenantB", () -> actionStatusCodeManagement.create(
+                ActionStatusCodeManagement.Create.builder()
+                        .code(1)
+                        .name("B")
+                        .build()
+        ).getId());
+
+        assertThatThrownBy(() -> actionStatusCodeManagement.delete(idInTenantB))
+                .isInstanceOf(EntityNotFoundException.class);
+        assertThat(runAsTenant("tenantB", () -> actionStatusCodeManagement.find(idInTenantB))).isPresent();
+    }
+
+    @Test
+    void deletedCodeCanBeCreatedAgain() {
+        final ActionStatusCode created = actionStatusCodeManagement.create(
+                ActionStatusCodeManagement.Create.builder()
+                        .code(1)
+                        .name("A")
+                        .build()
+        );
+        actionStatusCodeManagement.delete(created.getId());
+
+        final ActionStatusCode recreated = actionStatusCodeManagement.create(
+                ActionStatusCodeManagement.Create.builder()
+                        .code(1)
+                        .name("A2")
+                        .build()
+        );
+
+        assertThat(recreated.getId()).isNotEqualTo(created.getId());
+        assertThat(recreated.getName()).isEqualTo("A2");
+    }
+
+    @Test
+    void deletedCodeInUseIsUndocumentedAgainAndHistoryIsKept() {
+        final String controllerId = "targetDel";
+        targetManagement.create(Create.builder().controllerId(controllerId).build());
+        final DistributionSet ds = testdataFactory.createDistributionSet();
+        final long actionId = deploymentManagement.assignDistributionSets(
+                List.of(DeploymentRequest.builder(controllerId, ds.getId()).build()), null
+        ).get(0).getAssignedEntity().get(0).getId();
+        controllerManagement.addUpdateActionStatus(
+                Action.ActionStatusCreate.builder()
+                        .actionId(actionId)
+                        .status(Action.Status.RUNNING)
+                        .code(100)
+                        .build()
+        );
+        final ActionStatusCode documented = actionStatusCodeManagement.create(
+                ActionStatusCodeManagement.Create.builder()
+                        .code(100)
+                        .name("Documented")
+                        .build()
+        );
+        assertThat(actionStatusCodeManagement.findUndocumentedCodes(PageRequest.of(0, 10)).getContent()).isEmpty();
+
+        actionStatusCodeManagement.delete(documented.getId());
+
+        assertThat(actionStatusCodeManagement.findUndocumentedCodes(PageRequest.of(0, 10)).getContent()).containsExactly(100);
+        assertThat(deploymentManagement.findAction(actionId).orElseThrow().getLastActionStatusCode()).contains(100);
+    }
+
+    @Test
+    @WithUser(authorities = { READ_TARGET, CREATE_TARGET })
+    void deleteWithoutDeleteTargetIsDenied() {
+        final ActionStatusCode created = actionStatusCodeManagement.create(
+                ActionStatusCodeManagement.Create.builder()
+                        .code(1)
+                        .name("A")
+                        .build()
+        );
+
+        assertThatThrownBy(() -> actionStatusCodeManagement.delete(created.getId()))
+                .isInstanceOf(InsufficientPermissionException.class);
+        assertThat(actionStatusCodeManagement.find(created.getId())).isPresent();
+    }
+
+    @Test
+    @WithUser(authorities = { READ_TARGET, DELETE_TARGET })
+    void deleteWithDeleteTargetIsAllowed() throws Exception {
+        final Long id = SecurityContextSwitch.asPrivileged(() -> actionStatusCodeManagement.create(
+                ActionStatusCodeManagement.Create.builder()
+                        .code(1)
+                        .name("A")
+                        .build()
+        ).getId());
+
+        actionStatusCodeManagement.delete(id);
+
+        assertThat(actionStatusCodeManagement.find(id)).isEmpty();
     }
 
     @Test
