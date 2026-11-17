@@ -210,7 +210,8 @@ lastStatusCode=ge=200;lastStatusCode=le=299
 
 ## Action Status Code
 
-Action Status Codes define an optional per-tenant catalogue of numeric status codes that can be reported by devices or written by
+Action Status Codes define an optional per-tenant catalogue of numeric status codes that can be reported by devices or
+written by
 the server on action statuses.
 
 **Filterable/Sortable Fields:**
