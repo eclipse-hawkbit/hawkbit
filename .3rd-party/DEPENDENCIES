@@ -169,9 +169,9 @@ maven/mavencentral/org.aspectj/aspectjrt/1.9.25.1, Apache-2.0 AND BSD-3-Clause A
 maven/mavencentral/org.aspectj/aspectjweaver/1.9.25.1, Apache-2.0 AND BSD-3-Clause AND EPL-1.0 AND BSD-3-Clause AND Apache-1.1, approved, #15252
 maven/mavencentral/org.assertj/assertj-core/3.27.7, Apache-2.0, approved, #17980
 maven/mavencentral/org.awaitility/awaitility/4.3.0, Apache-2.0, approved, clearlydefined
-maven/mavencentral/org.bouncycastle/bcpkix-jdk18on/1.86, MIT, approved, #31037
+maven/mavencentral/org.bouncycastle/bcpkix-jdk18on/1.87, MIT, approved, #33207
 maven/mavencentral/org.bouncycastle/bcprov-jdk18on/1.85.2, MIT AND CC0-1.0, approved, #30066
-maven/mavencentral/org.bouncycastle/bcutil-jdk18on/1.86, MIT, approved, #31042
+maven/mavencentral/org.bouncycastle/bcutil-jdk18on/1.87, MIT, approved, #33209
 maven/mavencentral/org.flywaydb/flyway-core/12.4.0, Apache-2.0, approved, #28718
 maven/mavencentral/org.flywaydb/flyway-database-postgresql/12.4.0, Apache-2.0, approved, #28703
 maven/mavencentral/org.flywaydb/flyway-mysql/12.4.0, Apache-2.0, approved, #28753
