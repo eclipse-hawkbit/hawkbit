@@ -183,9 +183,12 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
             try {
                 convertedValue = CONVERSION_SERVICE.convert(e.getValue(), targetType);
             } catch (final ConversionException | IllegalArgumentException ex) {
+                // the message goes to the (audit) logs and responses - don't expose the (even malformed) gateway token
+                final Object valueToReport = AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY.equals(configurationKey.getKeyName())
+                        ? "***" : e.getValue();
                 throw new TenantConfigurationValidatorException(String.format(
                         "Cannot convert the value %s of type %s to the type %s defined by the configuration key.",
-                        e.getValue(), e.getValue().getClass(), targetType));
+                        valueToReport, e.getValue().getClass(), targetType));
             }
             final String valueToString = Optional.ofNullable(convertedValue)
                     .map(Object::toString)
