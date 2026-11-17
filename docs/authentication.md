@@ -99,6 +99,14 @@ For that you shall:
   openssl x509 -in client_certificate.crt -issuer_hash -noout`
   ```
 
+The reverse proxy is responsible for the client certificate headers (`X-Controller-Id`, `X-Authority*`): it shall set
+(overwrite) them for the requests with a verified client certificate and remove them from all the other requests.
+
+> `hawkbit.server.ddi.security.rp.trusted-ips` (DDI authentication accepted only from these reverse proxy IPs) is
+> deprecated since 1.2.1 and will be removed. If set, it has to be enabled explicitly with
+> `hawkbit.server.ddi.security.rp.trusted-ips-enable=true`, otherwise hawkBit (with embedded Tomcat) fails to start.
+> The IP of the connection peer (the reverse proxy) is checked, not the client IP resolved from `X-Forwarded-For`.
+
 Here is an example diagram that shows all the communication between the hawkBit, reverse proxy and client. For the sake
 of simplification we assume that there are not intermediate certificates and the certificate and key are as follows:
 

@@ -51,8 +51,15 @@ public class DdiSecurityProperties {
          */
         private String authoritiesSeparatorRegex = "[;,]";
         /**
-         * List of trusted (reverse proxy) IP addresses for performing DDI client certificate auth.
+         * List of trusted (reverse proxy) IP addresses for performing DDI client certificate auth. The IP address of the connection peer
+         * (the reverse proxy) is checked, not the client IP resolved from the forwarded headers. If set, requires (explicitly)
+         * <code>hawkbit.server.ddi.security.rp.trusted-ips-enable=true</code>, otherwise with embedded Tomcat the application fails to start.
+         *
+         * @deprecated since 1.2.1 - the deployment shall protect access to hawkBit
+         *         (e.g. only trusted peers shall be able to call DDI with client certificate headers).
+         *         Will be removed.
          */
+        @Deprecated(forRemoval = true, since = "1.2.1")
         private List<String> trustedIPs;
     }
 

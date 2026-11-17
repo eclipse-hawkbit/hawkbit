@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -62,6 +63,19 @@ class IpUtilTest {
                 .isEqualTo(knownRemoteClientIP);
         verify(requestMock, times(1)).getHeader(KNOWN_REQUEST_HEADER);
         verify(requestMock, times(1)).getRemoteAddr();
+    }
+
+    /**
+     * Tests that the remote address is used (no header is read) when there is no forward header configured
+     */
+    @Test
+    void getRemoteAddrFromRequestIfNoForwardedHeaderConfigured() {
+        final URI knownRemoteClientIP = IpUtil.createHttpUri("10.0.0.1");
+        when(requestMock.getRemoteAddr()).thenReturn(knownRemoteClientIP.getHost());
+
+        assertThat(IpUtil.getClientIpFromRequest(requestMock, (String) null)).isEqualTo(knownRemoteClientIP);
+        assertThat(IpUtil.getClientIpFromRequest(requestMock, "")).isEqualTo(knownRemoteClientIP);
+        verify(requestMock, times(0)).getHeader(any());
     }
 
     /**

@@ -1,5 +1,12 @@
 # Quick Start
 
+> hawkBit serves plain HTTP. Running it directly exposed is meant for local development only. In production hawkBit
+> MUST run behind a trusted reverse proxy, which terminates HTTPS and is responsible for the forwarded headers (e.g.
+> sets / appends to `X-Forwarded-For`). hawkBit is designed for embedded Tomcat with
+> `server.forward-headers-strategy=NATIVE` and `server.tomcat.use-relative-redirects=true` (the defaults), otherwise it
+> logs a warning and the correct forwarded headers and redirect behavior are up to the deployment (see
+> [Throttling](throttling.md)).
+
 ---
 
 ## From Docker Image

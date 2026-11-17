@@ -88,6 +88,13 @@ CI (`.github/workflows/reusable_workflow_verify.yaml`) runs `license:check`, the
 
 ## Gotchas
 
+- **Deployment model:** hawkBit serves plain HTTP. It runs directly exposed only on localhost (development). Every
+  production installation MUST run behind a trusted reverse proxy (HTTPS termination), which is responsible for the
+  forwarded headers (e.g. setting / appending to `X-Forwarded-For`). Don't treat a directly exposed hawkBit as a threat
+  scenario. It is designed for embedded Tomcat with `server.forward-headers-strategy=NATIVE` and
+  `server.tomcat.use-relative-redirects=true` (`hawkbit-rest-defaults.properties`): Tomcat resolves the client IP
+  (`RemoteIpResolutionPostProcessor`), otherwise a startup warning is logged and the header is read as is.
+
 - **JPA vendor is chosen at build time** (`jpa.vendor` property, Maven profiles in `hawkbit-repository-jpa/pom.xml`).
   Base entities exist in both `-jpa-eclipselink` and `-jpa-hibernate`, so change both.
 - **Generated code, don't edit:**

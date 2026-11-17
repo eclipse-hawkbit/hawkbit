@@ -17,6 +17,7 @@ import jakarta.servlet.http.HttpServletRequest;
 
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.rest.security.DosFilter;
+import org.eclipse.hawkbit.rest.security.RemoteIpResolutionPostProcessor;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -42,6 +43,16 @@ import org.springframework.util.CollectionUtils;
 public class SecurityManagedConfiguration {
 
     public static final int DOS_FILTER_ORDER = -200;
+
+    /**
+     * Decides whether the client IP is resolved by Tomcat or read from the configured remote IP header and warns if the
+     * instance doesn't run as hawkBit is designed for (see {@link RemoteIpResolutionPostProcessor}). Static in order to be
+     * registered early, before the {@link HawkbitSecurityProperties} are created.
+     */
+    @Bean
+    public static RemoteIpResolutionPostProcessor remoteIpResolutionPostProcessor() {
+        return new RemoteIpResolutionPostProcessor();
+    }
 
     public static FilterRegistrationBean<DosFilter> dosFilter(
             final Collection<String> includeAntPaths,

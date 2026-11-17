@@ -77,7 +77,9 @@ public class MgmtSecurityConfiguration {
     }
 
     /**
-     * Filter to protect the hawkBit server Management interface against to many requests.
+     * Filter to protect the hawkBit server Management interface against too many requests. A servlet filter, so it runs before the
+     * authentication: the basic / bearer authentication rejects invalid credentials directly (doesn't continue the chain), so a filter
+     * after the authentication wouldn't throttle (and blacklist) them. Hence, the requests are counted per client IP.
      *
      * @return the spring filter registration bean for registering a denial of service protection filter in the filter chain
      */
@@ -86,7 +88,7 @@ public class MgmtSecurityConfiguration {
     public FilterRegistrationBean<DosFilter> dosFilterREST() {
         final FilterRegistrationBean<DosFilter> filterRegBean = SecurityManagedConfiguration.dosFilter(null,
                 securityProperties.getDos().getFilter(), securityProperties.getClients());
-        filterRegBean.setUrlPatterns(List.of(MgmtRestConstants.REST + "/*", "/system/admin/*"));
+        filterRegBean.setUrlPatterns(List.of(MgmtRestConstants.REST + "/*"));
         filterRegBean.setOrder(SecurityManagedConfiguration.DOS_FILTER_ORDER);
         filterRegBean.setName("dosMgmtFilter");
 
