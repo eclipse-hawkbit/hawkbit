@@ -16,6 +16,7 @@ import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationPrope
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
@@ -88,8 +89,20 @@ public class SecurityHeaderAuthenticator extends Authenticator.AbstractAuthentic
     @SuppressWarnings({ "java:S2629", "java:S135", "java:S3776" }) // check if debug is enabled is maybe heavier than evaluation, rest - fine
     private boolean verify(final ControllerSecurityToken controllerSecurityToken, final String headerAuthority) {
         // there may be several trusted authorities (headerAuthority config value) configured for the tenant
-        final List<String> trustedAuthorities = Arrays.stream(headerAuthority.split(authoritiesSeparatorRegex))
-                .map(String::toLowerCase).map(String::trim).toList();
+        // blank entries are dropped - otherwise an empty / blank config (or an empty item, e.g. "a,,b") would trust an empty
+        // authority header. So, with no trusted authority configured, header authentication rejects all requests (fail closed)
+        final List<String> trustedAuthorities = headerAuthority == null
+                ? List.of()
+                : Arrays.stream(headerAuthority.split(authoritiesSeparatorRegex))
+                        .map(authority -> authority.toLowerCase(Locale.ROOT))
+                        .map(String::trim)
+                        .filter(authority -> !authority.isEmpty())
+                        .toList();
+        if (trustedAuthorities.isEmpty()) {
+            // debug, not warn - it is evaluated per request, so a higher level could be used to flood the logs
+            LOGGER.debug("[SEC_HEADER_AUTH] Header authentication is enabled but no trusted authority is configured");
+            return false;
+        }
 
         boolean hasAuthorityHeader = false;
         String matchingAuthority = null;
@@ -105,7 +118,8 @@ public class SecurityHeaderAuthenticator extends Authenticator.AbstractAuthentic
                     } // if 0, try if start from 1
                 } else {
                     hasAuthorityHeader = true;
-                    final String authorityLower = authority.toLowerCase();
+                    // trimmed as the trusted authorities and the not indexed header values are
+                    final String authorityLower = authority.toLowerCase(Locale.ROOT).trim();
                     if (trustedAuthorities.contains(authorityLower)) {
                         matchingAuthority = authorityLower;
                         break;
@@ -115,7 +129,7 @@ public class SecurityHeaderAuthenticator extends Authenticator.AbstractAuthentic
         } else {
             hasAuthorityHeader = true;
             matchingAuthority = Arrays.stream(authorityHeaderValue.split(authoritiesSeparatorRegex))
-                    .map(String::toLowerCase).map(String::trim)
+                    .map(authority -> authority.toLowerCase(Locale.ROOT)).map(String::trim)
                     .filter(trustedAuthorities::contains)
                     .findFirst().orElse(null);
         }

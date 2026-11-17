@@ -14,6 +14,8 @@ import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationPrope
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.AUTHENTICATION_HEADER_ENABLED;
 import static org.mockito.Mockito.when;
 
+import java.util.Locale;
+
 import org.eclipse.hawkbit.context.Principal;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
@@ -23,6 +25,8 @@ import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -36,7 +40,8 @@ class SecurityHeaderAuthenticatorTest {
     private static final String CA_COMMON_NAME = "ca-cn";
     private static final String CA_COMMON_NAME_VALUE = "box1";
 
-    private static final String X_AUTHORITY_1 = "X-Authority-1";
+    private static final String X_AUTHORITY = "X-Authority";
+    private static final String X_AUTHORITY_1 = X_AUTHORITY + "-1";
 
     private static final String SINGLE_AUTHORITY = "hash1";
     private static final String SECOND_AUTHORITY = "hash2";
@@ -108,6 +113,21 @@ class SecurityHeaderAuthenticatorTest {
     }
 
     /**
+     * Tests that indexed authority header values are matched case-insensitive and trimmed, as the not indexed ones
+     */
+    @Test
+    void testWithNotTrimmedIndexedAuthority() {
+        when(tenantConfigurationManagementMock.getConfigurationValue(AUTHENTICATION_HEADER_AUTHORITY, String.class))
+                .thenReturn(CONFIG_VALUE_SINGLE_AUTHORITY);
+        when(tenantConfigurationManagementMock.getConfigurationValue(AUTHENTICATION_HEADER_ENABLED, Boolean.class))
+                .thenReturn(CONFIG_VALUE_ENABLED);
+
+        assertThat(authenticator.authenticate(prepareSecurityToken(" " + SINGLE_AUTHORITY.toUpperCase(Locale.ROOT) + " ")))
+                .isNotNull()
+                .hasFieldOrPropertyWithValue("principal", new Principal("DEFAULT", CA_COMMON_NAME_VALUE));
+    }
+
+    /**
      * Tests that if the hash is unknown, the authentication fails
      */
     @Test
@@ -119,6 +139,45 @@ class SecurityHeaderAuthenticatorTest {
                 .thenReturn(CONFIG_VALUE_ENABLED);
 
         assertThat(authenticator.authenticate(securityToken)).isNull();
+    }
+
+    /**
+     * Tests that if no trusted authority is configured (empty / blank / only separators), empty or blank authority headers
+     * are not accepted - neither in the plain nor in the indexed authority header
+     */
+    @ParameterizedTest
+    @ValueSource(strings = { "", " ", ",", " ; , " })
+    void testWithBlankTrustedAuthority(final String configuredAuthority) {
+        when(tenantConfigurationManagementMock.getConfigurationValue(AUTHENTICATION_HEADER_AUTHORITY, String.class))
+                .thenReturn(TenantConfigurationValue.<String> builder().value(configuredAuthority).build());
+        when(tenantConfigurationManagementMock.getConfigurationValue(AUTHENTICATION_HEADER_ENABLED, Boolean.class))
+                .thenReturn(CONFIG_VALUE_ENABLED);
+
+        for (final String headerValue : new String[] { "", " ", "," }) {
+            assertThat(authenticator.authenticate(prepareSecurityToken(headerValue))).isNull();
+
+            final ControllerSecurityToken securityToken = new ControllerSecurityToken("DEFAULT", CA_COMMON_NAME_VALUE);
+            securityToken.putHeader(CA_COMMON_NAME, CA_COMMON_NAME_VALUE);
+            securityToken.putHeader(X_AUTHORITY, headerValue);
+            assertThat(authenticator.authenticate(securityToken)).isNull();
+        }
+    }
+
+    /**
+     * Tests that an empty item in the trusted authority list doesn't make an empty authority header trusted
+     */
+    @Test
+    void testWithEmptyItemInTrustedAuthorities() {
+        when(tenantConfigurationManagementMock.getConfigurationValue(AUTHENTICATION_HEADER_AUTHORITY, String.class))
+                .thenReturn(TenantConfigurationValue.<String> builder().value(SINGLE_AUTHORITY + ",," + SECOND_AUTHORITY).build());
+        when(tenantConfigurationManagementMock.getConfigurationValue(AUTHENTICATION_HEADER_ENABLED, Boolean.class))
+                .thenReturn(CONFIG_VALUE_ENABLED);
+
+        final ControllerSecurityToken securityToken = new ControllerSecurityToken("DEFAULT", CA_COMMON_NAME_VALUE);
+        securityToken.putHeader(CA_COMMON_NAME, CA_COMMON_NAME_VALUE);
+        securityToken.putHeader(X_AUTHORITY, "");
+        assertThat(authenticator.authenticate(securityToken)).isNull();
+        assertThat(authenticator.authenticate(prepareSecurityToken(SECOND_AUTHORITY))).isNotNull();
     }
 
     /**

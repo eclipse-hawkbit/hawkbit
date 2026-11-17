@@ -98,9 +98,14 @@ For that you shall:
   ```shell
   openssl x509 -in client_certificate.crt -issuer_hash -noout`
   ```
+  If no issuer hash is configured (empty or blank), header authentication rejects all requests.
 
-The reverse proxy is responsible for the client certificate headers (`X-Controller-Id`, `X-Authority*`): it shall set
-(overwrite) them for the requests with a verified client certificate and remove them from all the other requests.
+The reverse proxy is responsible for the client certificate headers (e.g. `X-Controller-Id`, `X-Authority*`): it shall
+set (overwrite) them for the requests with a verified client certificate and remove them from all the other requests.
+hawkBit trusts the controller id and authority headers as they are received. hawkBit shall not be reachable without
+passing the reverse proxy. If the not indexed authority header (`X-Authority`) is present, the indexed ones
+(`X-Authority-<n>`) are ignored, so setting `X-Authority` also overrides any indexed authority header sent by the
+client.
 
 > `hawkbit.server.ddi.security.rp.trusted-ips` (DDI authentication accepted only from these reverse proxy IPs) is
 > deprecated since 1.2.1 and will be removed. If set, it has to be enabled explicitly with
@@ -142,7 +147,7 @@ server.forward-headers-strategy=NATIVE
 
 2. In Hawkbit's UI section, under system configuration, make sure to select *Allow targets to authenticate via a
    certificate authenticated by a reverse proxy* and input the fixed issuer hash as "Hawkbit". This can be whenever you
-   have configured in the nginx configuration in `proxy_set_header X-Authority-1` below.
+   have configured in the nginx configuration in `proxy_set_header X-Authority` below.
 
 3. After placing your certificates and keys, you need to deploy your proxy server and apply the provided configurations.
    You can apply mutual TLS specifically to the URL given below to implement the process only for devices using the
@@ -208,7 +213,8 @@ server {
         # Client certificate Common Name and Issuer Hash is required
         # for auth in hawkbit. 
         proxy_set_header X-Controller-Id $ssl_client_s_dn_cn;
-        proxy_set_header X-Authority-1 Hawkbit;
+        # Set as not indexed header - then any indexed X-Authority-<n> header sent by the client is ignored
+        proxy_set_header X-Authority Hawkbit;
 
         # These are required for clients to upload and download software. 
         proxy_request_buffering off;
@@ -221,6 +227,10 @@ server {
         proxy_set_header Host $http_host; 
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        # Clear (an empty value makes nginx drop the header) the authentication headers if sent by the client.
+        # Without X-Controller-Id the header authentication fails, regardless of the authority headers
+        proxy_set_header X-Controller-Id "";
+        proxy_set_header X-Authority "";
 	    proxy_request_buffering off;
 	    client_max_body_size 1000m;
    }   
@@ -270,16 +280,16 @@ be adjusted as follows. Remember to change id, url and certificate names to your
 The location of the config file is `/etc/swupdate/swupdate.conf`
 
 ```yml
-suricatta :
-{
-tenant = "default";
-id = "device_id";
-url = "https://hawkbit.dev.example.com";
-nocheckcert = false;
-cafile = "server_ca.crt";
-sslkey = "/etc/ssl/certs/client.key";
-sslcert = "/etc/ssl/certs/client.crt";
-};
+suricatta:
+  {
+    tenant = "default";
+    id = "device_id";
+    url = "https://hawkbit.dev.example.com";
+    nocheckcert = false;
+    cafile = "server_ca.crt";
+    sslkey = "/etc/ssl/certs/client.key";
+    sslcert = "/etc/ssl/certs/client.crt";
+  };
 ```
 
 If your client service is a linux, you can use the command bellow to see the logs produced by the swupdate.
