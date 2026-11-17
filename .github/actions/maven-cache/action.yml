@@ -1,0 +1,21 @@
+name: Maven cache
+description: Caches the local maven repository (~/.m2/repository)
+
+runs:
+  using: composite
+  steps:
+    - name: Cache month
+      id: month
+      shell: bash
+      run: echo "value=$(date -u +%Y-%m)" >> "$GITHUB_OUTPUT"
+
+    # restore-keys falls back to the latest cache when the pom.xml hash changes, so only changed deps are downloaded
+    # (setup-java 'cache: maven' has no such fallback). The fallback keeps the old dependency versions too, so the cache
+    # grows with every pom.xml change - the month in the key (and in restore-keys) starts a fresh cache every month.
+    - name: Cache maven repository
+      uses: actions/cache@v6.1.0
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ steps.month.outputs.value }}-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-${{ steps.month.outputs.value }}-

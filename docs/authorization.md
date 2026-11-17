@@ -233,7 +233,7 @@ component which
 implements [org.eclipse.hawkbit.repository.jpa.acm.AccessController](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-repository/hawkbit-repository-jpa/src/main/java/org/eclipse/hawkbit/repository/jpa/acm/AccessController.java)
 interface.
 
-Out of the box hawkBit provides `Access Controller` implementations for:
+Out of the box, hawkBit provides `Access Controller` implementations for:
 
 * Target Management - `target`
 * Target Type Management - `target-type`

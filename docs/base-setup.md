@@ -32,11 +32,11 @@ For this you can either edit the existing `application.properties`
 or [create a new profile](http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#boot-features-external-config-profile-specific-properties):
 
 ```properties
-spring.jpa.database: MYSQL
-spring.datasource.url: jdbc:mariadb://localhost:3306/YOUR_SCHEMA
-spring.datasource.username: YOUR_USER
-spring.datasource.password: YOUR_PWD
-spring.datasource.driverClassName: org.mariadb.jdbc.Driver
+spring.jpa.database:MYSQL
+spring.datasource.url:jdbc:mariadb://localhost:3306/YOUR_SCHEMA
+spring.datasource.username:YOUR_USER
+spring.datasource.password:YOUR_PWD
+spring.datasource.driverClassName:org.mariadb.jdbc.Driver
 ```
 
 The update server ships with a `mysql` profile (`application-mysql.properties`) with these settings for a local
@@ -50,11 +50,11 @@ MariaDB/MySQL (`jdbc:mariadb://localhost:3306/hawkbit`, user `root`), which you 
 Alternatively, you can use PostgreSQL:
 
 ```properties
-spring.jpa.database: POSTGRESQL
-spring.datasource.url: jdbc:postgresql://localhost:5432/YOUR_SCHEMA
-spring.datasource.username: YOUR_USER
-spring.datasource.password: YOUR_PWD
-spring.datasource.driverClassName: org.postgresql.Driver
+spring.jpa.database:POSTGRESQL
+spring.datasource.url:jdbc:postgresql://localhost:5432/YOUR_SCHEMA
+spring.datasource.username:YOUR_USER
+spring.datasource.password:YOUR_PWD
+spring.datasource.driverClassName:org.postgresql.Driver
 ```
 
 The update server ships with a `postgresql` profile (`application-postgresql.properties`) with these settings for a
@@ -77,15 +77,18 @@ hawkbit.events.remote.enabled=false
 To enable it, remove the `RabbitAutoConfiguration` exclusion (e.g. `spring.autoconfigure.exclude=`) and set
 `hawkbit.dmf.enabled=true` (for DMF) and/or `hawkbit.events.remote.enabled=true` (for remote events).
 
+When DMF is enabled, the deployment model must be set explicitly, otherwise hawkBit fails at startup
+(see [deployment models](device-management-federation-api.md#deployment-models))
+
 Defaults are already provided for a standard Rabbit installation. Otherwise configure the following in
 `application.properties` of the update server (or of each service in micro-service mode):
 
 ```properties
-spring.rabbitmq.username: guest
-spring.rabbitmq.password: guest
-spring.rabbitmq.virtualHost: /
-spring.rabbitmq.host: localhost
-spring.rabbitmq.port: 5672
+spring.rabbitmq.username:guest
+spring.rabbitmq.password:guest
+spring.rabbitmq.virtualHost:/
+spring.rabbitmq.host:localhost
+spring.rabbitmq.port:5672
 ```
 
 ---

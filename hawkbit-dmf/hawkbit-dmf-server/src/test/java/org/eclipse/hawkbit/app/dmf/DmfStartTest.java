@@ -19,7 +19,8 @@ import org.springframework.boot.test.context.SpringBootTest;
         "spring.datasource.username=sa",
         "spring.datasource.password=",
         "spring.jpa.database=H2",
-        "spring.flyway.enabled=true" })
+        "spring.flyway.enabled=true",
+        "hawkbit.dmf.deployment-model=DM_SERVER_FOR_ALL" })
 class DmfStartTest {
 
     @Test

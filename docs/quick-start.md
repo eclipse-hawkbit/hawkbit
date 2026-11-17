@@ -134,8 +134,11 @@ $ java -jar ./hawkbit-ddi/hawkbit-ddi-server/target/hawkbit-ddi-server-0-SNAPSHO
 And (only if you want to use the DMF feature, requires a running RabbitMQ):
 
 ```bash
-$ java -jar ./hawkbit-dmf/hawkbit-dmf-server/target/hawkbit-dmf-server-0-SNAPSHOT.jar
+$ java -jar ./hawkbit-dmf/hawkbit-dmf-server/target/hawkbit-dmf-server-0-SNAPSHOT.jar --hawkbit.dmf.deployment-model=<deployment model>
 ```
+
+**Note:** When DMF is enabled, the deployment model must be set explicitly, otherwise hawkBit fails at startup
+(see [deployment models](device-management-federation-api.md#deployment-models)).
 
 **Note:** the monolith has RabbitMQ (`RabbitAutoConfiguration` excluded) and DMF (`hawkbit.dmf.enabled=false`) disabled
 by default. See [Base Setup](base-setup.md) how to enable them.

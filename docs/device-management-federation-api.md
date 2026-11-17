@@ -45,6 +45,14 @@ There are two ways to integrate DM (device manager) servers via DMF:
   extenders implementing it have to listen on the respective virtual hosts and to verify that the `tenant` header of
   each message belongs to the virtual host it came from.
 
+The deployment model is configured with `hawkbit.dmf.deployment-model` (env `HAWKBIT_DMF_DEPLOYMENTMODEL`):
+`DM_SERVER_FOR_ALL` or `DM_SERVER_PER_TENANT`. When DMF is enabled (`hawkbit.dmf.enabled`, default `true`), deployment
+model must be set explicitly.
+Out of the box, hawkBit supports only the `DM_SERVER_FOR_ALL` deployment model. Set the supported model
+`DM_SERVER_FOR_ALL` only if your DM server is trusted for any tenant.
+
+For `DM_SERVER_PER_TENANT` model extenders shall provide their own listener with virtual host / tenant verification.
+
 ## Messages sent **to** hawkBit
 
 ### THING_CREATED

@@ -39,6 +39,7 @@ import org.springframework.test.context.TestPropertySource;
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 @TestPropertySource(properties = {
         "hawkbit.events.remote.enabled=false",
+        "hawkbit.dmf.deployment-model=DM_SERVER_FOR_ALL",
         "spring.main.allow-bean-definition-overriding=true" })
 @SuppressWarnings("java:S6813") // constructor injects are not possible for test classes
 public abstract class AbstractAmqpIntegrationTest extends AbstractIntegrationTest {

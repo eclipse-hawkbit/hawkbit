@@ -50,7 +50,7 @@
 
         <!-- Other Overrides START - to be reviewed regularly -->
         <!-- override of org.apache.commons:commons-lang3 - old version coming via spring cloud openfeign 5.0.4 and org.springdoc 3.2.0 -->
-        <commons-lang.version>3.21.0</commons-lang.version>
+        <commons-lang.version>3.22.0</commons-lang.version>
         <!-- override spring-boot-starter-test 4.1.2 → json-smart 2.6.0 → accessors-smart 2.6.0 → org.ow2.asm:asm:9.7.1 that doesn't support java 25
           ASM used by EclipseLink to read entity metadata, must support the class file version of java.version. -->
         <asm.version>9.11.1</asm.version>
@@ -71,7 +71,7 @@
         <!-- spring cloud versions - stream (for rabbit mq) and openfeign -->
         <spring-cloud-stream.version>5.0.4</spring-cloud-stream.version>
         <spring-cloud-openfeign.version>5.0.4</spring-cloud-openfeign.version>
-        <openfeign-hc5.version>13.17</openfeign-hc5.version>
+        <openfeign-hc5.version>13.18</openfeign-hc5.version>
 
         <!-- Eclipselink - START -->
         <!--
@@ -83,7 +83,7 @@
 
         <!-- Misc libraries versions - START -->
         <cron-utils.version>9.2.1</cron-utils.version>
-        <jsoup.version>1.23.2</jsoup.version>
+        <jsoup.version>1.24.1</jsoup.version>
         <rsql-parser.version>2.1.0</rsql-parser.version>
         <commons-io.version>2.22.0</commons-io.version>
         <commons-collections4.version>4.6.0</commons-collections4.version>
@@ -93,13 +93,13 @@
 
         <!-- test -->
         <rabbitmq-http-client.version>5.7.0</rabbitmq-http-client.version>
-        <classgraph.version>6.0.1</classgraph.version>
+        <classgraph.version>6.0.2</classgraph.version>
         <awaitility.version>4.3.0</awaitility.version>
         <!-- Misc libraries versions - END -->
 
         <!-- Maven Plugin versions - START -->
         <maven-enforcer-plugin.version>3.7.0</maven-enforcer-plugin.version>
-        <flatten-maven-plugin.version>1.8.0</flatten-maven-plugin.version>
+        <flatten-maven-plugin.version>1.9.0</flatten-maven-plugin.version>
 
         <maven-surefire-plugin.version>3.6.1</maven-surefire-plugin.version>
         <jacoco-maven-plugin.version>0.8.16</jacoco-maven-plugin.version>
@@ -109,7 +109,7 @@
         <license-maven-plugin.version>5.1.2</license-maven-plugin.version>
         <central-publishing-maven-plugin.version>0.12.0</central-publishing-maven-plugin.version>
         <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
-        <exec-maven-plugin.version>3.6.4</exec-maven-plugin.version>
+        <exec-maven-plugin.version>3.7.0</exec-maven-plugin.version>
         <!-- Maven Plugin versions - END -->
 
         <!-- Test - START -->

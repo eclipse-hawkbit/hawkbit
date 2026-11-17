@@ -56,6 +56,14 @@ microservices mode and with UI you could use:
 $ docker compose -f postgres/docker-compose-micro-services-with-ui-postgres.yml up
 ```
 
+The DMF server (micro-services mode) is not started by default. To start it, add the `dmf` profile and set the
+[DMF deployment model](../docs/device-management-federation-api.md#deployment-models) (only if your DM server is trusted
+for any tenant; the variable could be put also in a `.env` file next to the compose file):
+
+```bash
+$ HAWKBIT_DMF_DEPLOYMENTMODEL=<deployment_model> docker compose -f postgres/docker-compose-micro-services-with-ui-postgres.yml --profile dmf up
+```
+
 ### Access
 
 | Service / Container   | URL                                              | Login       | A        | B        |

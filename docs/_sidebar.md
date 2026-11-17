@@ -45,7 +45,7 @@
 - [![Docker pulls](https://img.shields.io/docker/pulls/hawkbit/hawkbit-update-server.svg)](https://hub.docker.com/search?q=hawkbit%2Fhawkbit-update-server&type=image)
 -->
 
-- [![Join the chat at https://gitter.im/eclipse/hawkbit](https://badges.gitter.im/eclipse/hawkbit.svg)](https://gitter.im/eclipse/hawkbit?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+- [![hawkBit GitHub Discussions](https://img.shields.io/github/discussions/eclipse-hawkbit/hawkbit?label=GitHub%20Discussions)](https://github.com/eclipse-hawkbit/hawkbit/discussions)
 
 - [![License](https://img.shields.io/badge/License-EPL%202.0-green.svg)](https://opensource.org/licenses/EPL-2.0)
 
