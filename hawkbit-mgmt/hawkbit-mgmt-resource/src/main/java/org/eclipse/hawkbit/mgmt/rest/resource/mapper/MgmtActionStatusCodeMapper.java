@@ -16,7 +16,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.mgmt.json.model.actionstatuscode.MgmtActionStatusCode;
 import org.eclipse.hawkbit.mgmt.json.model.actionstatuscode.MgmtActionStatusCodeSeverity;
-import org.eclipse.hawkbit.mgmt.rest.api.MgmtActionStatusCodeRestApi;
+import org.eclipse.hawkbit.mgmt.rest.api.MgmtActionStatusCodeCatalogueRestApi;
 import org.eclipse.hawkbit.repository.model.ActionStatusCode;
 
 /**
@@ -38,7 +38,7 @@ public final class MgmtActionStatusCodeMapper {
         response.setCode(entity.getCode());
         response.setSeverity(toMgmtSeverity(entity.getSeverity()));
 
-        response.add(linkTo(methodOn(MgmtActionStatusCodeRestApi.class).getActionStatusCode(entity.getId()))
+        response.add(linkTo(methodOn(MgmtActionStatusCodeCatalogueRestApi.class).getActionStatusCode(entity.getId()))
                 .withSelfRel());
 
         return response;

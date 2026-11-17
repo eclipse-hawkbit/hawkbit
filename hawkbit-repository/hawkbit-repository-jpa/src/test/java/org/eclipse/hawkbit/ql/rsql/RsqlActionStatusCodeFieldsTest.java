@@ -12,7 +12,7 @@ package org.eclipse.hawkbit.ql.rsql;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import org.eclipse.hawkbit.repository.ActionStatusCodeManagement;
+import org.eclipse.hawkbit.repository.ActionStatusCodeCatalogueManagement;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.ActionStatusCode;
@@ -29,8 +29,8 @@ class RsqlActionStatusCodeFieldsTest extends AbstractJpaIntegrationTest {
 
     @BeforeEach
     void setup() {
-        actionStatusCodeManagement.create(
-                ActionStatusCodeManagement.Create.builder()
+        actionStatusCodeCatalogueManagement.create(
+                ActionStatusCodeCatalogueManagement.Create.builder()
                         .code(100)
                         .name("TestCode")
                         .severity(ActionStatusCode.Severity.ERROR)
@@ -64,7 +64,7 @@ class RsqlActionStatusCodeFieldsTest extends AbstractJpaIntegrationTest {
     }
 
     private void assertRSQLQuery(final String rsql, final long expectedCount) {
-        final Page<? extends ActionStatusCode> result = actionStatusCodeManagement.findByRsql(
+        final Page<? extends ActionStatusCode> result = actionStatusCodeCatalogueManagement.findByRsql(
                 rsql,
                 PageRequest.of(0, 100)
         );

@@ -37,7 +37,7 @@ import org.awaitility.Awaitility;
 import org.awaitility.core.ConditionFactory;
 import org.eclipse.hawkbit.artifact.ArtifactStorage;
 import org.eclipse.hawkbit.artifact.exception.ArtifactStoreException;
-import org.eclipse.hawkbit.repository.ActionStatusCodeManagement;
+import org.eclipse.hawkbit.repository.ActionStatusCodeCatalogueManagement;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.AutoAssignmentManagement;
 import org.eclipse.hawkbit.repository.ConfirmationManagement;
@@ -160,7 +160,7 @@ public abstract class AbstractIntegrationTest {
     @Autowired
     protected TargetTagManagement<? extends TargetTag> targetTagManagement;
     @Autowired
-    protected ActionStatusCodeManagement<? extends ActionStatusCode> actionStatusCodeManagement;
+    protected ActionStatusCodeCatalogueManagement<? extends ActionStatusCode> actionStatusCodeCatalogueManagement;
     @Autowired
     protected DeploymentManagement deploymentManagement;
     @Autowired

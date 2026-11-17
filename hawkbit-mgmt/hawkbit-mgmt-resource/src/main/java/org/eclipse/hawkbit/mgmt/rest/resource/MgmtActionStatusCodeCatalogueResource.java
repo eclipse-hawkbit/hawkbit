@@ -16,10 +16,10 @@ import org.eclipse.hawkbit.mgmt.json.model.actionstatuscode.MgmtActionStatusCode
 import org.eclipse.hawkbit.mgmt.json.model.actionstatuscode.MgmtActionStatusCodeRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.json.model.actionstatuscode.MgmtActionStatusCodeRequestBodyPut;
 import org.eclipse.hawkbit.mgmt.json.model.actionstatuscode.MgmtUndocumentedActionStatusCode;
-import org.eclipse.hawkbit.mgmt.rest.api.MgmtActionStatusCodeRestApi;
+import org.eclipse.hawkbit.mgmt.rest.api.MgmtActionStatusCodeCatalogueRestApi;
 import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtActionStatusCodeMapper;
 import org.eclipse.hawkbit.mgmt.rest.resource.util.PagingUtility;
-import org.eclipse.hawkbit.repository.ActionStatusCodeManagement;
+import org.eclipse.hawkbit.repository.ActionStatusCodeCatalogueManagement;
 import org.eclipse.hawkbit.repository.model.ActionStatusCode;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -33,13 +33,13 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @Slf4j
 @RestController
-public class MgmtActionStatusCodeResource implements MgmtActionStatusCodeRestApi {
+public class MgmtActionStatusCodeCatalogueResource implements MgmtActionStatusCodeCatalogueRestApi {
 
-    private final ActionStatusCodeManagement<ActionStatusCode> actionStatusCodeManagement;
+    private final ActionStatusCodeCatalogueManagement<ActionStatusCode> actionStatusCodeCatalogueManagement;
 
-    public MgmtActionStatusCodeResource(
-            final ActionStatusCodeManagement<ActionStatusCode> actionStatusCodeManagement) {
-        this.actionStatusCodeManagement = actionStatusCodeManagement;
+    public MgmtActionStatusCodeCatalogueResource(
+            final ActionStatusCodeCatalogueManagement<ActionStatusCode> actionStatusCodeCatalogueManagement) {
+        this.actionStatusCodeCatalogueManagement = actionStatusCodeCatalogueManagement;
     }
 
     @Override
@@ -54,7 +54,7 @@ public class MgmtActionStatusCodeResource implements MgmtActionStatusCodeRestApi
                 pagingLimitParam,
                 PagingUtility.sanitizeActionStatusCodeSortParam(sortParam));
 
-        final Page<ActionStatusCode> page = actionStatusCodeManagement.findByRsql(rsqlParam, pageable);
+        final Page<ActionStatusCode> page = actionStatusCodeCatalogueManagement.findByRsql(rsqlParam, pageable);
         final var rest = page.getContent().stream()
                 .map(MgmtActionStatusCodeMapper::toResponse)
                 .toList();
@@ -64,15 +64,15 @@ public class MgmtActionStatusCodeResource implements MgmtActionStatusCodeRestApi
 
     @Override
     public ResponseEntity<MgmtActionStatusCode> getActionStatusCode(final long id) {
-        final ActionStatusCode entity = actionStatusCodeManagement.get(id);
+        final ActionStatusCode entity = actionStatusCodeCatalogueManagement.get(id);
         return ResponseEntity.ok(MgmtActionStatusCodeMapper.toResponse(entity));
     }
 
     @Override
     @AuditLog(entity = "ActionStatusCode", type = AuditLog.Type.CREATE, description = "Create Action Status Code")
     public ResponseEntity<MgmtActionStatusCode> create(final MgmtActionStatusCodeRequestBodyPost body) {
-        final ActionStatusCode created = actionStatusCodeManagement.create(
-                ActionStatusCodeManagement.Create.builder()
+        final ActionStatusCode created = actionStatusCodeCatalogueManagement.create(
+                ActionStatusCodeCatalogueManagement.Create.builder()
                         .code(body.getCode())
                         .name(body.getName())
                         .description(body.getDescription())
@@ -85,8 +85,8 @@ public class MgmtActionStatusCodeResource implements MgmtActionStatusCodeRestApi
     @Override
     @AuditLog(entity = "ActionStatusCode", type = AuditLog.Type.UPDATE, description = "Update Action Status Code")
     public ResponseEntity<MgmtActionStatusCode> update(final long id, final MgmtActionStatusCodeRequestBodyPut body) {
-        final ActionStatusCode updated = actionStatusCodeManagement.update(
-                ActionStatusCodeManagement.Update.builder()
+        final ActionStatusCode updated = actionStatusCodeCatalogueManagement.update(
+                ActionStatusCodeCatalogueManagement.Update.builder()
                         .id(id)
                         .name(body.getName())
                         .description(body.getDescription())
@@ -100,7 +100,7 @@ public class MgmtActionStatusCodeResource implements MgmtActionStatusCodeRestApi
     @AuditLog(entity = "ActionStatusCode", type = AuditLog.Type.DELETE, description = "Delete Action Status Code")
     public ResponseEntity<Void> delete(final long id) {
         log.debug("Delete action status code {}", id);
-        actionStatusCodeManagement.delete(id);
+        actionStatusCodeCatalogueManagement.delete(id);
         return ResponseEntity.noContent().build();
     }
 
@@ -110,7 +110,7 @@ public class MgmtActionStatusCodeResource implements MgmtActionStatusCodeRestApi
             final int pagingLimitParam) {
 
         final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, Sort.unsorted());
-        final Page<Integer> page = actionStatusCodeManagement.findUndocumentedCodes(pageable);
+        final Page<Integer> page = actionStatusCodeCatalogueManagement.findUndocumentedCodes(pageable);
         final var rest = page.getContent().stream()
                 .map(MgmtUndocumentedActionStatusCode::new)
                 .toList();

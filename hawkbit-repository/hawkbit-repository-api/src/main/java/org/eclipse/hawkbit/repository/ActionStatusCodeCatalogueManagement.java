@@ -31,7 +31,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 /**
  * Service for managing {@link ActionStatusCode}s.
  */
-public interface ActionStatusCodeManagement<T extends ActionStatusCode> extends PermissionSupport {
+public interface ActionStatusCodeCatalogueManagement<T extends ActionStatusCode> extends PermissionSupport {
 
     @Override
     default String permissionGroup() {

@@ -27,9 +27,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 
 /**
- * Test for {@link MgmtActionStatusCodeResource}.
+ * Test for {@link MgmtActionStatusCodeCatalogueResource}.
  */
-class MgmtActionStatusCodeResourceTest extends AbstractManagementApiIntegrationTest {
+class MgmtActionStatusCodeCatalogueResourceTest extends AbstractManagementApiIntegrationTest {
 
     @Test
     void createReturns201WithDefaultInfoSeverity() throws Exception {

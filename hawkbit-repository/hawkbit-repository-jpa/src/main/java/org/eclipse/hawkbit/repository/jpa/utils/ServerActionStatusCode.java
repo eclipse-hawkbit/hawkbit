@@ -23,40 +23,42 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 public final class ServerActionStatusCode {
 
     /**
-     * Resolves the code configured for the given key for the current tenant.
-     *
-     * @param configKey tenant configuration key of type {@link Integer}
-     * @return the configured code or {@code null} if not defined
-     */
-    public static Integer resolve(final String configKey) {
-        return TenantConfigHelper.getAsSystem(configKey, Integer.class);
-    }
-
-    /**
-     * Sets the code on the status and as last action status code of its action. To be used only if the status also changes the
-     * state of the action. No-op if the code is {@code null}.
+     * Sets the code configured for the given key on the status and as last action status code of its action. To be used only if
+     * the status also changes the state of the action. No-op if the key is not defined for the current tenant.
      * <p/>
      * Precondition: the action of the status is set.
+     * <p/>
+     * The code is resolved on every call - tenant configuration values are cached, so no need to resolve them once per batch.
      *
      * @param status the server written action status
-     * @param code the resolved code, could be {@code null}
+     * @param configKey tenant configuration key of type {@link Integer}
+     * @return {@code true} if a code has been set (i.e. the action has been changed), {@code false} otherwise
      */
-    public static void apply(final JpaActionStatus status, final Integer code) {
-        if (code != null) {
-            status.setCode(code);
-            ((JpaAction) status.getAction()).setLastActionStatusCode(code);
+    public static boolean apply(final JpaActionStatus status, final String configKey) {
+        final Integer code = resolve(configKey);
+        if (code == null) {
+            return false;
         }
+        status.setCode(code);
+        ((JpaAction) status.getAction()).setLastActionStatusCode(code);
+        return true;
     }
 
     /**
-     * Sets the code on the status only, the last action status code of the action is not changed. No-op if the code is {@code null}.
+     * Sets the code configured for the given key on the status only, the last action status code of the action is not changed.
+     * No-op if the key is not defined for the current tenant.
      *
      * @param status the server written action status
-     * @param code the resolved code, could be {@code null}
+     * @param configKey tenant configuration key of type {@link Integer}
      */
-    public static void applyToStatusOnly(final JpaActionStatus status, final Integer code) {
+    public static void applyToStatusOnly(final JpaActionStatus status, final String configKey) {
+        final Integer code = resolve(configKey);
         if (code != null) {
             status.setCode(code);
         }
+    }
+
+    private static Integer resolve(final String configKey) {
+        return TenantConfigHelper.getAsSystem(configKey, Integer.class);
     }
 }

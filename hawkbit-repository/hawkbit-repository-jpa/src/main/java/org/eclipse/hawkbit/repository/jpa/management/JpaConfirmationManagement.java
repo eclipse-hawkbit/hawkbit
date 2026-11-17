@@ -276,7 +276,7 @@ public class JpaConfirmationManagement extends JpaActionManagement implements Co
         // to bypass the quota check. Otherwise, the action will not be confirmed in case of exceeded action status quota.
         action.setStatus(Status.RUNNING);
         actionStatus.setAction(action);
-        ServerActionStatusCode.apply(actionStatus, ServerActionStatusCode.resolve(ACTION_STATUS_CODE_AUTO_CONFIRMATION));
+        ServerActionStatusCode.apply(actionStatus, ACTION_STATUS_CODE_AUTO_CONFIRMATION);
 
         actionStatusRepository.save(actionStatus);
         return actionRepository.save(action);

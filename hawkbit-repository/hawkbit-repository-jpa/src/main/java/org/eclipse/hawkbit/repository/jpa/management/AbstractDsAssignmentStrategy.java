@@ -158,14 +158,13 @@ public abstract class AbstractDsAssignmentStrategy {
             );
         });
 
-        final Integer cancelingCode = ServerActionStatusCode.resolve(ACTION_STATUS_CODE_CANCELING);
         activeActions.forEach(action -> {
             action.setStatus(Status.CANCELING);
 
             // document that the status has been retrieved
             final JpaActionStatus actionStatus = new JpaActionStatus(action, Status.CANCELING, System.currentTimeMillis(),
                     RepositoryConstants.SERVER_MESSAGE_PREFIX + "cancel obsolete action due to new update");
-            ServerActionStatusCode.apply(actionStatus, cancelingCode);
+            ServerActionStatusCode.apply(actionStatus, ACTION_STATUS_CODE_CANCELING);
             actionStatusRepository.save(actionStatus);
             actionRepository.save(action);
         });
@@ -195,7 +194,6 @@ public abstract class AbstractDsAssignmentStrategy {
             );
         });
 
-        final Integer canceledCode = ServerActionStatusCode.resolve(ACTION_STATUS_CODE_CANCELED);
         activeActions.forEach(action -> {
             action.setStatus(Status.CANCELED);
             action.setActive(false);
@@ -203,7 +201,7 @@ public abstract class AbstractDsAssignmentStrategy {
             // document that the status has been retrieved
             final JpaActionStatus actionStatus = new JpaActionStatus(action, Status.CANCELED, System.currentTimeMillis(),
                     RepositoryConstants.SERVER_MESSAGE_PREFIX + "close obsolete action due to new update");
-            ServerActionStatusCode.apply(actionStatus, canceledCode);
+            ServerActionStatusCode.apply(actionStatus, ACTION_STATUS_CODE_CANCELED);
             actionStatusRepository.save(actionStatus);
             actionRepository.save(action);
         });

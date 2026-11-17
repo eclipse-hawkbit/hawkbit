@@ -592,7 +592,7 @@ public class JpaRolloutManagement implements RolloutManagement {
         final long currentTimestamp = System.currentTimeMillis();
         final boolean active = Action.Status.CANCELING.equals(status);
         final String typeOfCancellation = active ? "cancellation" : "force quit";
-        final Integer code = ServerActionStatusCode.resolve(active ? ACTION_STATUS_CODE_CANCELING : ACTION_STATUS_CODE_CANCELED);
+        final String codeKey = active ? ACTION_STATUS_CODE_CANCELING : ACTION_STATUS_CODE_CANCELED;
 
         actions.forEach(action -> {
             action.setStatus(status);
@@ -603,7 +603,7 @@ public class JpaRolloutManagement implements RolloutManagement {
             actionStatus.setStatus(status);
             actionStatus.setTimestamp(currentTimestamp);
             actionStatus.addMessage(RepositoryConstants.SERVER_MESSAGE_PREFIX + "A " + typeOfCancellation + " has been performed by server.");
-            ServerActionStatusCode.apply(actionStatus, code);
+            ServerActionStatusCode.apply(actionStatus, codeKey);
             cancellingStatuses.add(actionStatus);
         });
 

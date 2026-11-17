@@ -52,7 +52,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  */
 @Tag(name = "Action Status Codes", description = "REST API for action status code catalogue",
         extensions = @Extension(name = OpenApi.X_HAWKBIT, properties = @ExtensionProperty(name = "order", value = ACTION_STATUS_CODE_ORDER)))
-public interface MgmtActionStatusCodeRestApi {
+public interface MgmtActionStatusCodeCatalogueRestApi {
 
     String ACTION_STATUS_CODES_V1 = REST_V1 + "/action-status-codes";
 

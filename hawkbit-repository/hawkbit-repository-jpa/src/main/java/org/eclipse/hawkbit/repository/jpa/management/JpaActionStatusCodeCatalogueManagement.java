@@ -14,7 +14,7 @@ import java.util.Optional;
 
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.ql.jpa.QLSupport;
-import org.eclipse.hawkbit.repository.ActionStatusCodeManagement;
+import org.eclipse.hawkbit.repository.ActionStatusCodeCatalogueManagement;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -38,19 +38,19 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 /**
- * JPA implementation of {@link ActionStatusCodeManagement}.
+ * JPA implementation of {@link ActionStatusCodeCatalogueManagement}.
  */
 @Slf4j
 @Service
 @Transactional(readOnly = true)
 @Validated
-@ConditionalOnBooleanProperty(prefix = "hawkbit.jpa", name = { "enabled", "action-status-code-management" }, matchIfMissing = true)
+@ConditionalOnBooleanProperty(prefix = "hawkbit.jpa", name = { "enabled", "action-status-code-catalogue-management" }, matchIfMissing = true)
 @HandleAuthorizationDenied(handlerClass = JpaRepositoryConfiguration.ManagementExceptionThrowingMethodAuthorizationDeniedHandler.class)
-public class JpaActionStatusCodeManagement implements ActionStatusCodeManagement<ActionStatusCode> {
+public class JpaActionStatusCodeCatalogueManagement implements ActionStatusCodeCatalogueManagement<ActionStatusCode> {
 
     private final ActionStatusCodeRepository actionStatusCodeRepository;
 
-    public JpaActionStatusCodeManagement(final ActionStatusCodeRepository actionStatusCodeRepository) {
+    public JpaActionStatusCodeCatalogueManagement(final ActionStatusCodeRepository actionStatusCodeRepository) {
         this.actionStatusCodeRepository = actionStatusCodeRepository;
     }
 

@@ -227,7 +227,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             // document that the status has been retrieved
             final JpaActionStatus actionStatus = new JpaActionStatus(action, Status.CANCELING, System.currentTimeMillis(),
                     RepositoryConstants.SERVER_MESSAGE_PREFIX + "manual cancelation requested");
-            ServerActionStatusCode.apply(actionStatus, ServerActionStatusCode.resolve(ACTION_STATUS_CODE_CANCELING));
+            ServerActionStatusCode.apply(actionStatus, ACTION_STATUS_CODE_CANCELING);
             actionStatusRepository.save(actionStatus);
             final Action saveAction = actionRepository.save(action);
 
@@ -370,7 +370,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         // document that the status has been retrieved
         final JpaActionStatus actionStatus = new JpaActionStatus(action, Status.CANCELED, System.currentTimeMillis(),
                 RepositoryConstants.SERVER_MESSAGE_PREFIX + "A force quit has been performed.");
-        ServerActionStatusCode.apply(actionStatus, ServerActionStatusCode.resolve(ACTION_STATUS_CODE_CANCELED));
+        ServerActionStatusCode.apply(actionStatus, ACTION_STATUS_CODE_CANCELED);
         actionStatusRepository.save(actionStatus);
 
         DeploymentHelper.successCancellation(action, actionRepository, targetRepository);
@@ -967,16 +967,18 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     private void createActionsStatus(
             final Map<TargetWithActionType, JpaAction> actions, final AbstractDsAssignmentStrategy assignmentStrategy,
             final String actionMessage, final boolean confirmationFlowEnabled) {
-        final InitialStatusCodes initialStatusCodes = InitialStatusCodes.resolve();
-        actionStatusRepository.saveAll(actions.entrySet().stream().map(entry -> {
+        final List<JpaActionStatus> statusList = new ArrayList<>(actions.size());
+        boolean anyCodeApplied = false;
+        for (final Map.Entry<TargetWithActionType, JpaAction> entry : actions.entrySet()) {
             final JpaAction action = entry.getValue();
             final JpaActionStatus actionStatus = assignmentStrategy.createActionStatus(action, actionMessage, confirmationFlowEnabled);
-            verifyAndAddConfirmationStatus(action, actionStatus, entry.getKey().isConfirmationRequired(), initialStatusCodes);
-            return actionStatus;
-        }).toList());
+            anyCodeApplied |= verifyAndAddConfirmationStatus(action, actionStatus, entry.getKey().isConfirmationRequired());
+            statusList.add(actionStatus);
+        }
+        actionStatusRepository.saveAll(statusList);
         // the actions are managed (saved in createActions within the same transaction), so a changed last action status code
         // is flushed with the transaction - nevertheless, save them explicitly to not depend on the dirty checking
-        if (initialStatusCodes.anyDefined()) {
+        if (anyCodeApplied) {
             actionRepository.saveAll(actions.values());
         }
     }
@@ -984,22 +986,25 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     private void setInitialActionStatusOfRolloutGroup(final List<JpaAction> actions) {
         final List<JpaActionStatus> statusList = new ArrayList<>();
         final boolean confirmationFlowEnabled = isConfirmationFlowEnabled();
-        final InitialStatusCodes initialStatusCodes = InitialStatusCodes.resolve();
+        boolean anyCodeApplied = false;
         for (final JpaAction action : actions) {
             final JpaActionStatus actionStatus = onlineDsAssignmentStrategy.createActionStatus(action, null, confirmationFlowEnabled);
-            verifyAndAddConfirmationStatus(action, actionStatus, action.getRolloutGroup().isConfirmationRequired(), initialStatusCodes);
+            anyCodeApplied |= verifyAndAddConfirmationStatus(action, actionStatus, action.getRolloutGroup().isConfirmationRequired());
             statusList.add(actionStatus);
         }
         actionStatusRepository.saveAll(statusList);
         // the actions are managed (saved in activateActionsOfRolloutGroup within the same transaction), so a changed last action
         // status code is flushed with the transaction - nevertheless, save them explicitly to not depend on the dirty checking
-        if (initialStatusCodes.anyDefined()) {
+        if (anyCodeApplied) {
             actionRepository.saveAll(actions);
         }
     }
 
-    private void verifyAndAddConfirmationStatus(final JpaAction action, final JpaActionStatus actionStatus,
-            final boolean isConfirmationRequired, final InitialStatusCodes initialStatusCodes) {
+    /**
+     * @return {@code true} if a configured status code has been applied (i.e. the last action status code of the action changed)
+     */
+    private boolean verifyAndAddConfirmationStatus(final JpaAction action, final JpaActionStatus actionStatus,
+            final boolean isConfirmationRequired) {
         if (actionStatus.getStatus() == Status.WAIT_FOR_CONFIRMATION) {
             if (action.getStatus().equals(Status.RUNNING)) {
                 // action is in RUNNING state only if it's confirmed during
@@ -1007,25 +1012,26 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
                 if (!isConfirmationRequired) {
                     // confirmation given on assignment dialog
                     actionStatus.addMessage(String.format("Assignment confirmed by initiator [%s].", action.getInitiatedBy()));
-                    ServerActionStatusCode.apply(actionStatus, initialStatusCodes.assigned());
+                    return ServerActionStatusCode.apply(actionStatus, ACTION_STATUS_CODE_ASSIGNED);
                 } else if (action.getTarget().getAutoConfirmationStatus() != null) {
                     // auto-confirmation is configured
                     actionStatus.addMessage(action.getTarget().getAutoConfirmationStatus().constructActionMessage());
-                    ServerActionStatusCode.apply(actionStatus, initialStatusCodes.autoConfirmation());
+                    return ServerActionStatusCode.apply(actionStatus, ACTION_STATUS_CODE_AUTO_CONFIRMATION);
                 } else {
                     throw new IllegalStateException("Action in RUNNING state without given confirmation.");
                 }
 
             } else {
                 actionStatus.addMessage("Waiting for the confirmation by the device before processing with the deployment");
-                ServerActionStatusCode.apply(actionStatus, initialStatusCodes.waitForConfirmation());
+                return ServerActionStatusCode.apply(actionStatus, ACTION_STATUS_CODE_WAIT_FOR_CONFIRMATION);
             }
         } else if (actionStatus.getStatus() == Status.FINISHED) {
             // offline assignment
-            ServerActionStatusCode.apply(actionStatus, initialStatusCodes.offlineAssigned());
+            return ServerActionStatusCode.apply(actionStatus, ACTION_STATUS_CODE_OFFLINE_ASSIGNED);
         } else if (actionStatus.getStatus() == Status.RUNNING) {
-            ServerActionStatusCode.apply(actionStatus, initialStatusCodes.assigned());
+            return ServerActionStatusCode.apply(actionStatus, ACTION_STATUS_CODE_ASSIGNED);
         }
+        return false;
     }
 
     private void detachEntitiesAndSendTargetUpdatedEvents(final JpaDistributionSet set, final List<JpaTarget> targets,
@@ -1103,7 +1109,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         actionStatus.setStatus(Status.RUNNING);
         actionStatus.addMessage(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Distribution Set is already assigned. Skipping this action.");
         // the action is closed (FINISHED) with this status - the caller saves the action right after
-        ServerActionStatusCode.apply(actionStatus, ServerActionStatusCode.resolve(ACTION_STATUS_CODE_SKIPPED));
+        ServerActionStatusCode.apply(actionStatus, ACTION_STATUS_CODE_SKIPPED);
         actionStatusRepository.save(actionStatus);
     }
 
@@ -1138,24 +1144,6 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             return true;
         }).isEmpty()) {
             throw new EntityNotFoundException(Action.class, actionId);
-        }
-    }
-
-    /**
-     * Codes for the initial action status, resolved once per batch.
-     */
-    private record InitialStatusCodes(Integer assigned, Integer offlineAssigned, Integer autoConfirmation, Integer waitForConfirmation) {
-
-        private static InitialStatusCodes resolve() {
-            return new InitialStatusCodes(
-                    ServerActionStatusCode.resolve(ACTION_STATUS_CODE_ASSIGNED),
-                    ServerActionStatusCode.resolve(ACTION_STATUS_CODE_OFFLINE_ASSIGNED),
-                    ServerActionStatusCode.resolve(ACTION_STATUS_CODE_AUTO_CONFIRMATION),
-                    ServerActionStatusCode.resolve(ACTION_STATUS_CODE_WAIT_FOR_CONFIRMATION));
-        }
-
-        private boolean anyDefined() {
-            return assigned != null || offlineAssigned != null || autoConfirmation != null || waitForConfirmation != null;
         }
     }
 }

@@ -502,7 +502,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
             // document that the status has been retrieved
             final JpaActionStatus actionStatus = new JpaActionStatus(jpaAction, Status.CANCELING, System.currentTimeMillis(),
                     RepositoryConstants.SERVER_MESSAGE_PREFIX + "cancelation requested due to lapsed maintenance window");
-            ServerActionStatusCode.apply(actionStatus, ServerActionStatusCode.resolve(ACTION_STATUS_CODE_CANCELING));
+            ServerActionStatusCode.apply(actionStatus, ACTION_STATUS_CODE_CANCELING);
             actionStatusRepository.save(actionStatus);
             final Action saveAction = actionRepository.save(jpaAction);
 
@@ -928,22 +928,21 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         if (resultList.isEmpty() || (Status.RETRIEVED != resultList.get(0)[1])) {
             // document that the status has been retrieved
             final JpaActionStatus actionStatus = new JpaActionStatus(action, Status.RETRIEVED, System.currentTimeMillis(), message);
-            final Integer retrievedCode = ServerActionStatusCode.resolve(ACTION_STATUS_CODE_RETRIEVED);
 
             // don't change the action status itself in case the action is in
             // canceling state otherwise
             // we modify the action status and the controller won't get the
             // cancel job anymore.
             if (action.isCancelingOrCanceled()) {
-                ServerActionStatusCode.applyToStatusOnly(actionStatus, retrievedCode);
+                ServerActionStatusCode.applyToStatusOnly(actionStatus, ACTION_STATUS_CODE_RETRIEVED);
             } else if (action.getStatus() == Status.RETRIEVED) {
                 // e.g. re-fetch after device feedback (which doesn't change the action status) - the action state doesn't
                 // change, so the last action status code (maybe reported by the device) is kept
-                ServerActionStatusCode.applyToStatusOnly(actionStatus, retrievedCode);
+                ServerActionStatusCode.applyToStatusOnly(actionStatus, ACTION_STATUS_CODE_RETRIEVED);
             } else {
                 action.setStatus(Status.RETRIEVED);
                 // action is managed (loaded in this transaction) - the changed last action status code is flushed with it
-                ServerActionStatusCode.apply(actionStatus, retrievedCode);
+                ServerActionStatusCode.apply(actionStatus, ACTION_STATUS_CODE_RETRIEVED);
             }
             actionStatusRepository.save(actionStatus);
         }

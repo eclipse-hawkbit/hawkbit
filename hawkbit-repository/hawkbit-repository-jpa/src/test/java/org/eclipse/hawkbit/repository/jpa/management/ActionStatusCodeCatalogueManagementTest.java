@@ -20,7 +20,7 @@ import java.util.concurrent.Callable;
 import jakarta.validation.ConstraintViolationException;
 
 import org.eclipse.hawkbit.auth.SpRole;
-import org.eclipse.hawkbit.repository.ActionStatusCodeManagement;
+import org.eclipse.hawkbit.repository.ActionStatusCodeCatalogueManagement;
 import org.eclipse.hawkbit.repository.TargetManagement.Create;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -42,17 +42,17 @@ import org.springframework.data.domain.PageRequest;
 import java.util.List;
 
 /**
- * Test for {@link ActionStatusCodeManagement}.
+ * Test for {@link ActionStatusCodeCatalogueManagement}.
  */
-class ActionStatusCodeManagementTest extends AbstractJpaIntegrationTest {
+class ActionStatusCodeCatalogueManagementTest extends AbstractJpaIntegrationTest {
 
     @Autowired
     private TestdataFactory testdataFactory;
 
     @Test
     void createWithDefaultSeverity() {
-        final ActionStatusCode created = actionStatusCodeManagement.create(
-                ActionStatusCodeManagement.Create.builder()
+        final ActionStatusCode created = actionStatusCodeCatalogueManagement.create(
+                ActionStatusCodeCatalogueManagement.Create.builder()
                         .code(1)
                         .name("A")
                         .build()
@@ -67,15 +67,15 @@ class ActionStatusCodeManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     void createDuplicateCodeFails() {
-        actionStatusCodeManagement.create(
-                ActionStatusCodeManagement.Create.builder()
+        actionStatusCodeCatalogueManagement.create(
+                ActionStatusCodeCatalogueManagement.Create.builder()
                         .code(1)
                         .name("FIRST")
                         .build()
         );
 
-        assertThatThrownBy(() -> actionStatusCodeManagement.create(
-                ActionStatusCodeManagement.Create.builder()
+        assertThatThrownBy(() -> actionStatusCodeCatalogueManagement.create(
+                ActionStatusCodeCatalogueManagement.Create.builder()
                         .code(1)
                         .name("SECOND")
                         .build()
@@ -86,8 +86,8 @@ class ActionStatusCodeManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     void updateChangesOnlyGivenFields() {
-        final ActionStatusCode created = actionStatusCodeManagement.create(
-                ActionStatusCodeManagement.Create.builder()
+        final ActionStatusCode created = actionStatusCodeCatalogueManagement.create(
+                ActionStatusCodeCatalogueManagement.Create.builder()
                         .code(1)
                         .name("A")
                         .description("d")
@@ -97,8 +97,8 @@ class ActionStatusCodeManagementTest extends AbstractJpaIntegrationTest {
 
         final long initialRevision = created.getOptLockRevision();
 
-        final ActionStatusCode updated = actionStatusCodeManagement.update(
-                ActionStatusCodeManagement.Update.builder()
+        final ActionStatusCode updated = actionStatusCodeCatalogueManagement.update(
+                ActionStatusCodeCatalogueManagement.Update.builder()
                         .id(created.getId())
                         .severity(ActionStatusCode.Severity.ERROR)
                         .build()
@@ -113,8 +113,8 @@ class ActionStatusCodeManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     void updateUnknownIdFails() {
-        assertThatThrownBy(() -> actionStatusCodeManagement.update(
-                ActionStatusCodeManagement.Update.builder()
+        assertThatThrownBy(() -> actionStatusCodeCatalogueManagement.update(
+                ActionStatusCodeCatalogueManagement.Update.builder()
                         .id(999_999L)
                         .severity(ActionStatusCode.Severity.ERROR)
                         .build()
@@ -123,18 +123,18 @@ class ActionStatusCodeManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     void getUnknownIdFails() {
-        assertThatThrownBy(() -> actionStatusCodeManagement.get(999_999L))
+        assertThatThrownBy(() -> actionStatusCodeCatalogueManagement.get(999_999L))
                 .isInstanceOf(EntityNotFoundException.class);
 
-        assertThat(actionStatusCodeManagement.find(999_999L)).isEmpty();
+        assertThat(actionStatusCodeCatalogueManagement.find(999_999L)).isEmpty();
     }
 
     @Test
     void getOtherTenantsIdFails() throws Exception {
         final String tenantB = "tenantB";
         final Long idInTenantB = runAsTenant(tenantB, () -> {
-            final ActionStatusCode created = actionStatusCodeManagement.create(
-                    ActionStatusCodeManagement.Create.builder()
+            final ActionStatusCode created = actionStatusCodeCatalogueManagement.create(
+                    ActionStatusCodeCatalogueManagement.Create.builder()
                             .code(1)
                             .name("B")
                             .build()
@@ -143,56 +143,56 @@ class ActionStatusCodeManagementTest extends AbstractJpaIntegrationTest {
         });
 
         // Try to access it from the default tenant
-        assertThatThrownBy(() -> actionStatusCodeManagement.get(idInTenantB))
+        assertThatThrownBy(() -> actionStatusCodeCatalogueManagement.get(idInTenantB))
                 .isInstanceOf(EntityNotFoundException.class);
     }
 
     @Test
     void deleteRemovesEntry() {
-        final ActionStatusCode created = actionStatusCodeManagement.create(
-                ActionStatusCodeManagement.Create.builder()
+        final ActionStatusCode created = actionStatusCodeCatalogueManagement.create(
+                ActionStatusCodeCatalogueManagement.Create.builder()
                         .code(1)
                         .name("A")
                         .build()
         );
 
-        actionStatusCodeManagement.delete(created.getId());
+        actionStatusCodeCatalogueManagement.delete(created.getId());
 
-        assertThat(actionStatusCodeManagement.find(created.getId())).isEmpty();
+        assertThat(actionStatusCodeCatalogueManagement.find(created.getId())).isEmpty();
     }
 
     @Test
     void deleteUnknownIdFails() {
-        assertThatThrownBy(() -> actionStatusCodeManagement.delete(999_999L))
+        assertThatThrownBy(() -> actionStatusCodeCatalogueManagement.delete(999_999L))
                 .isInstanceOf(EntityNotFoundException.class);
     }
 
     @Test
     void deleteOtherTenantsIdFails() throws Exception {
-        final Long idInTenantB = runAsTenant("tenantB", () -> actionStatusCodeManagement.create(
-                ActionStatusCodeManagement.Create.builder()
+        final Long idInTenantB = runAsTenant("tenantB", () -> actionStatusCodeCatalogueManagement.create(
+                ActionStatusCodeCatalogueManagement.Create.builder()
                         .code(1)
                         .name("B")
                         .build()
         ).getId());
 
-        assertThatThrownBy(() -> actionStatusCodeManagement.delete(idInTenantB))
+        assertThatThrownBy(() -> actionStatusCodeCatalogueManagement.delete(idInTenantB))
                 .isInstanceOf(EntityNotFoundException.class);
-        assertThat(runAsTenant("tenantB", () -> actionStatusCodeManagement.find(idInTenantB))).isPresent();
+        assertThat(runAsTenant("tenantB", () -> actionStatusCodeCatalogueManagement.find(idInTenantB))).isPresent();
     }
 
     @Test
     void deletedCodeCanBeCreatedAgain() {
-        final ActionStatusCode created = actionStatusCodeManagement.create(
-                ActionStatusCodeManagement.Create.builder()
+        final ActionStatusCode created = actionStatusCodeCatalogueManagement.create(
+                ActionStatusCodeCatalogueManagement.Create.builder()
                         .code(1)
                         .name("A")
                         .build()
         );
-        actionStatusCodeManagement.delete(created.getId());
+        actionStatusCodeCatalogueManagement.delete(created.getId());
 
-        final ActionStatusCode recreated = actionStatusCodeManagement.create(
-                ActionStatusCodeManagement.Create.builder()
+        final ActionStatusCode recreated = actionStatusCodeCatalogueManagement.create(
+                ActionStatusCodeCatalogueManagement.Create.builder()
                         .code(1)
                         .name("A2")
                         .build()
@@ -217,89 +217,89 @@ class ActionStatusCodeManagementTest extends AbstractJpaIntegrationTest {
                         .code(100)
                         .build()
         );
-        final ActionStatusCode documented = actionStatusCodeManagement.create(
-                ActionStatusCodeManagement.Create.builder()
+        final ActionStatusCode documented = actionStatusCodeCatalogueManagement.create(
+                ActionStatusCodeCatalogueManagement.Create.builder()
                         .code(100)
                         .name("Documented")
                         .build()
         );
-        assertThat(actionStatusCodeManagement.findUndocumentedCodes(PageRequest.of(0, 10)).getContent()).isEmpty();
+        assertThat(actionStatusCodeCatalogueManagement.findUndocumentedCodes(PageRequest.of(0, 10)).getContent()).isEmpty();
 
-        actionStatusCodeManagement.delete(documented.getId());
+        actionStatusCodeCatalogueManagement.delete(documented.getId());
 
-        assertThat(actionStatusCodeManagement.findUndocumentedCodes(PageRequest.of(0, 10)).getContent()).containsExactly(100);
+        assertThat(actionStatusCodeCatalogueManagement.findUndocumentedCodes(PageRequest.of(0, 10)).getContent()).containsExactly(100);
         assertThat(deploymentManagement.findAction(actionId).orElseThrow().getLastActionStatusCode()).contains(100);
     }
 
     @Test
     @WithUser(authorities = { READ_TARGET, CREATE_TARGET })
     void deleteWithoutDeleteTargetIsDenied() {
-        final ActionStatusCode created = actionStatusCodeManagement.create(
-                ActionStatusCodeManagement.Create.builder()
+        final ActionStatusCode created = actionStatusCodeCatalogueManagement.create(
+                ActionStatusCodeCatalogueManagement.Create.builder()
                         .code(1)
                         .name("A")
                         .build()
         );
 
-        assertThatThrownBy(() -> actionStatusCodeManagement.delete(created.getId()))
+        assertThatThrownBy(() -> actionStatusCodeCatalogueManagement.delete(created.getId()))
                 .isInstanceOf(InsufficientPermissionException.class);
-        assertThat(actionStatusCodeManagement.find(created.getId())).isPresent();
+        assertThat(actionStatusCodeCatalogueManagement.find(created.getId())).isPresent();
     }
 
     @Test
     @WithUser(authorities = { READ_TARGET, DELETE_TARGET })
     void deleteWithDeleteTargetIsAllowed() throws Exception {
-        final Long id = SecurityContextSwitch.asPrivileged(() -> actionStatusCodeManagement.create(
-                ActionStatusCodeManagement.Create.builder()
+        final Long id = SecurityContextSwitch.asPrivileged(() -> actionStatusCodeCatalogueManagement.create(
+                ActionStatusCodeCatalogueManagement.Create.builder()
                         .code(1)
                         .name("A")
                         .build()
         ).getId());
 
-        actionStatusCodeManagement.delete(id);
+        actionStatusCodeCatalogueManagement.delete(id);
 
-        assertThat(actionStatusCodeManagement.find(id)).isEmpty();
+        assertThat(actionStatusCodeCatalogueManagement.find(id)).isEmpty();
     }
 
     @Test
     void findByRsqlFiltersBySeverity() {
-        actionStatusCodeManagement.create(
-                ActionStatusCodeManagement.Create.builder()
+        actionStatusCodeCatalogueManagement.create(
+                ActionStatusCodeCatalogueManagement.Create.builder()
                         .code(1)
                         .name("One")
                         .severity(ActionStatusCode.Severity.INFO)
                         .build()
         );
-        actionStatusCodeManagement.create(
-                ActionStatusCodeManagement.Create.builder()
+        actionStatusCodeCatalogueManagement.create(
+                ActionStatusCodeCatalogueManagement.Create.builder()
                         .code(2)
                         .name("Two")
                         .severity(ActionStatusCode.Severity.ERROR)
                         .build()
         );
-        actionStatusCodeManagement.create(
-                ActionStatusCodeManagement.Create.builder()
+        actionStatusCodeCatalogueManagement.create(
+                ActionStatusCodeCatalogueManagement.Create.builder()
                         .code(3)
                         .name("Three")
                         .severity(ActionStatusCode.Severity.ERROR)
                         .build()
         );
 
-        final Page<? extends ActionStatusCode> errorCodes = actionStatusCodeManagement.findByRsql(
+        final Page<? extends ActionStatusCode> errorCodes = actionStatusCodeCatalogueManagement.findByRsql(
                 "severity==ERROR",
                 PageRequest.of(0, 100)
         );
         assertThat(errorCodes.getTotalElements()).isEqualTo(2);
         assertThat(errorCodes.getContent()).extracting(ActionStatusCode::getCode).containsExactlyInAnyOrder(2, 3);
 
-        final Page<? extends ActionStatusCode> codeTwo = actionStatusCodeManagement.findByRsql(
+        final Page<? extends ActionStatusCode> codeTwo = actionStatusCodeCatalogueManagement.findByRsql(
                 "code=ge=2;code=le=2",
                 PageRequest.of(0, 100)
         );
         assertThat(codeTwo.getTotalElements()).isEqualTo(1);
         assertThat(codeTwo.getContent()).extracting(ActionStatusCode::getCode).containsExactly(2);
 
-        final Page<? extends ActionStatusCode> nameA = actionStatusCodeManagement.findByRsql(
+        final Page<? extends ActionStatusCode> nameA = actionStatusCodeCatalogueManagement.findByRsql(
                 "name==T*",
                 PageRequest.of(0, 100)
         );
@@ -309,8 +309,8 @@ class ActionStatusCodeManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     void validationRejectsBlankName() {
-        assertThatThrownBy(() -> actionStatusCodeManagement.create(
-                ActionStatusCodeManagement.Create.builder()
+        assertThatThrownBy(() -> actionStatusCodeCatalogueManagement.create(
+                ActionStatusCodeCatalogueManagement.Create.builder()
                         .code(1)
                         .name("")
                         .build()
@@ -319,8 +319,8 @@ class ActionStatusCodeManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     void validationRejectsNullSeverity() {
-        assertThatThrownBy(() -> actionStatusCodeManagement.create(
-                ActionStatusCodeManagement.Create.builder()
+        assertThatThrownBy(() -> actionStatusCodeCatalogueManagement.create(
+                ActionStatusCodeCatalogueManagement.Create.builder()
                         .code(1)
                         .name("A")
                         .severity(null)
@@ -331,8 +331,8 @@ class ActionStatusCodeManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @WithUser(authorities = READ_TARGET)
     void createWithoutCreateTargetIsDenied() {
-        assertThatThrownBy(() -> actionStatusCodeManagement.create(
-                ActionStatusCodeManagement.Create.builder()
+        assertThatThrownBy(() -> actionStatusCodeCatalogueManagement.create(
+                ActionStatusCodeCatalogueManagement.Create.builder()
                         .code(1)
                         .name("A")
                         .build()
@@ -342,7 +342,7 @@ class ActionStatusCodeManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @WithUser(authorities = CREATE_TARGET)
     void findUndocumentedWithoutReadTargetIsDenied() {
-        assertThatThrownBy(() -> actionStatusCodeManagement.findUndocumentedCodes(
+        assertThatThrownBy(() -> actionStatusCodeCatalogueManagement.findUndocumentedCodes(
                 PageRequest.of(0, 10)
         )).isInstanceOf(InsufficientPermissionException.class);
     }
@@ -390,15 +390,15 @@ class ActionStatusCodeManagementTest extends AbstractJpaIntegrationTest {
         );
 
         // Create catalogue entry for code 200
-        actionStatusCodeManagement.create(
-                ActionStatusCodeManagement.Create.builder()
+        actionStatusCodeCatalogueManagement.create(
+                ActionStatusCodeCatalogueManagement.Create.builder()
                         .code(200)
                         .name("Documented")
                         .build()
         );
 
         // Query undocumented codes
-        final Page<Integer> undocumented = actionStatusCodeManagement.findUndocumentedCodes(
+        final Page<Integer> undocumented = actionStatusCodeCatalogueManagement.findUndocumentedCodes(
                 PageRequest.of(0, 10)
         );
 
@@ -430,7 +430,7 @@ class ActionStatusCodeManagementTest extends AbstractJpaIntegrationTest {
         }
 
         // Get page 1, size 2 (should return codes 3, 4)
-        final Page<Integer> page = actionStatusCodeManagement.findUndocumentedCodes(
+        final Page<Integer> page = actionStatusCodeCatalogueManagement.findUndocumentedCodes(
                 PageRequest.of(1, 2)
         );
 
@@ -481,8 +481,8 @@ class ActionStatusCodeManagementTest extends AbstractJpaIntegrationTest {
             );
 
             // Document code 700 in tenant B
-            actionStatusCodeManagement.create(
-                    ActionStatusCodeManagement.Create.builder()
+            actionStatusCodeCatalogueManagement.create(
+                    ActionStatusCodeCatalogueManagement.Create.builder()
                             .code(700)
                             .name("Documented in B")
                             .build()
@@ -492,13 +492,13 @@ class ActionStatusCodeManagementTest extends AbstractJpaIntegrationTest {
 
         // Tenant A should see [700] (not affected by B's documentation)
         final Page<Integer> undocumentedA = runAsTenant(tenantA, () ->
-                actionStatusCodeManagement.findUndocumentedCodes(PageRequest.of(0, 10))
+                actionStatusCodeCatalogueManagement.findUndocumentedCodes(PageRequest.of(0, 10))
         );
         assertThat(undocumentedA.getContent()).containsExactly(700);
 
         // Tenant B should see [800] (700 is documented in B, and A's 700 is not visible)
         final Page<Integer> undocumentedB = runAsTenant(tenantB, () ->
-                actionStatusCodeManagement.findUndocumentedCodes(PageRequest.of(0, 10))
+                actionStatusCodeCatalogueManagement.findUndocumentedCodes(PageRequest.of(0, 10))
         );
         assertThat(undocumentedB.getContent()).containsExactly(800);
     }
@@ -521,7 +521,7 @@ class ActionStatusCodeManagementTest extends AbstractJpaIntegrationTest {
                         .build()
         );
 
-        final Page<Integer> undocumented = actionStatusCodeManagement.findUndocumentedCodes(
+        final Page<Integer> undocumented = actionStatusCodeCatalogueManagement.findUndocumentedCodes(
                 PageRequest.of(0, 10)
         );
 
