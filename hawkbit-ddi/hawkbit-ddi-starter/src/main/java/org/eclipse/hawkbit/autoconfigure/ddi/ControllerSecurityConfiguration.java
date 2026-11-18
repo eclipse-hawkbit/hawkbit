@@ -23,6 +23,7 @@ import org.eclipse.hawkbit.security.controller.DdiSecurityProperties;
 import org.eclipse.hawkbit.security.controller.GatewayTokenAuthenticator;
 import org.eclipse.hawkbit.security.controller.SecurityHeaderAuthenticator;
 import org.eclipse.hawkbit.security.controller.SecurityTokenAuthenticator;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -84,7 +85,8 @@ class ControllerSecurityConfiguration {
     @Order(301)
     protected SecurityFilterChain filterChainDDI(
             final HttpSecurity http,
-            @Value("${hawkbit.server.security.cors.disable-for-ddi-api:false}") final boolean disableCorsForDdiApi) {
+            @Value("${hawkbit.server.security.cors.disable-for-ddi-api:false}") final boolean disableCorsForDdiApi,
+            final ObjectProvider<DdiProxyDetectionConfiguration.DdiProxyDetector> ddiProxyDetector) {
         http
                 .securityMatcher(DDI_ANT_MATCHERS)
                 .authorizeHttpRequests(amrmRegistry -> amrmRegistry.anyRequest().authenticated())
@@ -114,6 +116,8 @@ class ControllerSecurityConfiguration {
         }
 
         Mdc.Filter.addMdcFilter(http);
+        // after the authentication filters - so the tenant is known
+        ddiProxyDetector.ifAvailable(detector -> http.addFilterBefore(detector.filter(), AuthorizationFilter.class));
 
         return http.build();
     }
