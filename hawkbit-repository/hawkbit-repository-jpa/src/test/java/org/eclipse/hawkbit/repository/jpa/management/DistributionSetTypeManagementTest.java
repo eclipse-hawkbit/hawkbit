@@ -249,6 +249,7 @@ class DistributionSetTypeManagementTest extends AbstractRepositoryManagementTest
     void loadingTypeAndReadingModuleTypeIdsIssuesNoSoftwareModuleTypeQuery() {
         final long typeId = defaultDsType().getId();
 
+        waitForEvents(); // the async event processing could query DB too
         queryCount.resetQueries();
         final DistributionSetType type = distributionSetTypeManagement.get(typeId);
         type.getMandatoryModuleTypeIds();

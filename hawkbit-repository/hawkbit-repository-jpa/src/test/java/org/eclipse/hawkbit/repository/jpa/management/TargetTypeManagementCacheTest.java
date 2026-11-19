@@ -35,6 +35,7 @@ class TargetTypeManagementCacheTest extends AbstractTypeManagementCacheTest {
     @Test
     void verifyTargetTypeCacheMissThenHit() {
         final TargetType targetType = testdataFactory.findOrCreateTargetType("cacheTargetType");
+        waitForEvents(); // the created event evicts the by-id cache
         evict(JpaTargetType.class.getSimpleName(), targetType.getId());
 
         final long beforeMiss = queryCount.countSelect();
@@ -59,6 +60,7 @@ class TargetTypeManagementCacheTest extends AbstractTypeManagementCacheTest {
     @Test
     void verifyTargetTypeByKeyCacheMissThenHit() {
         final TargetType targetType = testdataFactory.findOrCreateTargetType("cacheTargetTypeByKey");
+        waitForEvents(); // the created event evicts the by-id cache
         TenantAwareCacheManager.getInstance().getCache("targetType").evict(targetType.getKey());
 
         final long beforeMiss = queryCount.countSelect();
@@ -98,6 +100,7 @@ class TargetTypeManagementCacheTest extends AbstractTypeManagementCacheTest {
     @Test
     void verifyTargetTypeByKeyCacheEvictedOnUpdate() {
         final TargetType targetType = testdataFactory.findOrCreateTargetType("cacheTargetTypeByKeyUpdate");
+        waitForEvents(); // the created event evicts the by-id cache
         assertThat(targetTypeManagement.findByKey(targetType.getKey())).isPresent(); // cached
 
         targetTypeManagement.update(TargetTypeManagement.Update.builder().id(targetType.getId()).description("updated").build());
@@ -114,6 +117,7 @@ class TargetTypeManagementCacheTest extends AbstractTypeManagementCacheTest {
     @Test
     void verifyTargetTypeByKeyCacheEvictedOnDelete() {
         final TargetType targetType = testdataFactory.findOrCreateTargetType("cacheTargetTypeByKeyDelete");
+        waitForEvents(); // the created event evicts the by-id cache
         assertThat(targetTypeManagement.findByKey(targetType.getKey())).isPresent(); // cached
 
         targetTypeManagement.delete(targetType.getId());

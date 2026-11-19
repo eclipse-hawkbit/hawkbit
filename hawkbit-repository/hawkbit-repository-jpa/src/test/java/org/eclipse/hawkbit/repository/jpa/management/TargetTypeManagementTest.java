@@ -210,6 +210,7 @@ class TargetTypeManagementTest extends AbstractRepositoryManagementTest<TargetTy
         targetTypeManagement.assignCompatibleDistributionSetTypes(
                 targetType.getId(), Collections.singletonList(defaultDsType().getId()));
 
+        waitForEvents(); // the async event processing could query DB too
         queryCount.resetQueries();
         targetTypeManagement.get(targetType.getId()).getDistributionSetTypes().forEach(dst -> dst.getKey());
 
