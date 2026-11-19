@@ -30,6 +30,7 @@ import org.eclipse.hawkbit.repository.RolloutApprovalStrategy;
 import org.eclipse.hawkbit.repository.event.ApplicationEventFilter;
 import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyResolver;
+import org.eclipse.hawkbit.repository.test.util.PendingTasksTrackingExecutor;
 import org.eclipse.hawkbit.repository.test.util.RolloutTestApprovalStrategy;
 import org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
@@ -134,7 +135,8 @@ public class TestConfiguration implements AsyncConfigurer {
 
     @Bean
     Executor asyncExecutor() {
-        return new DelegatingSecurityContextExecutorService(Executors.newSingleThreadExecutor());
+        // tracks the pending tasks, so the tests could wait for the events to be processed (AbstractIntegrationTest#waitForEvents)
+        return new PendingTasksTrackingExecutor(new DelegatingSecurityContextExecutorService(Executors.newSingleThreadExecutor()));
     }
 
     @Bean
