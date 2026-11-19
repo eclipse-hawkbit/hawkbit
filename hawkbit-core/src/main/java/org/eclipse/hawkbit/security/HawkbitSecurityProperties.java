@@ -28,6 +28,7 @@ public class HawkbitSecurityProperties {
     private final Clients clients = new Clients();
     private final Dos dos = new Dos();
     private final Cors cors = new Cors();
+    private final TenantResolver tenantResolver = new TenantResolver();
 
     /**
      * Secure access enforced.
@@ -93,6 +94,35 @@ public class HawkbitSecurityProperties {
             final CorsConfiguration corsConfiguration = toCorsConfiguration();
             return request -> corsConfiguration;
         }
+    }
+
+    /**
+     * Management API requested tenant resolution - the tenant requested before the authentication (see
+     * <code>org.eclipse.hawkbit.rest.security.TenantResolverFilter</code>).
+     */
+    @Data
+    public static class TenantResolver {
+
+        /**
+         * If <code>true</code>, <code>/{tenant}/rest/**</code> is served as <code>/rest/**</code> with requested tenant
+         * <code>tenant</code>. Disable it only if the tenant path is handled otherwise (e.g. by extension controllers mapped under
+         * <code>/{tenant}/rest/**</code>).
+         */
+        private boolean tenantPath = true;
+        /**
+         * If <code>true</code>, a global, not tenant scoped, user (e.g. <code>spring.security.user</code>) acts in the scope of the
+         * requested tenant. Otherwise, the global user stays not tenant scoped.
+         */
+        private boolean globalUserRequestedTenant = false;
+        /**
+         * If <code>true</code>, a <code>tenant&#92;user</code> basic auth user on <code>/rest/**</code> requests the <code>tenant</code>
+         * and authenticates as <code>user</code> (as with the <code>/{tenant}/rest/**</code> path).
+         *
+         * @deprecated since 1.2.1 - use the tenant path <code>/{tenant}/rest/**</code> to request a tenant. Will be removed.
+         */
+        @Deprecated(forRemoval = true, since = "1.2.1")
+        @SuppressWarnings("java:S1133")
+        private boolean tenantPrefixedBasicAuth = true;
     }
 
     /**

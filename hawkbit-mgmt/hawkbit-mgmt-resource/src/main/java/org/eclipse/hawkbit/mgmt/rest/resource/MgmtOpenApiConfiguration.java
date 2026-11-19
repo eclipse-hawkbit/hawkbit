@@ -57,10 +57,8 @@ public class MgmtOpenApiConfiguration {
     private static final String DESCRIPTION_SUFFIX = " Authentication";
 
     @Bean
-    @ConditionalOnProperty(
-            value = "hawkbit.server.openapi.mgmt.enabled", havingValue = "true", matchIfMissing = true)
+    @ConditionalOnProperty(value = "hawkbit.server.openapi.mgmt.enabled", havingValue = "true", matchIfMissing = true)
     public GroupedOpenApi mgmtApi(
-            @Value("${hawkbit.server.openapi.mgmt.tenant-endpoint.enabled:false}") final boolean tenantEndpointEnabled,
             @Value("${springdoc.oauth-flow.authorizationUrl:}") final String authorizationUrl,
             @Value("${springdoc.oauth-flow.tokenUrl:}") final String tokenUrl,
             @Autowired(required = false) @Qualifier("hawkbitOAuth2ResourceServerCustomizer") final Customizer<OAuth2ResourceServerConfigurer<HttpSecurity>> oauth2ResourceServerCustomizer,
@@ -100,9 +98,8 @@ public class MgmtOpenApiConfiguration {
         return GroupedOpenApi
                 .builder()
                 .group("Management API")
-                .pathsToMatch(tenantEndpointEnabled ? new String[] { "/rest/v*/**", "/{tenant}/rest/v*/**" } : new String[] { "/rest/v*/**" })
-                .addOpenApiCustomizer(openApi ->
-                        openApi
+                .pathsToMatch("/rest/v*/**") // management server declared paths
+                .addOpenApiCustomizer(openApi -> openApi
                                 .info(new Info()
                                         .title("Management API")
                                         .version("v1")
@@ -110,13 +107,12 @@ public class MgmtOpenApiConfiguration {
                                                 The Management API provides access to the management features of the hawkBit.
                                                 It allows for managing devices, deployments, and other.
                                                 """))
-                                .servers(tenantEndpointEnabled
-                                        ? List.of(
-                                            new Server()
-                                                    .url("/{tenant}/")
-                                                    .variables(new ServerVariables().addServerVariable("tenant", tenantSeverVariable())),
-                                            new Server().url("/"))
-                                        : List.of(new Server().url("/")))
+                                // with the tenant path enabled the API is called via /{tenant}/rest/** (it requests the tenant)
+                                .servers(List.of(hawkbitSecurityProperties.getTenantResolver().isTenantPath()
+                                        ? new Server()
+                                                .url("/{tenant}/")
+                                                .variables(new ServerVariables().addServerVariable("tenant", tenantSeverVariable()))
+                                        : new Server().url("/")))
                                 .addSecurityItem(securityRequirement)
                                 .components(openApi.getComponents().securitySchemes(securitySchemeMap))
                                 .tags(sort(openApi.getTags())))
@@ -177,7 +173,7 @@ public class MgmtOpenApiConfiguration {
 
     private static ServerVariable tenantSeverVariable() {
         final ServerVariable tenantServerVariable = new ServerVariable();
-        tenantServerVariable.setDescription("AccessContext identifier");
+        tenantServerVariable.setDescription("Tenant identifier");
         tenantServerVariable.setDefault("DEFAULT");
         return tenantServerVariable;
     }

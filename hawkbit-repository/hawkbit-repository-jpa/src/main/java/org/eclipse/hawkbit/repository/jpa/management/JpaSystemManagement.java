@@ -14,6 +14,7 @@ import static org.eclipse.hawkbit.context.AccessContext.asTenant;
 
 import java.time.Instant;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -194,12 +195,21 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
 
     @Override
     public TenantMetaData getTenantMetadata() {
-        return getTenantMetadata0(true);
+        return getTenantMetadata0(true, repositoryProperties.isImplicitTenantCreateAllowed());
     }
 
     @Override
     public TenantMetaData getTenantMetadataWithoutDetails() {
-        return getTenantMetadata0(false);
+        return getTenantMetadata0(false, repositoryProperties.isImplicitTenantCreateAllowed());
+    }
+
+    @Override
+    public Optional<TenantMetaData> findTenantMetadataWithoutDetails() {
+        try {
+            return Optional.of(getTenantMetadata0(false, false));
+        } catch (final EntityNotFoundException e) {
+            return Optional.empty();
+        }
     }
 
     @Override
@@ -359,7 +369,8 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
         return metaData;
     }
 
-    private TenantMetaData getTenantMetadata0(final boolean withDetails) {
+    // createIfMissing - if to create the not existing tenant metadata, otherwise EntityNotFoundException is thrown
+    private TenantMetaData getTenantMetadata0(final boolean withDetails, final boolean createIfMissing) {
         final String tenant = AccessContext.tenant();
         if (tenant == null) {
             throw new IllegalStateException("AccessContext not set");
@@ -372,7 +383,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
             // checked before the implicit creation, so a soft deleted tenant is never re-created
             throw new TenantSoftDeletedException(tenant);
         } else if (metaData == null) {
-            if (repositoryProperties.isImplicitTenantCreateAllowed()) {
+            if (createIfMissing) {
                 log.info("AccessContext {} doesn't exist create metadata", tenant, new Exception("Thread dump"));
                 return createTenantMetadata0(tenant);
             } else {

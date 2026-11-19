@@ -13,7 +13,7 @@ The API is protected and needs authentication and authorization based on the sec
 
 hawkBit provides an consistent Management API interface that guarantees backwards compatibility for future releases by
 version control.
-The current version of the Management API is `version 1 (v1)` with the URI `http://localhost:8080/rest/v1/`
+The current version of the Management API is `version 1 (v1)` with the URI `http://localhost:8080/{tenant}/rest/v1/`.
 
 ### API Resources
 

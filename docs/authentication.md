@@ -327,3 +327,24 @@ is used for the integration.
 ## Management API
 
 - Basic Auth
+- OAuth2 / OpenID Connect bearer token (see [Authorization](authorization.md#openid-connect))
+
+### Requested tenant
+
+The tenant is part of the Management API path: `/{tenant}/rest/**`, e.g.
+`http://localhost:8080/DEFAULT/rest/v1/targets`. The response links contain the tenant path too. The tenant consists of
+URI unreserved chars (`A-Z`, `a-z`, `0-9`, `-`, `.`, `_`, `~`), not encoded, and must not be `.` or `..`.
+
+- the authenticated user must belong to the tenant, otherwise (or for an invalid tenant) the response is
+  `401 Unauthorized`
+- a global, not tenant scoped, user (e.g. `spring.security.user`) acts in the tenant only if
+  `hawkbit.server.security.tenant-resolver.global-user-requested-tenant=true`. The tenant must exist.
+
+Note: Management API is still accessible at `/rest/**` but this is deprecated (since 1.2.1) in favor of
+`/{tenant}/rest/**` and will be removed. In this case the tenant is the one of the authenticated user (e.g. from the
+OAuth2 / OpenID Connect token). A Basic Auth user `<tenant>\<username>` requests `<tenant>` (deprecated) - the part
+before the first `\` is always taken as the tenant.
+
+Extensions (e.g. authentication providers) get the requested tenant via
+[RequestedTenant](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-core/src/main/java/org/eclipse/hawkbit/context/RequestedTenant.java)
+`.getTenant()`. They shall not read the tenant from request headers - the checks above wouldn't apply.
