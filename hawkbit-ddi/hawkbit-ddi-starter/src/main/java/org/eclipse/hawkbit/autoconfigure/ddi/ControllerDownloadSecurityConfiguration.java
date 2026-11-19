@@ -23,6 +23,7 @@ import org.eclipse.hawkbit.security.controller.DdiSecurityProperties;
 import org.eclipse.hawkbit.security.controller.GatewayTokenAuthenticator;
 import org.eclipse.hawkbit.security.controller.SecurityHeaderAuthenticator;
 import org.eclipse.hawkbit.security.controller.SecurityTokenAuthenticator;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -76,7 +77,8 @@ class ControllerDownloadSecurityConfiguration {
 
     @Bean
     @Order(300) // higher priority than HawkBit DDI security, so that the DDI DL security is applied first
-    protected SecurityFilterChain filterChainDDIDL(final HttpSecurity http) {
+    protected SecurityFilterChain filterChainDDIDL(
+            final HttpSecurity http, final ObjectProvider<DdiProxyDetectionConfiguration.DdiProxyDetector> ddiProxyDetector) {
         http
                 .securityMatcher(DDI_DL_ANT_MATCHER)
                 .authorizeHttpRequests(amrmRegistry -> amrmRegistry.anyRequest().authenticated())
@@ -100,6 +102,8 @@ class ControllerDownloadSecurityConfiguration {
         }
 
         Mdc.Filter.addMdcFilter(http);
+        // after the authentication filters - so the tenant is known
+        ddiProxyDetector.ifAvailable(detector -> http.addFilterBefore(detector.filter(), AuthorizationFilter.class));
 
         return http.build();
     }
