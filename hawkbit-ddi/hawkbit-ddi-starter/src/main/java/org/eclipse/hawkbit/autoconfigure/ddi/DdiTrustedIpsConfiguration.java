@@ -9,22 +9,11 @@
  */
 package org.eclipse.hawkbit.autoconfigure.ddi;
 
-import java.io.IOException;
-
-import jakarta.servlet.ServletException;
-
 import lombok.extern.slf4j.Slf4j;
-import org.apache.catalina.connector.Request;
-import org.apache.catalina.connector.Response;
-import org.apache.catalina.valves.ValveBase;
-import org.eclipse.hawkbit.security.controller.AuthenticationFilters;
+import org.eclipse.hawkbit.rest.security.ClientAddress;
 import org.eclipse.hawkbit.security.controller.DdiSecurityProperties;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;
-import org.springframework.boot.tomcat.servlet.TomcatServletWebServerFactory;
-import org.springframework.boot.web.server.WebServerFactoryCustomizer;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Condition;
 import org.springframework.context.annotation.ConditionContext;
 import org.springframework.context.annotation.Conditional;
@@ -33,9 +22,8 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 
 /**
- * Support of the deprecated <code>hawkbit.server.ddi.security.rp.trusted-ips</code> with embedded Tomcat. The trusted IPs are reverse proxy
- * IPs, but with <code>server.forward-headers-strategy=NATIVE</code> the Tomcat RemoteIpValve replaces the remote address with the client
- * (device) IP. So, a valve stores the connection peer IP address (the reverse proxy) as request attribute, which is checked instead.
+ * Confirmation of the deprecated <code>hawkbit.server.ddi.security.rp.trusted-ips</code>. The trusted IPs are reverse proxy IPs, so the
+ * connection peer ({@link ClientAddress#peer()}) is checked - not the client IP resolved from the forwarded headers.
  * <p/>
  * Created only if the trusted IPs are set. Since they are deprecated, they have to be enabled explicitly with
  * <code>hawkbit.server.ddi.security.rp.trusted-ips-enable=true</code>, otherwise the application fails to start.
@@ -46,7 +34,6 @@ import org.springframework.core.type.AnnotatedTypeMetadata;
 @SuppressWarnings("java:S1133")
 @Slf4j
 @Configuration
-@ConditionalOnClass(name = "org.springframework.boot.tomcat.servlet.TomcatServletWebServerFactory")
 @Conditional(DdiTrustedIpsConfiguration.TrustedIpsSetCondition.class)
 public class DdiTrustedIpsConfiguration {
 
@@ -54,8 +41,7 @@ public class DdiTrustedIpsConfiguration {
     // just checked, not a DdiSecurityProperties property - it is only a confirmation for the deprecated trusted IPs
     static final String TRUSTED_IPS_ENABLE = "hawkbit.server.ddi.security.rp.trusted-ips-enable";
 
-    @Bean
-    WebServerFactoryCustomizer<TomcatServletWebServerFactory> ddiPeerAddressValveCustomizer(final Environment environment) {
+    DdiTrustedIpsConfiguration(final Environment environment) {
         if (Boolean.FALSE.equals(environment.getProperty(TRUSTED_IPS_ENABLE, Boolean.class, false))) {
             throw new IllegalStateException(String.format(
                     "%s is deprecated and will be removed! The deployment shall protect access to hawkBit " +
@@ -65,24 +51,6 @@ public class DdiTrustedIpsConfiguration {
         }
         log.warn("{} is deprecated and will be removed! The deployment shall protect access to hawkBit " +
                 "(e.g. only trusted peers shall be able to call DDI with client certificate headers).", TRUSTED_IPS);
-        return factory -> factory.addEngineValves(new PeerAddressValve());
-    }
-
-    /**
-     * Stores the connection peer IP address as request attribute. {@link Request#getPeerAddr()} is not changed by the RemoteIpValve, so the
-     * order of the valves doesn't matter.
-     */
-    static class PeerAddressValve extends ValveBase {
-
-        PeerAddressValve() {
-            super(true);
-        }
-
-        @Override
-        public void invoke(final Request request, final Response response) throws IOException, ServletException {
-            request.setAttribute(AuthenticationFilters.PEER_ADDRESS_ATTRIBUTE, request.getPeerAddr());
-            getNext().invoke(request, response);
-        }
     }
 
     // binds the list - so both, comma separated and indexed (trusted-ips[0]=...), notations are supported

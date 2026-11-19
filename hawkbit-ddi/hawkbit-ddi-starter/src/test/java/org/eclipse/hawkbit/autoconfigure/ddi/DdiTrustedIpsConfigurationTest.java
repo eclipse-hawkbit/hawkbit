@@ -20,18 +20,19 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import org.apache.catalina.valves.RemoteIpValve;
-import org.eclipse.hawkbit.security.controller.AuthenticationFilters;
+import org.eclipse.hawkbit.rest.security.ClientAddress;
+import org.eclipse.hawkbit.rest.security.ForwardedResolver;
+import org.eclipse.hawkbit.rest.security.ForwardedValve;
+import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.boot.tomcat.servlet.TomcatServletWebServerFactory;
 import org.springframework.boot.web.server.WebServer;
-import org.springframework.boot.web.server.WebServerFactoryCustomizer;
 
 /**
  * Feature: Unit Tests - Security<br/>
- * Story: Deprecated DDI reverse proxy trusted IPs with embedded Tomcat
+ * Story: Deprecated DDI reverse proxy trusted IPs
  */
 class DdiTrustedIpsConfigurationTest {
 
@@ -39,8 +40,8 @@ class DdiTrustedIpsConfigurationTest {
             .withConfiguration(AutoConfigurations.of(DdiTrustedIpsConfiguration.class));
 
     @Test
-    void noValveIfTrustedIpsNotSet() {
-        contextRunner.run(context -> assertThat(context).hasNotFailed().doesNotHaveBean(WebServerFactoryCustomizer.class));
+    void notCreatedIfTrustedIpsNotSet() {
+        contextRunner.run(context -> assertThat(context).hasNotFailed().doesNotHaveBean(DdiTrustedIpsConfiguration.class));
     }
 
     @Test
@@ -53,33 +54,28 @@ class DdiTrustedIpsConfigurationTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
-    void valveAddedIfTrustedIpsSetAndEnabled() {
+    void startsIfTrustedIpsSetAndEnabled() {
         contextRunner
                 .withPropertyValues(
                         DdiTrustedIpsConfiguration.TRUSTED_IPS + "[0]=10.0.0.1", // indexed notation
                         DdiTrustedIpsConfiguration.TRUSTED_IPS_ENABLE + "=true")
-                .run(context -> {
-                    final TomcatServletWebServerFactory factory = new TomcatServletWebServerFactory();
-                    context.getBean(WebServerFactoryCustomizer.class).customize(factory);
-                    assertThat(factory.getEngineValves()).hasExactlyElementsOfTypes(DdiTrustedIpsConfiguration.PeerAddressValve.class);
-                });
+                .run(context -> assertThat(context).hasNotFailed().hasSingleBean(DdiTrustedIpsConfiguration.class));
     }
 
     /**
-     * With a real Tomcat and RemoteIpValve: the remote address is the forwarded client IP, while the peer address attribute is the
-     * (trusted proxy) connection peer.
+     * With a real Tomcat and the forwarded headers processing: the remote address is the forwarded client IP, while the client address peer
+     * (checked against the trusted IPs) is the (trusted proxy) connection peer.
      */
     @Test
-    void peerAddressIsTheConnectionPeerWhileRemoteAddressIsForwarded() throws Exception {
+    void peerIsTheConnectionPeerWhileRemoteAddressIsForwarded() throws Exception {
         final TomcatServletWebServerFactory factory = new TomcatServletWebServerFactory(0);
-        // default internal proxies include the loopback - so the test client is a trusted proxy
-        factory.addEngineValves(new RemoteIpValve(), new DdiTrustedIpsConfiguration.PeerAddressValve());
+        // default trusted proxies include the loopback - so the test client is a trusted proxy
+        factory.addEngineValves(new ForwardedValve(ForwardedResolver.of(new HawkbitSecurityProperties())));
         final WebServer webServer = factory.getWebServer(servletContext -> servletContext.addServlet("echo", new HttpServlet() {
 
             @Override
             protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws java.io.IOException {
-                response.getWriter().write(request.getRemoteAddr() + "|" + request.getAttribute(AuthenticationFilters.PEER_ADDRESS_ATTRIBUTE));
+                response.getWriter().write(request.getRemoteAddr() + "|" + ClientAddress.of(request).peer());
             }
         }).addMapping("/*"));
         webServer.start();

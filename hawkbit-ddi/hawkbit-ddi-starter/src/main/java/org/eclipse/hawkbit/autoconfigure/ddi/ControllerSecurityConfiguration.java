@@ -23,7 +23,6 @@ import org.eclipse.hawkbit.security.controller.DdiSecurityProperties;
 import org.eclipse.hawkbit.security.controller.GatewayTokenAuthenticator;
 import org.eclipse.hawkbit.security.controller.SecurityHeaderAuthenticator;
 import org.eclipse.hawkbit.security.controller.SecurityTokenAuthenticator;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -64,7 +63,8 @@ class ControllerSecurityConfiguration {
     }
 
     /**
-     * Filter to protect the hawkBit server DDI interface against too many requests.
+     * Filter to protect the hawkBit server DDI interface against too many requests. The DDI download requests are excluded - they are
+     * limited by the DDI download DoS filter (see {@link ControllerDownloadSecurityConfiguration}).
      *
      * @param securityProperties for filter configuration
      * @return the spring filter registration bean for registering a denial of service protection filter in the filter chain
@@ -74,7 +74,9 @@ class ControllerSecurityConfiguration {
     protected FilterRegistrationBean<DosFilter> dosFilterDDI(final HawkbitSecurityProperties securityProperties) {
         final FilterRegistrationBean<DosFilter> filterRegBean =
                 SecurityManagedConfiguration.dosFilter(List.of(DDI_ANT_MATCHERS),
-                        securityProperties.getDos().getFilter(), securityProperties.getClients());
+                        List.of(ControllerDownloadSecurityConfiguration.DDI_DL_ANT_MATCHER),
+                        securityProperties.getDos().getFilter(), securityProperties.getDos().getFilter().getDdi(),
+                        securityProperties.getClients());
         filterRegBean.setOrder(SecurityManagedConfiguration.DOS_FILTER_ORDER);
         filterRegBean.setName("dosDDiFilter");
 
@@ -85,8 +87,7 @@ class ControllerSecurityConfiguration {
     @Order(301)
     protected SecurityFilterChain filterChainDDI(
             final HttpSecurity http,
-            @Value("${hawkbit.server.security.cors.disable-for-ddi-api:false}") final boolean disableCorsForDdiApi,
-            final ObjectProvider<DdiProxyDetectionConfiguration.DdiProxyDetector> ddiProxyDetector) {
+            @Value("${hawkbit.server.security.cors.disable-for-ddi-api:false}") final boolean disableCorsForDdiApi) {
         http
                 .securityMatcher(DDI_ANT_MATCHERS)
                 .authorizeHttpRequests(amrmRegistry -> amrmRegistry.anyRequest().authenticated())
@@ -116,8 +117,6 @@ class ControllerSecurityConfiguration {
         }
 
         Mdc.Filter.addMdcFilter(http);
-        // after the authentication filters - so the tenant is known
-        ddiProxyDetector.ifAvailable(detector -> http.addFilterBefore(detector.filter(), AuthorizationFilter.class));
 
         return http.build();
     }

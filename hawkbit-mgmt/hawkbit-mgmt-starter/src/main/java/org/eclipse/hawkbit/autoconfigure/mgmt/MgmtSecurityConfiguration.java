@@ -99,8 +99,9 @@ public class MgmtSecurityConfiguration {
         final List<String> includePaths = securityProperties.getTenantResolver().isTenantPath()
                 ? List.of(MgmtRestConstants.REST + "/**", "/*" + MgmtRestConstants.REST + "/**")
                 : List.of(MgmtRestConstants.REST + "/**");
-        final FilterRegistrationBean<DosFilter> filterRegBean = SecurityManagedConfiguration.dosFilter(
-                includePaths, securityProperties.getDos().getFilter(), securityProperties.getClients());
+        final FilterRegistrationBean<DosFilter> filterRegBean = SecurityManagedConfiguration.dosFilter(includePaths, null,
+                securityProperties.getDos().getFilter(), securityProperties.getDos().getFilter().getMgmt(),
+                securityProperties.getClients());
         filterRegBean.setOrder(SecurityManagedConfiguration.DOS_FILTER_ORDER);
         filterRegBean.setName("dosMgmtFilter");
         return filterRegBean;

@@ -27,6 +27,12 @@
             <artifactId>hawkbit-repository-api</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <!-- ClientAddress - the connection peer for the (deprecated) trusted IPs check -->
+            <groupId>org.eclipse.hawkbit</groupId>
+            <artifactId>hawkbit-rest-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.security</groupId>

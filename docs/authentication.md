@@ -109,7 +109,7 @@ client.
 
 > `hawkbit.server.ddi.security.rp.trusted-ips` (DDI authentication accepted only from these reverse proxy IPs) is
 > deprecated since 1.2.1 and will be removed. If set, it has to be enabled explicitly with
-> `hawkbit.server.ddi.security.rp.trusted-ips-enable=true`, otherwise hawkBit (with embedded Tomcat) fails to start.
+> `hawkbit.server.ddi.security.rp.trusted-ips-enable=true`, otherwise hawkBit fails to start.
 > The IP of the connection peer (the reverse proxy) is checked, not the client IP resolved from `X-Forwarded-For`.
 
 Here is an example diagram that shows all the communication between the hawkBit, reverse proxy and client. For the sake
@@ -135,15 +135,16 @@ different trusted CAs this example won't work.
 
 1. Hawkbit Configurations
 
-   There are also some configurations that you need update when you deployed your hawkbit service.
+   hawkBit generates the download URLs from the forwarded headers (`X-Forwarded-Proto`, `-Host`, `-Port`) set by the
+   reverse proxy. With the default forward headers strategy (`NONE`) hawkBit applies them if the reverse proxy is a
+   trusted proxy - by default the private, loopback, link-local and CGNAT ranges, e.g. the Docker network. So, usually,
+   nothing has to be configured. Only if the proxy reaches hawkBit from another address, configure
+   `hawkbit.server.security.forwarded.trusted-proxies` - it replaces the defaults, so list all proxies (see
+   [Throttling](throttling.md#client-ip)). If you're deploying hawkBit as a Docker container, add such configurations as
+   environmental values in the docker-compose.yml file.
 
-   You need to add the given setting to your hawkBit configurations so that hawkBit can generate the URLs according to
-   the https that the client will use to download. If you're deploying hawkBit as a Docker container, add these
-   configurations as environmental values in the docker-compose.yml file.
-
-```properties
-server.forward-headers-strategy=NATIVE
-```
+   Don't set `server.forward-headers-strategy=NATIVE` (recommended by older versions of this guide) - it switches hawkBit
+   to the legacy mode, where the forwarded headers are not processed by hawkBit.
 
 2. In Hawkbit's UI section, under system configuration, make sure to select *Allow targets to authenticate via a
    certificate authenticated by a reverse proxy* and input the fixed issuer hash as "Hawkbit". This can be whenever you

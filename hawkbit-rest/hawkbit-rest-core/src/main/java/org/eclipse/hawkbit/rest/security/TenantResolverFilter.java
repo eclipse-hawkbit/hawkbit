@@ -17,8 +17,6 @@ import java.util.Enumeration;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -63,10 +61,15 @@ import org.springframework.web.util.UrlPathHelper;
 @Slf4j
 public class TenantResolverFilter extends OncePerRequestFilter {
 
+    /**
+     * The DDI API path (after the tenant): <code>/{tenant}/controller/**</code>.
+     */
+    public static final String DDI_PATH = "/controller";
+
     private static final BasicAuthenticationConverter BASIC_AUTHENTICATION_CONVERTER = new BasicAuthenticationConverter();
 
+    private final String apiPath;
     private final String apiPathAndSlash;
-    private final Pattern tenantPathPattern;
     private final boolean tenantPathEnabled;
     private final boolean tenantPrefixedBasicAuthEnabled;
     private final AuthenticationEntryPoint authenticationEntryPoint;
@@ -86,8 +89,8 @@ public class TenantResolverFilter extends OncePerRequestFilter {
     public TenantResolverFilter(
             final String apiPath, final boolean tenantPathEnabled, final boolean tenantPrefixedBasicAuthEnabled,
             final AuthenticationEntryPoint authenticationEntryPoint) {
+        this.apiPath = apiPath;
         apiPathAndSlash = apiPath + "/";
-        tenantPathPattern = Pattern.compile("/(?<tenant>[^/]+)" + Pattern.quote(apiPathAndSlash) + ".*");
         this.tenantPathEnabled = tenantPathEnabled;
         this.tenantPrefixedBasicAuthEnabled = tenantPrefixedBasicAuthEnabled;
         this.authenticationEntryPoint = authenticationEntryPoint;
@@ -108,26 +111,24 @@ public class TenantResolverFilter extends OncePerRequestFilter {
         // context path, which has to be a prefix of the raw request URI (e.g. /%44EFAULT/rest/** is an invalid tenant, not DEFAULT).
         // Not normalized paths (e.g. /{tenant}/rest/../x) are still matched here, but they are rejected by the Spring Security
         // firewall which checks the same (not changed) request URI
-        final String rawPath = request.getRequestURI().substring(request.getContextPath().length());
-        final Matcher matcher = tenantPathEnabled ? tenantPathPattern.matcher(rawPath) : null;
-        if (matcher != null && matcher.matches()) {
-            final String tenant = matcher.group("tenant");
-            if (!RequestedTenant.isValidTenant(tenant)) {
+        final String pathTenant = tenantPathEnabled ? tenant(request, apiPath) : null;
+        if (pathTenant != null) {
+            if (!RequestedTenant.isValidTenant(pathTenant)) {
                 rejectInvalidTenant(request, response, "Invalid tenant in the request path");
                 return;
             }
 
-            final HttpServletRequest tenantPathRequest = tenantPathRequest(request, tenant);
+            final HttpServletRequest tenantPathRequest = tenantPathRequest(request, pathTenant);
             // remove the tenant prefix of the basic auth user only if it matches the path tenant (case-insensitive as tenants are).
             // otherwise, assume that the backslash is part of the username
             final HttpServletRequest apiRequest = TenantPrefixedBasicAuthUser.of(request)
-                    .filter(tenantPrefixedBasicAuthUser -> tenantPrefixedBasicAuthUser.tenant().equalsIgnoreCase(tenant))
+                    .filter(tenantPrefixedBasicAuthUser -> tenantPrefixedBasicAuthUser.tenant().equalsIgnoreCase(pathTenant))
                     .map(tenantPrefixedBasicAuthUser -> {
                         warnTenantPrefixedUserDeprecated();
                         return tenantPrefixedBasicAuthUser.withNonTenantPrefixedUser(tenantPathRequest);
                     })
                     .orElse(tenantPathRequest);
-            withRequestedTenant(request, tenant, () -> filterChain.doFilter(apiRequest, response));
+            withRequestedTenant(request, pathTenant, () -> filterChain.doFilter(apiRequest, response));
             return;
         } else if (tenantPrefixedBasicAuthEnabled
                 // the decoded path - as the servlet container, the DoS filter and the handler mappings match it (e.g. /r%65st/**)
@@ -151,6 +152,22 @@ public class TenantResolverFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
+    /**
+     * Returns the tenant of a tenant scoped API request <code>/{tenant}/{api path}/**</code> (after the context path) - matched against the
+     * raw (not decoded / normalized) request URI, as the filter does it.
+     *
+     * @param request the request
+     * @param apiPath the api path, e.g. <code>/rest</code> or <code>/controller</code> (DDI)
+     * @return the (raw, not validated) tenant path segment, <code>null</code> if the request path doesn't match
+     */
+    public static String tenant(final HttpServletRequest request, final String apiPath) {
+        final String rawPath = request.getRequestURI().substring(request.getContextPath().length());
+        final int tenantEnd = rawPath.indexOf('/', 1);
+        return rawPath.startsWith("/") && tenantEnd > 1 && rawPath.startsWith(apiPath + "/", tenantEnd)
+                ? rawPath.substring(1, tenantEnd)
+                : null;
+    }
+
     private void rejectInvalidTenant(final HttpServletRequest request, final HttpServletResponse response, final String message)
             throws ServletException, IOException {
         log.debug(message);
@@ -160,7 +177,7 @@ public class TenantResolverFilter extends OncePerRequestFilter {
     private void warnTenantPrefixedUserDeprecated() {
         if (tenantPrefixedUserWarned.compareAndSet(false, true)) {
             log.warn("Tenant prefixed basic auth user (tenant\\user) is deprecated since 1.2.1 and will be removed! " +
-                    "Use the tenant path /{tenant}{}/** to request a tenant.", apiPathAndSlash.substring(0, apiPathAndSlash.length() - 1));
+                    "Use the tenant path /{tenant}{}/** to request a tenant.", apiPath);
         }
     }
 
