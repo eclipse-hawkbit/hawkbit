@@ -35,10 +35,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class MgmtActionStatusCodeCatalogueResource implements MgmtActionStatusCodeCatalogueRestApi {
 
-    private final ActionStatusCodeCatalogueManagement<ActionStatusCode> actionStatusCodeCatalogueManagement;
+    private final ActionStatusCodeCatalogueManagement<? extends ActionStatusCode> actionStatusCodeCatalogueManagement;
 
     public MgmtActionStatusCodeCatalogueResource(
-            final ActionStatusCodeCatalogueManagement<ActionStatusCode> actionStatusCodeCatalogueManagement) {
+            final ActionStatusCodeCatalogueManagement<? extends ActionStatusCode> actionStatusCodeCatalogueManagement) {
         this.actionStatusCodeCatalogueManagement = actionStatusCodeCatalogueManagement;
     }
 
@@ -54,7 +54,9 @@ public class MgmtActionStatusCodeCatalogueResource implements MgmtActionStatusCo
                 pagingLimitParam,
                 PagingUtility.sanitizeActionStatusCodeSortParam(sortParam));
 
-        final Page<ActionStatusCode> page = actionStatusCodeCatalogueManagement.findByRsql(rsqlParam, pageable);
+        final Page<? extends ActionStatusCode> page = rsqlParam == null
+                ? actionStatusCodeCatalogueManagement.findAll(pageable)
+                : actionStatusCodeCatalogueManagement.findByRsql(rsqlParam, pageable);
         final var rest = page.getContent().stream()
                 .map(MgmtActionStatusCodeMapper::toResponse)
                 .toList();

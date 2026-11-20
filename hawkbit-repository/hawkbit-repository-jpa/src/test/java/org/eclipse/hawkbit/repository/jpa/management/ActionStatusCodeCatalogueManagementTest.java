@@ -79,9 +79,7 @@ class ActionStatusCodeCatalogueManagementTest extends AbstractJpaIntegrationTest
                         .code(1)
                         .name("SECOND")
                         .build()
-        )).isInstanceOf(EntityAlreadyExistsException.class)
-                .hasMessageContaining("Action status code")
-                .hasMessageContaining("1");
+        )).isInstanceOf(EntityAlreadyExistsException.class); // unique constraint uk_action_status_code
     }
 
     @Test

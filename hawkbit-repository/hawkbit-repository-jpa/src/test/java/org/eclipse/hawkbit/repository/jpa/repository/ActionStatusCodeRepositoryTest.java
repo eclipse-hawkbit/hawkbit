@@ -48,14 +48,15 @@ class ActionStatusCodeRepositoryTest extends AbstractJpaIntegrationTest {
     private PlatformTransactionManager txManager;
 
     @Test
-    void savesAndFindsByCode() {
+    void savesAndFindsById() {
         final JpaActionStatusCode entity = new JpaActionStatusCode();
         entity.setCode(1234);
         entity.setName("DOWNLOAD_HASH_MISMATCH");
         entity.setSeverity(ActionStatusCode.Severity.ERROR);
-        actionStatusCodeRepository.save(entity);
+        final long id = actionStatusCodeRepository.save(entity).getId();
 
-        assertThat(actionStatusCodeRepository.findByCode(1234)).hasValueSatisfying(c -> {
+        assertThat(actionStatusCodeRepository.findById(id)).hasValueSatisfying(c -> {
+            assertThat(c.getCode()).isEqualTo(1234);
             assertThat(c.getName()).isEqualTo("DOWNLOAD_HASH_MISMATCH");
             assertThat(c.getSeverity()).isEqualTo(ActionStatusCode.Severity.ERROR);
             assertThat(c.getTenant()).isNotBlank();
@@ -87,18 +88,6 @@ class ActionStatusCodeRepositoryTest extends AbstractJpaIntegrationTest {
                 ex -> assertThat(ex).isInstanceOf(EntityAlreadyExistsException.class),
                 ex -> assertThat(ex).isInstanceOf(DataIntegrityViolationException.class)
         );
-    }
-
-    @Test
-    void existsByCodeReturnsTrueForExistingCode() {
-        final JpaActionStatusCode entity = new JpaActionStatusCode();
-        entity.setCode(5678);
-        entity.setName("EXISTS_TEST");
-        entity.setSeverity(ActionStatusCode.Severity.INFO);
-        actionStatusCodeRepository.save(entity);
-
-        assertThat(actionStatusCodeRepository.existsByCode(5678)).isTrue();
-        assertThat(actionStatusCodeRepository.existsByCode(9999)).isFalse();
     }
 
     @Test

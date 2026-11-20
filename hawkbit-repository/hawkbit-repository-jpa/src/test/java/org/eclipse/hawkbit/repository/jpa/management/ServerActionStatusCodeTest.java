@@ -15,6 +15,7 @@ import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationPrope
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.ACTION_STATUS_CODE_AUTO_CONFIRMATION;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.ACTION_STATUS_CODE_CANCELED;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.ACTION_STATUS_CODE_CANCELING;
+import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.ACTION_STATUS_CODE_DOWNLOAD;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.ACTION_STATUS_CODE_OFFLINE_ASSIGNED;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.ACTION_STATUS_CODE_RETRIEVED;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.ACTION_STATUS_CODE_SKIPPED;
@@ -53,6 +54,7 @@ class ServerActionStatusCodeTest extends AbstractJpaIntegrationTest {
     private static final int OFFLINE_ASSIGNED_CODE = 9007;
     private static final int SKIPPED_CODE = 9008;
     private static final int RETRIEVED_CODE = 9009;
+    private static final int DOWNLOAD_CODE = 9010;
 
     @Test
     void noKeyDefinedWritesNoCode() {
@@ -412,6 +414,51 @@ class ServerActionStatusCodeTest extends AbstractJpaIntegrationTest {
     void nonIntegerValueRejected() {
         assertThatExceptionOfType(TenantConfigurationValidatorException.class)
                 .isThrownBy(() -> tenantConfigurationManagement().addOrUpdateConfiguration(ACTION_STATUS_CODE_CANCELING, "abc"));
+    }
+
+    @Test
+    void downloadCodeOnInformationalStatusOnly() {
+        final Long actionId = assignToNewTarget("download");
+        controllerManagement.addUpdateActionStatus(ActionStatusCreate.builder().actionId(actionId).status(Status.RUNNING).code(42).build());
+        setCode(ACTION_STATUS_CODE_DOWNLOAD, DOWNLOAD_CODE);
+
+        controllerManagement.addInformationalActionStatus(ActionStatusCreate.builder().actionId(actionId).status(Status.DOWNLOAD).build());
+
+        final ActionStatus latest = latestStatus(actionId);
+        assertThat(latest.getStatus()).isEqualTo(Status.DOWNLOAD);
+        assertThat(latest.getCode()).contains(DOWNLOAD_CODE);
+        // informational - the device's last code is kept
+        assertThat(lastStatusCode(actionId)).contains(42);
+    }
+
+    @Test
+    void downloadWithExplicitCodeKeepsIt() {
+        final Long actionId = assignToNewTarget("downloadexplicit");
+        setCode(ACTION_STATUS_CODE_DOWNLOAD, DOWNLOAD_CODE);
+
+        controllerManagement.addInformationalActionStatus(
+                ActionStatusCreate.builder().actionId(actionId).status(Status.DOWNLOAD).code(77).build());
+
+        assertThat(latestStatus(actionId).getCode()).contains(77);
+    }
+
+    @Test
+    void downloadWithoutKeyWritesNoCode() {
+        final Long actionId = assignToNewTarget("downloadnokey");
+
+        controllerManagement.addInformationalActionStatus(ActionStatusCreate.builder().actionId(actionId).status(Status.DOWNLOAD).build());
+
+        assertThat(latestStatus(actionId).getCode()).isEmpty();
+    }
+
+    @Test
+    void downloadCodeNotAppliedToOtherInformationalStatus() {
+        final Long actionId = assignToNewTarget("informationalother");
+        setCode(ACTION_STATUS_CODE_DOWNLOAD, DOWNLOAD_CODE);
+
+        controllerManagement.addInformationalActionStatus(ActionStatusCreate.builder().actionId(actionId).status(Status.RUNNING).build());
+
+        assertThat(latestStatus(actionId).getCode()).isEmpty();
     }
 
     private static void setCode(final String key, final int code) {

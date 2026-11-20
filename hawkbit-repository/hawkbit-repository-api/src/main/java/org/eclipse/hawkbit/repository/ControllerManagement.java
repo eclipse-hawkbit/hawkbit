@@ -78,6 +78,9 @@ public interface ControllerManagement {
 
     /**
      * Simple addition of a new {@link ActionStatus} entry to the {@link Action}. No state changes.
+     * <p/>
+     * A {@link Action.Status#DOWNLOAD} status without a code gets the code configured by
+     * {@code action.status.code.download} (if any). The last action status code of the action is not changed.
      *
      * @param create to add to the action
      * @return created {@link ActionStatus} entity

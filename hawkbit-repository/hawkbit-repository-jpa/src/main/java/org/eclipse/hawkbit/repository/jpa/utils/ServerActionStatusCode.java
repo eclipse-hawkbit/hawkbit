@@ -28,7 +28,8 @@ public final class ServerActionStatusCode {
      * <p/>
      * Precondition: the action of the status is set.
      * <p/>
-     * The code is resolved on every call - tenant configuration values are cached, so no need to resolve them once per batch.
+     * The code is resolved on every call - tenant configuration lookups are cached, not set keys included
+     * ({@code hawkbit.cache.JpaTenantConfiguration.cache-null}), so there is no need to resolve them once per batch.
      *
      * @param status the server written action status
      * @param configKey tenant configuration key of type {@link Integer}

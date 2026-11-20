@@ -9,7 +9,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa.repository;
 
-import java.util.Optional;
 
 import jakarta.persistence.EntityManager;
 
@@ -28,22 +27,6 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Transactional(readOnly = true)
 public interface ActionStatusCodeRepository extends BaseEntityRepository<JpaActionStatusCode> {
-
-    /**
-     * Find an action status code by its numeric code.
-     *
-     * @param code the numeric code
-     * @return the action status code if found
-     */
-    Optional<JpaActionStatusCode> findByCode(int code);
-
-    /**
-     * Check if an action status code with the given code exists.
-     *
-     * @param code the numeric code
-     * @return true if exists
-     */
-    boolean existsByCode(int code);
 
     /**
      * Finds distinct non-null action status codes that have been reported by devices

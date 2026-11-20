@@ -17,6 +17,7 @@ import static org.eclipse.hawkbit.repository.model.Action.Status.FINISHED;
 import static org.eclipse.hawkbit.repository.model.Target.CONTROLLER_ATTRIBUTE_MAX_KEY_SIZE;
 import static org.eclipse.hawkbit.repository.model.Target.CONTROLLER_ATTRIBUTE_MAX_VALUE_SIZE;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.ACTION_STATUS_CODE_CANCELING;
+import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.ACTION_STATUS_CODE_DOWNLOAD;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.ACTION_STATUS_CODE_RETRIEVED;
 
 import java.net.URI;
@@ -255,6 +256,10 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         final JpaActionStatus actionStatus = buildJpaActionStatus(create);
         actionStatus.setAction(action);
         assertActionStatusMessageQuota(actionStatus);
+        if (create.getStatus() == Status.DOWNLOAD && create.getCode() == null) {
+            // server written download log - configured code (if any) on the status only, the last action status code is not changed
+            ServerActionStatusCode.applyToStatusOnly(actionStatus, ACTION_STATUS_CODE_DOWNLOAD);
+        }
 
         return actionStatusRepository.save(actionStatus);
     }

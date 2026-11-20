@@ -13,7 +13,6 @@ import static org.eclipse.hawkbit.ddi.rest.resource.DataConversionHelper.createA
 import static org.eclipse.hawkbit.repository.RepositoryConstants.SERVER_MESSAGE_PREFIX;
 import static org.eclipse.hawkbit.rest.util.RequestResponseContextHolder.getHttpServletRequest;
 import static org.eclipse.hawkbit.rest.util.RequestResponseContextHolder.getHttpServletResponse;
-import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.ACTION_STATUS_CODE_DOWNLOAD;
 import static org.springframework.http.HttpHeaders.IF_MATCH;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.PRECONDITION_FAILED;
@@ -67,7 +66,6 @@ import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidConfirmationFeedbackException;
 import org.eclipse.hawkbit.repository.exception.SoftwareModuleNotAssignedToTargetException;
-import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.model.Action.ActionStatusCreate.ActionStatusCreateBuilder;
@@ -608,9 +606,8 @@ public class DdiRootController implements DdiRootControllerRestApi {
         return controllerManagement.addInformationalActionStatus(
                 ActionStatusCreate.builder()
                         .actionId(action.getId())
+                        // the configured download code (if any) is applied by the repository
                         .status(Status.DOWNLOAD)
-                        // informational status - the last action status code of the action is not changed
-                        .code(TenantConfigHelper.getAsSystem(ACTION_STATUS_CODE_DOWNLOAD, Integer.class))
                         .messages(List.of(SERVER_MESSAGE_PREFIX + "Target downloads " + getHttpServletRequest().getRequestURI()))
                         .build());
     }
