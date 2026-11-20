@@ -69,7 +69,7 @@ RabbitMQ is needed for the Device Management Federation API (DMF) and for the re
 (see [Clustering](clustering.md)). In the update server (monolith) it is **disabled by default**:
 
 ```properties
-spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration
+spring.autoconfigure.exclude=org.springframework.boot.rabbitmq.autoconfigure.RabbitAutoConfiguration
 hawkbit.dmf.enabled=false
 hawkbit.events.remote.enabled=false
 ```
