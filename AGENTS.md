@@ -69,6 +69,8 @@ CI (`.github/workflows/reusable_workflow_verify.yaml`) runs `license:check`, the
     - Secure methods with `@PreAuthorize(SpringEvalExpressions.…)`. Permissions are String constants in `SpPermission`.
 - **Tenancy/security context:** use the static `AccessContext` (`tenant()`, `actor()`, `asTenant`, `asActor`,
   `asSystem`, `asSystemAsTenant`). Don't read the `SecurityContext` directly.
+  The Mgmt API tenant requested before the authentication (`/{tenant}/rest/**` served as `/rest/**`, or `tenant\user`
+  basic auth) is `RequestedTenant.getTenant()` (`TenantResolverFilter`, see `docs/authentication.md#requested-tenant`).
 - **Exceptions:** extend `AbstractServerRtException` with an `SpServerError` code. HTTP mapping is in rest-core
   `RestConfiguration`.
 - **Events:** publish via `EventPublisherHolder`, after commit (`AfterTransactionCommitExecutor`). Remote events
@@ -85,6 +87,10 @@ CI (`.github/workflows/reusable_workflow_verify.yaml`) runs `license:check`, the
       `AbstractDDiApiIntegrationTest`, `AbstractAmqpIntegrationTest`.
     - Use `@WithUser`, `TestdataFactory`, `@ExpectEvents`.
     - Document the test class with Javadoc `Feature: <Type> - <Component><br/>` and `Story: …` (see `CONTRIBUTING.md`).
+- **Commits:**
+    - Always sign off: `git commit -s` (Eclipse ECA, `Signed-off-by` trailer, see `CONTRIBUTING.md`). Also on amend.
+    - Subject: short imperative summary. Prefix with the GitHub issue (`#<issue>: `) only if there is one, otherwise no
+      prefix. No ticket placeholders (e.g. `NO-TICKET`) and no external tracker IDs.
 
 ## Gotchas
 

@@ -18,7 +18,7 @@ and write (all other methods) requests. A client above the limit gets `429` unti
 
 It is applied to:
 
-- the Management API (`/rest/**`) (mgmt server / update server)
+- the Management API (`/{tenant}/rest/**` and `/rest/**`) (mgmt server / update server)
 - the DDI API (`/{tenant}/controller/v1/**`) and the DDI artifact download (DDI server / update server)
 - `/system/*`
 

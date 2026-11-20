@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.repository;
 
 import java.time.Instant;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 import jakarta.validation.constraints.NotNull;
@@ -17,6 +18,7 @@ import jakarta.validation.constraints.NotNull;
 import org.eclipse.hawkbit.auth.SpPermission;
 import org.eclipse.hawkbit.auth.SpringEvalExpressions;
 import org.eclipse.hawkbit.context.AccessContext;
+import org.eclipse.hawkbit.repository.exception.TenantSoftDeletedException;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
@@ -61,6 +63,16 @@ public interface SystemManagement {
      */
     @PreAuthorize("hasAuthority('" + SpPermission.READ_DISTRIBUTION_SET + "')" + " or " + "hasAuthority('READ_" + SpPermission.TARGET + "')" + " or " + "hasAuthority('READ_" + SpPermission.TENANT_CONFIGURATION + "')" + " or " + SpringEvalExpressions.IS_CONTROLLER)
     TenantMetaData getTenantMetadataWithoutDetails();
+
+    /**
+     * Same as {@link #getTenantMetadataWithoutDetails()}, but never creates the tenant metadata (even if the implicit tenant creation is
+     * allowed) - e.g. for checking if a tenant requested by the client exists.
+     *
+     * @return {@link TenantMetaData} of {@link AccessContext#tenant()} without details or empty if the tenant doesn't exist
+     * @throws TenantSoftDeletedException if the tenant is soft deleted
+     */
+    @PreAuthorize("hasAuthority('" + SpPermission.READ_DISTRIBUTION_SET + "')" + " or " + "hasAuthority('READ_" + SpPermission.TARGET + "')" + " or " + "hasAuthority('READ_" + SpPermission.TENANT_CONFIGURATION + "')" + " or " + SpringEvalExpressions.IS_CONTROLLER)
+    Optional<TenantMetaData> findTenantMetadataWithoutDetails();
 
     /**
      * Returns {@link TenantMetaData} of given and current tenant. Creates for

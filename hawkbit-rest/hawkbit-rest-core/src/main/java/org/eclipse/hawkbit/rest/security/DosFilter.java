@@ -30,6 +30,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.util.UrlPathHelper;
 
 /**
  * Filter for protection against Denial-of-Service (DoS) attacks. It reduces the maximum number of request per seconds which can be separately
@@ -128,8 +129,10 @@ public class DosFilter extends OncePerRequestFilter {
             return true;
         }
 
-        return includeAntPaths.stream()
-                .anyMatch(pattern -> antMatcher.match(request.getContextPath() + pattern, request.getRequestURI()));
+        // matched against the decoded path within the application (as the servlet container and the handler mappings do) - the raw
+        // request URI could be percent-encoded (e.g. /r%65st/**) and so would bypass the filter while still being served
+        final String path = UrlPathHelper.defaultInstance.getPathWithinApplication(request);
+        return includeAntPaths.stream().anyMatch(pattern -> antMatcher.match(pattern, path));
     }
 
     /**

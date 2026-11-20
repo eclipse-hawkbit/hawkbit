@@ -40,6 +40,7 @@ class MgmtOpenApiSpecExportTest extends AbstractManagementApiIntegrationTest {
         final JsonNode spec = OpenApiSpecExporter.export(mvc, "Management API", Path.of("target", "openapi", "mgmt.json"));
         assertThat(spec.path("info").path("title").asString()).isEqualTo("Management API");
         assertThat(spec.path("servers")).hasSize(1);
-        assertThat(spec.path("servers").path(0).path("url").asString()).isEqualTo("/");
+        assertThat(spec.path("servers").path(0).path("url").asString()).isEqualTo("/{tenant}/");
+        assertThat(spec.path("servers").path(0).path("variables").path("tenant").path("default").asString()).isEqualTo("DEFAULT");
     }
 }
