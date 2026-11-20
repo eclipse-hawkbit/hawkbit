@@ -19,6 +19,7 @@ import static org.springframework.http.HttpStatus.PRECONDITION_FAILED;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -74,6 +75,7 @@ import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.rest.security.ClientAddress;
 import org.eclipse.hawkbit.rest.util.FileStreamingUtil;
 import org.eclipse.hawkbit.rest.util.HttpUtil;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
@@ -142,8 +144,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
     @Override
     public ResponseEntity<DdiControllerBase> getControllerBase(final String tenant, final String controllerId) {
         log.debug("getControllerBase({})", controllerId);
-        final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotExist(
-                controllerId, IpUtil.getClientIpFromRequest(getHttpServletRequest(), securityProperties));
+        final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotExist(controllerId, clientAddress());
         final Action activeAction = controllerManagement.findActiveActionWithHighestWeight(controllerId).orElse(null);
         final Action installedAction = controllerManagement.findInstalledActionByTarget(target).orElse(null);
 
@@ -356,8 +357,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
     @Override
     public ResponseEntity<DdiConfirmationBase> getConfirmationBase(final String tenant, final String controllerId) {
         log.debug("getConfirmationBase is called [controllerId={}].", controllerId);
-        final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotExist(
-                controllerId, IpUtil.getClientIpFromRequest(getHttpServletRequest(), securityProperties));
+        final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotExist(controllerId, clientAddress());
         final Action activeAction = controllerManagement.findActiveActionWithHighestWeight(controllerId).orElse(null);
 
         final DdiAutoConfirmationState autoConfirmationState = getAutoConfirmationState(controllerId);
@@ -764,5 +764,12 @@ public class DdiRootController implements DdiRootControllerRestApi {
             log.trace("Returning state auto-conf state disabled for device {}", controllerId);
             return new DdiAutoConfirmationState(false, null, null, 0L);
         });
+    }
+
+    // the client IP resolved by the client address filter / valve (trusted proxies only), or hidden if the tracking is disabled
+    private URI clientAddress() {
+        return IpUtil.createHttpUri(securityProperties.getClients().isTrackRemoteIp()
+                ? ClientAddress.of(getHttpServletRequest()).ip()
+                : IpUtil.HIDDEN_IP);
     }
 }

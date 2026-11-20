@@ -16,6 +16,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 
+import org.eclipse.hawkbit.rest.security.ClientAddress;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -55,9 +56,9 @@ class AuthenticationFiltersTrustedIpsTest {
 
     @Test
     void peerAddressIsCheckedInsteadOfForwardedRemoteAddress() throws Exception {
-        // e.g. with Tomcat + NATIVE: the remote address is the device IP, the peer is the proxy
+        // forwarded headers processed: the remote address is the device IP, the peer is the proxy
         final MockHttpServletRequest request = request(DEVICE_IP);
-        request.setAttribute(AuthenticationFilters.PEER_ADDRESS_ATTRIBUTE, PROXY_IP);
+        request.setAttribute(ClientAddress.ATTRIBUTE, new ClientAddress(PROXY_IP, DEVICE_IP, List.of(), null));
 
         filter.doFilter(request, new MockHttpServletResponse(), new MockFilterChain());
 
@@ -65,7 +66,7 @@ class AuthenticationFiltersTrustedIpsTest {
     }
 
     @Test
-    void remoteAddressIsCheckedWithoutPeerAddress() throws Exception {
+    void remoteAddressIsCheckedWithoutClientAddress() throws Exception {
         filter.doFilter(request(PROXY_IP), new MockHttpServletResponse(), new MockFilterChain());
         verify(authenticator).authenticate(any());
     }
@@ -74,7 +75,7 @@ class AuthenticationFiltersTrustedIpsTest {
     void notTrustedPeerIsNotAuthenticated() throws Exception {
         final MockHttpServletRequest request = request(PROXY_IP);
         // the remote address (e.g. forwarded) is a trusted one, but the connection peer is not
-        request.setAttribute(AuthenticationFilters.PEER_ADDRESS_ATTRIBUTE, DEVICE_IP);
+        request.setAttribute(ClientAddress.ATTRIBUTE, new ClientAddress(DEVICE_IP, PROXY_IP, List.of(), null));
 
         filter.doFilter(request, new MockHttpServletResponse(), new MockFilterChain());
 

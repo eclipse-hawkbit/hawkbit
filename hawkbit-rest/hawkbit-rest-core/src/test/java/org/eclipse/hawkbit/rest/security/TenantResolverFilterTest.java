@@ -287,4 +287,30 @@ class TenantResolverFilterTest {
             requestUri = httpRequest.getRequestURI();
         }
     }
+
+    /**
+     * Verifies that the tenant of a tenant scoped API path is the raw first path segment of /{tenant}/{api path}/** (after the context path)
+     */
+    @Test
+    void tenantOfPath() {
+        assertThat(TenantResolverFilter.tenant(tenantPathRequest("", "/TENANT/controller/v1/dev1"), "/controller")).isEqualTo("TENANT");
+        assertThat(TenantResolverFilter.tenant(tenantPathRequest("", "/acme.com/rest/v1/targets"), "/rest")).isEqualTo("acme.com");
+        assertThat(TenantResolverFilter.tenant(tenantPathRequest("/hawkbit", "/hawkbit/TENANT/controller/v1/dev1"), "/controller"))
+                .isEqualTo("TENANT");
+        // raw - not decoded
+        assertThat(TenantResolverFilter.tenant(tenantPathRequest("", "/%44EFAULT/rest/v1/targets"), "/rest")).isEqualTo("%44EFAULT");
+
+        // not matching
+        assertThat(TenantResolverFilter.tenant(tenantPathRequest("", "/rest/v1/targets"), "/rest")).isNull();
+        assertThat(TenantResolverFilter.tenant(tenantPathRequest("", "/TENANT/rest"), "/rest")).isNull();
+        assertThat(TenantResolverFilter.tenant(tenantPathRequest("", "//rest/v1"), "/rest")).isNull();
+        assertThat(TenantResolverFilter.tenant(tenantPathRequest("", "/TENANT/restx/v1"), "/rest")).isNull();
+        assertThat(TenantResolverFilter.tenant(tenantPathRequest("", "/TENANT/controller/v1/dev1"), "/rest")).isNull();
+    }
+
+    private static MockHttpServletRequest tenantPathRequest(final String contextPath, final String uri) {
+        final MockHttpServletRequest request = new MockHttpServletRequest("GET", uri);
+        request.setContextPath(contextPath);
+        return request;
+    }
 }

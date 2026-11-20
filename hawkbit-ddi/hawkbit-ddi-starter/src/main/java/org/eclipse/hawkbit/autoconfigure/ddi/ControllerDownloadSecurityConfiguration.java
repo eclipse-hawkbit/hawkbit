@@ -23,7 +23,6 @@ import org.eclipse.hawkbit.security.controller.DdiSecurityProperties;
 import org.eclipse.hawkbit.security.controller.GatewayTokenAuthenticator;
 import org.eclipse.hawkbit.security.controller.SecurityHeaderAuthenticator;
 import org.eclipse.hawkbit.security.controller.SecurityTokenAuthenticator;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -44,7 +43,7 @@ import org.springframework.security.web.access.intercept.AuthorizationFilter;
 @Configuration
 class ControllerDownloadSecurityConfiguration {
 
-    private static final String DDI_DL_ANT_MATCHER =
+    static final String DDI_DL_ANT_MATCHER =
             DdiRootControllerRestApi.CONTROLLER_V1 + "/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/*";
 
     private final ControllerManagement controllerManagement;
@@ -69,7 +68,9 @@ class ControllerDownloadSecurityConfiguration {
     @ConditionalOnProperty(prefix = "hawkbit.server.security.dos.filter", name = "enabled", matchIfMissing = true)
     public FilterRegistrationBean<DosFilter> dosFilterDDIDL(final HawkbitSecurityProperties securityProperties) {
         final FilterRegistrationBean<DosFilter> filterRegBean = SecurityManagedConfiguration.dosFilter(
-                List.of(DDI_DL_ANT_MATCHER), securityProperties.getDos().getFilter(), securityProperties.getClients());
+                List.of(DDI_DL_ANT_MATCHER), null,
+                securityProperties.getDos().getFilter(), securityProperties.getDos().getFilter().getDdiDownload(),
+                securityProperties.getClients());
         filterRegBean.setOrder(SecurityManagedConfiguration.DOS_FILTER_ORDER);
         filterRegBean.setName("dosDDiDlFilter");
         return filterRegBean;
@@ -77,8 +78,7 @@ class ControllerDownloadSecurityConfiguration {
 
     @Bean
     @Order(300) // higher priority than HawkBit DDI security, so that the DDI DL security is applied first
-    protected SecurityFilterChain filterChainDDIDL(
-            final HttpSecurity http, final ObjectProvider<DdiProxyDetectionConfiguration.DdiProxyDetector> ddiProxyDetector) {
+    protected SecurityFilterChain filterChainDDIDL(final HttpSecurity http) {
         http
                 .securityMatcher(DDI_DL_ANT_MATCHER)
                 .authorizeHttpRequests(amrmRegistry -> amrmRegistry.anyRequest().authenticated())
@@ -102,8 +102,6 @@ class ControllerDownloadSecurityConfiguration {
         }
 
         Mdc.Filter.addMdcFilter(http);
-        // after the authentication filters - so the tenant is known
-        ddiProxyDetector.ifAvailable(detector -> http.addFilterBefore(detector.filter(), AuthorizationFilter.class));
 
         return http.build();
     }
