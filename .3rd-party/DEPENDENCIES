@@ -23,8 +23,8 @@ maven/mavencentral/com.nimbusds/content-type/2.3, Apache-2.0, approved, #33103
 maven/mavencentral/com.nimbusds/lang-tag/1.7, Apache-2.0, approved, #33046
 maven/mavencentral/com.nimbusds/nimbus-jose-jwt/10.9.1, Apache-2.0, approved, #29000
 maven/mavencentral/com.nimbusds/oauth2-oidc-sdk/11.38.2, Apache-2.0, approved, #30381
-maven/mavencentral/com.rabbitmq.client/amqp-client/1.7.0, , restricted, clearlydefined
-maven/mavencentral/com.rabbitmq.client/credentials/0.2.0, , restricted, clearlydefined
+maven/mavencentral/com.rabbitmq.client/amqp-client/1.7.0, Apache-2.0, approved, #33628
+maven/mavencentral/com.rabbitmq.client/credentials/0.2.0, Apache-2.0, approved, #33627
 maven/mavencentral/com.rabbitmq/amqp-client/5.37.1, Apache-2.0 OR GPL-2.0-only OR MPL-2.0, approved, #32532
 maven/mavencentral/com.rabbitmq/http-client/5.7.0, Apache-2.0, approved, #30484
 maven/mavencentral/com.sun.istack/istack-commons-runtime/4.1.2, BSD-3-Clause, approved, #15290
@@ -138,6 +138,7 @@ maven/mavencentral/io.protostuff/protostuff-runtime/1.8.0, Apache-2.0, approved,
 maven/mavencentral/io.smallrye/jandex/3.3.2, Apache-2.0, approved, #22775
 maven/mavencentral/io.swagger.core.v3/swagger-annotations-jakarta/2.2.38, Apache-2.0, approved, #5947
 maven/mavencentral/io.swagger.core.v3/swagger-annotations-jakarta/2.2.55, Apache-2.0, approved, #5947
+maven/mavencentral/io.swagger.core.v3/swagger-annotations-jakarta/2.2.56, Apache-2.0, approved, #5947
 maven/mavencentral/io.swagger.core.v3/swagger-core-jakarta/2.2.55, Apache-2.0, approved, #5929
 maven/mavencentral/io.swagger.core.v3/swagger-models-jakarta/2.2.55, Apache-2.0, approved, #5919
 maven/mavencentral/jakarta.activation/jakarta.activation-api/2.1.4, BSD-3-Clause OR EPL-2.0 OR GPL-2.0-only WITH Classpath-Exception-2.0, approved, #8015
