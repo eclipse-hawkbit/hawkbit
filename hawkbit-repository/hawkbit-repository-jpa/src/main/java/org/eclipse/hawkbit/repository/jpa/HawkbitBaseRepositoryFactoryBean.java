@@ -58,6 +58,11 @@ public class HawkbitBaseRepositoryFactoryBean<T extends Repository<S, ID>, S, ID
     private JpaRepositoryFragmentsContributor repositoryFragmentsContributor;
     private EscapeCharacter escapeCharacter = EscapeCharacter.DEFAULT;
     private JpaQueryMethodFactory queryMethodFactory;
+    // set by JpaRepositoryConfigExtension since Spring Data JPA 4.2 (@EnableJpaRepositories#validateQueries), without the
+    // setter the repository bean creation fails. Not passed on yet - JpaRepositoryFactory#setValidateQueries exists since
+    // 4.2 only (defaults to true there too)
+    @SuppressWarnings({ "unused", "java:S1068" })
+    private boolean validateQueries = true;
 
     @Nullable
     private EntityManager entityManager;
@@ -84,6 +89,10 @@ public class HawkbitBaseRepositoryFactoryBean<T extends Repository<S, ID>, S, ID
     @Autowired
     public void setEscapeCharacter(final char escapeCharacter) {
         this.escapeCharacter = EscapeCharacter.of(escapeCharacter);
+    }
+
+    public void setValidateQueries(final boolean validateQueries) {
+        this.validateQueries = validateQueries;
     }
 
     @Autowired
