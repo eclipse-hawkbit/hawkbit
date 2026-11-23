@@ -79,12 +79,16 @@ class ActionStatusCodeRepositoryTest extends AbstractJpaIntegrationTest {
         entity2.setSeverity(ActionStatusCode.Severity.WARN);
 
         // EclipseLink throws PersistenceException, Hibernate throws EntityAlreadyExistsException,
-        // Spring may translate to DataIntegrityViolationException
+        // Spring may translate to DataIntegrityViolationException.
+        // The constraint name case depends on the DB (H2: UK_ACTION_STATUS_CODE, MySQL / MariaDB / PostgreSQL: uk_action_status_code)
         assertThatThrownBy(() -> new TransactionTemplate(txManager).executeWithoutResult(status -> {
             actionStatusCodeRepository.save(entity2);
             entityManager.flush();
         })).satisfiesAnyOf(
-                ex -> assertThat(ex).isInstanceOf(PersistenceException.class).hasMessageContaining("UK_ACTION_STATUS_CODE"),
+                ex -> {
+                    assertThat(ex).isInstanceOf(PersistenceException.class);
+                    assertThat(ex.getMessage()).containsIgnoringCase("uk_action_status_code");
+                },
                 ex -> assertThat(ex).isInstanceOf(EntityAlreadyExistsException.class),
                 ex -> assertThat(ex).isInstanceOf(DataIntegrityViolationException.class)
         );
