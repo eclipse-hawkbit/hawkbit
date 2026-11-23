@@ -14,46 +14,156 @@ Both reject requests with HTTP `429 Too Many Requests`. Both work per node - in 
 ### DoS filter
 
 The DoS filter counts the requests of every client IP address within one-second windows, separately for read (`GET`)
-and write (all other methods) requests. A client above the limit gets `429` until the window expires.
+and write (all other methods) requests. A client above the limit gets `429` (with `Retry-After: 1`) until the window
+expires. The limits can be set per API, by default all use the global ones:
 
-It is applied to:
+- the Management API (`/{tenant}/rest/**` and `/rest/**`) (mgmt server / update server) - `mgmt`
+- the DDI API (`/{tenant}/controller/v1/**`) (DDI server / update server) - `ddi`
+- the DDI artifact download - `ddi-download` (not counted by the DDI API limits)
+- `/system/*` - `system`
 
-- the Management API (`/rest/*`) and `/system/admin/*` (mgmt server / update server)
-- the DDI API (`/{tenant}/controller/v1/**`) and the DDI artifact download (DDI server / update server)
-- `/system/*`
+The filter runs before the authentication, so requests with invalid credentials are throttled too, and rejected requests
+don't reach the authentication (e.g. DDI target token lookups in the database). Additionally, it counts the failed
+authentications (`401`) per client IP: above `max-auth-failures` per second the requests of the client IP are rejected
+without authentication. Devices with valid credentials don't count there - so many devices behind one IP (e.g. a mobile
+gateway / NAT) aren't limited by it, while clients with wrong credentials are.
 
-How the client IP is determined:
+Limits:
 
-- from the header `hawkbit.server.security.clients.remote-ip-header` (default `X-Forwarded-For`) if present, otherwise
-  from the remote address of the connection
-- clients matching `hawkbit.server.security.clients.blacklist` (regular expression) are rejected with `403 Forbidden`
-- clients matching `hawkbit.server.security.dos.filter.whitelist` (regular expression) are not limited. The default
-  whitelist contains the private and loopback address ranges (`10.*`, `192.168.*`, `172.16-31.*`, `169.254.*`, `127.*`)
+- the failed authentication limit is approximate under concurrency - the failures are counted when the request
+  completes, so the requests already in flight when the limit is reached still pass (e.g. with slow password hashing
+  somewhat more attempts per second than `max-auth-failures` are possible - the read / write limits still cap them)
+- IPv6 clients are counted per address - a client controlling a whole IPv6 prefix (e.g. `/64`) could rotate its source
+  addresses. If needed, the reverse proxy / network shall limit such clients
+
+The first rejected request of a window is logged (by the security logger, with the tenant and forwarded for - as in the
+[load report](#load-report)).
+
+| Property                                                          | Default                 | Description                                                       |
+|-------------------------------------------------------------------|-------------------------|-------------------------------------------------------------------|
+| `hawkbit.server.security.dos.filter.enabled`                      | `true`                  | enables the DoS filter                                            |
+| `hawkbit.server.security.dos.filter.max-read`                     | `200`                   | max read (`GET`) requests per second per client IP                |
+| `hawkbit.server.security.dos.filter.max-write`                    | `50`                    | max write requests per second per client IP                       |
+| `hawkbit.server.security.dos.filter.<api>.max-read` / `max-write` | global                  | per API limits, `<api>` = `mgmt`, `ddi`, `ddi-download`, `system` |
+| `hawkbit.server.security.dos.filter.max-auth-failures`            | `10`                    | max failed authentications per second per client IP, `0` = off    |
+| `hawkbit.server.security.dos.filter.whitelist`                    | private / loopback IPv4 | IPs (regex) which are not limited per IP                          |
+| `hawkbit.server.security.dos.filter.report-percent`               | `20`                    | load report threshold - percent of the limits, `0` = off          |
+| `hawkbit.server.security.dos.filter.report-interval`              | `1h`                    | load report interval                                              |
+| `hawkbit.server.security.clients.blacklist`                       | empty                   | IPs (regex) which are always rejected with `403`                  |
+
+- clients matching the blacklist are rejected with `403 Forbidden`, clients matching the whitelist aren't limited (nor
+  reported). The IPs are matched without brackets (IPv6 e.g. `0:0:0:0:0:0:0:1`). The patterns are searched in the IP
+  (not matched against the whole IP) - anchor them (e.g. `^10\.`), otherwise `10\.` matches `110.1.2.3` too. The
+  default whitelist is anchored
+- a client IP resolved behind a proxy of a tenant (see [Client IP](#client-ip)) is never whitelisted, and is counted
+  (requests, failed authentications, load report) per tenant and IP - since customers' (private) networks overlap. It is
+  logged as `<tenant>/<ip>`
 - if the client IP can't be determined the request fails with `500`
-
-| Property                                           | Default                      | Description                                        |
-|----------------------------------------------------|------------------------------|----------------------------------------------------|
-| `hawkbit.server.security.dos.filter.enabled`       | `true`                       | enables the DoS filter                             |
-| `hawkbit.server.security.dos.filter.max-read`      | `200`                        | max read (`GET`) requests per second per client IP |
-| `hawkbit.server.security.dos.filter.max-write`     | `50`                         | max write requests per second per client IP        |
-| `hawkbit.server.security.dos.filter.whitelist`     | private / loopback IP ranges | IPs (regex) which are not limited                  |
-| `hawkbit.server.security.clients.blacklist`        | empty                        | IPs (regex) which are always rejected with `403`   |
-| `hawkbit.server.security.clients.remote-ip-header` | `X-Forwarded-For`            | header containing the client IP                    |
-
-Example - stricter limits behind a reverse proxy, no whitelist:
-
-```properties
-hawkbit.server.security.dos.filter.max-read=50
-hawkbit.server.security.dos.filter.max-write=10
-hawkbit.server.security.dos.filter.whitelist=
-hawkbit.server.security.clients.remote-ip-header=X-Forwarded-For
-```
 
 Usually DoS protection is an infrastructure topic (e.g. a Web Application Firewall). The filter could be disabled with
 `hawkbit.server.security.dos.filter.enabled=false` when such protection is in place.
 
 > The other `hawkbit.server.security.dos.*` properties (e.g. `max-artifact-size`, `max-targets-per-rollout-group`) are
 > not request limits but repository quotas.
+
+#### Client IP
+
+The client IP is used by the DoS filter and stored as target address (see
+`hawkbit.server.security.clients.track-remote-ip`).
+
+hawkBit runs behind a reverse proxy. With `server.forward-headers-strategy=NONE` (the default, set by the hawkBit REST
+starters) hawkBit processes the forwarded headers itself - with embedded Tomcat as a valve (so the access log and the
+error pages see the resolved values too), with other servlet containers (e.g. Jetty) as a servlet filter:
+
+- the client IP is resolved from `hawkbit.server.security.clients.remote-ip-header` (default `X-Forwarded-For`)
+  processing it right to left: the trusted proxies are skipped, the
+  first not trusted address is the client IP. A proxy appends the address it got the request from, so the values a
+  client sends by itself can't be used to spoof its IP. A proxy with a public IP has to be configured as trusted,
+  otherwise all requests through it get the proxy IP
+- `X-Forwarded-Proto` / `-Host` / `-Port` (used for generated links) are applied only if the connection peer is a
+  (globally) trusted proxy. They are single values, so the proxy must set (overwrite) them
+- redirects are relative (`server.tomcat.use-relative-redirects=true`), so they don't contain the request host. With the
+  servlet filter, absolute redirects are corrected to the forwarded scheme / host / port
+- with the servlet filter the container itself doesn't see the resolved values (e.g. container access log, cookie
+  `Secure` flag - set `server.servlet.session.cookie.secure=true` if needed)
+
+Trusting a proxy globally trusts it for all tenants and APIs - its `X-Forwarded-For` values could be used to bypass the
+limits. A proxy (or NAT) of a tenant's devices (e.g. of the customer) shares its IP between all devices behind it, so
+they share the limits of a single client. Such a proxy could be trusted just for the tenant's DDI requests
+(`/{tenant}/controller/**`, including the artifact download; tenant from the path, case-insensitive) with
+`hawkbit.server.security.forwarded.tenants.<tenant>`: for them the client IP resolution continues past the tenant's
+trusted proxies, so the devices are resolved (DoS limited, failed authentications counted, target address tracked) by
+their own IPs. Left of a tenant's proxy only the tenant's trusted proxies are skipped - not the global ones (e.g. the
+private ranges): they describe hawkBit's own network, while left of a customer proxy the private IPs belong to the
+customer (e.g. the devices). So a customer with internal proxies behind its edge proxy lists them too. The other tenants
+and APIs don't trust them, and `X-Forwarded-Proto` / `-Host` / `-Port` are applied only from globally trusted peers.
+The tenant is from the not yet authenticated path - fine, since only requests coming through the tenant's proxies are
+affected. To find such proxies see the [load report](#load-report).
+
+The remote IP header values (hops) and the connection peer are normalized: the port (`IPv4:port`, `[IPv6]:port`) and the
+IPv6 brackets are removed, an IPv4-mapped IPv6 address (`::ffff:1.2.3.4`, e.g. from dual-stack proxies) is used as IPv4,
+IPv6 in full form (e.g. `2001:db8:0:0:0:0:0:1`, as the servlet container reports the peer). The whitelist / blacklist
+regular expressions and the logs see this form. A value which is not an IP literal ends the chain - the values left to
+it are ignored.
+
+| Property                                             | Default                   | Description                                                            |
+|------------------------------------------------------|---------------------------|------------------------------------------------------------------------|
+| `server.forward-headers-strategy`                    | `NONE`                    | `NONE` - hawkBit processes the forwarded headers                       |
+| `hawkbit.server.security.clients.remote-ip-header`   | `X-Forwarded-For`         | header containing the client IP chain (both modes)                     |
+| `hawkbit.server.security.forwarded.trusted-proxies`  | default ranges (below)    | trusted proxies - comma separated IPs / CIDR blocks                    |
+| `hawkbit.server.security.forwarded.tenants.<tenant>` | none                      | trusted proxies for the DDI requests of the tenant - IPs / CIDR blocks |
+| `hawkbit.server.security.forwarded.protocol-header`  | `X-Forwarded-Proto`       | header containing the original scheme                                  |
+| `hawkbit.server.security.forwarded.host-header`      | `X-Forwarded-Host`        | header containing the original host                                    |
+| `hawkbit.server.security.forwarded.port-header`      | `X-Forwarded-Port`        | header containing the original port                                    |
+| `server.tomcat.use-relative-redirects`               | `true`                    | relative redirects                                                     |
+
+The default trusted proxies are the private, loopback, link-local and CGNAT ranges (IPv4 and IPv6): `10.0.0.0/8`,
+`192.168.0.0/16`, `169.254.0.0/16`, `127.0.0.0/8`, `100.64.0.0/10`, `172.16.0.0/12`, `::1/128`, `fe80::/10`,
+`fc00::/7`. `trusted-proxies` not set - the defaults, set but empty - nothing trusted. Setting it replaces the defaults,
+so list all proxies.
+
+With another forward headers strategy (e.g. `NATIVE`, `FRAMEWORK`) hawkBit logs a warning at startup and works in
+legacy mode: the client IP is read as is from `hawkbit.server.security.clients.remote-ip-header` - the first IPv4
+address found in it (IPv6 only in full, uncompressed form), if any, otherwise the remote address of the connection.
+The users are responsible to ensure correct forwarded headers (e.g. the proxy sets / overwrites `X-Forwarded-For`) and
+redirect behavior.
+
+Example - stricter limits, and a customer edge proxy (with an internal proxy behind it) trusted for its tenant. The
+reverse proxy is in a private network - trusted by default, so `trusted-proxies` isn't set:
+
+```properties
+hawkbit.server.security.dos.filter.max-read=50
+hawkbit.server.security.dos.filter.max-write=10
+hawkbit.server.security.forwarded.tenants.acme=198.51.100.7, 10.20.0.5
+```
+
+##### Upgrade from 1.2.0
+
+hawkBit now processes the forwarded headers itself (default strategy `NONE`):
+
+- remove `server.forward-headers-strategy=NATIVE` if set (recommended by the 1.2.0 reverse proxy docs) - otherwise
+  hawkBit runs in legacy mode (the client IP read from the header as is, as in 1.2.0) and logs a warning
+- `server.tomcat.remoteip.*` properties are not used (a startup warning lists them if set) - configure
+  `hawkbit.server.security.forwarded.trusted-proxies` and `hawkbit.server.security.clients.remote-ip-header` instead
+- if the reverse proxy reaches hawkBit from a public (not default trusted) address, add it to
+  `hawkbit.server.security.forwarded.trusted-proxies` - otherwise all clients get the proxy IP (and share its DoS
+  limits)
+
+#### Load report
+
+The DoS filter logs (by the security logger) the client IPs reaching `report-percent` of their read or write limit (per
+API) in a one-second window:
+
+- the first time in a report interval immediately -
+  `[DOS] High load! Client <ip> reached <n> READ|WRITE requests per second (limit <l>) - tenant <tenant>, forwarded for [<hops>]`
+- at the end of the interval (reported with the next high load request after it) all client IPs of the interval with
+  their peak read / write rates (`[DOS] Load report: ...`). Then they are reset - so they are logged as new again. Max
+  1000 client IPs per interval, the others are just counted
+
+The tenant is the one of the DDI path (not authenticated), forwarded for - the up to 5 `X-Forwarded-For` hops nearest to
+the client IP, as claimed by it (not verifiable). A client IP with forwarded for hops is a proxy - it could be trusted
+for its tenant (`hawkbit.server.security.forwarded.tenants.<tenant>`) or globally. Without - e.g. a
+NAT - it could be whitelisted, or the limits raised.
 
 ---
 

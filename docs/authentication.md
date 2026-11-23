@@ -102,6 +102,19 @@ For that you shall:
   ```shell
   openssl x509 -in client_certificate.crt -issuer_hash -noout`
   ```
+  If no issuer hash is configured (empty or blank), header authentication rejects all requests.
+
+The reverse proxy is responsible for the client certificate headers (e.g. `X-Controller-Id`, `X-Authority*`): it shall
+set (overwrite) them for the requests with a verified client certificate and remove them from all the other requests.
+hawkBit trusts the controller id and authority headers as they are received. hawkBit shall not be reachable without
+passing the reverse proxy. If the not indexed authority header (`X-Authority`) is present, the indexed ones
+(`X-Authority-<n>`) are ignored, so setting `X-Authority` also overrides any indexed authority header sent by the
+client.
+
+> `hawkbit.server.ddi.security.rp.trusted-ips` (DDI authentication accepted only from these reverse proxy IPs) is
+> deprecated since 1.2.1 and will be removed. If set, it has to be enabled explicitly with
+> `hawkbit.server.ddi.security.rp.trusted-ips-enable=true`, otherwise hawkBit fails to start.
+> The IP of the connection peer (the reverse proxy) is checked, not the client IP resolved from `X-Forwarded-For`.
 
 Here is an example diagram that shows all the communication between the hawkBit, reverse proxy and client. For the sake
 of simplification we assume that there are not intermediate certificates and the certificate and key are as follows:
@@ -126,19 +139,20 @@ different trusted CAs this example won't work.
 
 1. Hawkbit Configurations
 
-   There are also some configurations that you need update when you deployed your hawkbit service.
+   hawkBit generates the download URLs from the forwarded headers (`X-Forwarded-Proto`, `-Host`, `-Port`) set by the
+   reverse proxy. With the default forward headers strategy (`NONE`) hawkBit applies them if the reverse proxy is a
+   trusted proxy - by default the private, loopback, link-local and CGNAT ranges, e.g. the Docker network. So, usually,
+   nothing has to be configured. Only if the proxy reaches hawkBit from another address, configure
+   `hawkbit.server.security.forwarded.trusted-proxies` - it replaces the defaults, so list all proxies (see
+   [Throttling](throttling.md#client-ip)). If you're deploying hawkBit as a Docker container, add such configurations as
+   environmental values in the docker-compose.yml file.
 
-   You need to add the given setting to your hawkBit configurations so that hawkBit can generate the URLs according to
-   the https that the client will use to download. If you're deploying hawkBit as a Docker container, add these
-   configurations as environmental values in the docker-compose.yml file.
-
-```properties
-server.forward-headers-strategy=NATIVE
-```
+   Don't set `server.forward-headers-strategy=NATIVE` (recommended by older versions of this guide) - it switches hawkBit
+   to the legacy mode, where the forwarded headers are not processed by hawkBit.
 
 2. In Hawkbit's UI section, under system configuration, make sure to select *Allow targets to authenticate via a
    certificate authenticated by a reverse proxy* and input the fixed issuer hash as "Hawkbit". This can be whenever you
-   have configured in the nginx configuration in `proxy_set_header X-Authority-1` below.
+   have configured in the nginx configuration in `proxy_set_header X-Authority` below.
 
 3. After placing your certificates and keys, you need to deploy your proxy server and apply the provided configurations.
    You can apply mutual TLS specifically to the URL given below to implement the process only for devices using the
@@ -204,7 +218,8 @@ server {
         # Client certificate Common Name and Issuer Hash is required
         # for auth in hawkbit. 
         proxy_set_header X-Controller-Id $ssl_client_s_dn_cn;
-        proxy_set_header X-Authority-1 Hawkbit;
+        # Set as not indexed header - then any indexed X-Authority-<n> header sent by the client is ignored
+        proxy_set_header X-Authority Hawkbit;
 
         # These are required for clients to upload and download software. 
         proxy_request_buffering off;
@@ -217,6 +232,10 @@ server {
         proxy_set_header Host $http_host; 
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        # Clear (an empty value makes nginx drop the header) the authentication headers if sent by the client.
+        # Without X-Controller-Id the header authentication fails, regardless of the authority headers
+        proxy_set_header X-Controller-Id "";
+        proxy_set_header X-Authority "";
 	    proxy_request_buffering off;
 	    client_max_body_size 1000m;
    }   
@@ -313,3 +332,24 @@ is used for the integration.
 ## Management API
 
 - Basic Auth
+- OAuth2 / OpenID Connect bearer token (see [Authorization](authorization.md#openid-connect))
+
+### Requested tenant
+
+The tenant is part of the Management API path: `/{tenant}/rest/**`, e.g.
+`http://localhost:8080/DEFAULT/rest/v1/targets`. The response links contain the tenant path too. The tenant consists of
+URI unreserved chars (`A-Z`, `a-z`, `0-9`, `-`, `.`, `_`, `~`), not encoded, and must not be `.` or `..`.
+
+- the authenticated user must belong to the tenant, otherwise (or for an invalid tenant) the response is
+  `401 Unauthorized`
+- a global, not tenant scoped, user (e.g. `spring.security.user`) acts in the tenant only if
+  `hawkbit.server.security.tenant-resolver.global-user-requested-tenant=true`. The tenant must exist.
+
+Note: Management API is still accessible at `/rest/**` but this is deprecated (since 1.2.1) in favor of
+`/{tenant}/rest/**` and will be removed. In this case the tenant is the one of the authenticated user (e.g. from the
+OAuth2 / OpenID Connect token). A Basic Auth user `<tenant>\<username>` requests `<tenant>` (deprecated) - the part
+before the first `\` is always taken as the tenant.
+
+Extensions (e.g. authentication providers) get the requested tenant via
+[RequestedTenant](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-core/src/main/java/org/eclipse/hawkbit/context/RequestedTenant.java)
+`.getTenant()`. They shall not read the tenant from request headers - the checks above wouldn't apply.

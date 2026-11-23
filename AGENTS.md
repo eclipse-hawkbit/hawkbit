@@ -69,6 +69,8 @@ CI (`.github/workflows/reusable_workflow_verify.yaml`) runs `license:check`, the
     - Secure methods with `@PreAuthorize(SpringEvalExpressions.…)`. Permissions are String constants in `SpPermission`.
 - **Tenancy/security context:** use the static `AccessContext` (`tenant()`, `actor()`, `asTenant`, `asActor`,
   `asSystem`, `asSystemAsTenant`). Don't read the `SecurityContext` directly.
+  The Mgmt API tenant requested before the authentication (`/{tenant}/rest/**` served as `/rest/**`, or `tenant\user`
+  basic auth) is `RequestedTenant.getTenant()` (`TenantResolverFilter`, see `docs/authentication.md#requested-tenant`).
 - **Exceptions:** extend `AbstractServerRtException` with an `SpServerError` code. HTTP mapping is in rest-core
   `RestConfiguration`.
 - **Events:** publish via `EventPublisherHolder`, after commit (`AfterTransactionCommitExecutor`). Remote events
@@ -85,8 +87,22 @@ CI (`.github/workflows/reusable_workflow_verify.yaml`) runs `license:check`, the
       `AbstractDDiApiIntegrationTest`, `AbstractAmqpIntegrationTest`.
     - Use `@WithUser`, `TestdataFactory`, `@ExpectEvents`.
     - Document the test class with Javadoc `Feature: <Type> - <Component><br/>` and `Story: …` (see `CONTRIBUTING.md`).
+- **Commits:**
+    - Always sign off: `git commit -s` (Eclipse ECA, `Signed-off-by` trailer, see `CONTRIBUTING.md`). Also on amend.
+    - Subject: short imperative summary. Prefix with the GitHub issue (`#<issue>: `) only if there is one, otherwise no
+      prefix. No ticket placeholders (e.g. `NO-TICKET`) and no external tracker IDs.
 
 ## Gotchas
+
+- **Deployment model:** hawkBit serves plain HTTP. It runs directly exposed only on localhost (development). Every
+  production installation MUST run behind a trusted reverse proxy (HTTPS termination), which is responsible for the
+  forwarded headers (e.g. setting / appending to `X-Forwarded-For`). Don't treat a directly exposed hawkBit as a threat
+  scenario. With `server.forward-headers-strategy=NONE` (default, `hawkbit-rest-defaults.properties`) hawkBit
+  processes the forwarded headers itself, trusting only `hawkbit.server.security.forwarded.*` proxies: a Tomcat valve
+  (`ForwardedValve`) or a filter on other containers (`ForwardedFilter`), mode decided in
+  `SecurityManagedConfiguration`.
+  Another strategy is the legacy mode: a startup warning, the header is read as is. Read the client IP from
+  `ClientAddress.of(request)` (rest-core `security`), not from headers.
 
 - **JPA vendor is chosen at build time** (`jpa.vendor` property, Maven profiles in `hawkbit-repository-jpa/pom.xml`).
   Base entities exist in both `-jpa-eclipselink` and `-jpa-hibernate`, so change both.

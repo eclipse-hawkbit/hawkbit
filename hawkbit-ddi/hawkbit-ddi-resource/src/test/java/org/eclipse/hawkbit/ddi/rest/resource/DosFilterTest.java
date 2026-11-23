@@ -21,6 +21,7 @@ import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.rest.SecurityManagedConfiguration.LegacyClientAddressFilter;
 import org.eclipse.hawkbit.rest.security.DosFilter;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.junit.jupiter.api.Test;
@@ -44,8 +45,11 @@ class DosFilterTest extends AbstractDDiApiIntegrationTest {
 
     @Override
     protected DefaultMockMvcBuilder createMvcWebAppContext(final WebApplicationContext context) {
-        return super.createMvcWebAppContext(context).addFilter(
-                new DosFilter(null, 10, 10, "127\\.0\\.0\\.1|\\[0:0:0:0:0:0:0:1\\]", "(^192\\.168\\.)", "X-Forwarded-For"));
+        // the client IP is resolved (from the X-Forwarded-For header, as is) by the legacy client address filter before the DoS filter
+        return super.createMvcWebAppContext(context)
+                .addFilter(new LegacyClientAddressFilter(X_FORWARDED_FOR))
+                .addFilter(new DosFilter(
+                        null, null, new DosFilter.Limits(10, 10), 10, null, "127\\.0\\.0\\.1|0:0:0:0:0:0:0:1", "(^192\\.168\\.)"));
     }
 
     /**

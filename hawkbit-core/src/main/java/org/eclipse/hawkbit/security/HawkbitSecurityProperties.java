@@ -9,9 +9,12 @@
  */
 package org.eclipse.hawkbit.security;
 
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -26,8 +29,10 @@ import org.springframework.web.cors.CorsConfigurationSource;
 public class HawkbitSecurityProperties {
 
     private final Clients clients = new Clients();
+    private final Forwarded forwarded = new Forwarded();
     private final Dos dos = new Dos();
     private final Cors cors = new Cors();
+    private final TenantResolver tenantResolver = new TenantResolver();
 
     /**
      * Secure access enforced.
@@ -96,6 +101,35 @@ public class HawkbitSecurityProperties {
     }
 
     /**
+     * Management API requested tenant resolution - the tenant requested before the authentication (see
+     * <code>org.eclipse.hawkbit.rest.security.TenantResolverFilter</code>).
+     */
+    @Data
+    public static class TenantResolver {
+
+        /**
+         * If <code>true</code>, <code>/{tenant}/rest/**</code> is served as <code>/rest/**</code> with requested tenant
+         * <code>tenant</code>. Disable it only if the tenant path is handled otherwise (e.g. by extension controllers mapped under
+         * <code>/{tenant}/rest/**</code>).
+         */
+        private boolean tenantPath = true;
+        /**
+         * If <code>true</code>, a global, not tenant scoped, user (e.g. <code>spring.security.user</code>) acts in the scope of the
+         * requested tenant. Otherwise, the global user stays not tenant scoped.
+         */
+        private boolean globalUserRequestedTenant = false;
+        /**
+         * If <code>true</code>, a <code>tenant&#92;user</code> basic auth user on <code>/rest/**</code> requests the <code>tenant</code>
+         * and authenticates as <code>user</code> (as with the <code>/{tenant}/rest/**</code> path).
+         *
+         * @deprecated since 1.2.1 - use the tenant path <code>/{tenant}/rest/**</code> to request a tenant. Will be removed.
+         */
+        @Deprecated(forRemoval = true, since = "1.2.1")
+        @SuppressWarnings("java:S1133")
+        private boolean tenantPrefixedBasicAuth = true;
+    }
+
+    /**
      * Security configuration related to clients.
      */
     @Data
@@ -107,13 +141,47 @@ public class HawkbitSecurityProperties {
          */
         private String blacklist = "";
         /**
-         * Name of the http header from which the remote ip is extracted.
+         * Header with the client IP chain (comma separated, the proxies append the address they got the request from). In legacy mode
+         * (forward headers strategy other than <code>NONE</code>) the client IP is extracted from it as is.
          */
         private String remoteIpHeader = X_FORWARDED_FOR;
         /**
          * Set to <code>true</code> if DDI clients remote IP should be stored.
          */
         private boolean trackRemoteIp = true;
+    }
+
+    /**
+     * Forwarded headers processing by hawkBit - applied only with <code>server.forward-headers-strategy=NONE</code> (the default), otherwise
+     * the client IP is read as is from {@link Clients#getRemoteIpHeader()} (legacy). The connection peer has to be a trusted proxy in
+     * order its forwarded headers to be applied.
+     */
+    @Data
+    public static class Forwarded {
+
+        /**
+         * Trusted proxies - a comma separated list of IPs / CIDR blocks. If not set, the private, loopback, link-local and CGNAT address
+         * ranges (IPv4 and IPv6). Set, but empty - nothing trusted. The client IP chain is read from {@link Clients#getRemoteIpHeader()}.
+         */
+        private String trustedProxies;
+        /**
+         * Header with the original protocol (scheme). Applied only if the connection peer is trusted.
+         */
+        private String protocolHeader = "X-Forwarded-Proto";
+        /**
+         * Header with the original host. Applied only if the connection peer is trusted.
+         */
+        private String hostHeader = "X-Forwarded-Host";
+        /**
+         * Header with the original port. Applied only if the connection peer is trusted.
+         */
+        private String portHeader = "X-Forwarded-Port";
+        /**
+         * Per tenant trusted proxies (the key is the tenant, case-insensitive) - a comma separated list of IPs / CIDR blocks, e.g. a customer
+         * proxy of the tenant's devices. Applied for the DDI requests of the tenant (<code>/{tenant}/controller/**</code>) coming through
+         * one of them: the hops left to it are trusted only if they are trusted proxies of the tenant.
+         */
+        private Map<String, String> tenants = new HashMap<>();
     }
 
     /**
@@ -213,10 +281,9 @@ public class HawkbitSecurityProperties {
              */
             private boolean enabled = true;
             /**
-             * White list of peer IP addresses for DOS filter (regular
-             * expression).
+             * White list of client IP addresses for DOS filter (regular expression, found in the IP - anchor it to match the whole IP).
              */
-            private String whitelist = "10\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}|192\\.168\\.\\d{1,3}\\.\\d{1,3}|169\\.254\\.\\d{1,3}\\.\\d{1,3}|127\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}|172\\.1[6-9]{1}\\.\\d{1,3}\\.\\d{1,3}|172\\.2[0-9]{1}\\.\\d{1,3}\\.\\d{1,3}|172\\.3[0-1]{1}\\.\\d{1,3}\\.\\d{1,3}";
+            private String whitelist = "^(?:10\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}|192\\.168\\.\\d{1,3}\\.\\d{1,3}|169\\.254\\.\\d{1,3}\\.\\d{1,3}|127\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}|172\\.1[6-9]{1}\\.\\d{1,3}\\.\\d{1,3}|172\\.2[0-9]{1}\\.\\d{1,3}\\.\\d{1,3}|172\\.3[0-1]{1}\\.\\d{1,3}\\.\\d{1,3})$";
             /**
              * # Maximum number of allowed REST read/GET requests per second per
              * client IP.
@@ -227,6 +294,69 @@ public class HawkbitSecurityProperties {
              * second per client IP.
              */
             private int maxWrite = 50;
+            /**
+             * Maximum number of failed authentications (HTTP 401) per second per client IP. Above it, the requests of the client IP are
+             * rejected (HTTP 429) without authentication. Counted separately from the read / write requests. 0 to disable.
+             */
+            private int maxAuthFailures = 10;
+
+            /**
+             * Management API (<code>/rest/**</code>) per client IP limits.
+             */
+            private final Limit mgmt = new Limit();
+            /**
+             * DDI API (<code>/{tenant}/controller/v1/**</code>) per client IP limits.
+             */
+            private final Limit ddi = new Limit();
+            /**
+             * DDI artifact download per client IP limits.
+             */
+            private final Limit ddiDownload = new Limit();
+            /**
+             * System API (<code>/system/*</code>) per client IP limits.
+             */
+            private final Limit system = new Limit();
+            /**
+             * Load report threshold - a client IP reaching this percent of its read or write limit is logged (once per report interval, the
+             * first time immediately) and reported with its peak rates at the end of the report interval - e.g. to find proxies to trust.
+             * 0 to disable.
+             */
+            private int reportPercent = 20;
+            /**
+             * Load report interval.
+             */
+            private Duration reportInterval = Duration.ofHours(1);
+
+            /**
+             * @return the effective max read requests per second of the given limits - {@link #getMaxRead()} if not set
+             */
+            public int maxRead(final Limit limit) {
+                return limit.getMaxRead() == null ? maxRead : limit.getMaxRead();
+            }
+
+            /**
+             * @return the effective max write requests per second of the given limits - {@link #getMaxWrite()} if not set
+             */
+            public int maxWrite(final Limit limit) {
+                return limit.getMaxWrite() == null ? maxWrite : limit.getMaxWrite();
+            }
+
+            /**
+             * Request limits per second. Not set (<code>null</code>) - the global ones ({@link Filter#getMaxRead()},
+             * {@link Filter#getMaxWrite()}).
+             */
+            @Data
+            public static class Limit {
+
+                /**
+                 * Maximum number of read (GET) requests per second.
+                 */
+                private Integer maxRead;
+                /**
+                 * Maximum number of write (PUT/POST/etc.) requests per second.
+                 */
+                private Integer maxWrite;
+            }
         }
     }
 }

@@ -43,7 +43,7 @@ import org.springframework.security.web.access.intercept.AuthorizationFilter;
 @Configuration
 class ControllerDownloadSecurityConfiguration {
 
-    private static final String DDI_DL_ANT_MATCHER =
+    static final String DDI_DL_ANT_MATCHER =
             DdiRootControllerRestApi.CONTROLLER_V1 + "/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/*";
 
     private final ControllerManagement controllerManagement;
@@ -68,7 +68,9 @@ class ControllerDownloadSecurityConfiguration {
     @ConditionalOnProperty(prefix = "hawkbit.server.security.dos.filter", name = "enabled", matchIfMissing = true)
     public FilterRegistrationBean<DosFilter> dosFilterDDIDL(final HawkbitSecurityProperties securityProperties) {
         final FilterRegistrationBean<DosFilter> filterRegBean = SecurityManagedConfiguration.dosFilter(
-                List.of(DDI_DL_ANT_MATCHER), securityProperties.getDos().getFilter(), securityProperties.getClients());
+                List.of(DDI_DL_ANT_MATCHER), null,
+                securityProperties.getDos().getFilter(), securityProperties.getDos().getFilter().getDdiDownload(),
+                securityProperties.getClients());
         filterRegBean.setOrder(SecurityManagedConfiguration.DOS_FILTER_ORDER);
         filterRegBean.setName("dosDDiDlFilter");
         return filterRegBean;

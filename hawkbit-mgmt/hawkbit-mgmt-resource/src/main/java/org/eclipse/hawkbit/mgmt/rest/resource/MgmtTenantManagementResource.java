@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
+import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -74,7 +76,8 @@ public class MgmtTenantManagementResource implements MgmtTenantManagementRestApi
     }
 
     @Override
-    @AuditLog(entity = "TenantConfiguration", type = AuditLog.Type.UPDATE, description = "Update AccessContext Configuration Value")
+    @AuditLog(entity = "TenantConfiguration", type = AuditLog.Type.UPDATE, description = "Update AccessContext Configuration Value",
+            masks = @AuditLog.Mask(when = "#keyName == '" + AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY + "'", mask = "configurationValueRest"))
     public void updateTenantConfigurationValue(final String keyName, final MgmtSystemTenantConfigurationValueRequest configurationValueRest) {
         final Object configurationValue = configurationValueRest.getValue();
         if (isDefaultDistributionSetTypeKey(keyName)) {
@@ -87,7 +90,8 @@ public class MgmtTenantManagementResource implements MgmtTenantManagementRestApi
     }
 
     @Override
-    @AuditLog(entity = "TenantConfiguration", type = AuditLog.Type.UPDATE, description = "Update AccessContext Configuration")
+    @AuditLog(entity = "TenantConfiguration", type = AuditLog.Type.UPDATE, description = "Update AccessContext Configuration",
+            masks = @AuditLog.Mask(mask = "configurationValueMap/" + AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY))
     public void updateTenantConfiguration(final Map<String, Object> configurationValueMap) {
         final boolean containsNull = configurationValueMap.keySet().stream().anyMatch(Objects::isNull);
 

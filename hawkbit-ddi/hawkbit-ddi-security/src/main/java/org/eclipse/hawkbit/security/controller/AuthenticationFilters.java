@@ -22,6 +22,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.eclipse.hawkbit.rest.security.ClientAddress;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -147,7 +148,9 @@ public class AuthenticationFilters {
                 return true;
             }
 
-            final String remoteAddress = request.getRemoteAddr();
+            // the trusted IPs are reverse proxy IPs - so the connection peer is checked, not the client IP (resolved from the forwarded
+            // headers). In legacy mode (hawkBit doesn't process the forwarded headers) the peer is the remote address
+            final String remoteAddress = ClientAddress.of(request).peer();
             if (authorizedSourceIps.contains(remoteAddress)) {
                 // source ip matches the given pattern -> authenticated
                 return true;

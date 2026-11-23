@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.repository.jpa.acm;
 import org.eclipse.hawkbit.repository.test.util.QueryCount;
 import org.eclipse.hawkbit.repository.test.util.QueryCountConfiguration;
 import org.eclipse.hawkbit.tenancy.TenantAwareCacheManager;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
@@ -37,6 +38,12 @@ abstract class AbstractTypeManagementCacheAcmTest extends AbstractAccessControll
 
     @Autowired
     private QueryCount queryCount;
+
+    /** The setup creates / updates entities - their (cache evict) events shall not interfere with the measurements. */
+    @BeforeEach
+    void waitForSetupEvents() {
+        waitForEvents();
+    }
 
     /** Evicts the given id from the by-id cache named after the entity class' simple name. */
     protected void evict(final String cacheName, final Long id) {

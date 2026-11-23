@@ -63,7 +63,8 @@ class ControllerSecurityConfiguration {
     }
 
     /**
-     * Filter to protect the hawkBit server DDI interface against too many requests.
+     * Filter to protect the hawkBit server DDI interface against too many requests. The DDI download requests are excluded - they are
+     * limited by the DDI download DoS filter (see {@link ControllerDownloadSecurityConfiguration}).
      *
      * @param securityProperties for filter configuration
      * @return the spring filter registration bean for registering a denial of service protection filter in the filter chain
@@ -73,7 +74,9 @@ class ControllerSecurityConfiguration {
     protected FilterRegistrationBean<DosFilter> dosFilterDDI(final HawkbitSecurityProperties securityProperties) {
         final FilterRegistrationBean<DosFilter> filterRegBean =
                 SecurityManagedConfiguration.dosFilter(List.of(DDI_ANT_MATCHERS),
-                        securityProperties.getDos().getFilter(), securityProperties.getClients());
+                        List.of(ControllerDownloadSecurityConfiguration.DDI_DL_ANT_MATCHER),
+                        securityProperties.getDos().getFilter(), securityProperties.getDos().getFilter().getDdi(),
+                        securityProperties.getClients());
         filterRegBean.setOrder(SecurityManagedConfiguration.DOS_FILTER_ORDER);
         filterRegBean.setName("dosDDiFilter");
 

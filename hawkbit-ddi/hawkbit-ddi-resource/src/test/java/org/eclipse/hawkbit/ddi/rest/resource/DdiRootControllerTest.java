@@ -62,6 +62,8 @@ import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
+import org.eclipse.hawkbit.rest.security.ForwardedFilter;
+import org.eclipse.hawkbit.rest.security.ForwardedResolver;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
@@ -70,6 +72,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 
@@ -411,6 +414,31 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
             assertThat(target.getLastModifiedBy()).isEqualTo(CONTROLLER_PLUG_AND_PLAY);
             assertThat(target.getLastModifiedAt()).isGreaterThanOrEqualTo(create);
         });
+    }
+
+    /**
+     * Ensures that the stored address of a target polling with an IPv4-mapped IPv6 client IP (e.g. behind a dual-stack proxy) is the IPv4 one
+     * - the client IP is resolved by the forwarded filter in its canonical form
+     */
+    @Test
+    @ExpectEvents({
+            @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetPollEvent.class, count = 1) })
+    void rootRsPlugAndPlayIpv4MappedIpAddress() throws Exception {
+        securityProperties.getClients().setTrackRemoteIp(true);
+        // the MockMvc remote address (127.0.0.1) is a default trusted proxy
+        final MockMvc forwardedMvc = createMvcWebAppContext(webApplicationContext)
+                .addFilter(new ForwardedFilter(ForwardedResolver.of(new HawkbitSecurityProperties())))
+                .build();
+        final String knownControllerId1 = "0815";
+        callAs(withController("controller"), () -> {
+            forwardedMvc.perform(get(CONTROLLER_BASE, AccessContext.tenant(), knownControllerId1)
+                            .header(HawkbitSecurityProperties.Clients.X_FORWARDED_FOR, "::ffff:1.2.3.4"))
+                    .andDo(MockMvcResultPrinter.print())
+                    .andExpect(status().isOk());
+            return null;
+        });
+        assertThat(targetManagement.getByControllerId(knownControllerId1).getAddress()).isEqualTo("http://1.2.3.4");
     }
 
     /**

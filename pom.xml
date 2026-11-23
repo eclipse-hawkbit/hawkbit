@@ -16,7 +16,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.1.2</version>
+        <version>4.1.3</version>
     </parent>
 
     <groupId>org.eclipse.hawkbit</groupId>
@@ -40,20 +40,17 @@
     </scm>
 
     <properties>
-        <!-- Spring Boot Overrides START - to be reviewed regularly, current overrides against spring-boot 4.1.2 -->
+        <!-- Spring Boot Overrides START - to be reviewed regularly, current overrides against spring-boot 4.1.3 -->
+        <h2.version>2.5.252</h2.version>
         <jackson-2-bom.version>2.22.4</jackson-2-bom.version>
         <jackson-bom.version>3.2.4</jackson-bom.version>
-        <logback.version>1.6.6</logback.version>
-        <mariadb.version>3.5.11</mariadb.version>
-        <rabbit-amqp-client.version>5.37.0</rabbit-amqp-client.version>
+        <logback.version>1.6.7</logback.version>
+        <tomcat.version>11.0.29</tomcat.version>
         <!-- END -->
 
         <!-- Other Overrides START - to be reviewed regularly -->
         <!-- override of org.apache.commons:commons-lang3 - old version coming via spring cloud openfeign 5.0.4 and org.springdoc 3.2.0 -->
         <commons-lang.version>3.22.0</commons-lang.version>
-        <!-- override spring-boot-starter-test 4.1.2 → json-smart 2.6.0 → accessors-smart 2.6.0 → org.ow2.asm:asm:9.7.1 that doesn't support java 25
-          ASM used by EclipseLink to read entity metadata, must support the class file version of java.version. -->
-        <asm.version>9.11.1</asm.version>
         <!-- END -->
 
         <revision>0-SNAPSHOT</revision>
@@ -64,12 +61,12 @@
         <java.client.version>17</java.client.version>
 
         <!-- must be the same as the parent version -->
-        <spring-boot.version>4.1.2</spring-boot.version>
-        <spring-ai.version>2.0.2</spring-ai.version>
+        <spring-boot.version>4.1.3</spring-boot.version>
+        <spring-ai.version>2.0.3</spring-ai.version>
         <springdoc-openapi.version>3.2.0</springdoc-openapi.version>
 
         <!-- spring cloud versions - stream (for rabbit mq) and openfeign -->
-        <spring-cloud-stream.version>5.0.4</spring-cloud-stream.version>
+        <spring-cloud-stream.version>5.0.5</spring-cloud-stream.version>
         <spring-cloud-openfeign.version>5.0.4</spring-cloud-openfeign.version>
         <openfeign-hc5.version>13.18</openfeign-hc5.version>
 
@@ -89,7 +86,7 @@
         <commons-collections4.version>4.6.0</commons-collections4.version>
         <io-protostuff.version>1.8.0</io-protostuff.version>
         <!-- the version should be `synchronized` with version used by springdoc-openapi -->
-        <swagger-annotations-jakarta.version>2.2.55</swagger-annotations-jakarta.version>
+        <swagger-annotations-jakarta.version>2.2.56</swagger-annotations-jakarta.version>
 
         <!-- test -->
         <rabbitmq-http-client.version>5.7.0</rabbitmq-http-client.version>
@@ -234,11 +231,6 @@
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
                 <version>${commons-lang.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.ow2.asm</groupId>
-                <artifactId>asm</artifactId>
-                <version>${asm.version}</version>
             </dependency>
             <!-- Overrides END -->
 

@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Random;
+import java.util.concurrent.Executor;
 
 import jakarta.validation.constraints.NotEmpty;
 
@@ -89,6 +90,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Import;
@@ -192,6 +194,9 @@ public abstract class AbstractIntegrationTest {
     protected TestdataFactory testdataFactory;
     @Autowired
     protected ApplicationEventPublisher eventPublisher;
+    @Autowired
+    @Qualifier("asyncExecutor")
+    private Executor asyncExecutor;
     private static final String ARTIFACT_DIRECTORY = createTempDir().getAbsolutePath() + "/" + randomString(20);
 
     @BeforeAll
@@ -248,6 +253,17 @@ public abstract class AbstractIntegrationTest {
             } catch (final IOException | IllegalArgumentException e) {
                 log.warn("Cannot cleanup file-directory", e);
             }
+        }
+    }
+
+    /**
+     * Waits until all the pending (async processed) events are processed. Use it before a section which shall not be
+     * affected by the events of the previous actions - e.g. a cache evict event of an entity created in the test setup,
+     * processed in the middle of a section measuring the DB queries.
+     */
+    protected void waitForEvents() {
+        if (asyncExecutor instanceof PendingTasksTrackingExecutor pendingTasksTrackingExecutor) {
+            pendingTasksTrackingExecutor.awaitIdle(Duration.ofSeconds(10));
         }
     }
 

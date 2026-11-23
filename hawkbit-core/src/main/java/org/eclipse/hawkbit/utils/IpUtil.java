@@ -19,7 +19,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 
 /**
  * A utility which determines the correct IP of a connected {@link Target}. E.g from a {@link HttpServletRequest}.
@@ -30,7 +29,10 @@ import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 @SuppressWarnings("squid:S2083")
 public final class IpUtil {
 
-    private static final String HIDDEN_IP = "***";
+    /**
+     * The IP stored instead of the real one if the remote IP tracking is disabled.
+     */
+    public static final String HIDDEN_IP = "***";
     private static final String SCHEME_SEPARATOR = "://";
     private static final String HTTP_SCHEME = "http";
     private static final String AMQP_SCHEME = "amqp";
@@ -59,35 +61,6 @@ public final class IpUtil {
             log.debug("Failed to parse URI: {}", address, e);
             return null;
         }
-    }
-
-    /**
-     * Retrieves the string based IP address from a given
-     * {@link HttpServletRequest} by either the configured {@link HawkbitSecurityProperties.Clients#getRemoteIpHeader()}
-     * (by default X-Forwarded-For) or by the {@link HttpServletRequest#getRemoteAddr()} method.
-     *
-     * @param request the {@link HttpServletRequest} to determine the IP address where this request has been sent from
-     * @param securityProperties hawkBit security properties.
-     * @return the {@link URI} based IP address from the client which sent the request
-     */
-    public static URI getClientIpFromRequest(final HttpServletRequest request, final HawkbitSecurityProperties securityProperties) {
-        return getClientIpFromRequest(
-                request, securityProperties.getClients().getRemoteIpHeader(), securityProperties.getClients().isTrackRemoteIp());
-    }
-
-    /**
-     * Retrieves the string based IP address from a given {@link HttpServletRequest} by either the
-     * forward header or by the {@link HttpServletRequest#getRemoteAddr()} method.
-     *
-     * @param request the {@link HttpServletRequest} to determine the IP address
-     *         where this request has been sent from
-     * @param forwardHeader the header name containing the IP address e.g. forwarded by a
-     *         proxy {@code x-forwarded-for}
-     * @return the {@link URI} based IP address from the client which sent the
-     *         request
-     */
-    public static URI getClientIpFromRequest(final HttpServletRequest request, final String forwardHeader) {
-        return getClientIpFromRequest(request, forwardHeader, true);
     }
 
     /**
@@ -160,21 +133,14 @@ public final class IpUtil {
         return uri != null && !(AMQP_SCHEME.equals(uri.getScheme()) || HIDDEN_IP.equals(uri.getHost()));
     }
 
-    private static URI getClientIpFromRequest(final HttpServletRequest request, final String forwardHeader, final boolean trackRemoteIp) {
-        String ip;
-        if (trackRemoteIp) {
-            ip = request.getHeader(forwardHeader);
-            if (ip == null || (ip = findClientIpAddress(ip)) == null) {
-                ip = request.getRemoteAddr();
-            }
-        } else {
-            ip = HIDDEN_IP;
-        }
-
-        return createHttpUri(ip);
-    }
-
-    private static String findClientIpAddress(final String s) {
+    /**
+     * Finds the client IP in a remote IP header value (as is) - the first IPv4 address, otherwise the first IPv6 address in full
+     * (uncompressed) form, without or in brackets.
+     *
+     * @param s the header value
+     * @return the IP address or <code>null</code> if not found
+     */
+    public static String findClientIpAddress(final String s) {
         Matcher matcher = IPV4_ADDRESS_PATTERN.matcher(s);
         if (matcher.find()) {
             return matcher.group(1);
@@ -192,5 +158,4 @@ public final class IpUtil {
 
         return null;
     }
-
 }
