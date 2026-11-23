@@ -65,6 +65,13 @@
       }
     },
     {
+      "name": "Action Status Codes",
+      "description": "REST API for action status code catalogue",
+      "x-hawkbit": {
+        "order": "5500"
+      }
+    },
+    {
       "name": "Rollouts",
       "description": "REST API for Rollout CRUD operations.",
       "x-hawkbit": {
@@ -4810,6 +4817,239 @@
         "summary": "Delete an auto assignment",
         "description": "Handles the DELETE request for deleting an auto assignment. Required Permission: DELETE_AUTO_ASSIGNMENT (or implied by UPDATE_TARGET)",
         "operationId": "delete_1",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successfully deleted"
+          },
+          "404": {
+            "description": "Requested resource not found.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "400": {
+            "description": "Bad Request - e.g. invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionInfo"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The request requires user auth.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "403": {
+            "description": "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "406": {
+            "description": "In case accept header is specified and not application/json.",
+            "content": {
+              "application/json": { }
+            }
+          }
+        }
+      }
+    },
+    "/rest/v1/action-status-codes/{id}": {
+      "get": {
+        "tags": [
+          "Action Status Codes"
+        ],
+        "summary": "Return a single action status code",
+        "description": "Handles the GET request of retrieving a single action status code. Required Permission: READ_TARGET",
+        "operationId": "getActionStatusCode",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved",
+            "content": {
+              "application/hal+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MgmtActionStatusCode"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MgmtActionStatusCode"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Requested resource not found.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "400": {
+            "description": "Bad Request - e.g. invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionInfo"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The request requires user auth.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "403": {
+            "description": "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "406": {
+            "description": "In case accept header is specified and not application/json.",
+            "content": {
+              "application/json": { }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Action Status Codes"
+        ],
+        "summary": "Update an action status code",
+        "description": "Handles the PUT request for updating an action status code. The code field is immutable. Required Permission: UPDATE_TARGET",
+        "operationId": "update_2",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/hal+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MgmtActionStatusCodeRequestBodyPut"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MgmtActionStatusCodeRequestBodyPut"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully updated",
+            "content": {
+              "application/hal+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MgmtActionStatusCode"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MgmtActionStatusCode"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Requested (or referenced) resource not found.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "409": {
+            "description": "E.g. in case an entity is created or modified by another user in another request at the same time. You may retry your modification request.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "415": {
+            "description": "The request was attempt with a media-type which is not supported by the server for this resource.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "429": {
+            "description": "Too many requests. The server will refuse further attempts and the client has to wait another second.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "400": {
+            "description": "Bad Request - e.g. invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionInfo"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The request requires user auth.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "403": {
+            "description": "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "406": {
+            "description": "In case accept header is specified and not application/json.",
+            "content": {
+              "application/json": { }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Action Status Codes"
+        ],
+        "summary": "Delete an action status code",
+        "description": "Handles the DELETE request for deleting an action status code from the catalogue. Action statuses keep their codes; codes still referenced by action statuses are listed under /undocumented again and can be re-documented via POST. Required Permissions: READ_TARGET, DELETE_TARGET",
+        "operationId": "delete_2",
         "parameters": [
           {
             "name": "id",
@@ -11452,6 +11692,193 @@
         }
       }
     },
+    "/rest/v1/action-status-codes": {
+      "get": {
+        "tags": [
+          "Action Status Codes"
+        ],
+        "summary": "Return all action status codes present in the catalogue",
+        "description": "Handles the GET request of retrieving all action status codes in the catalogue. Required Permission: READ_TARGET",
+        "operationId": "getActionStatusCodes",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "description": "Query fields based on the Feed Item Query Language (FIQL). See Entity Definitions for available fields.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Query fields based on the Feed Item Query Language (FIQL). See Entity Definitions for available fields."
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "The paging offset (default is 0)",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "description": "The paging offset (default is 0)",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "The maximum number of entries in a page (default is 50)",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "description": "The maximum number of entries in a page (default is 50)",
+              "format": "int32",
+              "default": 50
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "The query parameter sort allows to define the sort order for the result of a query. A sort criteria consists of the name of a field and the sort direction (ASC for ascending and DESC descending).The sequence of the sort criteria (multiple can be used) defines the sort order of the entities in the result.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "The query parameter sort allows to define the sort order for the result of a query. A sort criteria consists of the name of a field and the sort direction (ASC for ascending and DESC descending).The sequence of the sort criteria (multiple can be used) defines the sort order of the entities in the result."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved",
+            "content": {
+              "application/hal+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagedListMgmtActionStatusCode"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagedListMgmtActionStatusCode"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - e.g. invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionInfo"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The request requires user auth.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "403": {
+            "description": "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "406": {
+            "description": "In case accept header is specified and not application/json.",
+            "content": {
+              "application/json": { }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Action Status Codes"
+        ],
+        "summary": "Create a new action status code",
+        "description": "Handles the POST request for creating an action status code in the catalogue. Required Permission: CREATE_TARGET",
+        "operationId": "create_2",
+        "requestBody": {
+          "content": {
+            "application/hal+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MgmtActionStatusCodeRequestBodyPost"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MgmtActionStatusCodeRequestBodyPost"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successfully created",
+            "content": {
+              "application/hal+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MgmtActionStatusCode"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MgmtActionStatusCode"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "E.g. in case an entity is created or modified by another user in another request at the same time. You may retry your modification request.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "415": {
+            "description": "The request was attempt with a media-type which is not supported by the server for this resource.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "429": {
+            "description": "Too many requests. The server will refuse further attempts and the client has to wait another second.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "400": {
+            "description": "Bad Request - e.g. invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionInfo"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The request requires user auth.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "403": {
+            "description": "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "406": {
+            "description": "In case accept header is specified and not application/json.",
+            "content": {
+              "application/json": { }
+            }
+          }
+        }
+      }
+    },
     "/rest/v1/userinfo": {
       "get": {
         "tags": [
@@ -13962,6 +14389,87 @@
         }
       }
     },
+    "/rest/v1/action-status-codes/undocumented": {
+      "get": {
+        "tags": [
+          "Action Status Codes"
+        ],
+        "summary": "Return undocumented action status codes",
+        "description": "Handles the GET request of retrieving action status codes reported on action statuses (by devices or written by the server) that have no catalogue entry. This is a read-only endpoint. To document a code, POST it to the catalogue. Required Permission: READ_TARGET",
+        "operationId": "getUndocumentedActionStatusCodes",
+        "parameters": [
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "The paging offset (default is 0)",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "description": "The paging offset (default is 0)",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "The maximum number of entries in a page (default is 50)",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "description": "The maximum number of entries in a page (default is 50)",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved",
+            "content": {
+              "application/hal+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagedListMgmtUndocumentedActionStatusCode"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagedListMgmtUndocumentedActionStatusCode"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - e.g. invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionInfo"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The request requires user auth.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "403": {
+            "description": "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies.",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "406": {
+            "description": "In case accept header is specified and not application/json.",
+            "content": {
+              "application/json": { }
+            }
+          }
+        }
+      }
+    },
     "/rest/v1/targettypes/{targetTypeId}/compatibledistributionsettypes/{distributionSetTypeId}": {
       "delete": {
         "tags": [
@@ -15919,6 +16427,127 @@
           }
         }
       },
+      "MgmtActionStatusCodeRequestBodyPut": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name",
+            "example": "DOWNLOAD_HASH_MISMATCH"
+          },
+          "description": {
+            "type": "string",
+            "description": "The description",
+            "example": "Hash mismatch during download"
+          },
+          "severity": {
+            "type": "string",
+            "description": "The severity level",
+            "example": "WARN",
+            "enum": [
+              "TRACE",
+              "DEBUG",
+              "INFO",
+              "WARN",
+              "ERROR"
+            ]
+          }
+        },
+        "example": {
+          "name": "DOWNLOAD_HASH_MISMATCH",
+          "description": "Hash mismatch during download",
+          "severity": "WARN"
+        }
+      },
+      "MgmtActionStatusCode": {
+        "required": [
+          "code",
+          "id",
+          "name",
+          "severity"
+        ],
+        "type": "object",
+        "properties": {
+          "createdBy": {
+            "type": "string",
+            "description": "Entity was originally created by (User, AMQP-Controller, anonymous etc.)",
+            "readOnly": true,
+            "example": "bumlux"
+          },
+          "createdAt": {
+            "type": "integer",
+            "description": "Entity was originally created at (timestamp UTC in milliseconds)",
+            "format": "int64",
+            "readOnly": true,
+            "example": 1691065905897
+          },
+          "lastModifiedBy": {
+            "type": "string",
+            "description": "Entity was last modified by (User, AMQP-Controller, anonymous etc.)",
+            "readOnly": true,
+            "example": "bumlux"
+          },
+          "lastModifiedAt": {
+            "type": "integer",
+            "description": "Entity was last modified at (timestamp UTC in milliseconds)",
+            "format": "int64",
+            "readOnly": true,
+            "example": 1691065906407
+          },
+          "name": {
+            "type": "string",
+            "example": "Name of entity"
+          },
+          "description": {
+            "type": "string",
+            "example": "Description of entity"
+          },
+          "id": {
+            "type": "integer",
+            "description": "The technical ID of the action status code",
+            "format": "int64",
+            "example": 1
+          },
+          "code": {
+            "type": "integer",
+            "description": "The numeric status code",
+            "format": "int32",
+            "example": 1234
+          },
+          "severity": {
+            "type": "string",
+            "description": "The severity level",
+            "example": "ERROR",
+            "enum": [
+              "TRACE",
+              "DEBUG",
+              "INFO",
+              "WARN",
+              "ERROR"
+            ]
+          },
+          "_links": {
+            "$ref": "#/components/schemas/Links"
+          }
+        },
+        "description": "Action status code catalogue entry",
+        "example": {
+          "id": 1,
+          "code": 1234,
+          "name": "DOWNLOAD_HASH_MISMATCH",
+          "description": "Hash mismatch during download",
+          "severity": "ERROR",
+          "createdBy": "admin",
+          "createdAt": 1682408568812,
+          "lastModifiedBy": "admin",
+          "lastModifiedAt": 1682408568812,
+          "_links": {
+            "self": {
+              "href": "https://management-api.host.com/rest/v1/action-status-codes/1"
+            }
+          }
+        }
+      },
       "MgmtDistributionSetTypeAssignment": {
         "type": "object",
         "properties": {
@@ -16928,6 +17557,76 @@
           "weight": 400
         }
       },
+      "MgmtActionStatusCodeRequestBodyPost": {
+        "required": [
+          "code",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "createdBy": {
+            "type": "string",
+            "description": "Entity was originally created by (User, AMQP-Controller, anonymous etc.)",
+            "readOnly": true,
+            "example": "bumlux"
+          },
+          "createdAt": {
+            "type": "integer",
+            "description": "Entity was originally created at (timestamp UTC in milliseconds)",
+            "format": "int64",
+            "readOnly": true,
+            "example": 1691065905897
+          },
+          "lastModifiedBy": {
+            "type": "string",
+            "description": "Entity was last modified by (User, AMQP-Controller, anonymous etc.)",
+            "readOnly": true,
+            "example": "bumlux"
+          },
+          "lastModifiedAt": {
+            "type": "integer",
+            "description": "Entity was last modified at (timestamp UTC in milliseconds)",
+            "format": "int64",
+            "readOnly": true,
+            "example": 1691065906407
+          },
+          "name": {
+            "type": "string",
+            "example": "Name of entity"
+          },
+          "description": {
+            "type": "string",
+            "example": "Description of entity"
+          },
+          "code": {
+            "type": "integer",
+            "description": "The numeric status code",
+            "format": "int32",
+            "example": 1234
+          },
+          "severity": {
+            "type": "string",
+            "description": "The severity level (defaults to INFO if not specified)",
+            "example": "ERROR",
+            "enum": [
+              "TRACE",
+              "DEBUG",
+              "INFO",
+              "WARN",
+              "ERROR"
+            ]
+          },
+          "_links": {
+            "$ref": "#/components/schemas/Links"
+          }
+        },
+        "example": {
+          "code": 1234,
+          "name": "DOWNLOAD_HASH_MISMATCH",
+          "description": "Hash mismatch during download",
+          "severity": "ERROR"
+        }
+      },
       "MgmtUserInfo": {
         "type": "object",
         "properties": {
@@ -17258,7 +17957,7 @@
             "$ref": "#/components/schemas/Links"
           }
         },
-        "description": "**properties**:\n* **repository.actions.autoclose.enabled** - Boolean, The configuration key 'repository.actions.autoclose.enabled' defines if autoclose running actions with new Distribution Set assignment is enabled.\n* **user.confirmation.flow.enabled** - Boolean, The configuration key 'user.confirmation.flow.enabled' defines if confirmation is required when distribution set is assigned to target.\n* **authentication.gatewaytoken.enabled** - Boolean, The configuration key 'authentication.gatewaytoken.enabled' defines if the authentication mode 'gateway security token' is enabled.\n* **action.cleanup.enabled** - Boolean, The configuration key 'action.cleanup.enabled' defines if automatic cleanup of deployment actions is enabled.\n* **action.cleanup.auto.expiry** - Long, The configuration key 'action.cleanup.auto.expiry' defines the expiry time in milliseconds that needs to elapse before an action may be cleaned up.\n* **authentication.header.enabled** - Boolean, The configuration key 'authentication.header.enabled' defines if the authentication mode 'authority header' is enabled.\n* **maintenanceWindowPollCount** - Integer, The configuration key 'maintenanceWindowPollCount' defines the polling interval so that controller tries to poll at least these many times between the last polling and before start of maintenance window. The polling interval is bounded by configured pollingTime and minPollingTime. The polling interval is modified as per following scheme: pollingTime(@time=t) = (maintenanceWindowStartTime - t)/maintenanceWindowPollCount.\n* **authentication.targettoken.enabled** - Boolean, The configuration key 'authentication.targettoken.enabled' defines if the authentication mode 'target security token' is enabled.\n* **minPollingTime** - String, The configuration key 'minPollingTime' defines the smallest time interval permitted between two poll requests of a target.\n* **pollingTime** - String, The configuration key 'pollingTime' defines the time interval between two poll requests of a target.\n* **pollingOverdueTime** - String, The configuration key 'pollingOverdueTime' defines the period of time after the SP server will recognize a target, which is not performing pull requests anymore.\n* **authentication.header.authority** - String, The configuration key 'authentication.header.authority' defines the name of the 'authority header'.\n* **authentication.gatewaytoken.key** - String, The configuration key 'authentication.gatewaytoken.key' defines the key of the gateway security token.\n* **action.cleanup.auto.status** - String, The configuration key 'action.cleanup.auto.status' defines the list of action status that should be taken into account for the cleanup.\n* **multi.assignments.enabled** - Boolean, The configuration key 'multi.assignments.enabled' defines if multiple distribution sets can be assigned to the same targets.\n* **batch.assignments.enabled** - Boolean, The configuration key 'batch.assignments.enabled' defines if distribution set can be assigned to multiple targets in a single batch message.\n* **implicit.lock.enabled** - Boolean (true by default), The configuration key 'implicit.lock.enabled' defines if distribution set and their software modules shall be implicitly locked when assigned to target, rollout or target filter.\n",
+        "description": "**properties**:\n* **repository.actions.autoclose.enabled** - Boolean, The configuration key 'repository.actions.autoclose.enabled' defines if autoclose running actions with new Distribution Set assignment is enabled.\n* **user.confirmation.flow.enabled** - Boolean, The configuration key 'user.confirmation.flow.enabled' defines if confirmation is required when distribution set is assigned to target.\n* **authentication.gatewaytoken.enabled** - Boolean, The configuration key 'authentication.gatewaytoken.enabled' defines if the authentication mode 'gateway security token' is enabled.\n* **action.cleanup.enabled** - Boolean, The configuration key 'action.cleanup.enabled' defines if automatic cleanup of deployment actions is enabled.\n* **action.cleanup.auto.expiry** - Long, The configuration key 'action.cleanup.auto.expiry' defines the expiry time in milliseconds that needs to elapse before an action may be cleaned up.\n* **authentication.header.enabled** - Boolean, The configuration key 'authentication.header.enabled' defines if the authentication mode 'authority header' is enabled.\n* **maintenanceWindowPollCount** - Integer, The configuration key 'maintenanceWindowPollCount' defines the polling interval so that controller tries to poll at least these many times between the last polling and before start of maintenance window. The polling interval is bounded by configured pollingTime and minPollingTime. The polling interval is modified as per following scheme: pollingTime(@time=t) = (maintenanceWindowStartTime - t)/maintenanceWindowPollCount.\n* **authentication.targettoken.enabled** - Boolean, The configuration key 'authentication.targettoken.enabled' defines if the authentication mode 'target security token' is enabled.\n* **minPollingTime** - String, The configuration key 'minPollingTime' defines the smallest time interval permitted between two poll requests of a target.\n* **pollingTime** - String, The configuration key 'pollingTime' defines the time interval between two poll requests of a target.\n* **pollingOverdueTime** - String, The configuration key 'pollingOverdueTime' defines the period of time after the SP server will recognize a target, which is not performing pull requests anymore.\n* **authentication.header.authority** - String, The configuration key 'authentication.header.authority' defines the name of the 'authority header'.\n* **authentication.gatewaytoken.key** - String, The configuration key 'authentication.gatewaytoken.key' defines the key of the gateway security token.\n* **action.cleanup.auto.status** - String, The configuration key 'action.cleanup.auto.status' defines the list of action status that should be taken into account for the cleanup.\n* **multi.assignments.enabled** - Boolean, The configuration key 'multi.assignments.enabled' defines if multiple distribution sets can be assigned to the same targets.\n* **batch.assignments.enabled** - Boolean, The configuration key 'batch.assignments.enabled' defines if distribution set can be assigned to multiple targets in a single batch message.\n* **implicit.lock.enabled** - Boolean (true by default), The configuration key 'implicit.lock.enabled' defines if distribution set and their software modules shall be implicitly locked when assigned to target, rollout or target filter.\n* **action.status.code.assigned** - Integer, The configuration key 'action.status.code.assigned' defines the optional status code written on the initial action status of an online assignment that starts without waiting for confirmation.\n* **action.status.code.offline-assigned** - Integer, The configuration key 'action.status.code.offline-assigned' defines the optional status code written on the initial action status of an offline assignment.\n* **action.status.code.skipped** - Integer, The configuration key 'action.status.code.skipped' defines the optional status code written on the action status of a rollout action that is skipped because the distribution set is already assigned.\n* **action.status.code.retrieved** - Integer, The configuration key 'action.status.code.retrieved' defines the optional status code written when the device retrieves a deployment or cancellation.\n* **action.status.code.download** - Integer, The configuration key 'action.status.code.download' defines the optional status code written when the device downloads an artifact.\n* **action.status.code.auto-confirmation** - Integer, The configuration key 'action.status.code.auto-confirmation' defines the optional status code written when an action is auto-confirmed.\n* **action.status.code.wait-for-confirmation** - Integer, The configuration key 'action.status.code.wait-for-confirmation' defines the optional status code written on the initial action status of an action waiting for confirmation.\n* **action.status.code.canceling** - Integer, The configuration key 'action.status.code.canceling' defines the optional status code written on all server-side cancellations.\n* **action.status.code.canceled** - Integer, The configuration key 'action.status.code.canceled' defines the optional status code written on server-side closings.\n",
         "example": {
           "value": "",
           "global": true,
@@ -17625,6 +18324,65 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/MgmtAutoAssignmentResponseBody"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "_links": {
+            "$ref": "#/components/schemas/Links"
+          }
+        }
+      },
+      "PagedListMgmtActionStatusCode": {
+        "required": [
+          "content"
+        ],
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MgmtActionStatusCode"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "_links": {
+            "$ref": "#/components/schemas/Links"
+          }
+        }
+      },
+      "MgmtUndocumentedActionStatusCode": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "PagedListMgmtUndocumentedActionStatusCode": {
+        "required": [
+          "content"
+        ],
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MgmtUndocumentedActionStatusCode"
             }
           },
           "total": {
