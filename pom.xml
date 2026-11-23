@@ -62,7 +62,7 @@
 
         <!-- must be the same as the parent version -->
         <spring-boot.version>4.1.3</spring-boot.version>
-        <spring-ai.version>2.0.3</spring-ai.version>
+        <spring-ai.version>2.1.0</spring-ai.version>
         <springdoc-openapi.version>3.2.0</springdoc-openapi.version>
 
         <!-- spring cloud versions - stream (for rabbit mq) and openfeign -->
