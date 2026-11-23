@@ -10,6 +10,13 @@
 package org.eclipse.hawkbit.repository.jpa.management;
 
 import static org.eclipse.hawkbit.context.AccessContext.asSystem;
+import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.ACTION_STATUS_CODE_ASSIGNED;
+import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.ACTION_STATUS_CODE_AUTO_CONFIRMATION;
+import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.ACTION_STATUS_CODE_CANCELED;
+import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.ACTION_STATUS_CODE_CANCELING;
+import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.ACTION_STATUS_CODE_OFFLINE_ASSIGNED;
+import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.ACTION_STATUS_CODE_SKIPPED;
+import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.ACTION_STATUS_CODE_WAIT_FOR_CONFIRMATION;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.ACTION_USER_DELETION_ALLOWED_STATUSES;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED;
 
@@ -77,6 +84,7 @@ import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
 import org.eclipse.hawkbit.repository.jpa.utils.ActionUtils;
 import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
+import org.eclipse.hawkbit.repository.jpa.utils.ServerActionStatusCode;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -217,8 +225,10 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             action.setStatus(Status.CANCELING);
 
             // document that the status has been retrieved
-            actionStatusRepository.save(new JpaActionStatus(action, Status.CANCELING, System.currentTimeMillis(),
-                    RepositoryConstants.SERVER_MESSAGE_PREFIX + "manual cancelation requested"));
+            final JpaActionStatus actionStatus = new JpaActionStatus(action, Status.CANCELING, System.currentTimeMillis(),
+                    RepositoryConstants.SERVER_MESSAGE_PREFIX + "manual cancelation requested");
+            ServerActionStatusCode.apply(actionStatus, ACTION_STATUS_CODE_CANCELING);
+            actionStatusRepository.save(actionStatus);
             final Action saveAction = actionRepository.save(action);
 
             onlineDsAssignmentStrategy.sendCancellationMessage(action);
@@ -358,8 +368,10 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         log.warn("action ({}) was still active and has been force quite.", action);
 
         // document that the status has been retrieved
-        actionStatusRepository.save(new JpaActionStatus(action, Status.CANCELED, System.currentTimeMillis(),
-                RepositoryConstants.SERVER_MESSAGE_PREFIX + "A force quit has been performed."));
+        final JpaActionStatus actionStatus = new JpaActionStatus(action, Status.CANCELED, System.currentTimeMillis(),
+                RepositoryConstants.SERVER_MESSAGE_PREFIX + "A force quit has been performed.");
+        ServerActionStatusCode.apply(actionStatus, ACTION_STATUS_CODE_CANCELED);
+        actionStatusRepository.save(actionStatus);
 
         DeploymentHelper.successCancellation(action, actionRepository, targetRepository);
 
@@ -955,26 +967,43 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     private void createActionsStatus(
             final Map<TargetWithActionType, JpaAction> actions, final AbstractDsAssignmentStrategy assignmentStrategy,
             final String actionMessage, final boolean confirmationFlowEnabled) {
-        actionStatusRepository.saveAll(actions.entrySet().stream().map(entry -> {
+        final List<JpaActionStatus> statusList = new ArrayList<>(actions.size());
+        boolean anyCodeApplied = false;
+        for (final Map.Entry<TargetWithActionType, JpaAction> entry : actions.entrySet()) {
             final JpaAction action = entry.getValue();
             final JpaActionStatus actionStatus = assignmentStrategy.createActionStatus(action, actionMessage, confirmationFlowEnabled);
-            verifyAndAddConfirmationStatus(action, actionStatus, entry.getKey().isConfirmationRequired());
-            return actionStatus;
-        }).toList());
+            anyCodeApplied |= verifyAndAddConfirmationStatus(action, actionStatus, entry.getKey().isConfirmationRequired());
+            statusList.add(actionStatus);
+        }
+        actionStatusRepository.saveAll(statusList);
+        // the actions are managed (saved in createActions within the same transaction), so a changed last action status code
+        // is flushed with the transaction - nevertheless, save them explicitly to not depend on the dirty checking
+        if (anyCodeApplied) {
+            actionRepository.saveAll(actions.values());
+        }
     }
 
     private void setInitialActionStatusOfRolloutGroup(final List<JpaAction> actions) {
         final List<JpaActionStatus> statusList = new ArrayList<>();
         final boolean confirmationFlowEnabled = isConfirmationFlowEnabled();
+        boolean anyCodeApplied = false;
         for (final JpaAction action : actions) {
             final JpaActionStatus actionStatus = onlineDsAssignmentStrategy.createActionStatus(action, null, confirmationFlowEnabled);
-            verifyAndAddConfirmationStatus(action, actionStatus, action.getRolloutGroup().isConfirmationRequired());
+            anyCodeApplied |= verifyAndAddConfirmationStatus(action, actionStatus, action.getRolloutGroup().isConfirmationRequired());
             statusList.add(actionStatus);
         }
         actionStatusRepository.saveAll(statusList);
+        // the actions are managed (saved in activateActionsOfRolloutGroup within the same transaction), so a changed last action
+        // status code is flushed with the transaction - nevertheless, save them explicitly to not depend on the dirty checking
+        if (anyCodeApplied) {
+            actionRepository.saveAll(actions);
+        }
     }
 
-    private void verifyAndAddConfirmationStatus(final JpaAction action, final JpaActionStatus actionStatus,
+    /**
+     * @return {@code true} if a configured status code has been applied (i.e. the last action status code of the action changed)
+     */
+    private boolean verifyAndAddConfirmationStatus(final JpaAction action, final JpaActionStatus actionStatus,
             final boolean isConfirmationRequired) {
         if (actionStatus.getStatus() == Status.WAIT_FOR_CONFIRMATION) {
             if (action.getStatus().equals(Status.RUNNING)) {
@@ -983,17 +1012,26 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
                 if (!isConfirmationRequired) {
                     // confirmation given on assignment dialog
                     actionStatus.addMessage(String.format("Assignment confirmed by initiator [%s].", action.getInitiatedBy()));
+                    return ServerActionStatusCode.apply(actionStatus, ACTION_STATUS_CODE_ASSIGNED);
                 } else if (action.getTarget().getAutoConfirmationStatus() != null) {
                     // auto-confirmation is configured
                     actionStatus.addMessage(action.getTarget().getAutoConfirmationStatus().constructActionMessage());
+                    return ServerActionStatusCode.apply(actionStatus, ACTION_STATUS_CODE_AUTO_CONFIRMATION);
                 } else {
                     throw new IllegalStateException("Action in RUNNING state without given confirmation.");
                 }
 
             } else {
                 actionStatus.addMessage("Waiting for the confirmation by the device before processing with the deployment");
+                return ServerActionStatusCode.apply(actionStatus, ACTION_STATUS_CODE_WAIT_FOR_CONFIRMATION);
             }
+        } else if (actionStatus.getStatus() == Status.FINISHED) {
+            // offline assignment
+            return ServerActionStatusCode.apply(actionStatus, ACTION_STATUS_CODE_OFFLINE_ASSIGNED);
+        } else if (actionStatus.getStatus() == Status.RUNNING) {
+            return ServerActionStatusCode.apply(actionStatus, ACTION_STATUS_CODE_ASSIGNED);
         }
+        return false;
     }
 
     private void detachEntitiesAndSendTargetUpdatedEvents(final JpaDistributionSet set, final List<JpaTarget> targets,
@@ -1070,6 +1108,8 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         actionStatus.setTimestamp(action.getCreatedAt());
         actionStatus.setStatus(Status.RUNNING);
         actionStatus.addMessage(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Distribution Set is already assigned. Skipping this action.");
+        // the action is closed (FINISHED) with this status - the caller saves the action right after
+        ServerActionStatusCode.apply(actionStatus, ACTION_STATUS_CODE_SKIPPED);
         actionStatusRepository.save(actionStatus);
     }
 

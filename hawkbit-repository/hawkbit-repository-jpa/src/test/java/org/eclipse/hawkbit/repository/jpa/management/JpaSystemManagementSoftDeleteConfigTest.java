@@ -61,6 +61,6 @@ class JpaSystemManagementSoftDeleteConfigTest {
 
     private static JpaSystemManagement systemManagement(final RepositoryProperties repositoryProperties) {
         return new JpaSystemManagement(
-                null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, repositoryProperties, null);
+                null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, repositoryProperties, null);
     }
 }

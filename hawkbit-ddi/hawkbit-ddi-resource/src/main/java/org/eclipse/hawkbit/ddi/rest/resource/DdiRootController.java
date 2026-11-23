@@ -606,6 +606,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
         return controllerManagement.addInformationalActionStatus(
                 ActionStatusCreate.builder()
                         .actionId(action.getId())
+                        // the configured download code (if any) is applied by the repository
                         .status(Status.DOWNLOAD)
                         .messages(List.of(SERVER_MESSAGE_PREFIX + "Target downloads " + getHttpServletRequest().getRequestURI()))
                         .build());

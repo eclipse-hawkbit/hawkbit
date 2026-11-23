@@ -15,12 +15,15 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.event.entity.EntityCreatedEvent;
 import org.eclipse.hawkbit.repository.model.TenantConfiguration;
+import org.eclipse.hawkbit.tenancy.TenantAwareCacheManager.CacheEvictEvent;
 
 /**
  * Defines the remote event of creating a new {@link TenantConfiguration}.
+ * <p/>
+ * It evicts the tenant configuration cache too, since a "not set" (null) result for the key could have been cached.
  */
 @NoArgsConstructor // for serialization libs like jackson
-public class TenantConfigurationCreatedEvent extends RemoteEntityEvent<TenantConfiguration> implements EntityCreatedEvent {
+public class TenantConfigurationCreatedEvent extends RemoteEntityEvent<TenantConfiguration> implements EntityCreatedEvent, CacheEvictEvent {
 
     @Serial
     private static final long serialVersionUID = 1L;

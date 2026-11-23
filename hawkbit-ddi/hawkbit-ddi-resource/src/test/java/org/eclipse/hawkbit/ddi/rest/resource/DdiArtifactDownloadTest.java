@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.ddi.rest.resource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.hawkbit.context.AccessContext.tenant;
+import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.ACTION_STATUS_CODE_DOWNLOAD;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.springframework.http.HttpHeaders.ACCEPT_RANGES;
 import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
@@ -47,6 +48,9 @@ import com.jayway.jsonpath.JsonPath;
 import org.eclipse.hawkbit.auth.SpRole;
 import org.eclipse.hawkbit.ddi.rest.resource.DdiArtifactDownloadTest.DownloadTestConfiguration;
 import org.eclipse.hawkbit.repository.event.remote.DownloadProgressEvent;
+import org.eclipse.hawkbit.repository.model.Action.ActionStatusCreate;
+import org.eclipse.hawkbit.repository.model.Action.Status;
+import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.ArtifactUpload;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -434,6 +438,67 @@ class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
         outputStream.write("\r\n--THIS_STRING_SEPARATES_MULTIPART--".getBytes(StandardCharsets.ISO_8859_1));
 
         assertThat(result.getResponse().getContentAsByteArray()).isEqualTo(outputStream.toByteArray());
+    }
+
+    /**
+     * Verifies that the download action status written by the server gets the configured download code, but the last action status
+     * code of the action is not changed.
+     */
+    @Test
+    void downloadStatusGetsDownloadCodeButKeepsLastStatusCode() throws Exception {
+        tenantConfigurationManagement().addOrUpdateConfiguration(ACTION_STATUS_CODE_DOWNLOAD, 9010);
+        final TestData testData = createTargetAndDs(1024);
+        final Long actionId = getFirstAssignedActionId(assignDistributionSet(testData.ds(), testData.target()));
+        controllerManagement.addUpdateActionStatus(ActionStatusCreate.builder().actionId(actionId).status(Status.RUNNING).code(42).build());
+
+        mvc.perform(get(DOWNLOAD_FN, tenant(), testData.target().getControllerId(), testData.moduleId(), testData.artifact().getFilename()))
+                .andExpect(status().isOk());
+
+        final ActionStatus latest = latestStatus(actionId);
+        assertThat(latest.getStatus()).isEqualTo(Status.DOWNLOAD);
+        assertThat(latest.getCode()).contains(9010);
+
+        // download is informational: the code goes only on the DOWNLOAD status, lastStatusCode keeps the device's code
+        assertThat(deploymentManagement.findAction(actionId).orElseThrow().getLastActionStatusCode()).contains(42);
+    }
+
+    /**
+     * Verifies that the download action status has no code if no download code is configured.
+     */
+    @Test
+    void downloadWithoutKeyHasNoCode() throws Exception {
+        final TestData testData = createTargetAndDs(1024);
+        final Long actionId = getFirstAssignedActionId(assignDistributionSet(testData.ds(), testData.target()));
+
+        mvc.perform(get(DOWNLOAD_FN, tenant(), testData.target().getControllerId(), testData.moduleId(), testData.artifact().getFilename()))
+                .andExpect(status().isOk());
+
+        final ActionStatus latest = latestStatus(actionId);
+        assertThat(latest.getStatus()).isEqualTo(Status.DOWNLOAD);
+        assertThat(latest.getCode()).isEmpty();
+    }
+
+    /**
+     * Verifies that a range request writes no download action status (also with a configured download code).
+     */
+    @Test
+    void rangeRequestWritesNoStatus() throws Exception {
+        tenantConfigurationManagement().addOrUpdateConfiguration(ACTION_STATUS_CODE_DOWNLOAD, 9010);
+        final TestData testData = createTargetAndDs(1024);
+        final Long actionId = getFirstAssignedActionId(assignDistributionSet(testData.ds(), testData.target()));
+        final long statusCount = deploymentManagement.findActionStatusByAction(actionId, PAGE).getTotalElements();
+
+        mvc.perform(get(DOWNLOAD_FN, tenant(), testData.target().getControllerId(), testData.moduleId(), testData.artifact().getFilename())
+                        .header(RANGE, "bytes=0-9"))
+                .andExpect(status().is(PARTIAL_CONTENT.value()));
+
+        assertThat(deploymentManagement.findActionStatusByAction(actionId, PAGE).getTotalElements()).isEqualTo(statusCount);
+    }
+
+    private ActionStatus latestStatus(final long actionId) {
+        final List<ActionStatus> statuses = deploymentManagement.findActionStatusByAction(actionId, PAGE).getContent();
+        assertThat(statuses).isNotEmpty();
+        return statuses.get(statuses.size() - 1);
     }
 
     private MvcResult getRange(

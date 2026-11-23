@@ -78,6 +78,9 @@ public interface ControllerManagement {
 
     /**
      * Simple addition of a new {@link ActionStatus} entry to the {@link Action}. No state changes.
+     * <p/>
+     * A {@link Action.Status#DOWNLOAD} status without a code gets the code configured by
+     * {@code action.status.code.download} (if any). The last action status code of the action is not changed.
      *
      * @param create to add to the action
      * @return created {@link ActionStatus} entity
@@ -295,7 +298,8 @@ public interface ControllerManagement {
     List<String> getActionHistoryMessages(long actionId, int messageCount);
 
     /**
-     * Cancels given {@link Action} for this {@link Target}. The method will immediately add a {@link Status#CANCELED}.
+     * Cancels given {@link Action} for this {@link Target} because its maintenance window has lapsed (called by the DDI API when the
+     * maintenance schedule of the action is no longer valid). The method will immediately add a {@link Status#CANCELING} status.
      * However, it might be possible that the controller will continue to work on the cancellation. The controller needs to acknowledge or
      * reject the cancellation using DdiRootController#postCancelActionFeedback
      *

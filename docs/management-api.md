@@ -48,18 +48,18 @@ A Distribution Set entity may have for example URIs to artifacts, Software Modul
 
 ```json
 "_links": {
-  "artifacts": {
-    "href": "http://localhost:8080/rest/v1/softwaremodules/83/artifacts"
-  },
-  "self": {
-    "href": "http://localhost:8080/rest/v1/softwaremodules/83"
-  },
-  "type": {
-    "href": "http://localhost:8080/rest/v1/softwaremoduletypes/43"
-  },
-  "metadata": {
-  " href": "http://localhost:8080/rest/v1/softwaremodules/83/metadata?offset=0&limit=50"
-  }
+"artifacts": {
+"href": "http://localhost:8080/rest/v1/softwaremodules/83/artifacts"
+},
+"self": {
+"href": "http://localhost:8080/rest/v1/softwaremodules/83"
+},
+"type": {
+"href": "http://localhost:8080/rest/v1/softwaremoduletypes/43"
+},
+"metadata": {
+" href": "http://localhost:8080/rest/v1/softwaremodules/83/metadata?offset=0&limit=50"
+}
 }
 ```
 
