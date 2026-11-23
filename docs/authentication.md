@@ -34,11 +34,9 @@ DMF clients to leverage the feature or can it be manually retrieved per target
 by **Management UI** or in the **Management UI** in the target details.
 
 Note: needs to be enabled in your hawkBit installation
-(
-See [DdiSecurityProperties](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-ddi/hawkbit-ddi-security/src/main/java/org/eclipse/hawkbit/security/controller/DdiSecurityProperties.java)
+(See [DdiSecurityProperties](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-ddi/hawkbit-ddi-security/src/main/java/org/eclipse/hawkbit/security/controller/DdiSecurityProperties.java)
 for system-wide enablement) **and** in the tenant configuration
-(
-set [TenantConfigurationProperties](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-repository/hawkbit-repository-api/src/main/java/org/eclipse/hawkbit/tenancy/configuration/TenantConfigurationProperties.java)
+(set [TenantConfigurationProperties](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-repository/hawkbit-repository-api/src/main/java/org/eclipse/hawkbit/tenancy/configuration/TenantConfigurationProperties.java)
 #TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED, _authentication.targettoken.enabled_ to
 true). That allows both the
 operator and the individual customer (if run in a multi-tenant setup) to enable this access method.
@@ -60,11 +58,9 @@ Authorization: GatewayToken 3nkswAZhX81oDtktq0FF9Pn0Tc0UGXPW
 ```
 
 Note: needs to be enabled in your hawkBit installation
-(
-See [DdiSecurityProperties](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-ddi/hawkbit-ddi-security/src/main/java/org/eclipse/hawkbit/security/controller/DdiSecurityProperties.java)
+(See [DdiSecurityProperties](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-ddi/hawkbit-ddi-security/src/main/java/org/eclipse/hawkbit/security/controller/DdiSecurityProperties.java)
 for system-wide enablement) **and** in the tenant configuration
-(
-set [TenantConfigurationProperties](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-repository/hawkbit-repository-api/src/main/java/org/eclipse/hawkbit/tenancy/configuration/TenantConfigurationProperties.java)
+(set [TenantConfigurationProperties](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-repository/hawkbit-repository-api/src/main/java/org/eclipse/hawkbit/tenancy/configuration/TenantConfigurationProperties.java)
 #TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED, _authentication.gatewaytoken.enabled_ to
 true). That allows both the
 operator and the individual customer (if run in a multi-tenant setup) to enable this access method.
@@ -266,16 +262,16 @@ be adjusted as follows. Remember to change id, url and certificate names to your
 The location of the config file is `/etc/swupdate/swupdate.conf`
 
 ```yml
-suricatta:
-  {
-    tenant = "default";
-    id = "device_id";
-    url = "https://hawkbit.dev.example.com";
-    nocheckcert = false;
-    cafile = "server_ca.crt";
-    sslkey = "/etc/ssl/certs/client.key";
-    sslcert = "/etc/ssl/certs/client.crt";
-  };
+suricatta :
+{
+tenant = "default";
+id = "device_id";
+url = "https://hawkbit.dev.example.com";
+nocheckcert = false;
+cafile = "server_ca.crt";
+sslkey = "/etc/ssl/certs/client.key";
+sslcert = "/etc/ssl/certs/client.crt";
+};
 ```
 
 If your client service is a linux, you can use the command bellow to see the logs produced by the swupdate.
