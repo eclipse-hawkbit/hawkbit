@@ -29,4 +29,8 @@ public class ConcurrentModificationException extends AbstractServerRtException {
     public ConcurrentModificationException(final Throwable cause) {
         super(SpServerError.SP_REPO_CONCURRENT_MODIFICATION, cause);
     }
+
+    public ConcurrentModificationException(final String message) {
+        super(SpServerError.SP_REPO_CONCURRENT_MODIFICATION, message);
+    }
 }

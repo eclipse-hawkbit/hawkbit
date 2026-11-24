@@ -25,6 +25,7 @@ import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalUnit;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -154,6 +155,8 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     private final Duration minPollingTime;
     private final Duration maxPollingTime;
     private final BlockingDeque<TargetPoll> queue;
+    // start time of the previous poll queue flush - polls queued since then are written with the flush time
+    private volatile long lastFlush;
 
     @SuppressWarnings("squid:S00107")
     protected JpaControllerManagement(
@@ -702,10 +705,9 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     }
 
     /**
-     * Flush the update queue by means to persisting
-     * {@link Target#getLastTargetQuery()}.
+     * Flush the update queue by means to persisting {@link Target#getLastTargetQuery()}. Package-private for tests.
      */
-    private void flushUpdateQueue() {
+    void flushUpdateQueue() {
         log.debug("Run flushUpdateQueue.");
 
         final int size = queue.size();
@@ -715,60 +717,162 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
 
         log.debug("{} events in flushUpdateQueue.", size);
 
-        final Set<TargetPoll> events = HashSet.newHashSet(queue.size());
+        final List<TargetPoll> events = new ArrayList<>(size);
         final int drained = queue.drainTo(events);
 
         if (drained <= 0) {
             return;
         }
 
-        try {
-            events.stream()
-                    .collect(Collectors.groupingBy(TargetPoll::getTenant))
-                    .forEach((tenant, polls) -> DeploymentHelper.runInNewTransaction(
-                            "flushUpdateQueue", status -> updateLastTargetQueries(tenant, polls), txManager));
-        } catch (final RuntimeException ex) {
-            log.error("Failed to persist UpdateQueue content.", ex);
-            return;
-        }
+        final long now = System.currentTimeMillis();
+        final long previousFlush = lastFlush;
+        lastFlush = now;
+        // per tenant: controller id -> its oldest and newest still not persisted poll
+        final Map<String, Map<String, PollTimes>> pollTimesByTenant = new HashMap<>();
+        events.forEach(poll -> pollTimesByTenant.computeIfAbsent(poll.getTenant(), _ -> new HashMap<>())
+                .merge(poll.getControllerId(), poll.getPollTimes(), PollTimes::merge));
+        // per tenant, in chunks of sorted controller ids, each chunk in its own transaction: locks are held only for a chunk and
+        // are taken in the same order by every flush, and a failing chunk doesn't drop the polls of the other chunks / tenants
+        pollTimesByTenant.forEach((tenant, pollTimes) -> ListUtils.partition(
+                        pollTimes.keySet().stream().sorted().toList(), Constants.MAX_ENTRIES_IN_STATEMENT)
+                .forEach(chunk -> flushChunk(tenant, now, previousFlush, chunk, pollTimes)));
 
-        log.debug("{} events persisted.", drained);
+        log.debug("{} events processed.", drained);
     }
 
-    private Void updateLastTargetQueries(final String tenant, final List<TargetPoll> polls) {
-        log.debug("Persist {} targetqueries.", polls.size());
-
-        final List<List<String>> pollChunks = ListUtils.partition(
-                polls.stream().map(TargetPoll::getControllerId).toList(),
-                Constants.MAX_ENTRIES_IN_STATEMENT);
-
-        pollChunks.forEach(chunk -> {
-            final long lastTargetQuery = System.currentTimeMillis();
-            setLastTargetQuery(tenant, lastTargetQuery, chunk);
-            afterCommit(() -> EventPublisherHolder.getInstance().getEventPublisher()
-                    .publishEvent(new TargetPollEvent(chunk, lastTargetQuery, tenant)));
+    private void flushChunk(
+            final String tenant, final long now, final long previousFlush, final List<String> chunk, final Map<String, PollTimes> pollTimes) {
+        log.debug("Persist {} target queries.", chunk.size());
+        // The poll time written: the flush time if the target polled since the previous flush (as the polls are buffered up to one
+        // flush interval anyway, and one time for all lets them be written by one statement / event). Otherwise the target's poll
+        // was queued again after a failed flush and the device didn't poll since then - its own newest poll time is written, so
+        // that it doesn't look like polled later than it did.
+        final Map<String, Long> pollTimeToWrite = HashMap.newHashMap(chunk.size());
+        chunk.forEach(controllerId -> {
+            final long newest = pollTimes.get(controllerId).newest();
+            // strictly after: a poll of the previous flush's millisecond may have been drained by it
+            pollTimeToWrite.put(controllerId, newest > previousFlush ? now : newest);
         });
-
-        return null;
+        try {
+            final List<String> skipped = DeploymentHelper.runInNewTransaction("flushUpdateQueue", _ -> {
+                final List<String> written = setLastTargetQuery(tenant, chunk, pollTimeToWrite);
+                if (!written.isEmpty()) {
+                    // one event per written poll time - mostly one, the flush time
+                    final Map<Long, List<String>> writtenByPollTime = written.stream()
+                            .collect(Collectors.groupingBy(pollTimeToWrite::get, Collectors.toList()));
+                    afterCommit(() -> writtenByPollTime.forEach((pollTime, controllerIds) -> EventPublisherHolder.getInstance()
+                            .getEventPublisher().publishEvent(new TargetPollEvent(controllerIds, pollTime, tenant))));
+                }
+                return lockedByOthers(tenant, chunk, written);
+            }, txManager);
+            requeue(tenant, skipped, pollTimes, now);
+        } catch (final RuntimeException ex) {
+            log.warn("Failed to persist {} target polls of tenant {}, kept buffered for the next flush: {}", chunk.size(), tenant,
+                    ex.getMessage());
+            log.debug("Failed to persist target polls", ex);
+            requeue(tenant, chunk, pollTimes, now);
+        }
     }
 
     /**
      * Sets {@link Target#getLastTargetQuery()} by native SQL in order to avoid raising opt lock revision as this update is not mission-critical
      * and in fact only written by {@link ControllerManagement}, i.e. the target itself.
+     * <p/>
+     * The targets are locked first, in id order, skipping the ones locked by other transactions (e.g. a rollout group start or a
+     * device update) - so the flush never waits for them. Only the locked targets are updated, and a newer poll time is kept.
+     *
+     * @param pollTimeToWrite the poll time to write per controller id
+     * @return the controller ids of the written targets
      */
-    private void setLastTargetQuery(final String tenant, final long currentTimeMillis, final List<String> chunk) {
+    private List<String> setLastTargetQuery(final String tenant, final List<String> chunk, final Map<String, Long> pollTimeToWrite) {
+        final Query lockQuery = entityManager.createNativeQuery(
+                "SELECT id, controller_id FROM sp_target WHERE tenant = " + Jpa.nativeQueryParamPrefix() + "tenant" +
+                        " AND controller_id IN (" + Jpa.formatNativeQueryInClause("cid", chunk) + ")" +
+                        " ORDER BY id FOR UPDATE SKIP LOCKED"); // FOR UPDATE locks
+        lockQuery.setParameter("tenant", tenant);
+        Jpa.setNativeQueryInParameter(lockQuery, "cid", chunk);
+        @SuppressWarnings("unchecked") final List<Object[]> locked = lockQuery.getResultList();
+        if (locked.isEmpty()) {
+            return List.of();
+        }
+
+        final List<Long> ids = locked.stream().map(row -> ((Number) row[0]).longValue()).toList();
+        final List<Long> times = locked.stream().map(row -> pollTimeToWrite.get((String) row[1])).toList();
+        final String prefix = String.valueOf(Jpa.nativeQueryParamPrefix());
+        final boolean samePollTime = times.stream().distinct().count() == 1;
+        final String pollTime;
+        if (samePollTime) {
+            pollTime = prefix + "pt";
+        } else {
+            // different poll times (rare - polls queued again after a failed flush): one statement with a time per id
+            final StringBuilder caseExpression = new StringBuilder("CASE id");
+            for (int i = 0; i < ids.size(); i++) {
+                caseExpression.append(" WHEN ").append(prefix).append("cid").append(i).append(" THEN ").append(prefix).append("pt").append(i);
+            }
+            pollTime = caseExpression.append(" END").toString();
+        }
         final Query updateQuery = entityManager.createNativeQuery(
-                "UPDATE sp_target SET last_target_query = " + Jpa.nativeQueryParamPrefix() + "last_target_query " +
-                        "WHERE controller_id IN (" + Jpa.formatNativeQueryInClause("cid", chunk) + ")" +
-                        " AND tenant = " + Jpa.nativeQueryParamPrefix() + "tenant");
-
-        updateQuery.setParameter("last_target_query", currentTimeMillis);
-        Jpa.setNativeQueryInParameter(updateQuery, "cid", chunk);
-        updateQuery.setParameter("tenant", tenant);
-
+                // never moves the poll time backwards, e.g. a buffered poll after a newer eager write
+                "UPDATE sp_target SET last_target_query = GREATEST(COALESCE(last_target_query, 0), " + pollTime + ") " +
+                        "WHERE id IN (" + Jpa.formatNativeQueryInClause("id", ids) + ")");
+        if (samePollTime) {
+            updateQuery.setParameter("pt", times.get(0));
+        } else {
+            for (int i = 0; i < ids.size(); i++) {
+                updateQuery.setParameter("cid" + i, ids.get(i));
+                updateQuery.setParameter("pt" + i, times.get(i));
+            }
+        }
+        Jpa.setNativeQueryInParameter(updateQuery, "id", ids);
         final int updated = updateQuery.executeUpdate();
-        if (updated < chunk.size()) {
-            log.error("Targets polls could not be applied completely ({} instead of {}).", updated, chunk.size());
+        if (updated < ids.size()) {
+            log.warn("Targets polls could not be applied completely ({} instead of {}).", updated, ids.size());
+        }
+        return locked.stream().map(row -> (String) row[1]).toList();
+    }
+
+    // The targets of the chunk that were not written because another transaction locked them - their polls are kept buffered.
+    // The other not written ones don't exist (anymore), e.g. deleted - their polls are dropped. Plain read, doesn't wait for locks.
+    private List<String> lockedByOthers(final String tenant, final List<String> chunk, final List<String> written) {
+        if (written.size() == chunk.size()) {
+            return List.of();
+        }
+        final Set<String> writtenSet = new HashSet<>(written);
+        final List<String> notWritten = chunk.stream().filter(controllerId -> !writtenSet.contains(controllerId)).toList();
+        final Query existingQuery = entityManager.createNativeQuery(
+                "SELECT controller_id FROM sp_target WHERE tenant = " + Jpa.nativeQueryParamPrefix() + "tenant" +
+                        " AND controller_id IN (" + Jpa.formatNativeQueryInClause("cid", notWritten) + ")");
+        existingQuery.setParameter("tenant", tenant);
+        Jpa.setNativeQueryInParameter(existingQuery, "cid", notWritten);
+        @SuppressWarnings("unchecked") final List<String> skipped = existingQuery.getResultList();
+        if (skipped.size() < notWritten.size()) {
+            log.debug("Polls of {} not existing targets dropped.", notWritten.size() - skipped.size());
+        }
+        return skipped;
+    }
+
+    // Queues the polls again with their original queue time. Dropped (not critical, the devices poll again) are polls queued
+    // longer than pollPersistenceMaxQueueTime - so a persistent failure doesn't keep them forever - and, non-blocking, the
+    // polls that don't fit into a full queue.
+    private void requeue(final String tenant, final List<String> controllerIds, final Map<String, PollTimes> pollTimes, final long now) {
+        final long minQueuedAt = now - repositoryProperties.getPollPersistenceMaxQueueTime();
+        int expired = 0;
+        int requeued = 0;
+        for (final String controllerId : controllerIds) {
+            final PollTimes controllerPollTimes = pollTimes.get(controllerId);
+            if (controllerPollTimes.oldest() < minQueuedAt) {
+                expired++;
+            } else if (queue.offer(new TargetPoll(tenant, controllerId, controllerPollTimes))) {
+                requeued++;
+            } else {
+                log.debug("Poll persistence queue is full, dropped buffered polls of tenant {}: {}.",
+                        tenant, controllerIds.size() - requeued - expired);
+                break;
+            }
+        }
+        if (expired > 0) {
+            log.warn("Dropped {} polls of tenant {} that couldn't be persisted within {} ms.",
+                    expired, tenant, repositoryProperties.getPollPersistenceMaxQueueTime());
         }
     }
 
@@ -1039,10 +1143,30 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
 
         private final String tenant;
         private final String controllerId;
+        // kept when the poll is queued again after a failed flush
+        private final PollTimes pollTimes;
 
         TargetPoll(final Target target) {
-            this.tenant = target.getTenant();
-            this.controllerId = target.getControllerId();
+            this(target.getTenant(), target.getControllerId(), new PollTimes(System.currentTimeMillis()));
+        }
+
+        TargetPoll(final String tenant, final String controllerId, final PollTimes pollTimes) {
+            this.tenant = tenant;
+            this.controllerId = controllerId;
+            this.pollTimes = pollTimes;
+        }
+    }
+
+    // the oldest not persisted poll of a target - limits how long it is queued again (pollPersistenceMaxQueueTime), a newer poll
+    // doesn't reset it - and the newest one, the target's real last poll time
+    private record PollTimes(long oldest, long newest) {
+
+        PollTimes(final long pollTime) {
+            this(pollTime, pollTime);
+        }
+
+        PollTimes merge(final PollTimes other) {
+            return new PollTimes(Math.min(oldest, other.oldest), Math.max(newest, other.newest));
         }
     }
 }

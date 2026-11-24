@@ -54,6 +54,12 @@ public class RepositoryProperties {
     private long pollPersistenceFlushTime = TimeUnit.SECONDS.toMillis(10);
 
     /**
+     * Maximum time in {@link TimeUnit#MILLISECONDS} a queued poll is kept for the next flush if it couldn't be persisted
+     * (e.g. the target was locked). Older polls are dropped.
+     */
+    private long pollPersistenceMaxQueueTime = TimeUnit.MINUTES.toMillis(5);
+
+    /**
      * Set to true to persist polls immediately.
      */
     private boolean eagerPollPersistence;

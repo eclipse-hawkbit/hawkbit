@@ -92,21 +92,6 @@ public final class ActionSpecifications {
                 cb.equal(root.get(JpaAction_.active), true));
     }
 
-    public static Specification<JpaAction> byRolloutIdAndActive(final Long rolloutId) {
-        return (root, query, cb) -> cb.and(
-                cb.equal(root.get(JpaAction_.rollout).get(AbstractJpaBaseEntity_.id), rolloutId),
-                cb.equal(root.get(JpaAction_.active), true)
-        );
-    }
-
-    public static Specification<JpaAction> byRolloutIdAndActiveAndStatusIsNot(final Long rolloutId, final List<Action.Status> statuses) {
-        return (root, query, cb) -> cb.and(
-                cb.equal(root.get(JpaAction_.rollout).get(AbstractJpaBaseEntity_.id), rolloutId),
-                cb.equal(root.get(JpaAction_.active), true),
-                cb.not(root.get(JpaAction_.status).in(statuses))
-        );
-    }
-
     public static Specification<JpaAction> byIdIn(final List<Long> actionIds) {
         return (root, cd, cb) -> root.get(AbstractJpaBaseEntity_.id).in(actionIds);
     }

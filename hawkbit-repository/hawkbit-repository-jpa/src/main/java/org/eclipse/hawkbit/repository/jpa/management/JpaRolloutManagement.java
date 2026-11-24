@@ -19,12 +19,15 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Predicate;
 import jakarta.validation.ConstraintDeclarationException;
 import jakarta.validation.Valid;
 import jakarta.validation.ValidationException;
@@ -60,6 +63,7 @@ import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
+import org.eclipse.hawkbit.repository.jpa.model.JpaAction_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
@@ -71,7 +75,6 @@ import org.eclipse.hawkbit.repository.jpa.repository.RolloutRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.RolloutGroupEvaluationManager;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.StartNextGroupRolloutGroupSuccessAction;
-import org.eclipse.hawkbit.repository.jpa.specifications.ActionSpecifications;
 import org.eclipse.hawkbit.repository.jpa.specifications.RolloutSpecification;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.jpa.utils.ServerActionStatusCode;
@@ -96,6 +99,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProp
 import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
@@ -168,7 +172,7 @@ public class JpaRolloutManagement implements RolloutManagement {
         this.quotaManagement = quotaManagement;
         this.repositoryProperties = repositoryProperties;
 
-        onlineDsAssignmentStrategy = new OnlineDsAssignmentStrategy(targetRepository, actionRepository, actionStatusRepository,
+        onlineDsAssignmentStrategy = new OnlineDsAssignmentStrategy(targetRepository, actionRepository, actionStatusRepository, entityManager,
                 this::isConfirmationFlowEnabled, repositoryProperties);
     }
 
@@ -546,45 +550,79 @@ public class JpaRolloutManagement implements RolloutManagement {
     }
 
     private void softCancelActionsOfRollout(final Rollout rollout) {
-        final List<JpaAction> actions = actionRepository.findAll(
-                        ActionSpecifications
-                                // avoid cancelling state here, because it is count as still active
-                                .byRolloutIdAndActiveAndStatusIsNot(rollout.getId(), List.of(Action.Status.CANCELING)),
-                        Pageable.ofSize(maxActions))
-                .getContent();
-        log.info("Found {} active actions for rollout {}, performing soft cancel.", actions.size(), rollout.getId());
-
-        storeActionsAndStatuses(actions, Action.Status.CANCELING);
-
-        // send cancellation messages to event publisher
-        onlineDsAssignmentStrategy.sendCancellationMessages(actions);
+        // avoid cancelling state here, because it is count as still active
+        final int cancelled = forEachActiveActionsPage(rollout.getId(), Action.Status.CANCELING, actions -> {
+            storeActionsAndStatuses(actions, Action.Status.CANCELING);
+            // send cancellation messages to event publisher
+            onlineDsAssignmentStrategy.sendCancellationMessages(actions);
+        });
+        log.info("Found {} active actions for rollout {}, performing soft cancel.", cancelled, rollout.getId());
     }
 
     private void forceQuitActionsOfRollout(final Rollout rollout) {
-        final List<JpaAction> actions = findActiveActionsForRollout(rollout.getId(), Pageable.ofSize(maxActions))
-                .getContent();
-        log.info("Found {} active actions for rollout {}", actions.size(), rollout.getId());
+        final int quit = forEachActiveActionsPage(rollout.getId(), null, actions -> {
+            storeActionsAndStatuses(actions, Action.Status.CANCELED);
 
-        if (actions.isEmpty()) {
-            return;
+            // find next active actions - filter by targetId list and isActive
+            final List<Long> targetIds = actions.stream()
+                    .map(action -> action.getTarget().getId())
+                    .toList();
+            entityManager.flush();
+
+            int modifiedRows = updateTargetAssignedDsWithFirstActiveAction(targetIds);
+            log.debug("Updated {} targets with their previously active action", modifiedRows);
+
+            // if no active actions
+            // set assignedDs to previously installedDs and status to IN_SYNC
+            // otherwise set assigned ds to the active action ...
+            modifiedRows = updateTargetAssignedDsWithInstalledIfNoActiveActions(targetIds);
+            log.debug("Updated assignDs to previously installed to {} number of targets.", modifiedRows);
+        });
+        log.info("Found {} active actions for rollout {}", quit, rollout.getId());
+    }
+
+    /**
+     * Passes up to {@link #maxActions} active actions of the rollout (per call, i.e. per transaction of the caller - the
+     * scheduler handles the rest in its next runs) to the page handler, in pages of {@link Constants#MAX_ENTRIES_IN_STATEMENT}.
+     * The pages are read by id (keyset) with the target fetched: no {@code COUNT} query, no per action target read, and
+     * the actions already handled (and so possibly no longer matching the filter) don't shift the following pages.
+     *
+     * @param rolloutId the rollout id
+     * @param skipStatus actions in this status are skipped, {@code null} to handle all active actions
+     * @param pageHandler handles the actions of a page
+     * @return the number of handled actions
+     */
+    private int forEachActiveActionsPage(
+            final long rolloutId, final Action.Status skipStatus, final Consumer<List<JpaAction>> pageHandler) {
+        long fromId = 0;
+        int handled = 0;
+        while (handled < maxActions) {
+            final int pageSize = Math.min(Constants.MAX_ENTRIES_IN_STATEMENT, maxActions - handled);
+            final long afterId = fromId;
+            // through the repository proxy, so the read access rules apply (actions of not readable targets are not cancelled).
+            // Target, rollout and rollout group (cancel message, action update event) fetched in the same query, as
+            // JOIN FETCH and not an entity graph, as EclipseLink loads entity graph associations one by one. No COUNT query.
+            final List<JpaAction> actions = actionRepository.findAllWithoutCount((root, _, cb) -> {
+                root.fetch(JpaAction_.target);
+                root.fetch(JpaAction_.rolloutGroup, JoinType.LEFT);
+                root.fetch(JpaAction_.rollout, JoinType.LEFT);
+                final Predicate activeOfRollout = cb.and(
+                        cb.equal(root.get(JpaAction_.rollout).get(AbstractJpaBaseEntity_.id), rolloutId),
+                        cb.equal(root.get(JpaAction_.active), true),
+                        cb.greaterThan(root.get(AbstractJpaBaseEntity_.id), afterId));
+                return skipStatus == null ? activeOfRollout : cb.and(activeOfRollout, cb.notEqual(root.get(JpaAction_.status), skipStatus));
+            }, PageRequest.of(0, pageSize, Sort.by(AbstractJpaBaseEntity_.ID))).getContent();
+            if (actions.isEmpty()) {
+                break;
+            }
+            pageHandler.accept(actions);
+            handled += actions.size();
+            if (actions.size() < pageSize) {
+                break; // last page - spares the read of an empty one
+            }
+            fromId = actions.getLast().getId();
         }
-
-        storeActionsAndStatuses(actions, Action.Status.CANCELED);
-
-        // find next active actions - filter by targetId list and isActive
-        final List<Long> targetIds = actions.stream()
-                .map(action -> action.getTarget().getId())
-                .toList();
-        entityManager.flush();
-
-        int modifiedRows = updateTargetAssignedDsWithFirstActiveAction(targetIds);
-        log.debug("Updated {} targets with their previously active action", modifiedRows);
-
-        // if no active actions
-        // set assignedDs to previously installedDs and status to IN_SYNC
-        // otherwise set assigned ds to the active action ...
-        modifiedRows = updateTargetAssignedDsWithInstalledIfNoActiveActions(targetIds);
-        log.debug("Updated assignDs to previously installed to {} number of targets.", modifiedRows);
+        return handled;
     }
 
     private void storeActionsAndStatuses(List<JpaAction> actions, Action.Status status) {
@@ -643,11 +681,6 @@ public class JpaRolloutManagement implements RolloutManagement {
         log.info("{} of target assigned distribution set to previously installed distribution value for tenant {}",
                 updated, AccessContext.tenant());
         return updated;
-    }
-
-    private Page<JpaAction> findActiveActionsForRollout(long rolloutId, Pageable pageable) {
-        return actionRepository
-                .findAll(ActionSpecifications.byRolloutIdAndActive(rolloutId), pageable);
     }
 
     private void delete0(final JpaRollout jpaRollout) {

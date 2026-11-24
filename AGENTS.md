@@ -79,6 +79,8 @@ CI (`.github/workflows/reusable_workflow_verify.yaml`) runs `license:check`, the
   removing or renaming fields and endpoints.
 - **Code style:**
     - Lombok (`@Slf4j`, builders); `final` parameters.
+    - Unused lambda parameters and caught exceptions: use the unnamed variable `_` (e.g. `_ -> { ... }`,
+      `catch (final InterruptedException _)`).
     - No new utility libraries: prefer JDK, then Spring, then commons-lang (`CONTRIBUTING.md`).
     - Every file needs the EPL license header.
 - **Tests:**
@@ -168,5 +170,10 @@ Update these in the same change set:
   `hawkbit-mcp/hawkbit-mcp-starter/src/main/resources/hawkbit-entity-definitions.md`
 - Query fields (`hawkbit-repository-api/.../qfields`) changed → field tables in `docs/entity-definitions.md` and the MCP
   copy
+
+`docs/` is user documentation: how to use and operate hawkBit, at most high-level architecture. Document what users
+must know or set (e.g. config properties, minimum DB versions), not why or how it works inside. Implementation details
+(transactions, locking, retries, SQL, internal algorithms) go into code comments or module `README.md`s, never into
+`docs/`.
 
 Keep this file short: link, don't duplicate.

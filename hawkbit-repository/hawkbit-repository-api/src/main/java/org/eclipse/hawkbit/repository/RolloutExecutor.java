@@ -42,7 +42,11 @@ public interface RolloutExecutor {
      * <p/>
      * For {@link RolloutStatus#DELETING} that means either soft delete in case rollout was already {@link RolloutStatus#RUNNING}
      * which results in status change {@link RolloutStatus#DELETED} or hard delete from the persistence otherwise.
+     *
+     * @return {@code true} if the rollout shall be processed again right away, in a new transaction - e.g. a group has been
+     *         started, whose success condition may be reached already (so that such groups are started one after the other
+     *         without waiting for the next scheduler run)
      */
     @PreAuthorize(SpringEvalExpressions.IS_SYSTEM_CODE)
-    void execute(Rollout rollout);
+    boolean execute(Rollout rollout);
 }

@@ -62,6 +62,42 @@ public interface RolloutGroupRepository extends BaseEntityRepository<JpaRolloutG
     List<JpaRolloutGroup> findByParentIdAndStatus(@Param("rollout_group") long rolloutGroupId, @Param("status") RolloutGroupStatus status);
 
     /**
+     * Returns the ids of the groups of the given rollout without a parent (the first group).
+     * <p/>
+     * No access control applied
+     *
+     * @param rolloutId the ID of the rollout
+     * @return the group ids
+     */
+    @Query("SELECT g.id FROM JpaRolloutGroup g WHERE g.rollout.id = :rolloutId AND g.parent IS NULL")
+    List<Long> findIdsByRolloutIdAndParentIsNull(@Param("rolloutId") long rolloutId);
+
+    /**
+     * Returns the ids of the child groups of the given group of the given rollout.
+     * <p/>
+     * No access control applied
+     *
+     * @param rolloutId the ID of the rollout
+     * @param parentId the ID of the parent group
+     * @return the group ids
+     */
+    @Query("SELECT g.id FROM JpaRolloutGroup g WHERE g.rollout.id = :rolloutId AND g.parent.id = :parentId")
+    List<Long> findIdsByRolloutIdAndParentId(@Param("rolloutId") long rolloutId, @Param("parentId") long parentId);
+
+    /**
+     * Returns the ids of the groups of the given rollout with the given status - read from the DB, also if the status was changed by
+     * a bulk update after the groups were loaded.
+     * <p/>
+     * No access control applied
+     *
+     * @param rolloutId the ID of the rollout
+     * @param status the status
+     * @return the group ids
+     */
+    @Query("SELECT g.id FROM JpaRolloutGroup g WHERE g.rollout.id = :rolloutId AND g.status = :status")
+    List<Long> findIdsByRolloutIdAndStatus(@Param("rolloutId") long rolloutId, @Param("status") RolloutGroupStatus status);
+
+    /**
      * Updates all {@link RolloutGroup#getStatus()} of children for given parent.
      *
      * @param parent the parent rolloutgroup

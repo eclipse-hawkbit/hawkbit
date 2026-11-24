@@ -9,11 +9,16 @@
  */
 package org.eclipse.hawkbit.repository.jpa.repository;
 
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
 
+import org.apache.commons.collections4.ListUtils;
+import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction_;
@@ -25,6 +30,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus;
+import org.springframework.data.domain.Limit;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -79,6 +85,49 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
             @Param("active") boolean active, @Param("currentStatus") Action.Status currentStatus);
 
     /**
+     * Sets the given status on the given actions which are still active and not yet in that status (a concurrent change of the
+     * action in between the read and this update is respected). Also increments the optimistic lock revision, explicitly, as a
+     * JPQL bulk update doesn't increment it on every JPA vendor: a concurrent update based on the state read before then fails
+     * with a concurrency failure instead of overwriting the status.
+     * <p/>
+     * No access control applied
+     *
+     * @param ids the IDs of the actions (at most {@code MAX_ENTRIES_IN_STATEMENT})
+     * @param status the status to set
+     * @param lastModifiedAt last modified at to set
+     * @param lastModifiedBy last modified by to set
+     * @return the number of updated actions
+     */
+    @Modifying
+    @Transactional
+    @Query("UPDATE JpaAction a SET a.status = :status, a.lastModifiedAt = :lastModifiedAt, a.lastModifiedBy = :lastModifiedBy,"
+            + " a.optLockRevision = a.optLockRevision + 1 WHERE a.id IN :ids AND a.active = true AND a.status <> :status")
+    int setStatusOfActiveByIdsAndStatusNot(
+            @Param("ids") Collection<Long> ids, @Param("status") Status status,
+            @Param("lastModifiedAt") long lastModifiedAt, @Param("lastModifiedBy") String lastModifiedBy);
+
+    /**
+     * Like {@link #setStatusOfActiveByIdsAndStatusNot(Collection, Status, long, String)}, but sets the last action status code too.
+     * <p/>
+     * No access control applied
+     *
+     * @param ids the IDs of the actions (at most {@code MAX_ENTRIES_IN_STATEMENT})
+     * @param status the status to set
+     * @param lastActionStatusCode the last action status code to set
+     * @param lastModifiedAt last modified at to set
+     * @param lastModifiedBy last modified by to set
+     * @return the number of updated actions
+     */
+    @Modifying
+    @Transactional
+    @Query("UPDATE JpaAction a SET a.status = :status, a.lastActionStatusCode = :code, a.lastModifiedAt = :lastModifiedAt,"
+            + " a.lastModifiedBy = :lastModifiedBy, a.optLockRevision = a.optLockRevision + 1"
+            + " WHERE a.id IN :ids AND a.active = true AND a.status <> :status")
+    int setStatusAndLastActionStatusCodeOfActiveByIdsAndStatusNot(
+            @Param("ids") Collection<Long> ids, @Param("status") Status status, @Param("code") int lastActionStatusCode,
+            @Param("lastModifiedAt") long lastModifiedAt, @Param("lastModifiedBy") String lastModifiedBy);
+
+    /**
      * Counts all {@link Action}s referring to the given target.
      * <p/>
      * No access control applied
@@ -97,6 +146,33 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
      * @return the count of actions referring to the given target
      */
     Long countByTargetId(Long targetId);
+
+    /**
+     * Counts the {@link Action}s per target for the given targets with one grouped query per chunk of
+     * {@code MAX_ENTRIES_IN_STATEMENT} ids. Targets without actions are not in the result.
+     * <p/>
+     * No access control applied
+     *
+     * @param targetIds the targets to count the {@link Action}s of
+     * @return target id to count of actions
+     */
+    default Map<Long, Long> countByTargetIds(final Collection<Long> targetIds) {
+        final Map<Long, Long> counts = new HashMap<>();
+        ListUtils.partition(List.copyOf(targetIds), Constants.MAX_ENTRIES_IN_STATEMENT).forEach(chunk ->
+                countGroupedByTargetIdIn(chunk).forEach(row -> counts.put(((Number) row[0]).longValue(), ((Number) row[1]).longValue())));
+        return counts;
+    }
+
+    /**
+     * Counts the {@link Action}s per target for the given targets (see {@link #countByTargetIds(Collection)}).
+     * <p/>
+     * No access control applied
+     *
+     * @param targetIds the targets (at most {@code MAX_ENTRIES_IN_STATEMENT})
+     * @return rows of target id and count of actions
+     */
+    @Query("SELECT a.target.id, COUNT(a.id) FROM JpaAction a WHERE a.target.id IN :targetIds GROUP BY a.target.id")
+    List<Object[]> countGroupedByTargetIdIn(@Param("targetIds") Collection<Long> targetIds);
 
     /**
      * Counts all {@link Action}s referring to the given DistributionSet.
@@ -233,33 +309,43 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
     boolean existsByRolloutIdAndStatusNot(@Param("rolloutId") Long rolloutId, @Param("status") Status status);
 
     /**
-     * Retrieving all actions referring to a given rollout with a specific action as parent reference and a specific status.
-     * <p/>
-     * Finding all actions of a specific rollout group parent relation.
+     * Returns the ids, greater than the given id, of up to {@code limit} actions of the given rollout groups in the given
+     * status, ordered by id. No {@code COUNT} query is issued.
      * <p/>
      * No access control applied
+     * <p/>
+     * Note: it shall be JPA natively be implemented using entity graphs. However, Eclipslink does not make single call but N + 1.
+     * If we somehow remove Eclipselink - we could go again on entity graphs (Hibernate is fine).
      *
-     * @param pageable page parameters
-     * @param rollout the rollout the actions belong to
-     * @param rolloutGroupParent the parent rollout group the actions should reference
-     * @param actionStatus the status the actions have
-     * @return the actions referring a specific rollout and a specific parent rolloutgroup in a specific status
+     * @param rolloutGroupIds the IDs of the rollout groups
+     * @param status the status the actions have
+     * @param fromId exclusive lower bound of the ids (keyset paging)
+     * @param limit maximum number of ids to return. Applied by Sprint Data applies the limit
+     * @return the action ids
      */
-    @EntityGraph(attributePaths = { "target", "target.autoConfirmationStatus", "rolloutGroup" }, type = EntityGraphType.LOAD)
-    Page<Action> findByRolloutIdAndRolloutGroupParentIdAndStatus(Pageable pageable, Long rollout, Long rolloutGroupParent, Status actionStatus);
+    @Query("SELECT a.id FROM JpaAction a WHERE a.rolloutGroup.id IN :rolloutGroupIds AND a.status = :status AND a.id > :fromId ORDER BY a.id")
+    List<Long> findIdsByRolloutGroupIdInAndStatusAndIdGreaterThan(
+            @Param("rolloutGroupIds") Collection<Long> rolloutGroupIds,
+            @Param("status") Status status,
+            @Param("fromId") long fromId,
+            Limit limit);
 
     /**
-     * Retrieving all actions referring to the first group of a rollout.
+     * Returns the actions with the given ids, ordered by id, with their rollout group, target, the target's auto
+     * confirmation status and assigned distribution set fetched in the same query. A plain {@code JOIN FETCH} by ids, as an
+     * entity graph is not applied by every JPA vendor and a to-many fetch combined with paging is paged in memory.
      * <p/>
      * No access control applied
+     * <p/>
+     * Note: it shall be JPA natively be implemented using named graphs. However, Eclipslink does not make single call but N + 1.
+     * If we somehow remove Eclipselink - we could go again on named graphs (Hibernate is fine).
      *
-     * @param pageable page parameters
-     * @param rollout the rollout the actions belong to
-     * @param actionStatus the status the actions have
-     * @return the actions referring a specific rollout and a specific parent rolloutgroup in a specific status
+     * @param ids the IDs of the actions (at most {@code MAX_ENTRIES_IN_STATEMENT})
+     * @return the actions
      */
-    @EntityGraph(attributePaths = { "target", "target.autoConfirmationStatus", "rolloutGroup" }, type = EntityGraphType.LOAD)
-    Page<Action> findByRolloutIdAndRolloutGroupParentIsNullAndStatus(Pageable pageable, Long rollout, Status actionStatus);
+    @Query("SELECT a FROM JpaAction a JOIN FETCH a.rolloutGroup JOIN FETCH a.target t LEFT JOIN FETCH t.autoConfirmationStatus"
+            + " LEFT JOIN FETCH t.assignedDistributionSet WHERE a.id IN :ids ORDER BY a.id")
+    List<JpaAction> findWithTargetByIdIn(@Param("ids") Collection<Long> ids);
 
     /**
      * Retrieves all actions for a specific rollout and in a specific status.
@@ -272,6 +358,36 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
      * @return the actions referring a specific rollout an in a specific status
      */
     Page<JpaAction> findByRolloutIdAndStatus(Pageable pageable, Long rolloutId, Status actionStatus);
+
+    /**
+     * Returns the ids of up to {@code limit} actions of the given rollout in the given status, ordered by id. No {@code COUNT}
+     * query is issued.
+     * <p/>
+     * No access control applied
+     *
+     * @param rolloutId the ID of the rollout
+     * @param status the status of the actions
+     * @param limit maximum number of ids to return
+     * @return the action ids
+     */
+    @Query("SELECT a.id FROM JpaAction a WHERE a.rollout.id = :rolloutId AND a.status = :status ORDER BY a.id")
+    List<Long> findIdsByRolloutIdAndStatus(@Param("rolloutId") long rolloutId, @Param("status") Status status, Limit limit);
+
+    /**
+     * Deletes the given actions that are (still) in the given status with one bulk {@code DELETE}. The action status rows are
+     * deleted by the database ({@code ON DELETE CASCADE}), so they are not loaded as for an entity remove. Bypasses the entity
+     * callbacks - actions have no delete event.
+     * <p/>
+     * No access control applied
+     *
+     * @param ids the IDs of the actions (at most {@code MAX_ENTRIES_IN_STATEMENT})
+     * @param status the status the actions must have
+     * @return the number of deleted actions
+     */
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM JpaAction a WHERE a.id IN :ids AND a.status = :status")
+    int deleteByIdsAndStatus(@Param("ids") Collection<Long> ids, @Param("status") Status status);
 
     /**
      * Get list of objects which has details of status and count of targets in each status in specified rollout.

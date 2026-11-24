@@ -33,6 +33,11 @@ import org.springframework.transaction.PlatformTransactionManager;
 @Slf4j
 public class JpaRolloutHandler implements RolloutHandler {
 
+    // time budget of a run (all rollouts of the tenant) for processing rollouts again right away (groups started one after the
+    // other, see RolloutExecutor#execute) - every rollout is processed once per run, again only while the budget lasts, so that
+    // a run, and the tenant rollout lock it holds, isn't prolonged much by rollouts starting many groups
+    private static final long PROCESS_AGAIN_BUDGET_MS = 10_000;
+
     private final RolloutManagement rolloutManagement;
     private final RolloutExecutor rolloutExecutor;
     private final LockRegistry<? extends Lock> lockRegistry;
@@ -77,9 +82,14 @@ public class JpaRolloutHandler implements RolloutHandler {
 
         try {
             log.debug("Start handling {} rollouts.", rollouts.size());
+            final long processAgainDeadline = System.currentTimeMillis() + PROCESS_AGAIN_BUDGET_MS;
             rollouts.forEach(rolloutId -> {
                 try {
-                    handleRolloutInNewTransaction(rolloutId, handlerId);
+                    // processed again while it asks for it (a group has been started, whose success condition may be reached
+                    // already), each time in a new transaction - only within the time budget of the run
+                    while (handleRolloutInNewTransaction(rolloutId, handlerId) && System.currentTimeMillis() < processAgainDeadline) {
+                        log.debug("Process rollout {} again", rolloutId);
+                    }
                 } catch (final Throwable throwable) {
                     log.error("Failed to process rollout with id {}", rolloutId, throwable);
                 }
@@ -102,19 +112,20 @@ public class JpaRolloutHandler implements RolloutHandler {
     }
 
     // run in a tenant context, i.e. Security.getCurrentTenant() returns the tenant the rollout is made for
-    private void handleRolloutInNewTransaction(final long rolloutId, final String handlerId) {
+    // returns true if the rollout shall be processed again right away
+    private boolean handleRolloutInNewTransaction(final long rolloutId, final String handlerId) {
         final long startNano = System.nanoTime();
         // NB: new transaction in transaction
-        DeploymentHelper.runInNewTransaction(handlerId + "-" + rolloutId, status -> {
-            rolloutManagement.find(rolloutId).ifPresentOrElse(
-                    rolloutExecutor::execute,
-                    () -> log.error("Could not retrieve rollout with id {}. Will not continue with execution.", rolloutId));
-            return 0L;
-        }, txManager);
+        final boolean processAgain = DeploymentHelper.runInNewTransaction(handlerId + "-" + rolloutId, _ ->
+                rolloutManagement.find(rolloutId).map(rolloutExecutor::execute).orElseGet(() -> {
+                    log.error("Could not retrieve rollout with id {}. Will not continue with execution.", rolloutId);
+                    return false;
+                }), txManager);
 
         meterRegistry // handle single rollout
                 .map(mReg -> mReg.timer(
                         "hawkbit.rollout.handle", TENANT_TAG, TENANT_TAG_VALUE_PROVIDER.get(), "rollout", String.valueOf(rolloutId)))
                 .ifPresent(timer -> timer.record(System.nanoTime() - startNano, TimeUnit.NANOSECONDS));
+        return processAgain;
     }
 }
