@@ -127,7 +127,7 @@ maven/mavencentral/io.netty/netty-resolver/4.2.20.Final, Apache-2.0, approved, #
 maven/mavencentral/io.netty/netty-transport-native-unix-common/4.2.20.Final, Apache-2.0, approved, #21329
 maven/mavencentral/io.netty/netty-transport/4.2.20.Final, Apache-2.0, approved, #16113
 maven/mavencentral/io.projectreactor.netty/reactor-netty-core/1.4.0, Apache-2.0, approved, #33882
-maven/mavencentral/io.projectreactor.netty/reactor-netty-http/1.4.0, , restricted, clearlydefined
+maven/mavencentral/io.projectreactor.netty/reactor-netty-http/1.4.0, Apache-2.0, approved, #33918
 maven/mavencentral/io.projectreactor/reactor-core/3.9.0, , restricted, clearlydefined
 maven/mavencentral/io.protostuff/protostuff-api/1.8.0, Apache-2.0, approved, clearlydefined
 maven/mavencentral/io.protostuff/protostuff-collectionschema/1.8.0, Apache-2.0, approved, clearlydefined
@@ -188,7 +188,7 @@ maven/mavencentral/org.hibernate.orm/hibernate-core/7.4.15.Final, Apache-2.0 AND
 maven/mavencentral/org.hibernate.orm/hibernate-processor/7.4.15.Final, Apache-2.0, approved, #28712
 maven/mavencentral/org.hibernate.validator/hibernate-validator/9.1.6.Final, Apache-2.0, approved, #29640
 maven/mavencentral/org.jboss.logging/jboss-logging/3.6.3.Final, Apache-2.0, approved, #26108
-maven/mavencentral/org.jline/jline/3.30.13, BSD-3-Clause AND Apache-2.0, approved, #25548
+maven/mavencentral/org.jline/jline/3.30.17, BSD-3-Clause AND Apache-2.0, approved, #25548
 maven/mavencentral/org.jsoup/jsoup/1.24.1, MIT AND (Apache-2.0 AND BSD-3-Clause), approved, #32937
 maven/mavencentral/org.jspecify/jspecify/1.0.1, Apache-2.0, approved, #21897
 maven/mavencentral/org.mariadb.jdbc/mariadb-java-client/3.5.11, LGPL-2.1-or-later AND CC0-1.0, approved, #22822
@@ -229,31 +229,31 @@ maven/mavencentral/org.springframework.boot/spring-boot-amqp/4.2.0, , restricted
 maven/mavencentral/org.springframework.boot/spring-boot-autoconfigure/4.2.0, , restricted, clearlydefined
 maven/mavencentral/org.springframework.boot/spring-boot-cache/4.2.0, , restricted, clearlydefined
 maven/mavencentral/org.springframework.boot/spring-boot-configuration-processor/4.2.0, , restricted, clearlydefined
-maven/mavencentral/org.springframework.boot/spring-boot-data-commons/4.2.0, , restricted, clearlydefined
-maven/mavencentral/org.springframework.boot/spring-boot-data-jpa/4.2.0, , restricted, clearlydefined
+maven/mavencentral/org.springframework.boot/spring-boot-data-commons/4.2.0, Apache-2.0, approved, #33914
+maven/mavencentral/org.springframework.boot/spring-boot-data-jpa/4.2.0, Apache-2.0, approved, #33939
 maven/mavencentral/org.springframework.boot/spring-boot-devtools/4.2.0, , restricted, clearlydefined
 maven/mavencentral/org.springframework.boot/spring-boot-flyway/4.2.0, , restricted, clearlydefined
 maven/mavencentral/org.springframework.boot/spring-boot-hateoas/4.2.0, , restricted, clearlydefined
 maven/mavencentral/org.springframework.boot/spring-boot-health/4.2.0, , restricted, clearlydefined
 maven/mavencentral/org.springframework.boot/spring-boot-hibernate/4.2.0, Apache-2.0, approved, #33900
-maven/mavencentral/org.springframework.boot/spring-boot-http-client/4.2.0, , restricted, clearlydefined
+maven/mavencentral/org.springframework.boot/spring-boot-http-client/4.2.0, Apache-2.0, approved, #33927
 maven/mavencentral/org.springframework.boot/spring-boot-http-codec/4.2.0, Apache-2.0, approved, #33883
 maven/mavencentral/org.springframework.boot/spring-boot-http-converter/4.2.0, , restricted, clearlydefined
 maven/mavencentral/org.springframework.boot/spring-boot-integration/4.2.0, , restricted, clearlydefined
 maven/mavencentral/org.springframework.boot/spring-boot-jackson/4.2.0, Apache-2.0, approved, #33886
 maven/mavencentral/org.springframework.boot/spring-boot-jdbc/4.2.0, Apache-2.0, approved, #33903
-maven/mavencentral/org.springframework.boot/spring-boot-jpa/4.2.0, , restricted, clearlydefined
-maven/mavencentral/org.springframework.boot/spring-boot-micrometer-metrics/4.2.0, , restricted, clearlydefined
-maven/mavencentral/org.springframework.boot/spring-boot-micrometer-observation/4.2.0, , restricted, clearlydefined
-maven/mavencentral/org.springframework.boot/spring-boot-persistence/4.2.0, , restricted, clearlydefined
+maven/mavencentral/org.springframework.boot/spring-boot-jpa/4.2.0, Apache-2.0, approved, #33910
+maven/mavencentral/org.springframework.boot/spring-boot-micrometer-metrics/4.2.0, Apache-2.0, approved, #33929
+maven/mavencentral/org.springframework.boot/spring-boot-micrometer-observation/4.2.0, Apache-2.0, approved, #33909
+maven/mavencentral/org.springframework.boot/spring-boot-persistence/4.2.0, Apache-2.0, approved, #33908
 maven/mavencentral/org.springframework.boot/spring-boot-rabbitmq/4.2.0, , restricted, clearlydefined
-maven/mavencentral/org.springframework.boot/spring-boot-reactor-netty/4.2.0, , restricted, clearlydefined
-maven/mavencentral/org.springframework.boot/spring-boot-reactor/4.2.0, , restricted, clearlydefined
+maven/mavencentral/org.springframework.boot/spring-boot-reactor-netty/4.2.0, Apache-2.0, approved, #33913
+maven/mavencentral/org.springframework.boot/spring-boot-reactor/4.2.0, Apache-2.0, approved, #33905
 maven/mavencentral/org.springframework.boot/spring-boot-restclient/4.2.0, , restricted, clearlydefined
 maven/mavencentral/org.springframework.boot/spring-boot-security-oauth2-client/4.2.0, , restricted, clearlydefined
 maven/mavencentral/org.springframework.boot/spring-boot-security-oauth2-resource-server/4.2.0, , restricted, clearlydefined
 maven/mavencentral/org.springframework.boot/spring-boot-security/4.2.0, , restricted, clearlydefined
-maven/mavencentral/org.springframework.boot/spring-boot-servlet/4.2.0, , restricted, clearlydefined
+maven/mavencentral/org.springframework.boot/spring-boot-servlet/4.2.0, Apache-2.0, approved, #33935
 maven/mavencentral/org.springframework.boot/spring-boot-sql/4.2.0, , restricted, clearlydefined
 maven/mavencentral/org.springframework.boot/spring-boot-starter-actuator/4.2.0, , restricted, clearlydefined
 maven/mavencentral/org.springframework.boot/spring-boot-starter-amqp/4.2.0, , restricted, clearlydefined
@@ -261,7 +261,7 @@ maven/mavencentral/org.springframework.boot/spring-boot-starter-cache/4.2.0, Apa
 maven/mavencentral/org.springframework.boot/spring-boot-starter-data-jpa/4.2.0, , restricted, clearlydefined
 maven/mavencentral/org.springframework.boot/spring-boot-starter-flyway/4.2.0, , restricted, clearlydefined
 maven/mavencentral/org.springframework.boot/spring-boot-starter-hateoas/4.2.0, , restricted, clearlydefined
-maven/mavencentral/org.springframework.boot/spring-boot-starter-jackson/4.2.0, , restricted, clearlydefined
+maven/mavencentral/org.springframework.boot/spring-boot-starter-jackson/4.2.0, Apache-2.0, approved, #33934
 maven/mavencentral/org.springframework.boot/spring-boot-starter-jdbc/4.2.0, , restricted, clearlydefined
 maven/mavencentral/org.springframework.boot/spring-boot-starter-json/4.2.0, , restricted, clearlydefined
 maven/mavencentral/org.springframework.boot/spring-boot-starter-logging/4.2.0, , restricted, clearlydefined
@@ -271,7 +271,7 @@ maven/mavencentral/org.springframework.boot/spring-boot-starter-rabbitmq/4.2.0, 
 maven/mavencentral/org.springframework.boot/spring-boot-starter-reactor-netty/4.2.0, Apache-2.0, approved, #33894
 maven/mavencentral/org.springframework.boot/spring-boot-starter-security-oauth2-client/4.2.0, , restricted, clearlydefined
 maven/mavencentral/org.springframework.boot/spring-boot-starter-security/4.2.0, , restricted, clearlydefined
-maven/mavencentral/org.springframework.boot/spring-boot-starter-test/4.2.0, , restricted, clearlydefined
+maven/mavencentral/org.springframework.boot/spring-boot-starter-test/4.2.0, Apache-2.0, approved, #33911
 maven/mavencentral/org.springframework.boot/spring-boot-starter-tomcat-runtime/4.2.0, , restricted, clearlydefined
 maven/mavencentral/org.springframework.boot/spring-boot-starter-tomcat/4.2.0, Apache-2.0, approved, #33881
 maven/mavencentral/org.springframework.boot/spring-boot-starter-validation/4.2.0, , restricted, clearlydefined
@@ -283,9 +283,9 @@ maven/mavencentral/org.springframework.boot/spring-boot-test-autoconfigure/4.2.0
 maven/mavencentral/org.springframework.boot/spring-boot-test/4.2.0, , restricted, clearlydefined
 maven/mavencentral/org.springframework.boot/spring-boot-tomcat/4.2.0, , restricted, clearlydefined
 maven/mavencentral/org.springframework.boot/spring-boot-transaction/4.2.0, Apache-2.0, approved, #33898
-maven/mavencentral/org.springframework.boot/spring-boot-validation/4.2.0, , restricted, clearlydefined
-maven/mavencentral/org.springframework.boot/spring-boot-web-server/4.2.0, , restricted, clearlydefined
-maven/mavencentral/org.springframework.boot/spring-boot-webflux/4.2.0, , restricted, clearlydefined
+maven/mavencentral/org.springframework.boot/spring-boot-validation/4.2.0, Apache-2.0, approved, #33916
+maven/mavencentral/org.springframework.boot/spring-boot-web-server/4.2.0, Apache-2.0, approved, #33906
+maven/mavencentral/org.springframework.boot/spring-boot-webflux/4.2.0, Apache-2.0, approved, #33933
 maven/mavencentral/org.springframework.boot/spring-boot-webmvc/4.2.0, Apache-2.0, approved, #33899
 maven/mavencentral/org.springframework.boot/spring-boot/4.2.0, Apache-2.0, approved, #33901
 maven/mavencentral/org.springframework.cloud/spring-cloud-commons/5.1.0, , restricted, clearlydefined
@@ -299,7 +299,7 @@ maven/mavencentral/org.springframework.cloud/spring-cloud-starter/5.1.0, , restr
 maven/mavencentral/org.springframework.cloud/spring-cloud-stream-binder-rabbit-core/5.1.0, , restricted, clearlydefined
 maven/mavencentral/org.springframework.cloud/spring-cloud-stream-binder-rabbit/5.1.0, , restricted, clearlydefined
 maven/mavencentral/org.springframework.cloud/spring-cloud-stream/5.1.0, , restricted, clearlydefined
-maven/mavencentral/org.springframework.data/spring-data-commons/4.2.0, , restricted, clearlydefined
+maven/mavencentral/org.springframework.data/spring-data-commons/4.2.0, Apache-2.0, approved, #33920
 maven/mavencentral/org.springframework.data/spring-data-jpa/4.2.0, , restricted, clearlydefined
 maven/mavencentral/org.springframework.hateoas/spring-hateoas/3.2.0, , restricted, clearlydefined
 maven/mavencentral/org.springframework.integration/spring-integration-amqp/7.2.0, , restricted, clearlydefined
@@ -310,30 +310,30 @@ maven/mavencentral/org.springframework.plugin/spring-plugin-core/4.2.0-RC1, , re
 maven/mavencentral/org.springframework.security/spring-security-aspects/7.2.0, , restricted, clearlydefined
 maven/mavencentral/org.springframework.security/spring-security-config/7.2.0, , restricted, clearlydefined
 maven/mavencentral/org.springframework.security/spring-security-core/7.2.0, , restricted, clearlydefined
-maven/mavencentral/org.springframework.security/spring-security-crypto/7.2.0, , restricted, clearlydefined
+maven/mavencentral/org.springframework.security/spring-security-crypto/7.2.0, Apache-2.0 AND ISC, approved, #33912
 maven/mavencentral/org.springframework.security/spring-security-oauth2-client/7.2.0, , restricted, clearlydefined
 maven/mavencentral/org.springframework.security/spring-security-oauth2-core/7.2.0, , restricted, clearlydefined
 maven/mavencentral/org.springframework.security/spring-security-oauth2-jose/7.2.0, , restricted, clearlydefined
 maven/mavencentral/org.springframework.security/spring-security-oauth2-resource-server/7.2.0, , restricted, clearlydefined
 maven/mavencentral/org.springframework.security/spring-security-test/7.2.0, , restricted, clearlydefined
 maven/mavencentral/org.springframework.security/spring-security-web/7.2.0, , restricted, clearlydefined
-maven/mavencentral/org.springframework.shell/spring-shell-core-autoconfigure/4.0.3, Apache-2.0, approved, #27609
-maven/mavencentral/org.springframework.shell/spring-shell-core/4.0.3, Apache-2.0, approved, #27593
-maven/mavencentral/org.springframework.shell/spring-shell-jline/4.0.3, Apache-2.0, approved, #27653
-maven/mavencentral/org.springframework.shell/spring-shell-starter/4.0.3, Apache-2.0, approved, #27639
+maven/mavencentral/org.springframework.shell/spring-shell-core-autoconfigure/4.0.4, Apache-2.0, approved, #27609
+maven/mavencentral/org.springframework.shell/spring-shell-core/4.0.4, Apache-2.0, approved, #27593
+maven/mavencentral/org.springframework.shell/spring-shell-jline/4.0.4, Apache-2.0, approved, #27653
+maven/mavencentral/org.springframework.shell/spring-shell-starter/4.0.4, Apache-2.0, approved, #27639
 maven/mavencentral/org.springframework/spring-aop/7.1.0, , restricted, clearlydefined
 maven/mavencentral/org.springframework/spring-aspects/7.1.0, , restricted, clearlydefined
 maven/mavencentral/org.springframework/spring-beans/7.1.0, , restricted, clearlydefined
 maven/mavencentral/org.springframework/spring-context-support/7.1.0, Apache-2.0, approved, #33880
 maven/mavencentral/org.springframework/spring-context/7.1.0, , restricted, clearlydefined
 maven/mavencentral/org.springframework/spring-core/7.1.0, Apache-2.0 AND BSD-3-Clause, approved, #33889
-maven/mavencentral/org.springframework/spring-expression/7.1.0, , restricted, clearlydefined
+maven/mavencentral/org.springframework/spring-expression/7.1.0, Apache-2.0, approved, #33928
 maven/mavencentral/org.springframework/spring-jdbc/7.1.0, , restricted, clearlydefined
 maven/mavencentral/org.springframework/spring-messaging/7.1.0, , restricted, clearlydefined
 maven/mavencentral/org.springframework/spring-orm/7.1.0, Apache-2.0, approved, #33884
 maven/mavencentral/org.springframework/spring-test/7.1.0, , restricted, clearlydefined
 maven/mavencentral/org.springframework/spring-tx/7.1.0, Apache-2.0, approved, #33887
-maven/mavencentral/org.springframework/spring-web/7.1.0, , restricted, clearlydefined
+maven/mavencentral/org.springframework/spring-web/7.1.0, Apache-2.0, approved, #33930
 maven/mavencentral/org.springframework/spring-webflux/7.1.0, , restricted, clearlydefined
 maven/mavencentral/org.springframework/spring-webmvc/7.1.0, , restricted, clearlydefined
 maven/mavencentral/org.springframework/spring-websocket/7.1.0, , restricted, clearlydefined
