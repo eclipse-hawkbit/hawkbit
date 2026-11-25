@@ -16723,6 +16723,10 @@
       "MgmtActionId": {
         "type": "object",
         "properties": {
+          "controllerId": {
+            "type": "string",
+            "writeOnly": true
+          },
           "id": {
             "type": "integer",
             "description": "ID of the action",
