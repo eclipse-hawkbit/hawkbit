@@ -34,6 +34,14 @@ public final class Constants {
     public static final int MIN_ENTRIES_TO_SPLIT = Math.max(2, Integer.getInteger(PROP_PREFIX + "min-entries-to-split", 2));
 
     /**
+     * Maximum number of failed transactions while splitting a page after a concurrency exception (per page). When reached,
+     * splitting of the page stops and the rest of the page is left for a later run - so many conflicts (e.g. a systemic failure)
+     * don't end up in a transaction per entry. The default allows isolating a single conflicting entry of a page with
+     * {@link #MAX_ENTRIES_IN_STATEMENT} entries (~log2(999) = 10 split levels).
+     */
+    public static final int MAX_SPLIT_FAILURES = Math.max(0, Integer.getInteger(PROP_PREFIX + "max-split-failures", 10));
+
+    /**
      * See {@link Retryable#maxRetries()}
      */
     public static final String RETRY_MAX = "${" + PROP_PREFIX + "retry-max:10}";
