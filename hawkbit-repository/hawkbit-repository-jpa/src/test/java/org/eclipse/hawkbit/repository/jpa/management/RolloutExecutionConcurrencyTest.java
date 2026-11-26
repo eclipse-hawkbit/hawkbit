@@ -312,6 +312,40 @@ class RolloutExecutionConcurrencyTest extends AbstractJpaIntegrationTest {
     }
 
     /**
+     * Verifies that when every action conflicts, the split stops after the failure budget of the page (default 10 failed transactions)
+     * instead of a transaction per action, all actions stay scheduled and the next run starts them.
+     */
+    @Test
+    void allConflictingActionsStopSplitAfterFailureBudget() {
+        final String prefix = "all-conflict-";
+        testdataFactory.createTargets(prefix, 0, 10);
+        final Rollout rollout = createRollout(prefix, "all-conflict-new");
+        rolloutManagement.start(rollout.getId());
+
+        final AtomicInteger startAttempts = new AtomicInteger();
+        try (ConflictInjection _ = ConflictInjection.afterEachRead(
+                txManager, actionRepository, FIRST_GROUP_SCHEDULED_ACTIONS_READ, () -> bumpActionRevisions(rollout));
+                ConflictInjection _ = ConflictInjection.afterEachRead(
+                        txManager, actionRepository, FIRST_GROUP_SCHEDULED_ACTIONS_READ, startAttempts::incrementAndGet)) {
+            rolloutHandler.handleAll();
+        }
+        waitForEvents();
+
+        // page (10) + halves (5, 5) + quarters (2, 3, 2, 3) + 4 of the eighths (1, 1, 1, 2, ...) - then the budget of 10 failures
+        // is exhausted (without it: 1 + 2 * 10 - 2 = 19 attempts)
+        assertThat(startAttempts.get()).isEqualTo(11);
+        assertThat(actionRepository.findByRolloutIdAndStatus(PageRequest.of(0, 100), rollout.getId(), Status.SCHEDULED).getContent())
+                .hasSize(10);
+        assertThat(rolloutManagement.get(rollout.getId()).getStatus()).isEqualTo(RolloutStatus.STARTING);
+
+        rolloutHandler.handleAll();
+        waitForEvents();
+
+        assertRolloutActionsActive(rollout, 10);
+        assertThat(rolloutManagement.get(rollout.getId()).getStatus()).isEqualTo(RolloutStatus.RUNNING);
+    }
+
+    /**
      * Verifies that an action of a child group whose start fails with a concurrency failure keeps the child group
      * scheduled (the parent's success action is rolled back), and that the next run starts the action and the child group.
      */
@@ -390,6 +424,13 @@ class RolloutExecutionConcurrencyTest extends AbstractJpaIntegrationTest {
         entityManager.createNativeQuery("UPDATE sp_action SET optlock_revision = optlock_revision + 1 WHERE rollout = ?1 AND target = ?2")
                 .setParameter(1, rollout.getId())
                 .setParameter(2, target.getId())
+                .executeUpdate();
+    }
+
+    // a concurrent change of all rollout actions - every start attempt based on the state read before fails
+    private void bumpActionRevisions(final Rollout rollout) {
+        entityManager.createNativeQuery("UPDATE sp_action SET optlock_revision = optlock_revision + 1 WHERE rollout = ?1")
+                .setParameter(1, rollout.getId())
                 .executeUpdate();
     }
 

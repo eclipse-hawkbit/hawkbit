@@ -511,11 +511,13 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
                 if (actionIdsPage.isEmpty() || !isConcurrencyFailure(e)) {
                     throw e; // nothing read to split, or not a concurrency exception
                 }
-                allStarted &= startScheduledActionsSplit(txName, actionIdsPage, e);
+                allStarted &= startScheduledActionsSplit(txName, actionIdsPage);
             }
             if (actionIdsPage.isEmpty()) {
                 break; // no more actions - break
             }
+            // also after a (partly) failed page - it's not started actions stay SCHEDULED for the next scheduler run,
+            // this run proceeds with the next page
             lastId = actionIdsPage.getLast();
         }
         if (!allStarted) {
@@ -571,21 +573,44 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
                 .toList());
     }
 
-    // After a concurrency failure (e.g. a device changed an action of the page) the actions are started in two halves, each in
-    // its own transaction, recursively down to single actions - so everything that can be started is committed and only the
-    // conflicting actions stay SCHEDULED. Returns false if any action couldn't be started.
-    private boolean startScheduledActionsSplit(final String txName, final List<Long> actionIds, final RuntimeException failure) {
-        if (actionIds.size() < Constants.MIN_ENTRIES_TO_SPLIT) {
-            log.debug("{} Scheduled action could not be started because of a concurrent change: {}", actionIds.size(), failure.getMessage());
-            return false;
+    // After a concurrency failure (e.g. a device changed an action of the page) the actions are started in parts, each in its own
+    // transaction, so that everything that can be started is committed and only the conflicting actions stay SCHEDULED.
+    // Breadth-first: the page in halves, then the failed halves in quarters, and so on down to MIN_ENTRIES_TO_SPLIT - so the big
+    // parts are started first and a conflict costs ~2 * log2(page size) transactions. Every failed transaction uses up the
+    // budget of the page (MAX_SPLIT_FAILURES). When it is exhausted the rest of the page stays SCHEDULED for the next scheduler
+    // run, so many conflicts (e.g. a systemic failure) don't end up in a transaction per action.
+    // Returns false if any action couldn't be started.
+    private boolean startScheduledActionsSplit(final String txName, final List<Long> actionIds) {
+        int failuresLeft = Constants.MAX_SPLIT_FAILURES;
+        boolean allStarted = true;
+        List<List<Long>> failed = List.of(actionIds);
+        while (!failed.isEmpty()) {
+            final List<List<Long>> nextFailed = new ArrayList<>();
+            for (final List<Long> part : failed) {
+                if (part.size() < Constants.MIN_ENTRIES_TO_SPLIT) {
+                    log.debug("{} scheduled action(s) could not be started because of a concurrent change", part.size());
+                    allStarted = false;
+                    continue;
+                }
+                final int half = part.size() / 2;
+                for (final List<Long> subPart : List.of(part.subList(0, half), part.subList(half, part.size()))) {
+                    if (failuresLeft <= 0) {
+                        log.debug("Split failure budget exhausted, scheduled actions of the page left for the next run");
+                        return false;
+                    }
+                    if (!startScheduledActionsInNewTransaction(txName, subPart)) {
+                        failuresLeft--;
+                        nextFailed.add(subPart);
+                    }
+                }
+            }
+            failed = nextFailed;
         }
-        final int half = actionIds.size() / 2;
-        final boolean firstHalfStarted = startScheduledActionsOrSplit(txName, actionIds.subList(0, half));
-        final boolean secondHalfStarted = startScheduledActionsOrSplit(txName, actionIds.subList(half, actionIds.size()));
-        return firstHalfStarted && secondHalfStarted;
+        return allStarted;
     }
 
-    private boolean startScheduledActionsOrSplit(final String txName, final List<Long> actionIds) {
+    // returns false on a concurrency failure (the transaction is rolled back), re-throws any other failure
+    private boolean startScheduledActionsInNewTransaction(final String txName, final List<Long> actionIds) {
         try {
             DeploymentHelper.runInNewTransaction(txName, _ -> {
                 startScheduledActionsByIds(actionIds);
@@ -596,7 +621,8 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             if (!isConcurrencyFailure(e)) {
                 throw e;
             }
-            return startScheduledActionsSplit(txName, actionIds, e);
+            log.trace("Starting {} scheduled actions failed with a concurrency failure: {}", actionIds.size(), e.getMessage());
+            return false;
         }
     }
 
