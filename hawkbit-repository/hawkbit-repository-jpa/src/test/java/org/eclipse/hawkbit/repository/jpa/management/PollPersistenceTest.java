@@ -20,8 +20,9 @@ import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.ReentrantLock;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceException;
@@ -55,7 +56,7 @@ import org.springframework.transaction.support.TransactionTemplate;
  * Story: Poll persistence
  */
 @TestPropertySource(locations = "classpath:/jpa-test.properties", properties = {
-        "hawkbit.server.repository.eagerPollPersistence=false",
+        "hawkbit.server.repository.pollPersistenceQueueSize=10000",
         "hawkbit.server.repository.pollPersistenceFlushTime=3600000" })
 class PollPersistenceTest extends AbstractJpaIntegrationTest {
 
@@ -73,7 +74,7 @@ class PollPersistenceTest extends AbstractJpaIntegrationTest {
     private final List<TargetPollEvent> pollEvents = new CopyOnWriteArrayList<>();
     private final ApplicationListener<TargetPollEvent> pollEventListener = pollEvents::add;
 
-    private JpaControllerManagement jpaControllerManagement;
+    private LastPollUpdater lastPollUpdater;
 
     @AfterEach
     void removePollEventListener() {
@@ -83,9 +84,11 @@ class PollPersistenceTest extends AbstractJpaIntegrationTest {
     @BeforeEach
     void setUp() {
         eventMulticaster.addApplicationListener(pollEventListener);
-        jpaControllerManagement = AopTestUtils.getUltimateTargetObject(controllerManagement);
+        lastPollUpdater = (LastPollUpdater) ReflectionTestUtils.getField(
+                (Object) AopTestUtils.getUltimateTargetObject(controllerManagement),
+                "lastPollUpdater");
         // nothing left from other tests
-        jpaControllerManagement.flushUpdateQueue();
+        flush();
     }
 
     /**
@@ -97,18 +100,18 @@ class PollPersistenceTest extends AbstractJpaIntegrationTest {
         final Target other = asController(OTHER_TENANT, () -> registerAndPoll("failure-other"));
         final Target own = registerAndPoll("failure-own");
 
-        final EntityManager original = (EntityManager) ReflectionTestUtils.getField(jpaControllerManagement, "entityManager");
-        ReflectionTestUtils.setField(jpaControllerManagement, "entityManager", failingForTenant(original, OTHER_TENANT));
+        final EntityManager original = (EntityManager) ReflectionTestUtils.getField(lastPollUpdater, "entityManager");
+        ReflectionTestUtils.setField(lastPollUpdater, "entityManager", failingForTenant(original, OTHER_TENANT));
         try {
-            jpaControllerManagement.flushUpdateQueue();
+            flush();
         } finally {
-            ReflectionTestUtils.setField(jpaControllerManagement, "entityManager", original);
+            ReflectionTestUtils.setField(lastPollUpdater, "entityManager", original);
         }
 
         assertThat(lastTargetQuery(own)).isGreaterThan(own.getLastTargetQuery());
         assertThat(asTenant(OTHER_TENANT, () -> lastTargetQuery(other))).isEqualTo(other.getLastTargetQuery());
 
-        jpaControllerManagement.flushUpdateQueue();
+        flush();
 
         assertThat(asTenant(OTHER_TENANT, () -> lastTargetQuery(other))).isGreaterThan(other.getLastTargetQuery());
     }
@@ -125,7 +128,7 @@ class PollPersistenceTest extends AbstractJpaIntegrationTest {
 
         try (TargetLock ignored = lock(t2)) {
             final long start = System.nanoTime();
-            jpaControllerManagement.flushUpdateQueue();
+            flush();
             assertThat(Duration.ofNanos(System.nanoTime() - start)).isLessThan(Duration.ofSeconds(2));
         }
         waitForEvents();
@@ -145,7 +148,7 @@ class PollPersistenceTest extends AbstractJpaIntegrationTest {
         final Target t1 = registerAndPoll("locked-later-t1");
         final Target t2 = registerAndPoll("locked-later-t2");
         try (TargetLock ignored = lock(t2)) {
-            jpaControllerManagement.flushUpdateQueue();
+            flush();
         }
         assertThat(lastTargetQuery(t2)).isEqualTo(t2.getLastTargetQuery());
         final long t1FirstFlush = lastTargetQuery(t1);
@@ -156,7 +159,7 @@ class PollPersistenceTest extends AbstractJpaIntegrationTest {
         controllerManagement.findOrRegisterTargetIfItDoesNotExist(t1.getControllerId(), LOCALHOST);
         final long beforeLaterFlush = System.currentTimeMillis();
 
-        jpaControllerManagement.flushUpdateQueue();
+        flush();
         waitForEvents();
 
         final long t2Written = lastTargetQuery(t2);
@@ -182,12 +185,12 @@ class PollPersistenceTest extends AbstractJpaIntegrationTest {
         repositoryProperties.setPollPersistenceMaxQueueTime(0);
         try (final TargetLock _ = lock(t1)) {
             TimeUnit.MILLISECONDS.sleep(5); // the poll is older than the max queue time (0)
-            jpaControllerManagement.flushUpdateQueue();
+            flush();
         } finally {
             repositoryProperties.setPollPersistenceMaxQueueTime(maxQueueTime);
         }
 
-        jpaControllerManagement.flushUpdateQueue();
+        flush();
 
         assertThat(lastTargetQuery(t1)).isEqualTo(t1.getLastTargetQuery());
     }
@@ -206,7 +209,7 @@ class PollPersistenceTest extends AbstractJpaIntegrationTest {
                         .setParameter(2, t1.getId())
                         .executeUpdate());
 
-        jpaControllerManagement.flushUpdateQueue();
+        flush();
 
         assertThat(lastTargetQuery(t1)).isEqualTo(newer);
     }
@@ -226,7 +229,7 @@ class PollPersistenceTest extends AbstractJpaIntegrationTest {
         final JpaTarget changed = targetRepository.findById(t1.getId()).orElseThrow();
         assertThat(changed.getOptLockRevision()).isNotEqualTo(t1.getOptLockRevision());
 
-        jpaControllerManagement.flushUpdateQueue();
+        flush();
 
         final JpaTarget after = targetRepository.findById(t1.getId()).orElseThrow();
         assertThat(after.getLastTargetQuery()).isGreaterThan(changed.getLastTargetQuery());
@@ -336,6 +339,18 @@ class PollPersistenceTest extends AbstractJpaIntegrationTest {
             return method.invoke(target, args);
         } catch (final InvocationTargetException e) {
             throw e.getCause();
+        }
+    }
+
+    // Flushes the buffered polls, waits for a running flush: the flush only tries the lock (doesn't wait), here it is taken first -
+    // reentrant, so the flush gets it
+    private void flush() {
+        final ReentrantLock lock = (ReentrantLock) ReflectionTestUtils.getField(lastPollUpdater, "flushLock");
+        lock.lock();
+        try {
+            ReflectionTestUtils.invokeMethod(lastPollUpdater, "flush");
+        } finally {
+            lock.unlock();
         }
     }
 }
