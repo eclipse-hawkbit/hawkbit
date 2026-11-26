@@ -16,6 +16,8 @@ For a complete production-like setup (database, RabbitMQ, artifact storage) see 
 | MariaDB / MySQL | `MYSQL`               | production                                       |
 | PostgreSQL      | `POSTGRESQL`          | production                                       |
 
+Minimum versions: MySQL 8.0, MariaDB 10.6 and PostgreSQL 9.5.
+
 Without any configuration hawkBit starts with an in-memory H2 database (`jdbc:h2:mem:hawkbit`). All data is lost when
 the server stops.
 
@@ -53,6 +55,12 @@ spring.datasource.driverClassName=org.postgresql.Driver
 
 For MariaDB / MySQL use `spring.jpa.database=MYSQL` and the `org.mariadb.jdbc.Driver` driver. `spring.jpa.database`
 must always match the database - it also selects the schema migration scripts (see below).
+
+> Don't set `useBulkStmts=true` in the MariaDB JDBC URL (default: `false`), it isn't supported.
+
+The maximum number of values in an SQL `IN` list is set with the system property
+`-Dorg.eclipse.hawkbit.repository.jpa.max-entries-in-statement` (default: `999`). On MySQL / MariaDB, if large
+`IN` lists get inefficient query plans, set it to at most the server's `eq_range_index_dive_limit` (default: `200`).
 
 ---
 

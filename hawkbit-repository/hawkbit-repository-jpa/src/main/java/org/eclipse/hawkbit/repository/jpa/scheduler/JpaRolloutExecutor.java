@@ -20,13 +20,23 @@ import java.lang.reflect.Proxy;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.StreamSupport;
+import java.util.stream.Collectors;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.ListUtils;
 import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.ql.jpa.QLSupport;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
@@ -42,10 +52,13 @@ import org.eclipse.hawkbit.repository.event.remote.RolloutStoppedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
 import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
+import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.management.JpaRolloutManagement;
+import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
@@ -74,6 +87,7 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCondition;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.qfields.TargetFields;
+import org.springframework.data.domain.Limit;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -83,6 +97,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionException;
+import org.springframework.util.ObjectUtils;
 
 /**
  * A Jpa implementation of {@link RolloutExecutor}
@@ -154,19 +169,23 @@ public class JpaRolloutExecutor implements RolloutExecutor {
     }
 
     @Override
-    public void execute(final Rollout rollout) {
+    public boolean execute(final Rollout rollout) {
+        final AtomicBoolean processAgain = new AtomicBoolean();
         // the access control context is a large, lazily mapped @Lob that is not exposed on the entity; resolve it
         // explicitly through the management layer (rollout processing is already one-per-transaction, so no N+1)
         rolloutManagement.getAccessControlContext(rollout.getId()).ifPresentOrElse(
                 // has stored context - executes it with it
-                context -> withSecurityContext(context, () -> execute0(rollout)),
+                context -> withSecurityContext(context, () -> processAgain.set(execute0(rollout))),
                 // has no stored context - executes it in the tenant & user scope
-                () -> asActor(rollout.getCreatedBy(), () -> execute0(rollout)));
+                () -> asActor(rollout.getCreatedBy(), () -> processAgain.set(execute0(rollout))));
+        return processAgain.get();
     }
 
-    private void execute0(final Rollout rollout) {
+    // returns true if the rollout shall be processed again right away (see RolloutExecutor#execute)
+    private boolean execute0(final Rollout rollout) {
         log.debug("Processing rollout {}", rollout.getId());
 
+        boolean processAgain = false;
         switch (rollout.getStatus()) {
             case CREATING:
                 handleCreateRollout((JpaRollout) rollout);
@@ -179,7 +198,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
                 asActor(rollout.getLastModifiedBy(), () -> handleStartingRollout((JpaRollout) rollout));
                 break;
             case RUNNING:
-                handleRunningRollout((JpaRollout) rollout);
+                processAgain = handleRunningRollout((JpaRollout) rollout);
                 break;
             case STOPPING:
                 // the lastModifiedBy user is probably the user that has actually called the rollout stop (unless overridden) - not the creator
@@ -195,6 +214,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         }
 
         log.debug("Rollout {} processed", rollout.getId());
+        return processAgain;
     }
 
     private void handleCreateRollout(final JpaRollout rollout) {
@@ -207,6 +227,9 @@ public class JpaRolloutExecutor implements RolloutExecutor {
 
         int readyGroups = 0;
         int totalTargets = 0;
+        // count of the targets of the rollout's target set that are in no READY group, carried from group to group within
+        // this run, so that it is counted once per run and not once per group (null - unknown, has to be counted)
+        Long rolloutCandidates = null;
         for (final RolloutGroup group : rolloutGroups) {
             if (RolloutGroupStatus.READY == group.getStatus()) {
                 readyGroups++;
@@ -214,11 +237,15 @@ public class JpaRolloutExecutor implements RolloutExecutor {
                 continue;
             }
 
-            final RolloutGroup filledGroup = fillRolloutGroupWithTargets(rollout, (JpaRolloutGroup) group, rolloutGroups);
-            if (RolloutGroupStatus.READY == filledGroup.getStatus()) {
-                readyGroups++;
-                totalTargets += filledGroup.getTotalTargets();
+            final GroupFill fill = fillRolloutGroupWithTargets(rollout, (JpaRolloutGroup) group, rolloutGroups, rolloutCandidates);
+            if (!fill.ready()) {
+                // the group is filled in order: a later group must not take targets this group would get. The committed pages
+                // are kept and the next run continues with this group
+                break;
             }
+            readyGroups++;
+            totalTargets += fill.totalTargets();
+            rolloutCandidates = fill.rolloutCandidatesLeft();
         }
 
         // When all groups are ready the rollout status can be changed to be ready, too.
@@ -255,8 +282,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
             return;
         }
         // clean up all scheduled actions
-        final Slice<JpaAction> scheduledActions = findScheduledActionsByRollout(rollout);
-        deleteScheduledActions(rollout, scheduledActions);
+        deleteScheduledActions(rollout, findScheduledActionIdsByRollout(rollout));
 
         // avoid another scheduler round and re-check if all scheduled actions has been cleaned up.
         // we flush first to ensure that will include the deletion above
@@ -293,8 +319,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
     private void handleStopRollout(final JpaRollout rollout) {
         log.debug("handleStopRollout called for {}", rollout.getId());
         // clean up all scheduled actions
-        final Slice<JpaAction> scheduledActions = findScheduledActionsByRollout(rollout);
-        deleteScheduledActions(rollout, scheduledActions);
+        deleteScheduledActions(rollout, findScheduledActionIdsByRollout(rollout));
 
         // avoid another scheduler round and re-check if all scheduled actions has been cleaned up. we flush first to ensure that
         // we include the deletion above
@@ -340,12 +365,14 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         }
     }
 
-    private void handleRunningRollout(final JpaRollout rollout) {
+    // returns true if a group has been started, so that the rollout is processed again right away (the success condition of
+    // the started group may be reached already, e.g. 0%) - each time in a new transaction, so that it sees the started actions
+    private boolean handleRunningRollout(final JpaRollout rollout) {
         log.debug("handleRunningRollout called for rollout {}", rollout.getId());
 
         if (rollout.isDynamic() && fillDynamicRolloutGroupsWithTargets(rollout)) {
             log.debug("Dynamic group created for rollout {}", rollout.getId());
-            return;
+            return false;
         }
 
         final List<JpaRolloutGroup> runningGroups = rollout.getRolloutGroups().stream()
@@ -358,28 +385,43 @@ public class JpaRolloutExecutor implements RolloutExecutor {
             asSystem(() -> rolloutManagement.triggerNextGroup(rollout.getId()));
         } else {
             log.debug("Rollout {} has {} running groups", rollout.getId(), runningGroups.size());
-            executeRunningGroups(rollout, runningGroups, rollout.getRolloutGroups().get(rollout.getRolloutGroups().size() - 1));
+            final RolloutGroup lastGroup = rollout.getRolloutGroups().get(rollout.getRolloutGroups().size() - 1);
+            executeRunningGroups(rollout, runningGroups, lastGroup);
         }
 
         if (isRolloutComplete(rollout)) {
             log.info("Rollout {} is finished, setting FINISHED status", rollout);
             rollout.setStatus(RolloutStatus.FINISHED);
             rolloutRepository.save(rollout);
+            return false;
         }
+        // the group status is set by a bulk update - read from the DB (the own changes are visible to the own transaction)
+        final Set<Long> runningBefore = runningGroups.stream().map(JpaRolloutGroup::getId).collect(Collectors.toSet());
+        return rolloutGroupRepository.findIdsByRolloutIdAndStatus(rollout.getId(), RolloutGroupStatus.RUNNING).stream()
+                .anyMatch(groupId -> !runningBefore.contains(groupId));
     }
 
     private void hardDeleteRollout(final JpaRollout rollout) {
         rolloutRepository.delete(rollout);
     }
 
-    private void deleteScheduledActions(final JpaRollout rollout, final Slice<JpaAction> scheduledActions) {
-        if (scheduledActions.getNumberOfElements() > 0) {
+    private void deleteScheduledActions(final JpaRollout rollout, final List<Long> scheduledActionIds) {
+        if (!scheduledActionIds.isEmpty()) {
             // has scheduled actions - delete them
             try {
-                final List<Long> actionIds = StreamSupport.stream(scheduledActions.spliterator(), false)
-                        .map(Action::getId)
-                        .toList();
-                actionRepository.deleteAllById(actionIds);
+                final List<List<Long>> chunks = ListUtils.partition(scheduledActionIds, Constants.MAX_ENTRIES_IN_STATEMENT);
+                // the delete access check of the repository's deleteAllById
+                actionRepository.getAccessController().ifPresent(accessController -> chunks.forEach(chunk -> {
+                    if (actionRepository.count(AccessController.Operation.DELETE, actionRepository.byIdsSpec(chunk)) != chunk.size()) {
+                        throw new InsufficientPermissionException("Has at least one id that is not allowed for deletion!");
+                    }
+                }));
+                // bulk DELETE instead of an entity remove per action, which reads the action statuses of each action first (cascade).
+                // The action statuses are deleted by the DB (ON DELETE CASCADE) - a new child table of sp_action needs it too.
+                // Pending changes are flushed before. No action of the rollout is loaded here (ids only), so no managed entity
+                // gets stale - the persistence context isn't cleared, as the rollout handling goes on with the managed rollout
+                entityManager.flush();
+                chunks.forEach(chunk -> actionRepository.deleteByIdsAndStatus(chunk, Status.SCHEDULED));
                 afterCommit(() -> EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new RolloutUpdatedEvent(rollout)));
             } catch (final RuntimeException e) {
                 log.error("Exception during deletion of actions of rollout {}", rollout, e);
@@ -395,9 +437,8 @@ public class JpaRolloutExecutor implements RolloutExecutor {
                 });
     }
 
-    private Slice<JpaAction> findScheduledActionsByRollout(final JpaRollout rollout) {
-        return actionRepository.findByRolloutIdAndStatus(PageRequest.of(0, TRANSACTION_ACTIONS), rollout.getId(),
-                Status.SCHEDULED);
+    private List<Long> findScheduledActionIdsByRollout(final JpaRollout rollout) {
+        return actionRepository.findIdsByRolloutIdAndStatus(rollout.getId(), Status.SCHEDULED, Limit.of(TRANSACTION_ACTIONS));
     }
 
     private boolean isRolloutComplete(final JpaRollout rollout) {
@@ -550,22 +591,55 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         return scheduledGroups == groupsToBeScheduled.size();
     }
 
-    private JpaRolloutGroup fillRolloutGroupWithTargets(
-            final JpaRollout rollout, final JpaRolloutGroup group, final List<RolloutGroup> rolloutGroups) {
+    /**
+     * Fills the group with its targets in pages (one transaction per page), reading the candidates ordered by id from a
+     * cursor (keyset paging): a page continues where the previous one ended, instead of scanning again past the targets
+     * already assigned. A page only adds rollout target group rows; the group is set READY with its total targets by the
+     * transaction of the run (as its group instance is the one the next groups read). The cursor is not stored - it is
+     * derived from the assigned targets, so after a failure the committed pages are kept and the next run continues the
+     * group (the key of the rollout target group prevents duplicates). If the candidates after the cursor run out before
+     * the group is complete, the candidates are read once more from the start, for targets with a lower id matching by now.
+     * <p/>
+     * The candidates are taken in id order, so all candidates of a group with an id up to the max id assigned to the group
+     * are in the group (or in a group before). For a resumed fill the cursor is the max assigned id of the group. A group
+     * that selects from the rollout's target set as is (no own target filter, or a retried rollout, which ignores the group
+     * filters) continues after the max assigned id of the nearest such group before it: all targets of the rollout's
+     * target set up to that id are already in that group or in a group before. So these groups share one pass over the
+     * targets, and the cost of a fill doesn't grow with the number of groups before it. The NOT IN guard of the READY
+     * groups stays, for the targets taken by groups with an own target filter, which may take any targets of the set.
+     *
+     * @param rolloutCandidates the count of the targets of the rollout's target set not in a READY group, if known (carried
+     *         from the group before in the same run), otherwise {@code null}
+     */
+    private GroupFill fillRolloutGroupWithTargets(
+            final JpaRollout rollout, final JpaRolloutGroup group, final List<RolloutGroup> rolloutGroups, final Long rolloutCandidates) {
+        final boolean retried = RolloutHelper.isRolloutRetried(rollout.getTargetFilterQuery());
+        final boolean rolloutTargetSet = retried || ObjectUtils.isEmpty(group.getTargetFilterQuery());
         final String groupTargetFilter = RolloutHelper.getGroupTargetFilter(RolloutHelper.getTargetFilterQuery(rollout), group);
-        final List<Long> readyGroups = RolloutHelper.getGroupsByStatusIncludingGroup(
-                rollout.getRolloutGroups(), RolloutGroupStatus.READY, group);
-        final long targetsInGroupFilter;
-        if (!RolloutHelper.isRolloutRetried(rollout.getTargetFilterQuery())) { // default case
-            targetsInGroupFilter = DeploymentHelper.runInNewTransaction(
+        final long dsTypeId = rollout.getDistributionSet().getTypeId();
+        final String failedRolloutId = retried ? RolloutHelper.getIdFromRetriedTargetFilter(rollout.getTargetFilterQuery()) : null;
+
+        final long inGroupBefore = DeploymentHelper.runInNewTransaction(
+                "countRolloutTargetGroupByRolloutGroup", _ -> rolloutTargetGroupRepository.countByRolloutGroup(group), txManager);
+
+        // the group itself is not excluded from the count: the targets assigned by an interrupted fill are candidates of the
+        // group, so that a resumed fill expects the same size as an uninterrupted one
+        final List<Long> otherReadyGroups = rolloutGroups.stream()
+                .filter(other -> other.getStatus() == RolloutGroupStatus.READY && !other.equals(group))
+                .map(RolloutGroup::getId)
+                .toList();
+        final long candidates;
+        if (rolloutTargetSet && rolloutCandidates != null) {
+            candidates = rolloutCandidates;
+        } else if (!retried) { // default case
+            candidates = DeploymentHelper.runInNewTransaction(
                     "countByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable",
-                    count -> countByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable(
-                            groupTargetFilter, readyGroups, rollout.getDistributionSet().getTypeId()), txManager);
+                    _ -> countByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable(groupTargetFilter, otherReadyGroups, dsTypeId),
+                    txManager);
         } else { // if it is a rollout retry
-            targetsInGroupFilter = DeploymentHelper.runInNewTransaction(
+            candidates = DeploymentHelper.runInNewTransaction(
                     "countByFailedRolloutAndNotInRolloutGroupsAndCompatible",
-                    count -> countByFailedRolloutAndNotInRolloutGroups(
-                            RolloutHelper.getIdFromRetriedTargetFilter(rollout.getTargetFilterQuery()), readyGroups), txManager);
+                    _ -> countByFailedRolloutAndNotInRolloutGroups(failedRolloutId, otherReadyGroups), txManager);
         }
 
         final double percentFromTheRest;
@@ -574,52 +648,94 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         } else { // old style percent - percent from rest
             percentFromTheRest = group.getTargetPercentage();
         }
+        final long expectedInGroup = Math.round(percentFromTheRest * candidates / 100);
 
-        final long expectedInGroup = Math.round(percentFromTheRest * targetsInGroupFilter / 100);
-        long targetsLeftToAdd = expectedInGroup - DeploymentHelper.runInNewTransaction(
-                "countRolloutTargetGroupByRolloutGroup", count -> rolloutTargetGroupRepository.countByRolloutGroup(group), txManager);
+        // NOT IN guard - the READY groups and the group itself (never empty, an empty IN isn't valid)
+        final List<Long> excludedGroups = RolloutHelper.getGroupsByStatusIncludingGroup(rolloutGroups, RolloutGroupStatus.READY, group);
+        final List<Long> cursorGroups = rolloutTargetSet ? previousRolloutTargetSetGroup(group, rolloutGroups, retried)
+                .map(previous -> List.of(group.getId(), previous.getId()))
+                .orElseGet(() -> List.of(group.getId())) : List.of(group.getId());
         try {
-            while (targetsLeftToAdd > 0) {
-                // Add up to TRANSACTION_TARGETS of the left targets. In case a TransactionException is thrown this loop aborts
-                final long assigned = assignTargetsToGroupInNewTransaction(
-                        rollout, group, groupTargetFilter, Math.min(TRANSACTION_TARGETS, targetsLeftToAdd));
-                if (assigned == 0) {
-                    break; // percent > 100 or some could have disappeared
-                } else {
-                    targetsLeftToAdd -= assigned;
+            final long startCursor = DeploymentHelper.runInNewTransaction("findMaxTargetIdOfRolloutGroups", _ -> cursorGroups.stream()
+                    .map(rolloutTargetGroupRepository::findMaxTargetIdByRolloutGroupId)
+                    .filter(Objects::nonNull)
+                    .mapToLong(Long::longValue)
+                    .max().orElse(0L), txManager);
+            long cursor = startCursor;
+            boolean fromStart = startCursor == 0;
+            long inGroup = inGroupBefore;
+            while (inGroup < expectedInGroup) {
+                final long afterId = cursor;
+                final int limit = (int) Math.min(Constants.MAX_ENTRIES_IN_STATEMENT, expectedInGroup - inGroup);
+                // a page in its own transaction: only the rollout target group rows - the group itself is updated by this
+                // (outer) transaction below, as before, so its instance here stays current and committed pages are kept
+                final List<Long> targetIds = DeploymentHelper.runInNewTransaction("assignTargetsToRolloutGroup", _ -> {
+                    final List<Long> pageTargetIds = retried
+                            ? findIdsByFailedRolloutAndNotInRolloutGroups(failedRolloutId, excludedGroups, afterId, limit)
+                            : findIdsByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable(
+                                    excludedGroups, groupTargetFilter, dsTypeId, afterId, limit);
+                    final JpaRolloutGroup groupReference = entityManager.getReference(JpaRolloutGroup.class, group.getId());
+                    // persist with references instead of saveAll: the RolloutTargetGroup has an assigned (composite) id, so saveAll
+                    // would merge, i.e. read every row first - and the targets themselves are not needed, only their ids
+                    pageTargetIds.forEach(targetId -> entityManager.persist(
+                            new RolloutTargetGroup(groupReference, entityManager.getReference(JpaTarget.class, targetId))));
+                    return pageTargetIds;
+                }, txManager);
+                inGroup += targetIds.size();
+                if (!targetIds.isEmpty()) {
+                    cursor = targetIds.getLast();
+                }
+                if (targetIds.size() < limit) {
+                    if (fromStart) {
+                        break; // no more candidates
+                    }
+                    // no more candidates after the cursor - targets with a lower id may match by now (e.g. changed since the
+                    // group before was filled), so read once more from the start (the NOT IN guard skips the assigned ones)
+                    fromStart = true;
+                    cursor = 0;
                 }
             }
 
             group.setStatus(RolloutGroupStatus.READY);
-            group.setTotalTargets((int) (expectedInGroup - targetsLeftToAdd));
-            return rolloutGroupRepository.save(group);
+            group.setTotalTargets(Math.toIntExact(inGroup));
+            rolloutGroupRepository.save(group);
+
+            // carry the candidates count to the next group - only if this group has been filled from scratch in this run, so
+            // that all its targets are of the counted ones (all targets of a group are of the rollout's target set)
+            final long assigned = inGroup - inGroupBefore;
+            final Long rolloutCandidatesLeft;
+            if (inGroupBefore != 0) {
+                rolloutCandidatesLeft = null;
+            } else if (rolloutTargetSet) {
+                rolloutCandidatesLeft = candidates - assigned;
+            } else {
+                rolloutCandidatesLeft = rolloutCandidates == null ? null : rolloutCandidates - assigned;
+            }
+            return new GroupFill(true, Math.toIntExact(inGroup), rolloutCandidatesLeft);
         } catch (final TransactionException e) {
             log.warn(TRANSACTION_ASSIGNING_TARGETS_TO_ROLLOUT_GROUP_FAILED, e);
-            return group;
+            return new GroupFill(false, 0, null);
         }
     }
 
-    private int assignTargetsToGroupInNewTransaction(
-            final JpaRollout rollout, final RolloutGroup group, final String targetFilter, final long limit) {
-        // NB: new transaction in transaction
-        return DeploymentHelper.runInNewTransaction("assignTargetsToRolloutGroup", status -> {
-            final PageRequest pageRequest = PageRequest.of(0, Math.toIntExact(limit));
-            final List<Long> readyGroups = RolloutHelper.getGroupsByStatusIncludingGroup(
-                    rollout.getRolloutGroups(), RolloutGroupStatus.READY, group);
-            final Slice<Target> targets;
-            if (!RolloutHelper.isRolloutRetried(rollout.getTargetFilterQuery())) {
-                targets = findByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable(
-                        readyGroups, targetFilter, rollout.getDistributionSet().getTypeId(), pageRequest);
-            } else {
-                targets = findByFailedRolloutAndNotInRolloutGroups(
-                        RolloutHelper.getIdFromRetriedTargetFilter(rollout.getTargetFilterQuery()), readyGroups, pageRequest);
+    // the nearest READY group before the group that selects from the rollout's target set as is and has targets - it has the
+    // highest target id of these groups, as each of them continues after the one before
+    private static Optional<RolloutGroup> previousRolloutTargetSetGroup(
+            final RolloutGroup group, final List<RolloutGroup> rolloutGroups, final boolean retried) {
+        final int index = rolloutGroups.indexOf(group);
+        for (int i = index - 1; i >= 0; i--) {
+            final RolloutGroup previous = rolloutGroups.get(i);
+            if (previous.getStatus() == RolloutGroupStatus.READY && previous.getTotalTargets() > 0
+                    && (retried || ObjectUtils.isEmpty(previous.getTargetFilterQuery()))) {
+                return Optional.of(previous);
             }
-
-            rolloutTargetGroupRepository.saveAll(targets.stream().map(target -> new RolloutTargetGroup(group, target)).toList());
-
-            return targets.getNumberOfElements();
-        }, txManager);
+        }
+        return Optional.empty();
     }
+
+    // result of a group fill: if the group got READY, its total targets and the count of the rollout's target set candidates
+    // left for the next group (null - unknown)
+    private record GroupFill(boolean ready, int totalTargets, Long rolloutCandidatesLeft) {}
 
     // return if group change is made
     private boolean fillDynamicRolloutGroupsWithTargets(final JpaRollout rollout) {
@@ -793,9 +909,12 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         // then cancel the current scheduled action to cancel. E.g. a new scheduled action is created.
         final List<Long> targetIds = targets.stream().map(Target::getId).toList();
         deploymentManagement.cancelInactiveScheduledActionsForTargets(targetIds);
+        // the action counts of all targets at once (grouped, per chunk), instead of one count per target
+        final int quota = quotaManagement.getMaxActionsPerTarget();
+        final Map<Long, Long> actionCounts = quota > 0 ? actionRepository.countByTargetIds(targetIds) : Map.of();
         return targets.stream()
                 .map(target -> {
-                    assertActionsPerTargetQuota(target, 1);
+                    assertActionsPerTargetQuota(target, 1, quota, actionCounts.getOrDefault(target.getId(), 0L));
 
                     final JpaAction action = new JpaAction();
                     action.setTarget(target);
@@ -821,11 +940,12 @@ public class JpaRolloutExecutor implements RolloutExecutor {
      *
      * @param target the target
      * @param requested number of actions to check
+     * @param quota the maximum number of actions per target
+     * @param actionCount the current number of actions of the target
      */
-    private void assertActionsPerTargetQuota(final Target target, final long requested) {
-        final int quota = quotaManagement.getMaxActionsPerTarget();
+    private void assertActionsPerTargetQuota(final Target target, final long requested, final int quota, final long actionCount) {
         try {
-            QuotaHelper.assertAssignmentQuota(target.getId(), requested, quota, Action.class, Target.class, actionRepository::countByTargetId);
+            QuotaHelper.assertAssignmentQuota(target.getId(), requested, quota, Action.class, Target.class, targetId -> actionCount);
         } catch (final AssignmentQuotaExceededException ex) {
             asSystem(() -> deploymentManagement.handleMaxAssignmentsExceeded(target.getId(), requested, ex));
         }
@@ -848,26 +968,44 @@ public class JpaRolloutExecutor implements RolloutExecutor {
 
     // Finds all targets for all the given parameter {@link TargetFilterQuery} and that are not assigned to one of the {@link RolloutGroup}s
     // and are compatible with the passed {@link DistributionSetType}
-    private Slice<Target> findByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable(
-            final Collection<Long> groups, final String rsql, final long dsTypeId, final Pageable pageable) {
-        return targetRepository
-                .findAllWithoutCount(AccessController.Operation.UPDATE,
-                        combineWithAnd(List.of(
-                                QLSupport.getInstance().buildSpec(rsql, TargetFields.class),
-                                TargetSpecifications.isNotInRolloutGroups(groups),
-                                TargetSpecifications.isCompatibleWithDistributionSetType(dsTypeId))),
-                        pageable)
-                .map(Target.class::cast);
+    private List<Long> findIdsByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable(
+            final Collection<Long> groups, final String rsql, final long dsTypeId, final long afterId, final int maxResults) {
+        return findTargetIds(AccessController.Operation.UPDATE,
+                combineWithAnd(List.of(
+                        QLSupport.getInstance().buildSpec(rsql, TargetFields.class),
+                        TargetSpecifications.isNotInRolloutGroups(groups),
+                        TargetSpecifications.isCompatibleWithDistributionSetType(dsTypeId))),
+                afterId, maxResults);
     }
 
     // Finds all targets with failed actions for specific Rollout and that are not assigned to one of the retried {@link RolloutGroup}s and
     //  are compatible with the passed {@link DistributionSetType}.
-    private Slice<Target> findByFailedRolloutAndNotInRolloutGroups(
-            final String rolloutId, final Collection<Long> groups, final Pageable pageable) {
-        final List<Specification<JpaTarget>> specList = List.of(
-                TargetSpecifications.failedActionsForRollout(rolloutId),
-                TargetSpecifications.isNotInRolloutGroups(groups));
-        return JpaManagementHelper.findAllWithCountBySpec(targetRepository, specList, pageable);
+    private List<Long> findIdsByFailedRolloutAndNotInRolloutGroups(final String rolloutId, final Collection<Long> groups,
+            final long afterId, final int maxResults) {
+        return findTargetIds(AccessController.Operation.READ,
+                combineWithAnd(List.of(
+                        TargetSpecifications.failedActionsForRollout(rolloutId),
+                        TargetSpecifications.isNotInRolloutGroups(groups))),
+                afterId, maxResults);
+    }
+
+    // the ids of up to maxResults targets matching the specification with an id greater than afterId, in id order (keyset page),
+    // with the access rules of the operation applied - as the target repository applies them, but without loading the targets
+    private List<Long> findTargetIds(
+            final AccessController.Operation operation, final Specification<JpaTarget> spec, final long afterId, final int maxResults) {
+        final Specification<JpaTarget> withAccessRules = targetRepository.getAccessController()
+                .map(accessController -> accessController.appendAccessRules(operation, spec))
+                .orElse(spec);
+        final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        final CriteriaQuery<Long> query = cb.createQuery(Long.class);
+        final Root<JpaTarget> root = query.from(JpaTarget.class);
+        final Path<Long> id = root.get(AbstractJpaBaseEntity_.id);
+        final Predicate specPredicate = withAccessRules.toPredicate(root, query, cb);
+        final Predicate afterCursor = cb.greaterThan(id, afterId);
+        query.select(id)
+                .where(specPredicate == null ? afterCursor : cb.and(specPredicate, afterCursor))
+                .orderBy(cb.asc(id));
+        return entityManager.createQuery(query).setMaxResults(maxResults).getResultList();
     }
 
     // Finds all targets of the provided {@link RolloutGroup} that have no Action for the RolloutGroup
@@ -889,18 +1027,24 @@ public class JpaRolloutExecutor implements RolloutExecutor {
     private long countByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable(
             final String rsql, final Collection<Long> groups, final long dsTypeId) {
         return targetRepository.count(AccessController.Operation.UPDATE,
-                combineWithAnd(List.of(
-                        QLSupport.getInstance().buildSpec(rsql, TargetFields.class),
-                        TargetSpecifications.isNotInRolloutGroups(groups),
-                        TargetSpecifications.isCompatibleWithDistributionSetType(dsTypeId))));
+                combineWithAnd(groups.isEmpty() // an empty IN isn't valid
+                        // @formatter:off
+                        ? List.of(
+                                QLSupport.getInstance().buildSpec(rsql, TargetFields.class),
+                                TargetSpecifications.isCompatibleWithDistributionSetType(dsTypeId))
+                        : List.of(
+                                QLSupport.getInstance().buildSpec(rsql, TargetFields.class),
+                                TargetSpecifications.isNotInRolloutGroups(groups),
+                                TargetSpecifications.isCompatibleWithDistributionSetType(dsTypeId))));
+                         // @formatter:on
     }
 
     // Counts all targets with failed actions for specific Rollout and that are not assigned to one of the {@link RolloutGroup}s and are
     // compatible with the passed {@link DistributionSetType}
     private long countByFailedRolloutAndNotInRolloutGroups(final String rolloutId, final Collection<Long> groups) {
-        final List<Specification<JpaTarget>> specList = List.of(
-                TargetSpecifications.failedActionsForRollout(rolloutId),
-                TargetSpecifications.isNotInRolloutGroups(groups));
+        final List<Specification<JpaTarget>> specList = groups.isEmpty() // an empty IN isn't valid
+                ? List.of(TargetSpecifications.failedActionsForRollout(rolloutId))
+                : List.of(TargetSpecifications.failedActionsForRollout(rolloutId), TargetSpecifications.isNotInRolloutGroups(groups));
         return JpaManagementHelper.countBySpec(targetRepository, specList);
     }
 }

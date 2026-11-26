@@ -9,16 +9,22 @@
  */
 package org.eclipse.hawkbit.repository.jpa.management;
 
+import static org.eclipse.hawkbit.repository.jpa.acm.AccessController.Operation.UPDATE;
 import static org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor.afterCommit;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.ACTION_STATUS_CODE_CANCELED;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.ACTION_STATUS_CODE_CANCELING;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.BooleanSupplier;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
 import jakarta.persistence.criteria.JoinType;
 
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +36,7 @@ import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
+import org.eclipse.hawkbit.repository.jpa.Jpa;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction_;
@@ -48,6 +55,8 @@ import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -58,10 +67,13 @@ import org.springframework.util.StringUtils;
 @Slf4j
 public abstract class AbstractDsAssignmentStrategy {
 
+    private static final Integer CANCELING_DB_VALUE = new JpaAction.StatusConverter().convertToDatabaseColumn(Status.CANCELING);
+
     protected final TargetRepository targetRepository;
     protected final ActionRepository actionRepository;
 
     private final ActionStatusRepository actionStatusRepository;
+    private final EntityManager entityManager;
     private final BooleanSupplier confirmationFlowConfig;
     private final RepositoryProperties repositoryProperties;
 
@@ -69,10 +81,12 @@ public abstract class AbstractDsAssignmentStrategy {
     AbstractDsAssignmentStrategy(
             final TargetRepository targetRepository,
             final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
+            final EntityManager entityManager,
             final BooleanSupplier confirmationFlowConfig, final RepositoryProperties repositoryProperties) {
         this.targetRepository = targetRepository;
         this.actionRepository = actionRepository;
         this.actionStatusRepository = actionStatusRepository;
+        this.entityManager = entityManager;
         this.confirmationFlowConfig = confirmationFlowConfig;
         this.repositoryProperties = repositoryProperties;
     }
@@ -141,37 +155,118 @@ public abstract class AbstractDsAssignmentStrategy {
      * Cancels {@link Action}s that are no longer necessary and sends
      * cancellations to the controller.
      * <p/>
-     * No access control applied
+     * Actions of targets without read access are skipped, update access to the targets of the others is asserted.
      *
      * @param targetsIds to override {@link Action}s
      */
     protected void overrideObsoleteUpdateActions(final Collection<Long> targetsIds) {
-        // Figure out if there are potential target/action combinations that
-        // need to be considered for cancellation
-        final List<JpaAction> activeActions = actionRepository.findAll((root, query, cb) -> {
+        if (targetsIds.isEmpty()) {
+            return;
+        }
+        // write the pending changes first, so that the reads and the bulk updates below see them and no pending change of an
+        // obsolete action is written (with an outdated version) after its bulk update
+        entityManager.flush();
+        // in pages (keyset by id), so that the obsolete actions are never all in memory. The cancelled actions don't match the
+        // read anymore (CANCELING), the ones skipped because of a concurrent change are behind the last read id
+        long lastId = 0;
+        List<JpaAction> page;
+        do {
+            page = findObsoleteUpdateActions(targetsIds, lastId);
+            if (!page.isEmpty()) {
+                lastId = page.getLast().getId();
+                cancelObsoleteUpdateActions(page);
+            }
+        } while (page.size() >= Constants.MAX_ENTRIES_IN_STATEMENT);
+    }
+
+    // The active, not yet canceling actions of the targets that can be cancelled (no required migration step). Through the
+    // repository proxy, so the read access rules apply (actions of not readable targets are not cancelled). With their target
+    // (cancel event: controller id) fetched in the same query, as a JOIN FETCH and not an entity graph, as EclipseLink loads
+    // entity graph associations one by one. No COUNT query is issued.
+    private List<JpaAction> findObsoleteUpdateActions(final Collection<Long> targetsIds, final long fromId) {
+        return actionRepository.findAllWithoutCount((root, _, cb) -> {
             root.fetch(JpaAction_.target, JoinType.LEFT);
+            // the action update events need the rollout and rollout group ids - the actions are detached when the events are built
+            root.fetch(JpaAction_.rollout, JoinType.LEFT);
+            root.fetch(JpaAction_.rolloutGroup, JoinType.LEFT);
             return cb.and(
                     cb.equal(root.get(JpaAction_.active), true),
                     cb.equal(root.get(JpaAction_.distributionSet).get(JpaDistributionSet_.requiredMigrationStep), false),
                     cb.notEqual(root.get(JpaAction_.status), Action.Status.CANCELING),
-                    root.get(JpaAction_.target).get(AbstractJpaBaseEntity_.id).in(targetsIds)
-            );
-        });
+                    root.get(JpaAction_.target).get(AbstractJpaBaseEntity_.id).in(targetsIds),
+                    cb.greaterThan(root.get(AbstractJpaBaseEntity_.id), fromId));
+        }, PageRequest.of(0, Constants.MAX_ENTRIES_IN_STATEMENT, Sort.by(AbstractJpaBaseEntity_.ID))).getContent();
+    }
 
-        activeActions.forEach(action -> {
-            action.setStatus(Status.CANCELING);
+    // Cancels the page with one bulk UPDATE instead of an entity update per action: fewer statements and no per-action version
+    // check, which a concurrent device update of an obsolete action would fail (rolling back the whole batch). The UPDATE repeats
+    // the conditions (active, not canceling), so an action changed concurrently in between (e.g. finished by the device) is
+    // skipped, and increments the version, so a stale device-side save fails instead of overwriting the cancellation.
+    // Bulk updates bypass the entity callbacks, so the ActionUpdatedEvents are published explicitly.
+    private void cancelObsoleteUpdateActions(final List<JpaAction> page) {
+        // the update access check the per-action save did (i.e. update access to the targets)
+        actionRepository.getAccessController().ifPresent(accessController -> accessController.assertOperationAllowed(UPDATE, page));
 
-            // document that the status has been retrieved
-            final JpaActionStatus actionStatus = new JpaActionStatus(action, Status.CANCELING, System.currentTimeMillis(),
-                    RepositoryConstants.SERVER_MESSAGE_PREFIX + "cancel obsolete action due to new update");
-            ServerActionStatusCode.apply(actionStatus, ACTION_STATUS_CODE_CANCELING);
-            actionStatusRepository.save(actionStatus);
-            actionRepository.save(action);
-        });
-
-        if (!activeActions.isEmpty()) {
-            cancelAssignDistributionSetEvent(Collections.unmodifiableList(activeActions));
+        // the actions still to cancel, locked until the commit - so exactly these are updated below and get a status and events
+        // here, not in findObsoleteUpdateActions because lock there will lock joins or fail
+        final Set<Long> lockedIds = new HashSet<>(lockCancelable(page.stream().map(JpaAction::getId).toList()));
+        if (lockedIds.size() < page.size()) {
+            log.debug("{} of {} obsolete actions changed concurrently, not cancelled", page.size() - lockedIds.size(), page.size());
         }
+        // the managed actions get stale with the bulk update - detach them, so they are not written again (with an outdated
+        // version) and a later read in this transaction gets the current state, and set the new state for the events
+        page.forEach(entityManager::detach);
+        final List<JpaAction> toCancel = page.stream().filter(action -> lockedIds.contains(action.getId())).toList();
+        if (toCancel.isEmpty()) {
+            return;
+        }
+        final long now = System.currentTimeMillis();
+        final String actor = AccessContext.actor();
+        final List<JpaActionStatus> statuses = new ArrayList<>(toCancel.size());
+        Integer code = null;
+        for (final JpaAction action : toCancel) {
+            action.setStatus(Status.CANCELING);
+            action.setLastModifiedAt(now);
+            action.setLastModifiedBy(actor);
+            // document that the status has been retrieved
+            final JpaActionStatus actionStatus = new JpaActionStatus(action, Status.CANCELING, now,
+                    RepositoryConstants.SERVER_MESSAGE_PREFIX + "cancel obsolete action due to new update");
+            // sets the code on the status and the last action status code on the (detached) action. The code is per tenant,
+            // so the same for all actions
+            if (ServerActionStatusCode.apply(actionStatus, ACTION_STATUS_CODE_CANCELING)) {
+                code = actionStatus.getCode().orElse(null);
+            }
+            statuses.add(actionStatus);
+        }
+
+        final List<Long> ids = toCancel.stream().map(JpaAction::getId).toList();
+        if (code == null) {
+            actionRepository.setStatusOfActiveByIdsAndStatusNot(ids, Status.CANCELING, now, actor);
+        } else {
+            actionRepository.setStatusAndLastActionStatusCodeOfActiveByIdsAndStatusNot(ids, Status.CANCELING, code, now, actor);
+        }
+
+        // a reference instead of the detached action, so that persisting the status doesn't involve (merge / write) the action
+        statuses.forEach(status -> status.setAction(entityManager.getReference(JpaAction.class, status.getAction().getId())));
+        actionStatusRepository.saveAll(statuses);
+
+        cancelAssignDistributionSetEvent(Collections.unmodifiableList(toCancel));
+        toCancel.forEach(action -> afterCommit(action::fireUpdateEvent));
+    }
+
+    // Locks the actions of the given ids that are still active and not canceling (i.e. not changed concurrently since they were
+    // read), in id order, and returns their ids. The bulk update locks the same rows until the commit anyway - locking them before
+    // gives the exact set it changes, also on READ COMMITTED where an action set to canceling by a concurrent transaction would
+    // otherwise look like cancelled by this one. Native, as JPA can't lock on an ids-only query; sp_action only, by primary key.
+    private List<Long> lockCancelable(final List<Long> ids) {
+        final String prefix = String.valueOf(Jpa.nativeQueryParamPrefix());
+        final Query lockQuery = entityManager.createNativeQuery(
+                "SELECT id FROM sp_action WHERE id IN (" + Jpa.formatNativeQueryInClause("id", ids) + ")" +
+                        " AND active = " + prefix + "active AND status <> " + prefix + "canceling ORDER BY id FOR UPDATE");
+        Jpa.setNativeQueryInParameter(lockQuery, "id", ids);
+        lockQuery.setParameter("active", true);
+        lockQuery.setParameter("canceling", CANCELING_DB_VALUE);
+        return ((List<?>) lockQuery.getResultList()).stream().map(id -> ((Number) id).longValue()).toList();
     }
 
     /**
@@ -279,5 +374,4 @@ public abstract class AbstractDsAssignmentStrategy {
         afterCommit(() -> EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
                 new CancelTargetAssignmentEvent(tenant, actions)));
     }
-
 }

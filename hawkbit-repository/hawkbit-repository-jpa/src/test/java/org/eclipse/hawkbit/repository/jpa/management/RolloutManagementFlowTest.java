@@ -30,6 +30,7 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessAction;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.test.context.TestPropertySource;
@@ -64,6 +65,30 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
     @Test
     void rolloutPauseFlow() {
         rolloutFlow(RolloutGroupSuccessAction.PAUSE);
+    }
+
+    /**
+     * Verifies that groups whose success condition is reached right away (0%) are all started by one scheduler run, not one
+     * group per run.
+     */
+    @Test
+    void groupsWithReachedSuccessConditionStartedInOneRun() {
+        final String prefix = "rollout-chained-";
+        final int amountGroups = 5;
+        testdataFactory.createTargets(prefix, 0, amountGroups * 2);
+        final DistributionSet distributionSet = testdataFactory.createDistributionSetLocked(prefix + "ds");
+        final Rollout rollout = testdataFactory.createRolloutByVariables(
+                prefix, prefix, amountGroups, "controllerid==" + prefix + "*", distributionSet, "0", "100");
+        rolloutManagement.start(rollout.getId());
+
+        rolloutHandler.handleAll(); // starts the first group
+        rolloutHandler.handleAll(); // starts the others, one after the other
+
+        assertThat(rolloutGroupManagement.findByRollout(rollout.getId(), new OffsetBasedPageRequest(0, amountGroups + 10)).getContent())
+                .hasSize(amountGroups)
+                .allSatisfy(group -> assertThat(group.getStatus()).isEqualTo(RolloutGroupStatus.RUNNING));
+        assertThat(actionRepository.findByRolloutIdAndStatus(PageRequest.of(0, 100), rollout.getId(), Action.Status.RUNNING).getContent())
+                .hasSize(amountGroups * 2);
     }
 
     void rolloutFlow(final RolloutGroupSuccessAction successAction) throws Exception {
@@ -508,8 +533,10 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
         rolloutHandler.handleAll();
         assertRollout(rollout, false, RolloutStatus.RUNNING, amountGroups, amountGroups * 3);
         for (int step = 1; step <= amountGroups; step++) {
+            // with NEXTGROUP the groups started by a run are evaluated in the same run - the second run starts all the others
+            final int running = successAction == RolloutGroupSuccessAction.NEXTGROUP && step > 1 ? amountGroups : step;
             for (int i = 0; i < amountGroups; i++) {
-                assertGroup(groups.get(i), false, i < step ? RolloutGroupStatus.RUNNING : RolloutGroupStatus.SCHEDULED, 3);
+                assertGroup(groups.get(i), false, i < running ? RolloutGroupStatus.RUNNING : RolloutGroupStatus.SCHEDULED, 3);
             }
 
             // expect all groups without last to trigger PAUSE action

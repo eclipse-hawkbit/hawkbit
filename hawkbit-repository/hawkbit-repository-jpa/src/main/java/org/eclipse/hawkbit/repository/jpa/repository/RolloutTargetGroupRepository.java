@@ -13,7 +13,9 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
 import org.eclipse.hawkbit.repository.jpa.model.RolloutTargetGroup;
 import org.eclipse.hawkbit.repository.jpa.model.RolloutTargetGroupId;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -30,4 +32,14 @@ public interface RolloutTargetGroupRepository
      * @return count of targets in the group
      */
     Long countByRolloutGroup(JpaRolloutGroup rolloutGroup);
+
+    /**
+     * The highest id of the targets in the group - the cursor of a (resumed) rollout group fill, which assigns the targets
+     * in id order. Served by the primary key (rollout group, target).
+     *
+     * @param rolloutGroupId the group id
+     * @return the highest target id, {@code null} if the group has no targets
+     */
+    @Query("SELECT MAX(r.target.id) FROM RolloutTargetGroup r WHERE r.rolloutGroup.id = :rolloutGroupId")
+    Long findMaxTargetIdByRolloutGroupId(@Param("rolloutGroupId") long rolloutGroupId);
 }

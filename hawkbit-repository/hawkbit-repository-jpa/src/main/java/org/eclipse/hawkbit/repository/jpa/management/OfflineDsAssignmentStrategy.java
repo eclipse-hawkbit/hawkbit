@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 
+import jakarta.persistence.EntityManager;
+
 import org.apache.commons.collections4.ListUtils;
 import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
@@ -43,8 +45,9 @@ class OfflineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     OfflineDsAssignmentStrategy(
             final TargetRepository targetRepository,
             final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
+            final EntityManager entityManager,
             final BooleanSupplier confirmationFlowConfig, final RepositoryProperties repositoryProperties) {
-        super(targetRepository, actionRepository, actionStatusRepository, confirmationFlowConfig, repositoryProperties);
+        super(targetRepository, actionRepository, actionStatusRepository, entityManager, confirmationFlowConfig, repositoryProperties);
     }
 
     @Override

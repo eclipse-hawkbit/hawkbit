@@ -137,6 +137,10 @@ public class JpaConfiguration extends JpaBaseConfiguration {
                 // do nothing
             }
         }));
+        // JDBC batching of updates / deletes (the counterpart of EclipseLink's batch writing), ordered so that more
+        // statements fall into one batch
+        properties.put("hibernate.jdbc.batch_size", "500");
+        properties.put("hibernate.order_updates", "true");
 
         // override with all explicitly configured properties
         properties.putAll(hibernateProperties);

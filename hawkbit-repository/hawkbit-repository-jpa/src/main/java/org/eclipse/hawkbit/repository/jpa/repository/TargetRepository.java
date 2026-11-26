@@ -53,13 +53,23 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget> {
     // TODO AC - remove it and use specification
 
     /**
+     * Also increments the optimistic lock revision. A JPQL bulk update doesn't increment it on every JPA vendor (EclipseLink does,
+     * Hibernate doesn't), so it is set explicitly: a concurrent update based on the state read before the bulk update then
+     * fails with a concurrency failure instead of overwriting the assignment.
+     * <p/>
+     * No access control applied
+     *
+     * @param set the distribution set to assign
+     * @param modifiedAt last modified at to set
+     * @param modifiedBy last modified by to set
+     * @param status the update status to set
+     * @param targets the IDs of the targets (at most {@code MAX_ENTRIES_IN_STATEMENT})
      * @deprecated remove it and use specification
      */
-    // no access check
     @Deprecated(forRemoval = true)
     @Modifying
     @Transactional
-    @Query("UPDATE JpaTarget t SET t.assignedDistributionSet = :dSet, t.lastModifiedAt = :lastModifiedAt, t.lastModifiedBy = :lastModifiedBy, t.updateStatus = :status WHERE t.id IN :targets")
+    @Query("UPDATE JpaTarget t SET t.assignedDistributionSet = :dSet, t.lastModifiedAt = :lastModifiedAt, t.lastModifiedBy = :lastModifiedBy, t.updateStatus = :status, t.optLockRevision = t.optLockRevision + 1 WHERE t.id IN :targets")
     void setAssignedDistributionSetAndUpdateStatus(
             @Param("dSet") JpaDistributionSet set, @Param("lastModifiedAt") Long modifiedAt, @Param("lastModifiedBy") String modifiedBy,
             @Param("status") TargetUpdateStatus status,
@@ -68,13 +78,16 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget> {
     // TODO AC - remove it and use specification
 
     /**
+     * Also increments the optimistic lock revision, see
+     * {@link #setAssignedDistributionSetAndUpdateStatus(JpaDistributionSet, Long, String, TargetUpdateStatus, Collection)}.
+     *
      * @deprecated will be removed
      */
     // no access check
     @Deprecated(forRemoval = true)
     @Modifying
     @Transactional
-    @Query("UPDATE JpaTarget t SET t.assignedDistributionSet = :dSet, t.installedDistributionSet = :dSet, t.installationDate = :lastModifiedAt, t.lastModifiedAt = :lastModifiedAt, t.lastModifiedBy = :lastModifiedBy, t.updateStatus = :status WHERE t.id IN :targets")
+    @Query("UPDATE JpaTarget t SET t.assignedDistributionSet = :dSet, t.installedDistributionSet = :dSet, t.installationDate = :lastModifiedAt, t.lastModifiedAt = :lastModifiedAt, t.lastModifiedBy = :lastModifiedBy, t.updateStatus = :status, t.optLockRevision = t.optLockRevision + 1 WHERE t.id IN :targets")
     void setAssignedAndInstalledDistributionSetAndUpdateStatus(
             @Param("status") TargetUpdateStatus status,
             @Param("dSet") JpaDistributionSet distributionSet, @Param("lastModifiedAt") Long modifiedAt,
