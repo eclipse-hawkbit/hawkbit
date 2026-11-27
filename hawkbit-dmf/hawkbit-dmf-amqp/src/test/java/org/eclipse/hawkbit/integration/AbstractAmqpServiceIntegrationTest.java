@@ -292,18 +292,19 @@ abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpIntegratio
                 () -> targetManagement.findByControllerId(controllerId));
     }
 
-    protected void registerSameTargetAndAssertBasedOnVersion(final String controllerId,
+    protected void registerSameTargetAndAssertBasedOnPollTime(final String controllerId,
             final int existingTargetsAfterCreation, final TargetUpdateStatus expectedTargetStatus) {
-        registerSameTargetAndAssertBasedOnVersion(controllerId, null, existingTargetsAfterCreation,
+        registerSameTargetAndAssertBasedOnPollTime(controllerId, null, existingTargetsAfterCreation,
                 expectedTargetStatus, null);
     }
 
-    protected void registerSameTargetAndAssertBasedOnVersion(final String controllerId, final String name,
+    protected void registerSameTargetAndAssertBasedOnPollTime(final String controllerId, final String name,
             final int existingTargetsAfterCreation, final TargetUpdateStatus expectedTargetStatus,
             final Map<String, String> attributes) {
-        final int version = controllerManagement.findByControllerId(controllerId).get().getOptLockRevision();
+        final Long lastTargetQuery = controllerManagement.findByControllerId(controllerId).get().getLastTargetQuery();
         registerAndAssertTargetWithExistingTenant(controllerId, name, existingTargetsAfterCreation,
-                expectedTargetStatus, CONTROLLER_PLUG_AND_PLAY, attributes, () -> findTargetBasedOnNewVersion(controllerId, version));
+                expectedTargetStatus, CONTROLLER_PLUG_AND_PLAY, attributes,
+                () -> findTargetPolledAfter(controllerId, lastTargetQuery, attributes));
     }
 
     protected Message createTargetMessage(final String controllerId, final String tenant) {
@@ -472,12 +473,14 @@ abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpIntegratio
                 createdBy, attributes != null ? attributes : Collections.emptyMap());
     }
 
-    private Optional<Target> findTargetBasedOnNewVersion(final String controllerId, final int version) {
-        final Optional<Target> target2 = controllerManagement.findByControllerId(controllerId);
-        if (version < target2.get().getOptLockRevision()) {
-            return target2;
-        }
-        return Optional.empty();
+    // The re-registration is processed when the new poll time is written - the version isn't a marker, a poll that changes nothing
+    // but the poll time doesn't change it. The attributes are updated in a separate transaction after it - waited for too.
+    private Optional<Target> findTargetPolledAfter(final String controllerId, final Long lastTargetQuery,
+            final Map<String, String> attributes) {
+        return controllerManagement.findByControllerId(controllerId)
+                .filter(target -> target.getLastTargetQuery() != null
+                        && (lastTargetQuery == null || target.getLastTargetQuery() > lastTargetQuery))
+                .filter(target -> attributes == null || attributes.equals(targetManagement.getControllerAttributes(controllerId)));
     }
 
     private void assertTarget(

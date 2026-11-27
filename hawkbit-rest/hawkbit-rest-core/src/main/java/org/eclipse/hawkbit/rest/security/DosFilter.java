@@ -86,7 +86,7 @@ public class DosFilter extends OncePerRequestFilter {
     private final AtomicLong notReported = new AtomicLong();
     // started with the first reported load
     private final AtomicLong reportStart = new AtomicLong(NOT_STARTED);
-    // for the report interval - replaceable in tests
+    // for the counter windows and the report interval - replaceable in tests
     Ticker ticker = Ticker.systemTicker();
 
     private final Pattern whitelist;
@@ -187,8 +187,9 @@ public class DosFilter extends OncePerRequestFilter {
         }
     }
 
-    private static <V> Cache<String, V> newWindowCache() {
-        return Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.SECONDS).build();
+    // reads the ticker field on each access - all time of the filter (windows and report interval) comes from one ticker
+    private <V> Cache<String, V> newWindowCache() {
+        return Caffeine.newBuilder().ticker(() -> ticker.read()).expireAfterWrite(1, TimeUnit.SECONDS).build();
     }
 
     private static boolean checkIpFails(final String ip) {

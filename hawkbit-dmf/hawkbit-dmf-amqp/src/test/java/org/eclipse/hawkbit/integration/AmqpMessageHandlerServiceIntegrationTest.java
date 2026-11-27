@@ -117,7 +117,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
         final String target2 = "Target2";
         registerAndAssertTargetWithExistingTenant(target2, 2);
 
-        registerSameTargetAndAssertBasedOnVersion(target2, 2, TargetUpdateStatus.REGISTERED);
+        registerSameTargetAndAssertBasedOnPollTime(target2, 2, TargetUpdateStatus.REGISTERED);
         Mockito.verifyNoInteractions(getDeadletterListener());
     }
 
@@ -133,7 +133,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
         final String controllerId = TARGET_PREFIX + "registerTargetWithName";
         final String name = "NonDefaultTargetName";
         registerAndAssertTargetWithExistingTenant(controllerId, name, 1, TargetUpdateStatus.REGISTERED, CONTROLLER_PLUG_AND_PLAY, null);
-        registerSameTargetAndAssertBasedOnVersion(controllerId, name + "_updated", 1, TargetUpdateStatus.REGISTERED, null);
+        registerSameTargetAndAssertBasedOnPollTime(controllerId, name + "_updated", 1, TargetUpdateStatus.REGISTERED, null);
 
         Mockito.verifyNoInteractions(getDeadletterListener());
     }
@@ -155,7 +155,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
         registerAndAssertTargetWithExistingTenant(controllerId, null, 1, TargetUpdateStatus.REGISTERED, CONTROLLER_PLUG_AND_PLAY, attributes);
 
         attributes.put("testKey3", "testValue3");
-        registerSameTargetAndAssertBasedOnVersion(controllerId, null, 1, TargetUpdateStatus.REGISTERED, attributes);
+        registerSameTargetAndAssertBasedOnPollTime(controllerId, null, 1, TargetUpdateStatus.REGISTERED, attributes);
 
         Mockito.verifyNoInteractions(getDeadletterListener());
     }
@@ -178,7 +178,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
         registerAndAssertTargetWithExistingTenant(controllerId, name, 1, TargetUpdateStatus.REGISTERED, CONTROLLER_PLUG_AND_PLAY, attributes);
 
         attributes.put("testKey3", "testValue3");
-        registerSameTargetAndAssertBasedOnVersion(controllerId, name + "_updated", 1, TargetUpdateStatus.REGISTERED, attributes);
+        registerSameTargetAndAssertBasedOnPollTime(controllerId, name + "_updated", 1, TargetUpdateStatus.REGISTERED, attributes);
 
         Mockito.verifyNoInteractions(getDeadletterListener());
     }
@@ -572,7 +572,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
         assignDistributionSet(distributionSet.getId(), controllerId);
 
         // test
-        registerSameTargetAndAssertBasedOnVersion(controllerId, 1, TargetUpdateStatus.PENDING);
+        registerSameTargetAndAssertBasedOnPollTime(controllerId, 1, TargetUpdateStatus.PENDING);
 
         // verify
         assertDownloadAndInstallMessage(distributionSet.getModules(), controllerId);
@@ -604,7 +604,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
                 distributionSet.getId(), controllerId, getTestSchedule(2), getTestDuration(1), getTestTimeZone());
 
         // test
-        registerSameTargetAndAssertBasedOnVersion(controllerId, 1, TargetUpdateStatus.PENDING);
+        registerSameTargetAndAssertBasedOnPollTime(controllerId, 1, TargetUpdateStatus.PENDING);
 
         // verify
         assertDownloadMessage(distributionSet.getModules(), controllerId);
@@ -636,7 +636,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
                 distributionSet.getId(), controllerId, getTestSchedule(-5), getTestDuration(10), getTestTimeZone());
 
         // test
-        registerSameTargetAndAssertBasedOnVersion(controllerId, 1, TargetUpdateStatus.PENDING);
+        registerSameTargetAndAssertBasedOnPollTime(controllerId, 1, TargetUpdateStatus.PENDING);
 
         // verify
         assertDownloadAndInstallMessage(distributionSet.getModules(), controllerId);
@@ -670,7 +670,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
         deploymentManagement.cancelAction(getFirstAssignedActionId(distributionSetAssignmentResult));
 
         // test
-        registerSameTargetAndAssertBasedOnVersion(controllerId, 1, TargetUpdateStatus.PENDING);
+        registerSameTargetAndAssertBasedOnPollTime(controllerId, 1, TargetUpdateStatus.PENDING);
 
         // verify
         assertCancelActionMessage(getFirstAssignedActionId(distributionSetAssignmentResult), controllerId);
