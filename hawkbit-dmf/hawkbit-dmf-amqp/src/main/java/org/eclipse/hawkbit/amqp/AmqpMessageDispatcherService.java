@@ -315,7 +315,8 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
 
     private void sendUpdateMessageToTargets(
             final Long dsId, final Map<String, ActionProperties> actionsPropsByTargetId, final List<Target> targets) {
-        distributionSetManagement.find(dsId).ifPresent(ds -> {
+        // the modules with their artifacts are loaded up front - the messages are built on event threads, without open session
+        distributionSetManagement.findWithArtifacts(dsId).ifPresent(ds -> {
             final Map<SoftwareModule, Map<String, String>> softwareModules = getSoftwareModulesWithMetadata(ds);
             sendUpdateMessageToTargets(actionsPropsByTargetId, targets, softwareModules);
         });

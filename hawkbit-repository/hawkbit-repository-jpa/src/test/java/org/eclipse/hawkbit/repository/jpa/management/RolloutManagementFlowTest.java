@@ -213,10 +213,12 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
         assertScheduled(rollout, 1);
 
         // executes last from static and dynamic1 without 1 target
-        assertAndGetRunning(rollout, 4)// one from the last static and 6 for the first dynamic
+        // action target is a lazy relation - filter in transaction
+        inTransaction(() -> assertAndGetRunning(rollout, 4)// one from the last static and 6 for the first dynamic
                 .stream()
                 // filters for action of the last static group
                 .filter(action -> Integer.parseInt(action.getTarget().getControllerId().substring(targetPrefix.length())) < amountGroups * 3)
+                .toList())
                 .forEach(this::finishAction);
         executeWithoutOneTargetFromAGroup(dynamic1, rollout, 3);
         assertAndGetRunning(rollout, 1); // remains on in the first dynamic
@@ -352,10 +354,12 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
         assertScheduled(rollout, 2);
 
         // executes last from static and dynamic1 without 1 target
-        assertAndGetRunning(rollout, 7)// one from the last static and 6 for the first dynamic
+        // action target is a lazy relation - filter in transaction
+        inTransaction(() -> assertAndGetRunning(rollout, 7)// one from the last static and 6 for the first dynamic
                 .stream()
                 // filters for action of the last static group
                 .filter(action -> Integer.parseInt(action.getTarget().getControllerId().substring(targetPrefix.length())) < amountGroups * 3)
+                .toList())
                 .forEach(this::finishAction);
         executeWithoutOneTargetFromAGroup(dynamic1, rollout, 6);
         assertAndGetRunning(rollout, 1); // remains on in the first dynamic

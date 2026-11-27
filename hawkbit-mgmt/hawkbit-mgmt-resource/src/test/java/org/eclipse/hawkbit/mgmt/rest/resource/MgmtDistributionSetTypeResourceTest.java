@@ -185,8 +185,8 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
 
         testType = distributionSetTypeManagement.find(testType.getId()).get();
         assertThat(testType.getLastModifiedBy()).isEqualTo("uploadTester");
-        assertThat(testType.getMandatoryModuleTypes()).containsExactly(osType);
-        assertThat(testType.getOptionalModuleTypes()).isEmpty();
+        assertThat(testType.getMandatoryModuleTypeIds()).containsExactly(osType.getId());
+        assertThat(testType.getOptionalModuleTypeIds()).isEmpty();
     }
 
     /**
@@ -211,8 +211,8 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
 
         testType = distributionSetTypeManagement.find(testType.getId()).get();
         assertThat(testType.getLastModifiedBy()).isEqualTo("uploadTester");
-        assertThat(testType.getOptionalModuleTypes()).containsExactly(osType);
-        assertThat(testType.getMandatoryModuleTypes()).isEmpty();
+        assertThat(testType.getOptionalModuleTypeIds()).containsExactly(osType.getId());
+        assertThat(testType.getMandatoryModuleTypeIds()).isEmpty();
     }
 
     /**
@@ -370,8 +370,8 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
 
         testType = distributionSetTypeManagement.find(testType.getId()).get();
         assertThat(testType.getLastModifiedBy()).isEqualTo("uploadTester");
-        assertThat(testType.getOptionalModuleTypes()).containsExactly(appType);
-        assertThat(testType.getMandatoryModuleTypes()).isEmpty();
+        assertThat(testType.getOptionalModuleTypeIds()).containsExactly(appType.getId());
+        assertThat(testType.getMandatoryModuleTypeIds()).isEmpty();
     }
 
     /**
@@ -389,8 +389,8 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
 
         testType = distributionSetTypeManagement.find(testType.getId()).get();
         assertThat(testType.getLastModifiedBy()).isEqualTo("uploadTester");
-        assertThat(testType.getOptionalModuleTypes()).isEmpty();
-        assertThat(testType.getMandatoryModuleTypes()).containsExactly(osType);
+        assertThat(testType.getOptionalModuleTypeIds()).isEmpty();
+        assertThat(testType.getMandatoryModuleTypeIds()).containsExactly(osType.getId());
     }
 
     /**
@@ -880,10 +880,10 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
         final DistributionSetType created2 = distributionSetTypeManagement.findByKey("testKey2").get();
         final DistributionSetType created3 = distributionSetTypeManagement.findByKey("testKey3").get();
 
-        assertThat(created1.getMandatoryModuleTypes()).containsOnly(osType);
-        assertThat(created1.getOptionalModuleTypes()).containsOnly(runtimeType);
-        assertThat(created2.getOptionalModuleTypes()).containsOnly(osType, runtimeType, appType);
-        assertThat(created3.getMandatoryModuleTypes()).containsOnly(osType, runtimeType);
+        assertThat(created1.getMandatoryModuleTypeIds()).containsOnly(osType.getId());
+        assertThat(created1.getOptionalModuleTypeIds()).containsOnly(runtimeType.getId());
+        assertThat(created2.getOptionalModuleTypeIds()).containsOnly(osType.getId(), runtimeType.getId(), appType.getId());
+        assertThat(created3.getMandatoryModuleTypeIds()).containsOnly(osType.getId(), runtimeType.getId());
 
         assertThat(JsonPath.compile("[0]_links.self.href").<Object> read(mvcResult.getResponse().getContentAsString()))
                 .hasToString("http://localhost/rest/v1/distributionsettypes/" + created1.getId());
@@ -964,8 +964,8 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
                         .optionalModuleTypes(Set.of(appType))
                         .build());
         assertThat(testType.getOptLockRevision()).isEqualTo(1);
-        assertThat(testType.getOptionalModuleTypes()).containsExactly(appType);
-        assertThat(testType.getMandatoryModuleTypes()).containsExactly(osType);
+        assertThat(testType.getOptionalModuleTypeIds()).containsExactly(appType.getId());
+        assertThat(testType.getMandatoryModuleTypeIds()).containsExactly(osType.getId());
         return testType;
     }
 }

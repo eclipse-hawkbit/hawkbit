@@ -48,6 +48,20 @@ public interface DistributionSetTypeManagement<T extends DistributionSetType>
     Optional<T> findByKey(@NotEmpty String key);
 
     /**
+     * Gets the {@link DistributionSetType} with its {@link DistributionSetType#getMandatoryModuleTypes()} and
+     * {@link DistributionSetType#getOptionalModuleTypes()} loaded. By default, a type is loaded without its module types (only
+     * their ids, {@link DistributionSetType#getMandatoryModuleTypeIds()} and {@link DistributionSetType#getOptionalModuleTypeIds()}
+     * are available without loading them), so use this when the module types are needed and the type is used out of a
+     * transaction / persistence context.
+     *
+     * @param id of the type
+     * @return the type with its module types loaded
+     * @throws EntityNotFoundException if the type doesn't exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
+    T getWithModuleTypes(long id);
+
+    /**
      * Assigns {@link DistributionSetType#getMandatoryModuleTypes()}.
      *
      * @param id to update
@@ -92,7 +106,7 @@ public interface DistributionSetTypeManagement<T extends DistributionSetType>
     @Getter
     @EqualsAndHashCode(callSuper = true)
     @ToString(callSuper = true)
-    final class Create extends UpdateCreate {
+    final class Create extends UpdateCreate implements CreateRequest {
 
         @ValidString
         @Size(min = 1, max = Type.KEY_MAX_SIZE)

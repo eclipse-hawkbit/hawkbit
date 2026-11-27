@@ -1360,13 +1360,13 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
 
         final DistributionSetManagement.Create toLongName =
                 testdataFactory.generateDistributionSet(randomString(NamedEntity.NAME_MAX_SIZE + 1));
-        mvc.perform(post("/rest/v1/distributionsets").content(toJson(List.of(toLongName)))
+        mvc.perform(post("/rest/v1/distributionsets").content(toJson(toMgmtDistributionSetPost(List.of(toLongName))))
                         .contentType(APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());
 
         // unsupported media type
-        mvc.perform(post("/rest/v1/distributionsets").content(toJson(sets))
+        mvc.perform(post("/rest/v1/distributionsets").content(toJson(toMgmtDistributionSetPost(sets)))
                         .contentType(MediaType.APPLICATION_OCTET_STREAM))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isUnsupportedMediaType());

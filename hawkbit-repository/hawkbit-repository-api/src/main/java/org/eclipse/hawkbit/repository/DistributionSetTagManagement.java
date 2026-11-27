@@ -36,7 +36,7 @@ public interface DistributionSetTagManagement<T extends DistributionSetTag>
     @Getter
     @EqualsAndHashCode(callSuper = true)
     @ToString(callSuper = true)
-    final class Create extends UpdateCreate {}
+    final class Create extends UpdateCreate implements CreateRequest {}
 
     @SuperBuilder
     @Getter

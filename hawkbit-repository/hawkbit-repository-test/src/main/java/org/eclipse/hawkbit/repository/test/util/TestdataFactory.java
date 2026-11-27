@@ -631,7 +631,8 @@ public class TestdataFactory {
         set = distributionSetManagement.update(
                 DistributionSetManagement.Update.builder().id(set.getId()).description("Updated " + DEFAULT_DESCRIPTION).build());
 
-        set.getModules().forEach(module -> softwareModuleManagement.update(
+        // the set returned by the update is detached and the modules are a lazy relation - so, iterate the modules of a set read with details
+        distributionSetManagement.getWithDetails(set.getId()).getModules().forEach(module -> softwareModuleManagement.update(
                 SoftwareModuleManagement.Update.builder().id(module.getId()).description("Updated " + DEFAULT_DESCRIPTION).build()));
 
         // load also lazy stuff

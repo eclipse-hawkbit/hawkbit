@@ -434,7 +434,7 @@ public interface TargetManagement<T extends Target>
     @Getter
     @EqualsAndHashCode(callSuper = true)
     @ToString(callSuper = true)
-    final class Create extends UpdateCreate {
+    final class Create extends UpdateCreate implements CreateRequest {
 
         @ValidString
         @Size(min = 1, max = Target.CONTROLLER_ID_MAX_SIZE)

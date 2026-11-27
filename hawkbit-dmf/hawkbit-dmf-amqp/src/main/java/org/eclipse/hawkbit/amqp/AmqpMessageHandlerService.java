@@ -370,8 +370,12 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
                     target.getTenant(), target.getControllerId(),
                     action.getId(), IpUtil.addressToUri(target.getAddress()), action.getExternalRef());
         } else {
+            // the (lazy) action distribution set is loaded with its modules and artifacts up front - the message is built
+            // on the listener thread, without open session
+            final DistributionSet distributionSet =
+                    controllerManagement.getDistributionSetWithArtifacts(action.getDistributionSet().getId());
             amqpMessageDispatcherService.sendUpdateMessageToTarget(
-                    new ActionProperties(action), action.getTarget(), getSoftwareModulesWithMetadata(action.getDistributionSet()));
+                    new ActionProperties(action), target, getSoftwareModulesWithMetadata(distributionSet));
         }
     }
 

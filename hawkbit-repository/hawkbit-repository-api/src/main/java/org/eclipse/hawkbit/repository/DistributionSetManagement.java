@@ -15,6 +15,7 @@ import static org.eclipse.hawkbit.auth.SpringEvalExpressions.HAS_UPDATE_REPOSITO
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 import jakarta.validation.constraints.NotEmpty;
@@ -60,6 +61,17 @@ public interface DistributionSetManagement<T extends DistributionSet>
     }
 
     /**
+     * Creates or updates a meta-data value.
+     *
+     * @param id the entity id which meta-data has to be updated
+     * @param key the key of the meta-data entry to be updated
+     * @param value the meta-data value to be updated
+     * @throws EntityNotFoundException in case the meta-data entry does not exist and cannot be updated
+     */
+    @PreAuthorize(HAS_UPDATE_REPOSITORY)
+    void createMetadata(@NotNull Long id, @NotEmpty String key, @NotNull String value);
+
+    /**
      * Find {@link DistributionSet} based on given ID including (lazy loaded) details, e.g. {@link DistributionSet#getModules()}. <br/>
      * For performance reasons it is recommended to use {@link #find(long)} if the details are not required.
      *
@@ -68,6 +80,18 @@ public interface DistributionSetManagement<T extends DistributionSet>
      */
     @PreAuthorize(HAS_READ_REPOSITORY)
     T getWithDetails(long id);
+
+    /**
+     * Find {@link DistributionSet} based on given ID with its {@link DistributionSet#getModules()} and their
+     * {@link SoftwareModule#getType()} and {@link SoftwareModule#getArtifacts()} loaded. The returned entity could be used
+     * detached (e.g. out of a transaction / persistence context) to build the software module descriptions for devices
+     * (e.g. the DMF download requests).
+     *
+     * @param id to look for.
+     * @return the {@link DistributionSet} or empty if not found
+     */
+    @PreAuthorize(HAS_READ_REPOSITORY)
+    Optional<T> findWithArtifacts(long id);
 
     @PreAuthorize(HAS_READ_REPOSITORY)
     boolean shouldLockImplicitly(final DistributionSet distributionSet);
@@ -230,7 +254,7 @@ public interface DistributionSetManagement<T extends DistributionSet>
     @Getter
     @EqualsAndHashCode(callSuper = true)
     @ToString(callSuper = true)
-    final class Create extends UpdateCreate {
+    final class Create extends UpdateCreate implements CreateRequest {
 
         @NotNull
         private DistributionSetType type;

@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.IntConsumer;
 import java.util.stream.IntStream;
 
@@ -680,6 +681,37 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertThat(
                 controllerManagement.hasTargetArtifactAssigned(savedTarget.getControllerId(), artifact2.getSha1Hash()))
                 .isTrue();
+    }
+
+    /**
+     * Verifies that a controller gets the distribution set with its modules, their types and artifacts loaded, so they are accessible
+     * out of a transaction (detached).
+     */
+    @Test
+    void getDistributionSetWithArtifactsLoadsModulesWithTypesAndArtifacts() {
+        final DistributionSet ds = testdataFactory.createDistributionSet();
+        final Set<SoftwareModule> modules = distributionSetManagement.getWithDetails(ds.getId()).getModules();
+        final SoftwareModule module = modules.iterator().next();
+        final List<String> artifactFilenames =
+                testdataFactory.createArtifacts(module.getId()).stream().map(Artifact::getFilename).toList();
+
+        final WithUser withController = SecurityContextSwitch.withController("controller");
+        final DistributionSet found = SecurityContextSwitch.getAs(
+                withController, () -> controllerManagement.getDistributionSetWithArtifacts(ds.getId()));
+
+        assertThat(found.getModules()).hasSameSizeAs(modules);
+        found.getModules().forEach(foundModule -> {
+            assertThat(foundModule.getType().getKey()).isNotEmpty();
+            if (foundModule.getId().equals(module.getId())) {
+                assertThat(foundModule.getArtifacts())
+                        .extracting(Artifact::getFilename)
+                        .containsExactlyInAnyOrderElementsOf(artifactFilenames);
+            } else {
+                assertThat(foundModule.getArtifacts()).isEmpty();
+            }
+        });
+        assertThatExceptionOfType(EntityNotFoundException.class).isThrownBy(() -> runAs(
+                withController, () -> controllerManagement.getDistributionSetWithArtifacts(NOT_EXIST_IDL)));
     }
 
     /**

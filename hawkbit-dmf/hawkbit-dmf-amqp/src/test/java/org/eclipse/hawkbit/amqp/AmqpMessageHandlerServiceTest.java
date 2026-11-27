@@ -745,6 +745,8 @@ class AmqpMessageHandlerServiceTest {
         final DistributionSet distributionSetMock = mock(DistributionSet.class);
 
         when(actionMock.getDistributionSet()).thenReturn(distributionSetMock);
+        when(distributionSetMock.getId()).thenReturn(1L);
+        when(controllerManagementMock.getDistributionSetWithArtifacts(1L)).thenReturn(distributionSetMock);
         when(actionMock.getId()).thenReturn(targetId);
         when(actionMock.getTenant()).thenReturn("DEFAULT");
         when(actionMock.getTarget()).thenReturn(targetMock);

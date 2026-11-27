@@ -957,7 +957,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         targetList.stream()
                 .map(Target::getControllerId)
                 .map(deploymentManagement::findAssignedDistributionSet)
-                .forEach(d -> assertThat(d).contains(distributionSet));
+                .forEach(d -> assertThat(d).map(DistributionSet::getId).contains(distributionSet.getId()));
     }
 
     /**

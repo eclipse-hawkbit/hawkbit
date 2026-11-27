@@ -361,7 +361,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
         testType = targetTypeManagement.find(testType.getId()).get();
         assertThat(testType.getLastModifiedBy()).isEqualTo(TEST_USER);
         assertThat(testType.getOptLockRevision()).isEqualTo(2);
-        assertThat(testType.getDistributionSetTypes()).containsExactly(standardDsType);
+        assertThat(getDistributionSetTypes(testType.getId())).containsExactly(standardDsType);
     }
 
     /**
@@ -417,7 +417,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
         testType = targetTypeManagement.find(testType.getId()).get();
         assertThat(testType.getLastModifiedBy()).isEqualTo(TEST_USER);
         assertThat(testType.getOptLockRevision()).isEqualTo(2);
-        assertThat(testType.getDistributionSetTypes()).isEmpty();
+        assertThat(getDistributionSetTypes(testType.getId())).isEmpty();
     }
 
     /**
@@ -437,7 +437,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
         testType = targetTypeManagement.find(testType.getId()).get();
         assertThat(testType.getLastModifiedBy()).isEqualTo(TEST_USER);
         assertThat(testType.getOptLockRevision()).isEqualTo(2);
-        assertThat(testType.getDistributionSetTypes()).isEmpty();
+        assertThat(getDistributionSetTypes(testType.getId())).isEmpty();
         assertThat(distributionSetTypeManagement.findByKey(standardDsType.getKey())).isEmpty();
     }
 
@@ -532,7 +532,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(status().isNotFound());
 
         // target types at creation time invalid
-        final TargetType testNewType = createTestTargetTypeInDB(typeName + "Another", Set.of(standardDsType));
+        final Create testNewType = buildTestTargetTypeBody(typeName + "Another");
 
         mvc.perform(post(TARGETTYPES_ENDPOINT).content(toJson(List.of(testNewType)))
                         .contentType(MediaType.APPLICATION_OCTET_STREAM))
@@ -680,6 +680,11 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
 
     private List<? extends TargetType> createTestTargetTypesInDB(final String namePrefix, final int count) {
         return testdataFactory.createTargetTypes(namePrefix, count);
+    }
+
+    // the distribution set types are a lazy relation of the (detached) target type, so they are read within a transaction
+    private Set<DistributionSetType> getDistributionSetTypes(final long targetTypeId) {
+        return inTransaction(() -> Set.copyOf(targetTypeManagement.find(targetTypeId).orElseThrow().getDistributionSetTypes()));
     }
 
     private TargetType createTestTargetTypeInDB(final String name) {

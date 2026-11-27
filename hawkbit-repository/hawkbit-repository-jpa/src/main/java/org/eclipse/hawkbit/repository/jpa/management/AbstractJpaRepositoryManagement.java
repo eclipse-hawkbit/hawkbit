@@ -35,6 +35,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.ql.QueryField;
 import org.eclipse.hawkbit.ql.jpa.QLSupport;
+import org.eclipse.hawkbit.repository.CreateRequest;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.RepositoryManagement;
@@ -76,7 +77,7 @@ import org.springframework.validation.annotation.Validated;
 @Transactional(readOnly = true)
 @Validated
 @Slf4j
-abstract class AbstractJpaRepositoryManagement<T extends AbstractJpaBaseEntity, C, U extends Identifiable<Long>, R extends BaseEntityRepository<T>, A extends Enum<A> & QueryField>
+abstract class AbstractJpaRepositoryManagement<T extends AbstractJpaBaseEntity, C extends CreateRequest, U extends Identifiable<Long>, R extends BaseEntityRepository<T>, A extends Enum<A> & QueryField>
         implements RepositoryManagement<T, C, U> {
 
     public static final String DELETED = "deleted";
@@ -372,6 +373,19 @@ abstract class AbstractJpaRepositoryManagement<T extends AbstractJpaBaseEntity, 
         return supportSoftDelete()
                 ? Optional.of((root, query, cb) -> cb.equal(root.get(DELETED), false))
                 : Optional.empty();
+    }
+
+    /**
+     * Returns a JPA entity, which lazy relations could be navigated in the current transaction, for the passed entity.
+     * Detached entities (see {@link JpaManagementHelper#isDetached}) and non JPA instances are re-read by id. The re-read
+     * bypasses the by-id cache since the cached instances are detached too.
+     */
+    @SuppressWarnings("unchecked")
+    protected T managed(final Identifiable<Long> entity) {
+        if (jpaRepository.getDomainClass().isInstance(entity) && !JpaManagementHelper.isDetached(entityManager, entity)) {
+            return (T) entity;
+        }
+        return jpaRepository.getById(entity.getId());
     }
 
     protected T jpaEntity(final Object create) {

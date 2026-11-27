@@ -93,9 +93,7 @@ class ActionTest extends AbstractJpaIntegrationTest {
         for (final Status status : Status.values()) {
             final long id = createAction().getId();
             controllerManagement.addUpdateActionStatus(ActionStatusCreate.builder().actionId(id).status(status).build());
-            final List<ActionStatus> actionStatuses = actionRepository
-                    .findById(id).orElseThrow(() -> new IllegalStateException("Action not found"))
-                    .getActionStatus();
+            final List<ActionStatus> actionStatuses = deploymentManagement.findActionStatusByAction(id, PAGE).getContent();
             assertThat(actionStatuses).hasSize(1);
             assertThat(actionStatuses.stream().filter(as -> as.getStatus() == status).count()).isEqualTo(1);
         }

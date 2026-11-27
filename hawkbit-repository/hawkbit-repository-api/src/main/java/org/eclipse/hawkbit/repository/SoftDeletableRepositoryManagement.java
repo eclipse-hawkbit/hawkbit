@@ -25,7 +25,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
  * @param <C> type of the create request
  * @param <U> type of the update request
  */
-public interface SoftDeletableRepositoryManagement<T extends BaseEntity, C, U extends Identifiable<Long>>
+public interface SoftDeletableRepositoryManagement<T extends BaseEntity, C extends CreateRequest, U extends Identifiable<Long>>
         extends RepositoryManagement<T, C, U> {
 
     /**

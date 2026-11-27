@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import lombok.SneakyThrows;
+import org.eclipse.hawkbit.repository.CreateRequest;
 import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.MetadataSupport;
 import org.eclipse.hawkbit.repository.QuotaManagement;
@@ -26,7 +27,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("java:S119") // java:S119 - better self explainable
-public abstract class AbstractRepositoryManagementWithMetadataTest<T extends BaseEntity, C, U extends Identifiable<Long>, MV, MVI extends MV>
+public abstract class AbstractRepositoryManagementWithMetadataTest<T extends BaseEntity, C extends CreateRequest, U extends Identifiable<Long>, MV, MVI extends MV>
         extends AbstractRepositoryManagementTest<T, C, U> {
 
     protected MetadataSupport<MV> metadataSupport; // repository management, just casted to MetadataSupport
@@ -56,6 +57,9 @@ public abstract class AbstractRepositoryManagementWithMetadataTest<T extends Bas
         metadataSupport = (MetadataSupport<MV>) repositoryManagement;
     }
 
+    // the single value create isn't part of MetadataSupport, it is declared by each management with the concrete value type
+    protected abstract void createMetadata(final Long id, final String key, final MV value);
+
     @Test
     void createMetadata() {
         final String key = forType(String.class);
@@ -70,7 +74,7 @@ public abstract class AbstractRepositoryManagementWithMetadataTest<T extends Bas
 
         // create an entity meta data entry
         waitNextMillis(); // wait that last modified at is different so the opt lock revision is increased
-        metadataSupport.createMetadata(instance.getId(), key, createValue);
+        createMetadata(instance.getId(), key, createValue);
 
         final T createResult = repositoryManagement.get(instance.getId());
         assertThat(createResult.getOptLockRevision()).isEqualTo(2);
@@ -81,7 +85,7 @@ public abstract class AbstractRepositoryManagementWithMetadataTest<T extends Bas
 
         // update the entity metadata
         waitNextMillis(); // wait that last modified at is different so the opt lock revision is increased
-        metadataSupport.createMetadata(instance.getId(), key, updateValue);
+        createMetadata(instance.getId(), key, updateValue);
         reloaded = repositoryManagement.get(instance.getId());
         assertThat(reloaded.getOptLockRevision()).isEqualTo(3);
         assertThat(reloaded.getLastModifiedAt()).isPositive();
@@ -94,12 +98,12 @@ public abstract class AbstractRepositoryManagementWithMetadataTest<T extends Bas
     void getMetadata() {
         final T instance = instance();
         for (int i = 0; i < maxMetaDataEntries; i++) {
-            metadataSupport.createMetadata(instance.getId(), "key" + i, getCreateValue());
+            createMetadata(instance.getId(), "key" + i, getCreateValue());
         }
 
         final T instance2 = instance();
         for (int i = 0; i < maxMetaDataEntries - 1; i++) {
-            metadataSupport.createMetadata(instance2.getId(), "key" + i, getCreateValue());
+            createMetadata(instance2.getId(), "key" + i, getCreateValue());
         }
 
         assertThat(metadataSupport.getMetadata(instance.getId())).hasSize(maxMetaDataEntries);
@@ -110,7 +114,7 @@ public abstract class AbstractRepositoryManagementWithMetadataTest<T extends Bas
     void deleteMetadata() {
         final T instance = instance();
         for (int i = 0; i < maxMetaDataEntries; i++) {
-            metadataSupport.createMetadata(instance.getId(), "key" + i, getCreateValue());
+            createMetadata(instance.getId(), "key" + i, getCreateValue());
         }
         assertThat(metadataSupport.getMetadata(instance.getId())).hasSize(maxMetaDataEntries);
 
@@ -125,12 +129,12 @@ public abstract class AbstractRepositoryManagementWithMetadataTest<T extends Bas
         // add metadata one by one
         final Long id1 = instance().getId();
         for (int i = 0; i < maxMetaDataEntries; ++i) {
-            metadataSupport.createMetadata(id1, "k" + i, getCreateValue());
+            createMetadata(id1, "k" + i, getCreateValue());
         }
         // verify quota exceeded exception
         final MV exceedValue = getCreateValue();
         assertThatExceptionOfType(AssignmentQuotaExceededException.class)
-                .isThrownBy(() -> metadataSupport.createMetadata(id1, "k" + maxMetaDataEntries, exceedValue));
+                .isThrownBy(() -> createMetadata(id1, "k" + maxMetaDataEntries, exceedValue));
 
         // add multiple meta data entries at once
         final T instance2 = instance();
@@ -146,7 +150,7 @@ public abstract class AbstractRepositoryManagementWithMetadataTest<T extends Bas
         final int firstHalf = Math.round((maxMetaDataEntries) / 2.f);
         final Long id3 = instance().getId();
         for (int i = 0; i < firstHalf; ++i) {
-            metadataSupport.createMetadata(id3, "k" + i, getCreateValue());
+            createMetadata(id3, "k" + i, getCreateValue());
         }
         // add too many data entries
         final int secondHalf = maxMetaDataEntries - firstHalf;

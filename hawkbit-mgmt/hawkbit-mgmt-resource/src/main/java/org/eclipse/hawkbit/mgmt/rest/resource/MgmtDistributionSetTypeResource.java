@@ -119,7 +119,8 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
 
     @Override
     public ResponseEntity<List<MgmtSoftwareModuleType>> getMandatoryModules(final Long distributionSetTypeId) {
-        final DistributionSetType foundType = findDistributionSetTypeWithExceptionIfNotFound(distributionSetTypeId);
+        // with the module types loaded - the (possibly cached, so detached) type is loaded without them
+        final DistributionSetType foundType = distributionSetTypeManagement.getWithModuleTypes(distributionSetTypeId);
         return ResponseEntity.ok(MgmtSoftwareModuleTypeMapper.toTypesResponse(foundType.getMandatoryModuleTypes()));
     }
 
@@ -149,7 +150,8 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
 
     @Override
     public ResponseEntity<List<MgmtSoftwareModuleType>> getOptionalModules(final Long distributionSetTypeId) {
-        final DistributionSetType foundType = findDistributionSetTypeWithExceptionIfNotFound(distributionSetTypeId);
+        // with the module types loaded - the (possibly cached, so detached) type is loaded without them
+        final DistributionSetType foundType = distributionSetTypeManagement.getWithModuleTypes(distributionSetTypeId);
         return ResponseEntity.ok(MgmtSoftwareModuleTypeMapper.toTypesResponse(foundType.getOptionalModuleTypes()));
     }
 

@@ -34,6 +34,19 @@ import org.springframework.util.ObjectUtils;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class JpaManagementHelper {
 
+    /**
+     * Checks if an entity (e.g. passed by a caller, loaded in another, already finished, transaction) has to be re-read
+     * before navigating its lazy relations. Hibernate can't load lazy relations of entities not managed by the current
+     * persistence context (no lazy loading out of session). EclipseLink loads them, so with it no re-read is needed.
+     *
+     * @param entityManager the current entity manager
+     * @param entity the entity to check
+     * @return <code>true</code> if the entity shall be re-read in the current persistence context
+     */
+    public static boolean isDetached(final EntityManager entityManager, final Object entity) {
+        return Jpa.JPA_VENDOR == Jpa.JpaVendor.HIBERNATE && !entityManager.contains(entity);
+    }
+
     public static <T, J extends T> Page<T> findAllWithCountBySpec(
             final JpaSpecificationExecutor<J> repository, final List<Specification<J>> specList, final Pageable pageable) {
         if (CollectionUtils.isEmpty(specList)) {

@@ -82,7 +82,7 @@ public interface TargetFilterQueryManagement<T extends TargetFilterQuery>
 
     @SuperBuilder
     @Getter
-    class UpdateCreate {
+    class UpdateCreate implements CreateRequest {
 
         @ValidString
         @Size(min = 1, max = NamedEntity.NAME_MAX_SIZE)

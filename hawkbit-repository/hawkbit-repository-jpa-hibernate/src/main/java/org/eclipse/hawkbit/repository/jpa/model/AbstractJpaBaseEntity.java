@@ -29,6 +29,7 @@ import lombok.Setter;
 import org.eclipse.hawkbit.auth.SpRole;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
+import org.hibernate.Hibernate;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -167,7 +168,9 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + " [id=" + getId() + " / optLockRevision=" + getOptLockRevision() + "]";
+        // not initialized lazy proxy - the optLockRevision is not available (could throw LazyInitializationException out of session)
+        return getClass().getSimpleName() + " [id=" + getId() +
+                (Hibernate.isInitialized(this) ? " / optLockRevision=" + getOptLockRevision() : " / not initialized") + "]";
     }
 
     @PostPersist

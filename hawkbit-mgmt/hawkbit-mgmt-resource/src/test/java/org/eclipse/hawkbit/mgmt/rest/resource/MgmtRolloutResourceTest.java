@@ -253,10 +253,10 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
         rolloutHandler.handleAll();
 
-        for (Target target : allTargets) {
+        for (final Target target : allTargets) {
             final List<Action> actions = deploymentManagement.findActionsByTarget(target.getControllerId(), PAGE).getContent();
             for (Action action : actions) {
-                if (action.getTarget().getControllerId().startsWith("retryRolloutTargetFailed")) {
+                if (target.getControllerId().startsWith("retryRolloutTargetFailed")) {
                     Assertions.assertEquals(Status.ERROR, action.getStatus());
                 } else {
                     Assertions.assertEquals(Status.FINISHED, action.getStatus());

@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -44,6 +45,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.hawkbit.repository.CreateRequest;
 import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.RepositoryManagement;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
@@ -60,7 +62,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.util.ObjectUtils;
 
 @Slf4j
-public abstract class AbstractRepositoryManagementTest<T extends BaseEntity, C, U extends Identifiable<Long>>
+public abstract class AbstractRepositoryManagementTest<T extends BaseEntity, C extends CreateRequest, U extends Identifiable<Long>>
         extends AbstractJpaIntegrationTest {
 
     protected RepositoryManagement<T, C, U> repositoryManagement;
@@ -410,7 +412,9 @@ public abstract class AbstractRepositoryManagementTest<T extends BaseEntity, C, 
                 field.setAccessible(true);
                 final RepositoryManagement entityManager = (RepositoryManagement) field.get(this);
                 final Type[] fieldGenericTypes = genericTypes(field.getType(), RepositoryManagement.class);
-                entityCreators.put((Class<?>) fieldGenericTypes[0], () -> entityManager.create(forType((Class<?>) fieldGenericTypes[1])));
+                entityCreators.put(
+                        (Class<?>) fieldGenericTypes[0],
+                        () -> entityManager.create(forType((Class<? extends CreateRequest>) fieldGenericTypes[1])));
             } catch (final IllegalAccessException e) {
                 throw new IllegalStateException("Could not access field " + field.getName(), e);
             }
@@ -475,6 +479,17 @@ public abstract class AbstractRepositoryManagementTest<T extends BaseEntity, C, 
         }
         if (expected == null || actual == null) {
             throw new AssertionError("One of the expected and actual is null the other is not");
+        }
+        if (expected instanceof BaseEntity expectedEntity && actual instanceof BaseEntity actualEntity) {
+            if (!Objects.equals(expectedEntity.getId(), actualEntity.getId())) {
+                // different entities - fail fast, without deep compare (that could navigate lazy relations not available out of session)
+                throw new AssertionError("Expected entity with id " + expectedEntity.getId() + " but got " + actualEntity.getId());
+            }
+            if (!path.isEmpty()) {
+                // referenced entity (e.g. target type of a target) - the same id is enough. The reference could be a not loaded lazy
+                // one, which state (incl. the optimistic lock revision used by equals) is not available out of session
+                return;
+            }
         }
         if (expected.equals(actual)) {
             return; // equal
@@ -651,7 +666,7 @@ public abstract class AbstractRepositoryManagementTest<T extends BaseEntity, C, 
         private record EventTypeKey(Class<?> entityClass, EventType eventType) {}
     }
 
-    private record RepoMan<T extends BaseEntity, C, U extends Identifiable<Long>>(
+    private record RepoMan<T extends BaseEntity, C extends CreateRequest, U extends Identifiable<Long>>(
             RepositoryManagement<T, C, U> repo,
             Class<T> entityType,
             Class<C> createType,

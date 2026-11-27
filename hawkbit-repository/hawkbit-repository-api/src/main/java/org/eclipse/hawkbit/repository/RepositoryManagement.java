@@ -36,7 +36,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
  * @param <C> type of the create request
  * @param <U> type of the update request
  */
-public interface RepositoryManagement<T extends BaseEntity, C, U extends Identifiable<Long>> extends PermissionSupport {
+public interface RepositoryManagement<T extends BaseEntity, C extends CreateRequest, U extends Identifiable<Long>>
+        extends PermissionSupport {
 
     /**
      * Creates new {@link BaseEntity}.

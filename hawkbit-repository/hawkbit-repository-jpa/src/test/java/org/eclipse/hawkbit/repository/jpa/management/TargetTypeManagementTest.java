@@ -55,9 +55,12 @@ class TargetTypeManagementTest extends AbstractRepositoryManagementTest<TargetTy
         final DistributionSetType distributionSetType = testdataFactory.findOrCreateDistributionSetType("testDst", "dst1");
         targetTypeManagement.assignCompatibleDistributionSetTypes(targetType.getId(), Collections.singletonList(distributionSetType.getId()));
 
-        Optional<JpaTargetType> targetTypeWithDsTypes = targetTypeRepository.findById(targetType.getId());
-        assertThat(targetTypeWithDsTypes).isPresent();
-        assertThat(targetTypeWithDsTypes.get().getDistributionSetTypes()).extracting("key").contains("testDst");
+        // distribution set types is a lazy relation - read in transaction
+        runInTransaction(() -> {
+            final Optional<JpaTargetType> targetTypeWithDsTypes = targetTypeRepository.findById(targetType.getId());
+            assertThat(targetTypeWithDsTypes).isPresent();
+            assertThat(targetTypeWithDsTypes.get().getDistributionSetTypes()).extracting("key").contains("testDst");
+        });
     }
 
     /**
@@ -69,13 +72,18 @@ class TargetTypeManagementTest extends AbstractRepositoryManagementTest<TargetTy
                 .create(Create.builder().name("targettype1").description("targettypedes1").key("targettyp1.key").build());
         DistributionSetType distributionSetType = testdataFactory.findOrCreateDistributionSetType("testDst1", "dst11");
         targetTypeManagement.assignCompatibleDistributionSetTypes(targetType.getId(), Collections.singletonList(distributionSetType.getId()));
-        Optional<JpaTargetType> targetTypeWithDsTypes = targetTypeRepository.findById(targetType.getId());
-        assertThat(targetTypeWithDsTypes).isPresent();
-        assertThat(targetTypeWithDsTypes.get().getDistributionSetTypes()).extracting("key").contains("testDst1");
+        // distribution set types is a lazy relation - read in transaction
+        runInTransaction(() -> {
+            final Optional<JpaTargetType> targetTypeWithDsTypes = targetTypeRepository.findById(targetType.getId());
+            assertThat(targetTypeWithDsTypes).isPresent();
+            assertThat(targetTypeWithDsTypes.get().getDistributionSetTypes()).extracting("key").contains("testDst1");
+        });
         targetTypeManagement.unassignDistributionSetType(targetType.getId(), distributionSetType.getId());
-        Optional<JpaTargetType> targetTypeWithDsTypes1 = targetTypeRepository.findById(targetType.getId());
-        assertThat(targetTypeWithDsTypes1).isPresent();
-        assertThat(targetTypeWithDsTypes1.get().getDistributionSetTypes()).isEmpty();
+        runInTransaction(() -> {
+            final Optional<JpaTargetType> targetTypeWithDsTypes1 = targetTypeRepository.findById(targetType.getId());
+            assertThat(targetTypeWithDsTypes1).isPresent();
+            assertThat(targetTypeWithDsTypes1.get().getDistributionSetTypes()).isEmpty();
+        });
     }
 
     @Test
@@ -212,7 +220,8 @@ class TargetTypeManagementTest extends AbstractRepositoryManagementTest<TargetTy
 
         waitForEvents(); // the async event processing could query DB too
         queryCount.resetQueries();
-        targetTypeManagement.get(targetType.getId()).getDistributionSetTypes().forEach(dst -> dst.getKey());
+        // distribution set types is a lazy relation - navigate in transaction
+        runInTransaction(() -> targetTypeManagement.get(targetType.getId()).getDistributionSetTypes().forEach(dst -> dst.getKey()));
 
         assertThat(queryCount.countSelectsFromTable("sp_software_module_type")).isZero();
     }

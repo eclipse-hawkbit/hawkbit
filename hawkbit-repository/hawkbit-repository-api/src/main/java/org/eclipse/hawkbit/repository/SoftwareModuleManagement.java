@@ -12,6 +12,8 @@ package org.eclipse.hawkbit.repository;
 import java.util.Collection;
 import java.util.Map;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
@@ -44,6 +46,17 @@ public interface SoftwareModuleManagement<T extends SoftwareModule>
     default String permissionGroup() {
         return SpPermission.SOFTWARE_MODULE;
     }
+
+    /**
+     * Creates or updates a meta-data value.
+     *
+     * @param id the entity id which meta-data has to be updated
+     * @param key the key of the meta-data entry to be updated
+     * @param value the meta-data value to be updated
+     * @throws EntityNotFoundException in case the meta-data entry does not exist and cannot be updated
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
+    void createMetadata(@NotNull Long id, @NotEmpty String key, @NotNull @Valid MetadataValue value);
 
     @PreAuthorize(SpringEvalExpressions.IS_SYSTEM_CODE)
     Map<Long, Map<String, String>> findMetaDataBySoftwareModuleIdsAndTargetVisible(Collection<Long> ids);
@@ -83,7 +96,7 @@ public interface SoftwareModuleManagement<T extends SoftwareModule>
     @Getter
     @EqualsAndHashCode(callSuper = true)
     @ToString(callSuper = true)
-    final class Create extends UpdateCreate {
+    final class Create extends UpdateCreate implements CreateRequest {
 
         private SoftwareModuleType type;
         private boolean encrypted;

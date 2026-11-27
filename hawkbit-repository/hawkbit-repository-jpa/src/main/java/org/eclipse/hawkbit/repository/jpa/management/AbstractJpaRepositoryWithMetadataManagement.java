@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 import jakarta.persistence.EntityManager;
 
 import org.eclipse.hawkbit.ql.QueryField;
+import org.eclipse.hawkbit.repository.CreateRequest;
 import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.MetadataSupport;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -35,7 +36,7 @@ import org.springframework.resilience.annotation.Retryable;
 import org.springframework.transaction.annotation.Transactional;
 
 @SuppressWarnings("java:S119") // java:S119 - better self explainable
-abstract class AbstractJpaRepositoryWithMetadataManagement<T extends AbstractJpaBaseEntity & WithMetadata<MV, MVI>, C, U extends Identifiable<Long>, R extends BaseEntityRepository<T>, A extends Enum<A> & QueryField, MV, MVI extends MV>
+abstract class AbstractJpaRepositoryWithMetadataManagement<T extends AbstractJpaBaseEntity & WithMetadata<MV, MVI>, C extends CreateRequest, U extends Identifiable<Long>, R extends BaseEntityRepository<T>, A extends Enum<A> & QueryField, MV, MVI extends MV>
         extends AbstractJpaRepositoryManagement<T, C, U, R, A> implements MetadataSupport<MV> {
 
     private final Supplier<MVI> metadataValueCreator;
@@ -71,10 +72,10 @@ abstract class AbstractJpaRepositoryWithMetadataManagement<T extends AbstractJpa
         }
     }
 
-    @Override
-    @Transactional
-    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
-    public void createMetadata(final Long id, final String key, final MV value) {
+    // Implementation of the single value createMetadata. The public method is declared in the subclasses with the concrete value type,
+    // as the management interfaces do: a generic public one would inherit the interface @Valid with erasure Object (a potential container
+    // for Hibernate Validator) and wouldn't get the interface @PreAuthorize. Must be called in a transaction.
+    protected void createMetadataValue(final Long id, final String key, final MV value) {
         final T jpaEntity = getValid(id);
         final Map<String, MVI> metadataValueMap = jpaEntity.getMetadata();
         final MVI existingValue = metadataValueMap.get(key);

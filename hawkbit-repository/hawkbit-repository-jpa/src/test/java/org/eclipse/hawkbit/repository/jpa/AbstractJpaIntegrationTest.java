@@ -15,6 +15,7 @@ import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.StreamSupport;
 
 import lombok.extern.slf4j.Slf4j;
@@ -64,7 +65,9 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 @Slf4j
 @ContextConfiguration(classes = { JpaRepositoryConfiguration.class, TestConfiguration.class })
@@ -112,6 +115,8 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
     protected RolloutTestApprovalStrategy approvalStrategy;
     @Autowired
     private JpaProperties jpaProperties;
+    @Autowired
+    private PlatformTransactionManager transactionManager;
 
     protected static void verifyThrownExceptionBy(final ThrowingCallable tc, final String objectType) {
         Assertions.assertThatExceptionOfType(EntityNotFoundException.class).isThrownBy(tc)
@@ -139,6 +144,17 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
     // just increase the opt lock revision if the instance in order to match it against locked db instance - not really locking
     protected static void implicitLock(final SoftwareModule module) {
         ((JpaSoftwareModule) module).setOptLockRevision(module.getOptLockRevision() + 1);
+    }
+
+    // Runs the supplier in a transaction. Needed to navigate lazy relations (entities shall be (re-)read in the transaction), since
+    // out of session (e.g. of detached entities returned by the management) Hibernate throws LazyInitializationException
+    protected <T> T inTransaction(final Supplier<T> supplier) {
+        return new TransactionTemplate(transactionManager).execute(_ -> supplier.get());
+    }
+
+    // see inTransaction(Supplier)
+    protected void runInTransaction(final Runnable runnable) {
+        new TransactionTemplate(transactionManager).executeWithoutResult(_ -> runnable.run());
     }
 
     protected Database getDatabase() {

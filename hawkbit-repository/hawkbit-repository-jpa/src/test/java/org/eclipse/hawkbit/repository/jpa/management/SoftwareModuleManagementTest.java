@@ -55,6 +55,11 @@ import org.junit.jupiter.api.Test;
 class SoftwareModuleManagementTest
         extends AbstractRepositoryManagementWithMetadataTest<SoftwareModule, Create, Update, MetadataValue, MetadataValueCreate> {
 
+    @Override
+    protected void createMetadata(final Long id, final String key, final MetadataValue value) {
+        softwareModuleManagement.createMetadata(id, key, value);
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     protected <O> O forType(final Class<O> type) {
@@ -131,7 +136,7 @@ class SoftwareModuleManagementTest
 
         // [VERIFY EXPECTED RESULT]:
         // verify: assignedModule is marked as deleted
-        assignedModule = softwareModuleManagement.find(assignedModule.getId()).get();
+        assignedModule = findWithArtifacts(assignedModule.getId());
         assertTrue(assignedModule.isDeleted(), "The module should be flagged as deleted");
         assertThat(softwareModuleManagement.findAll(PAGE)).isEmpty();
         assertThat(softwareModuleManagement.findByRsql("name==*", PAGE)).isEmpty();
@@ -174,7 +179,7 @@ class SoftwareModuleManagementTest
 
         // [VERIFY EXPECTED RESULT]:
         // verify: assignedModule is marked as deleted
-        assignedModule = softwareModuleManagement.find(assignedModule.getId()).get();
+        assignedModule = findWithArtifacts(assignedModule.getId());
         assertTrue(assignedModule.isDeleted(), "The found module should be flagged deleted");
         assertThat(softwareModuleManagement.findAll(PAGE)).isEmpty();
         assertThat(softwareModuleRepository.findAll()).hasSize(1);
@@ -206,7 +211,7 @@ class SoftwareModuleManagementTest
         artifactManagement.create(new ArtifactUpload(
                 new ByteArrayInputStream(source), null, artifactSize, null,
                 moduleX.getId(), "artifactx", false));
-        moduleX = softwareModuleManagement.find(moduleX.getId()).get();
+        moduleX = findWithArtifacts(moduleX.getId());
         final Artifact artifactX = moduleX.getArtifacts().iterator().next();
 
         // [STEP3]: Create SoftwareModuleY and add the same ArtifactX
@@ -216,7 +221,7 @@ class SoftwareModuleManagementTest
         artifactManagement.create(new ArtifactUpload(
                 new ByteArrayInputStream(source), null, artifactSize, null,
                 moduleY.getId(), "artifactx", false));
-        moduleY = softwareModuleManagement.find(moduleY.getId()).get();
+        moduleY = findWithArtifacts(moduleY.getId());
         final Artifact artifactY = moduleY.getArtifacts().iterator().next();
 
         // [STEP5]: Delete SoftwareModuleX
@@ -254,7 +259,7 @@ class SoftwareModuleManagementTest
         artifactManagement.create(new ArtifactUpload(
                 new ByteArrayInputStream(source), null, artifactSize, null,
                 moduleX.getId(), "artifactx", false));
-        moduleX = softwareModuleManagement.find(moduleX.getId()).get();
+        moduleX = findWithArtifacts(moduleX.getId());
         final Artifact artifactX = moduleX.getArtifacts().iterator().next();
 
         // [STEP2]: Create SoftwareModuleY and add the same ArtifactX
@@ -263,7 +268,7 @@ class SoftwareModuleManagementTest
         artifactManagement.create(new ArtifactUpload(
                 new ByteArrayInputStream(source), null, artifactSize, null,
                 moduleY.getId(), "artifactx", false));
-        moduleY = softwareModuleManagement.find(moduleY.getId()).get();
+        moduleY = findWithArtifacts(moduleY.getId());
         final Artifact artifactY = moduleY.getArtifacts().iterator().next();
 
         // [STEP3]: Assign SoftwareModuleX to DistributionSetX and to target
@@ -364,7 +369,7 @@ class SoftwareModuleManagementTest
         artifactManagement.create(new ArtifactUpload(
                 new ByteArrayInputStream(new byte[] { 1 }), null, 1, null, softwareModuleId, "artifact1", false));
         // update software module reference since it is modified, old reference is stale
-        final int artifactCount = (softwareModule = softwareModuleManagement.find(softwareModuleId).orElseThrow()).getArtifacts().size();
+        final int artifactCount = (softwareModule = findWithArtifacts(softwareModuleId)).getArtifacts().size();
         assertThat(artifactCount).isNotZero();
         softwareModuleManagement.lock(softwareModule);
         assertThat(softwareModuleManagement.find(softwareModuleId).map(SoftwareModule::isLocked).orElse(false)).isTrue();
@@ -375,16 +380,16 @@ class SoftwareModuleManagementTest
         assertThatExceptionOfType(LockedException.class)
                 .as("Attempt to modify a locked SM artifacts should throw an exception")
                 .isThrownBy(() -> artifactManagement.create(artifactUpload));
-        assertThat(softwareModuleManagement.find(softwareModuleId).get().getArtifacts())
+        assertThat(findWithArtifacts(softwareModuleId).getArtifacts())
                 .as("Artifacts shall not be added to a locked SM.")
                 .hasSize(artifactCount);
 
         // try remove
-        final long artifactId = softwareModuleManagement.find(softwareModuleId).get().getArtifacts().stream().findFirst().get().getId();
+        final long artifactId = findWithArtifacts(softwareModuleId).getArtifacts().stream().findFirst().get().getId();
         assertThatExceptionOfType(LockedException.class)
                 .as("Attempt to modify a locked SM artifacts should throw an exception")
                 .isThrownBy(() -> artifactManagement.delete(artifactId));
-        assertThat(softwareModuleManagement.find(softwareModuleId).get().getArtifacts())
+        assertThat(findWithArtifacts(softwareModuleId).getArtifacts())
                 .as("Artifact shall not be removed from a locked SM.")
                 .hasSize(artifactCount);
     }
@@ -440,6 +445,22 @@ class SoftwareModuleManagementTest
     }
 
     /**
+     * Verifies that the meta-data values are validated (cascaded) on create.
+     */
+    @Test
+    @ExpectEvents({ @Expect(type = SoftwareModuleCreatedEvent.class, count = 1) })
+    void failToCreateMetadataWithInvalidValue() {
+        final Long moduleId = testdataFactory.createSoftwareModuleApp().getId();
+        final MetadataValueCreate tooLong = new MetadataValueCreate("x".repeat(SoftwareModule.METADATA_VALUE_MAX_SIZE + 1));
+        final Map<String, MetadataValueCreate> tooLongMap = Map.of("key", tooLong);
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> softwareModuleManagement.createMetadata(moduleId, "key", tooLong));
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> softwareModuleManagement.createMetadata(moduleId, tooLongMap));
+    }
+
+    /**
      * Verifies that when no SoftwareModules are assigned to a Distribution then the DistributionSet is not complete.
      */
     @Test
@@ -457,10 +478,10 @@ class SoftwareModuleManagementTest
                 new ByteArrayInputStream(randomBytes(10)), null, 10, null,
                 softwareModuleIncomplete.getId(), "file1", false));
 
-        final SoftwareModule softwareModuleComplete = softwareModuleManagement.get(softwareModuleIncomplete.getId());
+        final SoftwareModule softwareModuleComplete = findWithArtifacts(softwareModuleIncomplete.getId());
         assertThat(softwareModuleComplete.isComplete()).isTrue();
         assertThatNoException().isThrownBy(() -> softwareModuleManagement.lock(softwareModuleComplete));
-        assertThat(softwareModuleManagement.get(softwareModuleIncomplete.getId()).isComplete()).isTrue();
+        assertThat(findWithArtifacts(softwareModuleIncomplete.getId()).isComplete()).isTrue();
     }
 
     private SoftwareModule createSoftwareModuleWithArtifacts(
@@ -479,7 +500,7 @@ class SoftwareModuleManagementTest
         }
 
         // Verify correct Creation of SoftwareModule and corresponding artifacts
-        softwareModule = softwareModuleManagement.find(softwareModule.getId()).get();
+        softwareModule = findWithArtifacts(softwareModule.getId());
         assertThat(softwareModuleRepository.findAll()).hasSize((int) countSoftwareModule + 1);
 
         final List<Artifact> artifacts = softwareModule.getArtifacts();
@@ -491,6 +512,15 @@ class SoftwareModuleManagementTest
 
         artifacts.forEach(artifact -> assertThat(artifactRepository.findById(artifact.getId())).isNotNull());
         return softwareModule;
+    }
+
+    // artifacts is a lazy relation - read the module in transaction and initialize the artifacts, so they are available out of session too
+    private SoftwareModule findWithArtifacts(final long id) {
+        return inTransaction(() -> {
+            final SoftwareModule softwareModule = softwareModuleManagement.find(id).orElseThrow();
+            softwareModule.getArtifacts().size(); // initializes the lazy artifacts
+            return softwareModule;
+        });
     }
 
     private void assertArtifactNotNull(final Artifact... results) {

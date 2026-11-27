@@ -24,6 +24,7 @@ import lombok.Setter;
 import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.repository.exception.TenantNotExistException;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
+import org.hibernate.Hibernate;
 import org.hibernate.annotations.TenantId;
 
 /**
@@ -67,7 +68,10 @@ public abstract class AbstractJpaTenantAwareBaseEntity extends AbstractJpaBaseEn
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + " [tenant=" + getTenant() + ", id=" + getId() + " / optLockRevision=" + getOptLockRevision() + "]";
+        // not initialized lazy proxy - tenant and optLockRevision are not available (could throw LazyInitializationException out of session)
+        return Hibernate.isInitialized(this)
+                ? getClass().getSimpleName() + " [tenant=" + getTenant() + ", id=" + getId() + " / optLockRevision=" + getOptLockRevision() + "]"
+                : super.toString();
     }
 
     /**

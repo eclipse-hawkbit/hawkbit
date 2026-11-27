@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
@@ -106,6 +107,13 @@ public class JpaDistributionSetManagement
     private static final String COMPLETE = "complete";
 
     @Override
+    @Transactional
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
+    public void createMetadata(final Long id, final String key, final String value) {
+        createMetadataValue(id, key, value);
+    }
+
+    @Override
     @SuppressWarnings("java:S3776") // java:S3776 - just too complex
     public Page<JpaDistributionSet> findByRsql(final String rsql, final Pageable pageable) {
         return findByRsqlAndDeleted(rsql, SoftDeletedMode.EXCLUDE_SOFT_DELETED, pageable);
@@ -175,6 +183,13 @@ public class JpaDistributionSetManagement
                 .orElseThrow(() -> new EntityNotFoundException(DistributionSet.class, id));
     }
 
+    @Override
+    public Optional<JpaDistributionSet> findWithArtifacts(final long id) {
+        // the dedicated fetch plan (not the detail one) loads exactly what is needed to describe the modules with their artifacts
+        // in one query, so the result could be used detached (Hibernate doesn't load lazy relations out of session)
+        return jpaRepository.findOne(jpaRepository.byIdSpec(id), JpaDistributionSet_.GRAPH_DISTRIBUTION_SET_MODULES_WITH_ARTIFACTS);
+    }
+
     // implicitly lock a distribution set if not already locked and implicit lock is enabled and not to skip
     @Override
     @Transactional
@@ -215,10 +230,10 @@ public class JpaDistributionSetManagement
         final JpaDistributionSet jpaDistributionSet = toJpaDistributionSet(distributionSet);
         assertDistributionSetIsNotDeleted(jpaDistributionSet);
 
-        if (distributionSet.isLocked()) {
+        if (jpaDistributionSet.isLocked()) {
             return jpaDistributionSet;
         } else {
-            if (!distributionSet.isComplete()) {
+            if (!jpaDistributionSet.isComplete()) {
                 throw new IncompleteDistributionSetException("Could not be locked while incomplete!");
             }
             lockSoftwareModules(jpaDistributionSet);
@@ -499,11 +514,7 @@ public class JpaDistributionSetManagement
     }
 
     private JpaDistributionSet toJpaDistributionSet(final DistributionSet distributionSet) {
-        if (distributionSet instanceof JpaDistributionSet jpaDistributionSet) {
-            return jpaDistributionSet;
-        } else {
-            return jpaRepository.getById(distributionSet.getId());
-        }
+        return managed(distributionSet);
     }
 
     private void assertDistributionSetExists(final long id) {

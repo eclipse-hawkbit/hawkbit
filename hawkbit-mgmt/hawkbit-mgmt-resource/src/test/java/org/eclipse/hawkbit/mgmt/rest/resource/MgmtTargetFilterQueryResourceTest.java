@@ -663,7 +663,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
 
         final AutoAssignment autoAssignment = autoAssignmentManagement.findByName(tfq.getName()).orElseThrow();
 
-        assertThat(autoAssignment.getDistributionSet()).isEqualTo(set);
+        assertThat(autoAssignment.getDistributionSet().getId()).isEqualTo(set.getId());
         assertThat(autoAssignment.getActionType()).isEqualTo(ActionType.FORCED);
 
         mvc.perform(get(MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1 + "/" + tfq.getId() + "/autoAssignDS"))
@@ -778,7 +778,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         final AutoAssignment autoAssignment = autoAssignmentManagement.findByName(tfq.getName()).orElseThrow();
         final MgmtActionType expectedActionType = actionType != null ? actionType : MgmtActionType.FORCED;
 
-        assertThat(autoAssignment.getDistributionSet()).isEqualTo(set);
+        assertThat(autoAssignment.getDistributionSet().getId()).isEqualTo(set.getId());
         assertThat(autoAssignment.getActionType()).isEqualTo(MgmtRestModelMapper.convertActionType(expectedActionType));
 
         mvc.perform(get(MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1 + "/" + tfq.getId()))

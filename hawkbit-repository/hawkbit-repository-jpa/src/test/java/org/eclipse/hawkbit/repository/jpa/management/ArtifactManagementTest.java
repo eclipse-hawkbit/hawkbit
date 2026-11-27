@@ -128,7 +128,8 @@ class ArtifactManagementTest extends AbstractJpaIntegrationTest {
             assertThat(artifactRepository.findAll()).hasSize(4);
             assertThat(softwareModuleRepository.findAll()).hasSize(3);
 
-            assertThat(softwareModuleManagement.get(sm.getId()).getArtifacts()).hasSize(3);
+            // artifacts is a lazy relation - read in transaction
+            assertThat(inTransaction(() -> softwareModuleManagement.get(sm.getId()).getArtifacts().size())).isEqualTo(3);
         }
     }
 
@@ -146,7 +147,8 @@ class ArtifactManagementTest extends AbstractJpaIntegrationTest {
                 new ByteArrayInputStream(artifactData.getBytes(StandardCharsets.UTF_8)), null, artifactSize, null, smID, illegalFilename,
                 false);
         assertThatExceptionOfType(ConstraintViolationException.class).isThrownBy(() -> artifactManagement.create(artifactUpload));
-        assertThat(softwareModuleManagement.get(smID).getArtifacts()).isEmpty();
+        // artifacts is a lazy relation - read in transaction
+        assertThat(inTransaction(() -> softwareModuleManagement.get(smID).getArtifacts().isEmpty())).isTrue();
     }
 
     /**
