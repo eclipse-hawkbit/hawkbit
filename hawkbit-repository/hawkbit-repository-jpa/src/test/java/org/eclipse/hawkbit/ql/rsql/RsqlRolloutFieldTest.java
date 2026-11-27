@@ -29,14 +29,14 @@ import org.springframework.data.domain.PageRequest;
  */
 class RsqlRolloutFieldTest extends AbstractJpaIntegrationTest {
 
-    private Rollout rollout;
+    // the rollout's distribution set is a lazy relation (not available out of session with Hibernate), so keep the created one
+    private DistributionSet distributionSet;
 
     @BeforeEach
     void setupBeforeTest() {
         testdataFactory.createTargets(20, "rollout", "rollout");
-        final DistributionSet dsA = testdataFactory.createDistributionSet("");
-        rollout = createRollout("rollout1", 4, dsA.getId(), "controllerId==rollout*");
-        rollout = rolloutManagement.get(rollout.getId());
+        distributionSet = testdataFactory.createDistributionSet("");
+        createRollout("rollout1", 4, distributionSet.getId(), "controllerId==rollout*");
     }
 
     /**
@@ -44,13 +44,13 @@ class RsqlRolloutFieldTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void testFilterByDsType() {
-        assertRSQLQuery(RolloutFields.DISTRIBUTIONSET.name() + ".type.id" + "==" + rollout.getDistributionSet().getType().getId() + 1, 0);
-        assertRSQLQuery(RolloutFields.DISTRIBUTIONSET.name() + ".type.id" + "!=" + rollout.getDistributionSet().getType().getId() + 1, 1);
-        assertRSQLQuery(RolloutFields.DISTRIBUTIONSET.name() + ".type.id" + "==" + rollout.getDistributionSet().getType().getId(), 1);
-        assertRSQLQuery(RolloutFields.DISTRIBUTIONSET.name() + ".type.id" + "!=" + rollout.getDistributionSet().getType().getId(), 0);
+        assertRSQLQuery(RolloutFields.DISTRIBUTIONSET.name() + ".type.id" + "==" + distributionSet.getType().getId() + 1, 0);
+        assertRSQLQuery(RolloutFields.DISTRIBUTIONSET.name() + ".type.id" + "!=" + distributionSet.getType().getId() + 1, 1);
+        assertRSQLQuery(RolloutFields.DISTRIBUTIONSET.name() + ".type.id" + "==" + distributionSet.getType().getId(), 1);
+        assertRSQLQuery(RolloutFields.DISTRIBUTIONSET.name() + ".type.id" + "!=" + distributionSet.getType().getId(), 0);
         // default type sub-attribute is the key
-        assertRSQLQuery(RolloutFields.DISTRIBUTIONSET.name() + ".type" + "==" + rollout.getDistributionSet().getType().getKey(), 1);
-        assertRSQLQuery(RolloutFields.DISTRIBUTIONSET.name() + ".type" + "!=" + rollout.getDistributionSet().getType().getKey(), 0);
+        assertRSQLQuery(RolloutFields.DISTRIBUTIONSET.name() + ".type" + "==" + distributionSet.getType().getKey(), 1);
+        assertRSQLQuery(RolloutFields.DISTRIBUTIONSET.name() + ".type" + "!=" + distributionSet.getType().getKey(), 0);
     }
 
     private void assertRSQLQuery(final String rsql, final long expectedTargets) {

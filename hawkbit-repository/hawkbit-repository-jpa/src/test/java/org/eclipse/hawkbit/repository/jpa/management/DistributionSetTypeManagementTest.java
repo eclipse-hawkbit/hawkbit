@@ -30,12 +30,14 @@ import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTypeCre
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
+import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.eclipse.hawkbit.repository.test.util.QueryCount;
@@ -65,22 +67,22 @@ class DistributionSetTypeManagementTest extends AbstractRepositoryManagementTest
     void updateUnassignedDistributionSetTypeModules() {
         final DistributionSetType updatableType = distributionSetTypeManagement
                 .create(Create.builder().key(USED_BY_DS_TYPE_KEY).name("to be deleted").build());
-        assertThat(distributionSetTypeManagement.findByKey(USED_BY_DS_TYPE_KEY).orElseThrow().getMandatoryModuleTypes()).isEmpty();
+        assertThat(distributionSetTypeManagement.findByKey(USED_BY_DS_TYPE_KEY).orElseThrow().getMandatoryModuleTypeIds()).isEmpty();
 
         // add OS
         distributionSetTypeManagement.assignMandatorySoftwareModuleTypes(updatableType.getId(), Set.of(osType.getId()));
-        assertThat(distributionSetTypeManagement.findByKey(USED_BY_DS_TYPE_KEY).orElseThrow().getMandatoryModuleTypes())
-                .containsOnly(osType);
+        assertThat(distributionSetTypeManagement.findByKey(USED_BY_DS_TYPE_KEY).orElseThrow().getMandatoryModuleTypeIds())
+                .containsOnly(osType.getId());
 
         // add JVM
         distributionSetTypeManagement.assignMandatorySoftwareModuleTypes(updatableType.getId(), Set.of(runtimeType.getId()));
-        assertThat(distributionSetTypeManagement.findByKey(USED_BY_DS_TYPE_KEY).orElseThrow().getMandatoryModuleTypes())
-                .containsOnly(osType, runtimeType);
+        assertThat(distributionSetTypeManagement.findByKey(USED_BY_DS_TYPE_KEY).orElseThrow().getMandatoryModuleTypeIds())
+                .containsOnly(osType.getId(), runtimeType.getId());
 
         // remove OS
         distributionSetTypeManagement.unassignSoftwareModuleType(updatableType.getId(), osType.getId());
-        assertThat(distributionSetTypeManagement.findByKey(USED_BY_DS_TYPE_KEY).orElseThrow().getMandatoryModuleTypes()).containsOnly(
-                runtimeType);
+        assertThat(distributionSetTypeManagement.findByKey(USED_BY_DS_TYPE_KEY).orElseThrow().getMandatoryModuleTypeIds())
+                .containsOnly(runtimeType.getId());
     }
 
     /**
@@ -146,7 +148,7 @@ class DistributionSetTypeManagementTest extends AbstractRepositoryManagementTest
         distributionSetTypeManagement.assignMandatorySoftwareModuleTypes(dsType2Id,
                 moduleTypeIds.subList(0, quota));
         assertThat(distributionSetTypeManagement.find(dsType2Id)).isNotEmpty();
-        assertThat(distributionSetTypeManagement.find(dsType2Id).get().getMandatoryModuleTypes()).hasSize(quota);
+        assertThat(distributionSetTypeManagement.find(dsType2Id).get().getMandatoryModuleTypeIds()).hasSize(quota);
         // assign one more to trigger the quota exceeded error
         final List<Long> softwareModuleTypeIds = Collections.singletonList(moduleTypeIds.get(quota));
         assertThatExceptionOfType(AssignmentQuotaExceededException.class)
@@ -157,7 +159,7 @@ class DistributionSetTypeManagementTest extends AbstractRepositoryManagementTest
         final Long dsType3Id = dsType3.getId();
         distributionSetTypeManagement.assignOptionalSoftwareModuleTypes(dsType3Id, moduleTypeIds.subList(0, quota));
         assertThat(distributionSetTypeManagement.find(dsType3Id)).isNotEmpty();
-        assertThat(distributionSetTypeManagement.find(dsType3Id).get().getOptionalModuleTypes()).hasSize(quota);
+        assertThat(distributionSetTypeManagement.find(dsType3Id).get().getOptionalModuleTypeIds()).hasSize(quota);
         // assign one more to trigger the quota exceeded error
         assertThatExceptionOfType(AssignmentQuotaExceededException.class)
                 .isThrownBy(() -> distributionSetTypeManagement.assignOptionalSoftwareModuleTypes(dsType3Id, softwareModuleTypeIds));
@@ -229,7 +231,7 @@ class DistributionSetTypeManagementTest extends AbstractRepositoryManagementTest
     void failToRemoveModuleIfAssignedDistributionSetType() {
         DistributionSetType nonUpdatableType = distributionSetTypeManagement
                 .create(Create.builder().key(USED_BY_DS_TYPE_KEY).name("to be deleted").build());
-        assertThat(distributionSetTypeManagement.findByKey(USED_BY_DS_TYPE_KEY).get().getMandatoryModuleTypes()).isEmpty();
+        assertThat(distributionSetTypeManagement.findByKey(USED_BY_DS_TYPE_KEY).get().getMandatoryModuleTypeIds()).isEmpty();
 
         final Long osTypeId = osType.getId();
         nonUpdatableType = distributionSetTypeManagement.assignMandatorySoftwareModuleTypes(nonUpdatableType.getId(), Set.of(osTypeId));
@@ -256,6 +258,25 @@ class DistributionSetTypeManagementTest extends AbstractRepositoryManagementTest
         type.getOptionalModuleTypeIds();
 
         assertThat(queryCount.countSelectsFromTable("sp_software_module_type")).isZero();
+    }
+
+    /**
+     * A distribution set type got with its module types could be used out of a transaction / persistence context - its module
+     * types (lazy by default) are loaded with it.
+     */
+    @Test
+    void getWithModuleTypesLoadsModuleTypes() {
+        final long typeId = defaultDsType().getId();
+
+        final DistributionSetType type = distributionSetTypeManagement.getWithModuleTypes(typeId); // out of a transaction
+
+        assertThat(type.getMandatoryModuleTypes()).isNotEmpty()
+                .allSatisfy(moduleType -> assertThat(moduleType.getKey()).isNotEmpty())
+                .extracting(SoftwareModuleType::getId).containsExactlyInAnyOrderElementsOf(type.getMandatoryModuleTypeIds());
+        assertThat(type.getOptionalModuleTypes())
+                .allSatisfy(moduleType -> assertThat(moduleType.getKey()).isNotEmpty())
+                .extracting(SoftwareModuleType::getId).containsExactlyInAnyOrderElementsOf(type.getOptionalModuleTypeIds());
+        assertThatThrownBy(() -> distributionSetTypeManagement.getWithModuleTypes(-1L)).isInstanceOf(EntityNotFoundException.class);
     }
 
     private void createAndUpdateDistributionSetWithInvalidDescription(final DistributionSet set) {
@@ -375,7 +396,7 @@ class DistributionSetTypeManagementTest extends AbstractRepositoryManagementTest
     private DistributionSetType createDistributionSetTypeUsedByDs() {
         final DistributionSetType dsType = distributionSetTypeManagement.create(
                 Create.builder().key(USED_BY_DS_TYPE_KEY).name("to be deleted").colour("test123").build());
-        assertThat(distributionSetTypeManagement.findByKey(USED_BY_DS_TYPE_KEY).orElseThrow().getMandatoryModuleTypes()).isEmpty();
+        assertThat(distributionSetTypeManagement.findByKey(USED_BY_DS_TYPE_KEY).orElseThrow().getMandatoryModuleTypeIds()).isEmpty();
         distributionSetManagement.create(DistributionSetManagement.Create.builder()
                 .type(dsType)
                 .name("newTypeSoft").version("1")

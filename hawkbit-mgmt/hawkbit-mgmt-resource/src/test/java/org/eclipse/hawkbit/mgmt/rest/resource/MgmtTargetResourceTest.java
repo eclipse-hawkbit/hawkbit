@@ -61,7 +61,6 @@ import org.eclipse.hawkbit.repository.TargetManagement.Create;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
-import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -354,7 +353,9 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final List<Action> actionHistory = deploymentManagement.findActionsByTarget(controllerId, PAGE).getContent();
         assertThat(actionHistory).hasSize(1);
         final JpaAction jpaAction = (JpaAction) actionHistory.get(0);
-        final List<ActionStatus> actionStatuses = new ArrayList<>(jpaAction.getActionStatus());
+        // the action status (and its messages) are lazy relations of the detached action, so they are read via the deployment management
+        final List<ActionStatus> actionStatuses =
+                new ArrayList<>(deploymentManagement.findActionStatusByAction(jpaAction.getId(), PAGE).getContent());
 
         // confirmation call was successful, check if Action status ,status code and messages are updated appropriately
         if (expectedHttpResponseStatus == HttpStatus.NO_CONTENT) {
@@ -367,11 +368,12 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
             assertThat((actionStatuses.get(0)).getCode()).isEmpty();
             assertThat((actionStatuses.get(1)).getStatus()).isEqualTo(expectedGeneratedStatus);
             assertThat((actionStatuses.get(1)).getCode()).hasValue(payloadCode);
-            assertThat(((JpaActionStatus) actionStatuses.get(1)).getMessages()).contains(payloadMessages[0], payloadMessages[1]);
+            assertThat(deploymentManagement.findMessagesByActionStatusId(actionStatuses.get(1).getId(), PAGE).getContent())
+                    .contains(payloadMessages[0], payloadMessages[1]);
         } else { // confirmation call not successful, check if Action status is not updated, no new Action status added as well.
             assertThat(jpaAction.getStatus()).isEqualTo(Status.WAIT_FOR_CONFIRMATION);
             assertThat(jpaAction.getLastActionStatusCode()).isEmpty();
-            assertThat(jpaAction.getActionStatus()).hasSize(1);
+            assertThat(actionStatuses).hasSize(1);
         }
     }
 
@@ -1627,7 +1629,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
 
         assertThat(deploymentManagement.findAssignedDistributionSet(target.getControllerId()).get()).isEqualTo(set);
         final Slice<Action> actions = deploymentManagement.findActionsByTarget("targetExist", PageRequest.of(0, 100));
-        assertThat(actions).isNotEmpty().filteredOn(a -> a.getDistributionSet().equals(set))
+        assertThat(actions).isNotEmpty().filteredOn(a -> a.getDistributionSet().getId().equals(set.getId()))
                 .extracting(Action::getActionType).containsOnly(ActionType.DOWNLOAD_ONLY);
     }
 
@@ -2367,11 +2369,12 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         assertThat(target1.getSecurityToken()).isEqualTo("token");
         assertThat(target1.getAddress()).hasToString("amqp://test123/foobar");
 
+        // the target type of the detached target is an uninitialized lazy proxy - so, only its id is accessible
         final Target target2 = assertTarget("id2", "targetOfType1", "testid2");
-        assertThat(target2.getTargetType()).extracting(TargetType::getName).isEqualTo("typeWithDs");
+        assertThat(target2.getTargetType()).extracting(TargetType::getId).isEqualTo(type1.getId());
 
         final Target target3 = assertTarget("id3", "targetOfType2", "testid3");
-        assertThat(target3.getTargetType()).extracting(TargetType::getName).isEqualTo("typeWithOutDs");
+        assertThat(target3.getTargetType()).extracting(TargetType::getId).isEqualTo(type2.getId());
     }
 
     /**

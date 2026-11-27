@@ -23,22 +23,15 @@ import org.springframework.security.access.prepost.PreAuthorize;
 
 /**
  * Represents interface for managing meta-data of entities. The keys are always Strings, while the values are generic
+ * <p/>
+ * The single value {@code createMetadata(Long id, String key, MV value)} is declared by the sub-interfaces with the concrete value type.
+ * A {@code @Valid} parameter of the unbounded {@code MV} (erasure {@link Object}) is a potential container for Hibernate Validator
+ * (deprecated, HV000272), and the sub-interfaces / implementations must not add {@code @Valid} to an inherited method parameter.
  *
  * @param <MV> the type of the meta-data value
  */
 @SuppressWarnings("java:S119") // java:S119 - better self explainable
 public interface MetadataSupport<MV> {
-
-    /**
-     * Creates or updates a meta-data value.
-     *
-     * @param id the entity id which meta-data has to be updated
-     * @param key the key of the meta-data entry to be updated
-     * @param value the meta-data value to be updated
-     * @throws EntityNotFoundException in case the meta-data entry does not exist and cannot be updated
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
-    void createMetadata(@NotNull Long id, @NotEmpty String key, @NotNull @Valid MV value);
 
     /**
      * Creates a list of entity meta-data entries.

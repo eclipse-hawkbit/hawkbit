@@ -29,6 +29,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapKeyColumn;
 import jakarta.persistence.NamedAttributeNode;
 import jakarta.persistence.NamedEntityGraph;
+import jakarta.persistence.NamedEntityGraphs;
+import jakarta.persistence.NamedSubgraph;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 
@@ -58,8 +60,17 @@ import org.springframework.core.annotation.Order;
 @ToString(callSuper = true)
 @Entity
 @Table(name = "sp_distribution_set")
-@NamedEntityGraph(name = "DistributionSet.detail",
-        attributeNodes = { @NamedAttributeNode("modules"), @NamedAttributeNode("tags"), @NamedAttributeNode("type") })
+@NamedEntityGraphs({
+        @NamedEntityGraph(name = "DistributionSet.detail",
+                attributeNodes = { @NamedAttributeNode("modules"), @NamedAttributeNode("tags"), @NamedAttributeNode("type") }),
+        // modules with their types and artifacts - all needed to describe the modules to devices (e.g. DMF), loaded up front
+        // to be used detached. Only artifacts is a bag (List) - modules is a Set, so no multiple bag fetch.
+        @NamedEntityGraph(name = "DistributionSet.modulesWithArtifacts",
+                attributeNodes = @NamedAttributeNode(value = "modules", subgraph = "modules"),
+                subgraphs = @NamedSubgraph(
+                        name = "modules",
+                        attributeNodes = { @NamedAttributeNode("type"), @NamedAttributeNode("artifacts") }))
+})
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities
 @SuppressWarnings("squid:S2160")
 public class JpaDistributionSet

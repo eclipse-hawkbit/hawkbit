@@ -19,6 +19,7 @@ import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -51,6 +52,7 @@ import org.eclipse.hawkbit.repository.exception.UnsupportedSoftwareModuleForThis
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionCancellationType;
+import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.ArtifactUpload;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation;
@@ -81,6 +83,11 @@ class DistributionSetManagementTest extends AbstractRepositoryManagementWithMeta
     @Autowired
     private RepositoryProperties repositoryProperties;
 
+    @Override
+    protected void createMetadata(final Long id, final String key, final String value) {
+        distributionSetManagement.createMetadata(id, key, value);
+    }
+
     /**
      * Verifies that management get access react as specified on calls for non existing entities by means of Optional not present.
      */
@@ -92,9 +99,36 @@ class DistributionSetManagementTest extends AbstractRepositoryManagementWithMeta
         final DistributionSet set = testdataFactory.createDistributionSet();
         assertThat(distributionSetManagement.find(NOT_EXIST_IDL)).isNotPresent();
         assertThatExceptionOfType(EntityNotFoundException.class).isThrownBy(() -> distributionSetManagement.getWithDetails(NOT_EXIST_IDL));
+        assertThat(distributionSetManagement.findWithArtifacts(NOT_EXIST_IDL)).isNotPresent();
         assertThatExceptionOfType(EntityNotFoundException.class)
                 .isThrownBy(() -> distributionSetManagement.findByNameAndVersion(NOT_EXIST_ID, NOT_EXIST_ID));
         assertThat(distributionSetManagement.getMetadata(set.getId()).get(NOT_EXIST_ID)).isNull();
+    }
+
+    /**
+     * Verifies that the distribution set is returned with its modules, their types and artifacts loaded, so they are accessible
+     * out of a transaction (detached).
+     */
+    @Test
+    void findWithArtifactsLoadsModulesWithTypesAndArtifacts() {
+        final DistributionSet ds = testdataFactory.createDistributionSet();
+        final Map<Long, String> typeKeyByModuleId = new HashMap<>();
+        final Map<Long, List<String>> artifactFilenamesByModuleId = new HashMap<>();
+        distributionSetManagement.getWithDetails(ds.getId()).getModules().forEach(module -> {
+            typeKeyByModuleId.put(module.getId(), module.getType().getKey());
+            artifactFilenamesByModuleId.put(
+                    module.getId(), testdataFactory.createArtifacts(module.getId()).stream().map(Artifact::getFilename).toList());
+        });
+
+        final DistributionSet found = distributionSetManagement.findWithArtifacts(ds.getId()).orElseThrow();
+
+        assertThat(found.getModules()).extracting(SoftwareModule::getId).containsExactlyInAnyOrderElementsOf(typeKeyByModuleId.keySet());
+        found.getModules().forEach(module -> {
+            assertThat(module.getType().getKey()).isEqualTo(typeKeyByModuleId.get(module.getId()));
+            assertThat(module.getArtifacts())
+                    .extracting(Artifact::getFilename)
+                    .containsExactlyInAnyOrderElementsOf(artifactFilenamesByModuleId.get(module.getId()));
+        });
     }
 
     /**
@@ -338,11 +372,12 @@ class DistributionSetManagementTest extends AbstractRepositoryManagementWithMeta
 
         // legal update of module - addition
         distributionSetManagement.assignSoftwareModules(ds.getId(), Set.of(os.getId()));
-        assertThat(findFirstModuleByType(distributionSetManagement.get(ds.getId()), osType)).hasValue(os);
+        // modules is a lazy relation - get with details
+        assertThat(findFirstModuleByType(distributionSetManagement.getWithDetails(ds.getId()), osType)).hasValue(os);
 
         // legal update of module - removal
         distributionSetManagement.unassignSoftwareModule(ds.getId(), findFirstModuleByType(ds, appType).map(Identifiable::getId).orElseThrow());
-        assertThat(findFirstModuleByType(distributionSetManagement.get(ds.getId()), appType)).isNotPresent();
+        assertThat(findFirstModuleByType(distributionSetManagement.getWithDetails(ds.getId()), appType)).isNotPresent();
     }
 
     /**
@@ -518,7 +553,7 @@ class DistributionSetManagementTest extends AbstractRepositoryManagementWithMeta
         distributionSet = distributionSetManagement.unlock(distributionSet);
         assertThat(distributionSetManagement.find(distributionSet.getId()).map(DistributionSet::isLocked).orElse(true)).isFalse();
         // assert software modules are not unlocked
-        assertThat(distributionSet.getModules().size()).isNotZero();
+        assertThat(distributionSetManagement.getWithDetails(distributionSet.getId()).getModules()).isNotEmpty();
         distributionSetManagement.getWithDetails(distributionSet.getId()).getModules()
                 .forEach(module -> assertThat(module.isLocked()).isTrue());
     }
@@ -722,7 +757,8 @@ class DistributionSetManagementTest extends AbstractRepositoryManagementWithMeta
         distributionSetManagement.assignSoftwareModules(distributionSetIncomplete.getId(), List.of(softwareModule.getId()));
 
         final DistributionSet distributionSetComplete = distributionSetManagement.get(distributionSetIncomplete.getId());
-        assertThat(distributionSetComplete.isComplete()).isTrue();
+        // completeness is computed from lazy relations (modules, artifacts) - read in transaction
+        assertThat(inTransaction(() -> distributionSetManagement.get(distributionSetComplete.getId()).isComplete())).isTrue();
         assertThatNoException().isThrownBy(() -> distributionSetManagement.lock(distributionSetComplete));
         assertThat(softwareModuleManagement.get(softwareModule.getId()).isComplete()).isTrue();
     }
@@ -750,7 +786,8 @@ class DistributionSetManagementTest extends AbstractRepositoryManagementWithMeta
         distributionSetManagement.assignSoftwareModules(distributionSetIncomplete.getId(), List.of(softwareModule.getId()));
 
         final DistributionSet distributionSetComplete = distributionSetManagement.get(distributionSetIncomplete.getId());
-        assertThat(distributionSetComplete.isComplete()).isTrue();
+        // completeness is computed from lazy relations (modules, artifacts) - read in transaction
+        assertThat(inTransaction(() -> distributionSetManagement.get(distributionSetComplete.getId()).isComplete())).isTrue();
         assertThatNoException().isThrownBy(() -> distributionSetManagement.lock(distributionSetComplete));
         assertThat(softwareModuleManagement.get(softwareModule.getId()).isComplete()).isTrue();
     }
@@ -776,12 +813,13 @@ class DistributionSetManagementTest extends AbstractRepositoryManagementWithMeta
         artifactManagement.create(new ArtifactUpload(
                 new ByteArrayInputStream(randomBytes(10)), null, 10, null,
                 softwareModuleIncomplete.getId(), "file1", false));
-        assertThat(softwareModuleManagement.get(softwareModuleIncomplete.getId()).isComplete()).isTrue();
+        assertThat(inTransaction(() -> softwareModuleManagement.get(softwareModuleIncomplete.getId()).isComplete())).isTrue();
 
         final DistributionSet distributionSetComplete = distributionSetManagement.get(distributionSetIncomplete.getId());
-        assertThat(distributionSetComplete.isComplete()).isTrue();
+        // completeness is computed from lazy relations (modules, artifacts) - read in transaction
+        assertThat(inTransaction(() -> distributionSetManagement.get(distributionSetComplete.getId()).isComplete())).isTrue();
         assertThatNoException().isThrownBy(() -> distributionSetManagement.lock(distributionSetComplete));
-        assertThat(softwareModuleManagement.get(softwareModuleIncomplete.getId()).isComplete()).isTrue();
+        assertThat(inTransaction(() -> softwareModuleManagement.get(softwareModuleIncomplete.getId()).isComplete())).isTrue();
     }
 
     /**

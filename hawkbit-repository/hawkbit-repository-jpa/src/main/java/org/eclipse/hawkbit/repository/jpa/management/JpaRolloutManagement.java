@@ -214,7 +214,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     private Rollout create0(
             final Create rollout, final int amountGroup, final boolean confirmationRequired,
             final RolloutGroupConditions conditions, final DynamicRolloutGroupTemplate dynamicRolloutGroupTemplate) {
-        validateDs(rollout);
+        final JpaDistributionSet distributionSet = validateDs(rollout);
         if (amountGroup < 0) {
             throw new ValidationException("The amount of groups cannot be lower than or equal to zero for static rollouts");
         } else if (amountGroup == 0) {
@@ -238,6 +238,7 @@ public class JpaRolloutManagement implements RolloutManagement {
 
         final JpaRollout rolloutRequest = new JpaRollout();
         ObjectCopyUtil.copy(rollout, rolloutRequest, false, UnaryOperator.identity());
+        rolloutRequest.setDistributionSet(distributionSet);
         // TODO - copy compares isDynamic == false and don't set it to false - remain null
         rolloutRequest.setDynamic(rollout.isDynamic());
         return createRolloutGroups(
@@ -260,10 +261,11 @@ public class JpaRolloutManagement implements RolloutManagement {
         if (groups.isEmpty()) {
             throw new ValidationException("The amount of groups cannot be 0");
         }
-        validateDs(rollout);
+        final JpaDistributionSet distributionSet = validateDs(rollout);
         RolloutHelper.verifyRolloutGroupAmount(groups.size(), quotaManagement);
         final JpaRollout rolloutRequest = new JpaRollout();
         ObjectCopyUtil.copy(rollout, rolloutRequest, false, UnaryOperator.identity());
+        rolloutRequest.setDistributionSet(distributionSet);
         rolloutRequest.setDynamic(rollout.isDynamic()); // TODO - copy compares isDynamic == false and don't set it to false - remain null
         return createRolloutGroups(groups, conditions, createRollout(rolloutRequest, false));
     }
@@ -711,13 +713,19 @@ public class JpaRolloutManagement implements RolloutManagement {
                 : RolloutSpecification.isDeleted(mode == SoftDeletedMode.ONLY_SOFT_DELETED, sort);
     }
 
-    private static void validateDs(final Create rollout) {
-        if (!rollout.getDistributionSet().isValid()) {
+    // returns the validated distribution set, re-read if detached so that its lazy relations could be navigated
+    private JpaDistributionSet validateDs(final Create rollout) {
+        final DistributionSet requested = rollout.getDistributionSet();
+        final JpaDistributionSet distributionSet = (JpaDistributionSet) (JpaManagementHelper.isDetached(entityManager, requested)
+                ? distributionSetManagement.get(requested.getId())
+                : requested);
+        if (!distributionSet.isValid()) {
             throw new InvalidDistributionSetException("The distribution set is not valid");
         }
-        if (!rollout.getDistributionSet().isComplete()) {
+        if (!distributionSet.isComplete()) {
             throw new IncompleteDistributionSetException("The distribution set is not complete");
         }
+        return distributionSet;
     }
 
     /**

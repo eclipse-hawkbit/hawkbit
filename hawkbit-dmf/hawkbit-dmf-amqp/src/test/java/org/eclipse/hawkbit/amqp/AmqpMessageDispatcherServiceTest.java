@@ -173,7 +173,9 @@ class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
         DistributionSet dsA = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
         SoftwareModule module = dsA.getModules().iterator().next();
         final List<StoredArtifactInfo> receivedList = new ArrayList<>();
-        for (final Artifact artifact : testdataFactory.createArtifacts(module.getId())) {
+        // the artifacts of the (detached) module are lazy - compare with the created ones
+        final List<Artifact> artifacts = testdataFactory.createArtifacts(module.getId());
+        for (final Artifact artifact : artifacts) {
             receivedList.add(new StoredArtifactInfo(
                     null, artifact.getSize(),
                     new ArtifactHashes(artifact.getSha1Hash(), artifact.getMd5Hash(), artifact.getSha256Hash())));
@@ -202,10 +204,10 @@ class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
                 continue;
             }
             assertThat(softwareModule.getArtifacts().size())
-                    .isEqualTo(module.getArtifacts().size())
+                    .isEqualTo(artifacts.size())
                     .isNotZero();
 
-            module.getArtifacts().forEach(dbArtifact -> {
+            artifacts.forEach(dbArtifact -> {
                 final Optional<org.eclipse.hawkbit.dmf.json.model.DmfArtifact> found = softwareModule.getArtifacts()
                         .stream().filter(dmfartifact -> dmfartifact.getFilename().equals(dbArtifact.getFilename()))
                         .findAny();

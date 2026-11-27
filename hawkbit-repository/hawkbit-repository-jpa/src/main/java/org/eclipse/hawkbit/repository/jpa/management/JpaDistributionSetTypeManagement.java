@@ -29,6 +29,7 @@ import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetRepository;
@@ -101,6 +102,14 @@ public class JpaDistributionSetTypeManagement
     @Override
     public Optional<JpaDistributionSetType> findByKey(final String key) {
         return jpaRepository.findOne(DistributionSetTypeSpecification.byKey(key));
+    }
+
+    @Override
+    public JpaDistributionSetType getWithModuleTypes(final long id) {
+        // the dedicated fetch plan loads the module types in the same query (bypassing the by-id cache which types are without
+        // them), so the result could be used detached (Hibernate doesn't load lazy relations out of session)
+        return jpaRepository.findOne(jpaRepository.byIdSpec(id), JpaDistributionSetType_.GRAPH_DISTRIBUTION_SET_TYPE_MODULE_TYPES)
+                .orElseThrow(() -> new EntityNotFoundException(DistributionSetType.class, id));
     }
 
     @Override

@@ -415,6 +415,11 @@ abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpIntegratio
         return distributionSetLocal;
     }
 
+    // the modules of a (detached) distribution set, e.g. of an assignment result, with their (lazy) artifacts loaded
+    protected Set<SoftwareModule> getModulesWithArtifacts(final DistributionSet distributionSet) {
+        return distributionSetManagement.findWithArtifacts(distributionSet.getId()).orElseThrow().getModules();
+    }
+
     protected void assertSoftwareModules(final Set<SoftwareModule> expectedSoftwareModules,
             final List<DmfSoftwareModule> softwareModules) {
         assertThat(expectedSoftwareModules)

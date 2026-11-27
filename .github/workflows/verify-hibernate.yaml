@@ -22,4 +22,4 @@ jobs:
   verify-hibernate:
     uses: ./.github/workflows/reusable_workflow_verify.yaml
     with:
-      maven_properties: '-Djpa.vendor=hibernate -Dlogging.level.org.hibernate.orm.collection=ERROR -Dlogging.level.org.hibernate.collection.spi.AbstractPersistentCollection=ERROR'
+      maven_properties: '-Djpa.vendor=hibernate'

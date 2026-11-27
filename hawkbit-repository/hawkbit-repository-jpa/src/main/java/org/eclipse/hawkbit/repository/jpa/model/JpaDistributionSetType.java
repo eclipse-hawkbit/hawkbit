@@ -17,6 +17,9 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.NamedAttributeNode;
+import jakarta.persistence.NamedEntityGraph;
+import jakarta.persistence.NamedSubgraph;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
@@ -37,6 +40,11 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 @NoArgsConstructor // Default constructor needed for JPA entities.
 @Entity
 @Table(name = "sp_distribution_set_type")
+// the module types of the elements - by default (and so in the by-id cache) a type is loaded without them (their ids are served
+// from the element keys), this fetch plan loads them in the same query when they are needed out of a persistence context
+@NamedEntityGraph(name = "DistributionSetType.moduleTypes",
+        attributeNodes = @NamedAttributeNode(value = "elements", subgraph = "elements"),
+        subgraphs = @NamedSubgraph(name = "elements", attributeNodes = @NamedAttributeNode("smType")))
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities
 @SuppressWarnings("squid:S2160")
 public class JpaDistributionSetType extends AbstractJpaTypeEntity implements DistributionSetType, EventAwareEntity {

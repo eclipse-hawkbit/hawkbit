@@ -99,39 +99,30 @@ class JpaTargetFilterQueryManagement
     @Override
     @Transactional
     public void delete(final long id) {
-        findLinkedAutoAssignment0(id).ifPresent(autoAssignment -> {
-            unlinkAutoAssignment(id);
-            autoAssignmentManagement.delete(autoAssignment.getId());
-        });
+        findLinkedAutoAssignment0(id).ifPresent(autoAssignment -> deleteLinkedAutoAssignment(id, autoAssignment.getId()));
         super.delete(id);
     }
 
     @Override
     @Transactional
     public void delete(final Collection<Long> ids) {
-        ids.forEach(id -> findLinkedAutoAssignment0(id).ifPresent(autoAssignment -> {
-            unlinkAutoAssignment(id);
-            autoAssignmentManagement.delete(autoAssignment.getId());
-        }));
+        ids.forEach(id -> findLinkedAutoAssignment0(id)
+                .ifPresent(autoAssignment -> deleteLinkedAutoAssignment(id, autoAssignment.getId())));
         super.delete(ids);
     }
 
     @Override
     @Transactional
     public AutoAssignment createLinkedAutoAssignment(final long id, final AutoAssignmentManagement.Create create) {
-        unlinkAutoAssignment(id);
-        findLinkedAutoAssignment0(id).ifPresent(autoAssignment -> autoAssignmentManagement.delete(autoAssignment.getId()));
-        entityManager.flush();
-
+        findLinkedAutoAssignment0(id).ifPresent(autoAssignment -> deleteLinkedAutoAssignment(id, autoAssignment.getId()));
         return autoAssignmentManagement.create(create);
     }
 
     @Override
     @Transactional
     public void deleteLinkedAutoAssignment(final long id) {
-        unlinkAutoAssignment(id);
         autoAssignmentManagement.findByName(get(id).getName())
-                .ifPresent(autoAssignment -> autoAssignmentManagement.delete(autoAssignment.getId()));
+                .ifPresent(autoAssignment -> deleteLinkedAutoAssignment(id, autoAssignment.getId()));
     }
 
     @Override
@@ -185,9 +176,7 @@ class JpaTargetFilterQueryManagement
                         .weight(autoAssignment.getWeight().orElse(null))
                         .startAt(autoAssignment.getStartAt())
                         .build();
-                unlinkAutoAssignment(update.getId());
-                autoAssignmentManagement.delete(autoAssignment.getId());
-                entityManager.flush();
+                deleteLinkedAutoAssignment(update.getId(), autoAssignment.getId());
                 autoAssignmentManagement.create(create);
             } else if (update.getName() != null && !update.getName().equals(autoAssignment.getName())) {
                 autoAssignmentManagement.update(AutoAssignmentManagement.Update.builder()
@@ -199,14 +188,18 @@ class JpaTargetFilterQueryManagement
     }
 
     /**
-     * Clears the in-memory link from the target filter query to its (read-only mapped) auto assignment.
+     * Deletes the auto assignment linked to a target filter query.
      *
-     * <p>The auto assignment is an independent entity linked to the filter only by matching name and query. When it is
-     * removed or replaced within the same transaction, the still-managed target filter query would otherwise keep a
-     * reference to the no-longer-persistent auto assignment, which Hibernate rejects on flush. Callers that delete or
-     * replace the linked auto assignment must call this first.
+     * <p>The auto assignment is an independent entity linked to the filter only by matching name and query (read-only
+     * mapping of the target filter query). A still-managed target filter query would keep a reference to the removed
+     * auto assignment, which Hibernate rejects on flush, and the read-only reference must not be modified. So, the
+     * (not modified) target filter query is detached before the removal and the removal is flushed - a later read of the
+     * target filter query in the same transaction loads it without the removed auto assignment.
      */
-    private void unlinkAutoAssignment(final long id) {
-        jpaRepository.getById(id).setAutoAssignment(null);
+    private void deleteLinkedAutoAssignment(final long targetFilterQueryId, final long autoAssignmentId) {
+        // served from the persistence context - the target filter query is already loaded by the callers
+        Optional.ofNullable(entityManager.find(JpaTargetFilterQuery.class, targetFilterQueryId)).ifPresent(entityManager::detach);
+        autoAssignmentManagement.delete(autoAssignmentId);
+        entityManager.flush();
     }
 }

@@ -424,11 +424,12 @@ class AutoAssignHandlerIntTest extends AbstractJpaIntegrationTest {
             final DistributionSet distributionSet, final List<Target> targets) {
         final Set<String> targetIds = targets.stream().map(Target::getControllerId).collect(Collectors.toSet());
 
-        findActionsByDistributionSet(Pageable.unpaged(), distributionSet.getId()).stream()
+        // action target is a lazy relation - read in transaction
+        runInTransaction(() -> findActionsByDistributionSet(Pageable.unpaged(), distributionSet.getId()).stream()
                 .filter(a -> targetIds.contains(a.getTarget().getControllerId()))
                 .forEach(a -> assertThat(a.getInitiatedBy())
                         .as("Action should be initiated by the user who initiated the auto assignment")
-                        .isEqualTo(autoAssignment.getCreatedBy()));
+                        .isEqualTo(autoAssignment.getCreatedBy())));
     }
 
     private List<Target> createTargetsAndAutoAssignDistSet(

@@ -73,7 +73,7 @@ public interface TargetTypeManagement<T extends TargetType>
     @Getter
     @EqualsAndHashCode(callSuper = true)
     @ToString(callSuper = true)
-    final class Create extends UpdateCreate {
+    final class Create extends UpdateCreate implements CreateRequest {
 
         @ValidString
         @Size(min = 1, max = Type.KEY_MAX_SIZE)

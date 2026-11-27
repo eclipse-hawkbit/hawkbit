@@ -375,6 +375,8 @@ public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrat
     }
 
     protected Optional<DistributionSet> findDsByAction(final long actionId) {
-        return deploymentManagement.findAction(actionId).map(Action::getDistributionSet);
+        // re-read with details, the modules of the action's (detached) distribution set are lazy
+        return deploymentManagement.findAction(actionId)
+                .<DistributionSet> map(action -> distributionSetManagement.getWithDetails(action.getDistributionSet().getId()));
     }
 }

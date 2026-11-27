@@ -309,7 +309,9 @@ public abstract class AbstractIntegrationTest {
     }
 
     protected SoftwareModuleType getASmType() {
-        return defaultDsType().getMandatoryModuleTypes().stream().findAny().orElseThrow();
+        // with the module types loaded - the default type is loaded without them (lazy, not available out of session)
+        return distributionSetTypeManagement.getWithModuleTypes(defaultDsType().getId()).getMandatoryModuleTypes().stream().findAny()
+                .orElseThrow();
     }
 
     protected static Action getFirstAssignedAction(final DistributionSetAssignmentResult distributionSetAssignmentResult) {

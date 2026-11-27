@@ -309,7 +309,10 @@ public abstract class AbstractDsAssignmentStrategy {
      * @param action the action of the assignment
      */
     protected void cancelAssignDistributionSetEvent(final Action action) {
-        afterCommit(() -> EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new CancelTargetAssignmentEvent(action)));
+        // the event is created in the transaction - after commit the session is closed and the lazy action relations (e.g. target)
+        // could not be loaded (Hibernate). The canceled actions exist (have ids), so the event could be created before the flush
+        final CancelTargetAssignmentEvent event = new CancelTargetAssignmentEvent(action);
+        afterCommit(() -> EventPublisherHolder.getInstance().getEventPublisher().publishEvent(event));
     }
 
     protected boolean isConfirmationFlowEnabled() {
@@ -371,7 +374,9 @@ public abstract class AbstractDsAssignmentStrategy {
             return;
         }
         final String tenant = actions.get(0).getTenant();
-        afterCommit(() -> EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
-                new CancelTargetAssignmentEvent(tenant, actions)));
+        // the event is created in the transaction - after commit the session is closed and the lazy action relations (e.g. target)
+        // could not be loaded (Hibernate). The canceled actions exist (have ids), so the event could be created before the flush
+        final CancelTargetAssignmentEvent event = new CancelTargetAssignmentEvent(tenant, actions);
+        afterCommit(() -> EventPublisherHolder.getInstance().getEventPublisher().publishEvent(event));
     }
 }

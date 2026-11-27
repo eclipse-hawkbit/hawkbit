@@ -225,6 +225,12 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     }
 
     @Override
+    public DistributionSet getDistributionSetWithArtifacts(final long distributionSetId) {
+        return asSystem(() -> distributionSetManagement.findWithArtifacts(distributionSetId)).map(DistributionSet.class::cast)
+                .orElseThrow(() -> new EntityNotFoundException(DistributionSet.class, distributionSetId));
+    }
+
+    @Override
     public Map<Long, Map<String, String>> findTargetVisibleMetaDataBySoftwareModuleId(final Collection<Long> moduleId) {
         return asSystem(() -> softwareModuleManagement.findMetaDataBySoftwareModuleIdsAndTargetVisible(moduleId));
     }
@@ -494,7 +500,8 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
             actionStatusRepository.save(actionStatus);
             final Action saveAction = actionRepository.save(jpaAction);
 
-            cancelAssignDistributionSetEvent(jpaAction);
+            // the saved action is the managed one (the passed could be detached), so its lazy target could be loaded
+            cancelAssignDistributionSetEvent(saveAction);
             return saveAction;
         } else {
             throw new CancelActionNotAllowedException("Action [id: " + action.getId() + "] is not active and cannot be canceled");
@@ -868,7 +875,10 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     }
 
     private void cancelAssignDistributionSetEvent(final Action action) {
-        afterCommit(() -> EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new CancelTargetAssignmentEvent(action)));
+        // the event is created in the transaction - after commit the session is closed and the lazy action relations (e.g. target)
+        // could not be loaded (Hibernate). The canceled actions exist (have ids), so the event could be created before the flush
+        final CancelTargetAssignmentEvent event = new CancelTargetAssignmentEvent(action);
+        afterCommit(() -> EventPublisherHolder.getInstance().getEventPublisher().publishEvent(event));
     }
 
     /**

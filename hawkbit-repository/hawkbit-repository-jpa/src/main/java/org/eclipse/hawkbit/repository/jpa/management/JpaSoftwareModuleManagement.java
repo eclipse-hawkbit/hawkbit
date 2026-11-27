@@ -150,6 +150,13 @@ public class JpaSoftwareModuleManagement extends
         }).toList();
     }
 
+    @Override
+    @Transactional
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
+    public void createMetadata(final Long id, final String key, final MetadataValue value) {
+        createMetadataValue(id, key, value);
+    }
+
     // called only with 'system code' access, so no need to check access control
     @Override
     public Map<Long, Map<String, String>> findMetaDataBySoftwareModuleIdsAndTargetVisible(final Collection<Long> ids) {
@@ -168,7 +175,7 @@ public class JpaSoftwareModuleManagement extends
         if (jpaSoftwareModule.isLocked()) {
             return jpaSoftwareModule;
         } else {
-            if (!softwareModule.isComplete()) {
+            if (!jpaSoftwareModule.isComplete()) {
                 throw new IncompleteSoftwareModuleException("Could not be locked while incomplete!");
             }
             jpaSoftwareModule.lock();
@@ -182,7 +189,7 @@ public class JpaSoftwareModuleManagement extends
     public JpaSoftwareModule unlock(final SoftwareModule softwareModule) {
         final JpaSoftwareModule jpaSoftwareModule = toJpaSoftwareModule(softwareModule);
         assertSoftwareModuleIsNotDeleted(jpaSoftwareModule);
-        if (softwareModule.isLocked()) {
+        if (jpaSoftwareModule.isLocked()) {
             jpaSoftwareModule.unlock();
             return jpaRepository.save(jpaSoftwareModule);
         } else {
@@ -234,11 +241,7 @@ public class JpaSoftwareModuleManagement extends
     }
 
     private JpaSoftwareModule toJpaSoftwareModule(final SoftwareModule softwareModule) {
-        if (softwareModule instanceof JpaSoftwareModule jpaSoftwareModule) {
-            return jpaSoftwareModule;
-        } else {
-            return jpaRepository.getById(softwareModule.getId());
-        }
+        return managed(softwareModule);
     }
 
     private void deleteGridFsArtifacts(final JpaSoftwareModule swModule) {

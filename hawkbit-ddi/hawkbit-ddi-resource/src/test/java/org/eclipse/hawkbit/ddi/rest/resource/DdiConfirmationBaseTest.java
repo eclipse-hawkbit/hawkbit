@@ -100,7 +100,7 @@ class DdiConfirmationBaseTest extends AbstractDDiApiIntegrationTest {
         assertThat(deploymentManagement.countActionsAll()).isEqualTo(2);
 
         final Action uaction = deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE).getContent().get(0);
-        assertThat(uaction.getDistributionSet()).isEqualTo(ds);
+        assertThat(uaction.getDistributionSet().getId()).isEqualTo(ds.getId());
         assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE)).hasSize(2);
 
         // Run test

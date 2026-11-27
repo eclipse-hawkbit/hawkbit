@@ -36,9 +36,7 @@ import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.exception.AutoAssignmentIllegalStateException;
-import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignActionTypeException;
-import org.eclipse.hawkbit.repository.exception.InvalidDistributionSetException;
 import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
@@ -258,14 +256,9 @@ public class JpaAutoAssignmentManagement extends
     }
 
     private void validate(final Create create) {
-        Optional.ofNullable(create.getDistributionSet()).ifPresent(distributionSet -> {
-            if (!distributionSet.isValid()) {
-                throw new InvalidDistributionSetException();
-            }
-            if (!distributionSet.isComplete()) {
-                throw new IncompleteDistributionSetException();
-            }
-        });
+        // validity and completeness are checked on the re-read distribution set (the passed one could be detached and,
+        // with Hibernate, its lazy relations could not be loaded)
+        create.setDistributionSet(distributionSetManagement.getValidAndComplete(create.getDistributionSet().getId()));
         Optional.ofNullable(create.getActionType()).ifPresent(actionType -> {
             if (!ALLOWED_ACTION_TYPES.contains(actionType)) {
                 throw new InvalidAutoAssignActionTypeException();
@@ -275,7 +268,6 @@ public class JpaAutoAssignmentManagement extends
         QLSupport.getInstance().validate(create.getTargetFilterQuery(), TargetFields.class, JpaTarget.class);
 
         // enforce the 'max targets per auto assign' quota right here even if the result of the filter query can vary over time
-        create.setDistributionSet(distributionSetManagement.getValidAndComplete(create.getDistributionSet().getId()));
         DistributionSet distributionSet = create.getDistributionSet();
 
         assertMaxTargetsQuota(create.getTargetFilterQuery(), create.getName(), distributionSet.getId());

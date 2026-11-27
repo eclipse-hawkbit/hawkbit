@@ -21,3 +21,19 @@ To build hawkBit with Hibernate:
 ```shell
 mvn clean install -Djpa.vendor=hibernate
 ```
+
+## Lazy loading
+
+Hibernate runs without `hibernate.enable_lazy_load_no_trans`: lazy relations (and not initialized lazy proxies) can be
+loaded only within the session that loaded the entity, otherwise a `LazyInitializationException` is thrown. EclipseLink
+loads them silently, so code that works with EclipseLink may fail with Hibernate. Rules:
+
+- load what is used outside the transaction with an entity graph (e.g. `DistributionSetManagement#getWithDetails`,
+  `DistributionSetManagement#findWithArtifacts`, `DistributionSetTypeManagement#getWithModuleTypes`), especially on
+  event / AMQP listener threads that have no open session. Cached entities (by-id cache) are detached too
+- a management method that gets an entity from the caller and navigates its lazy relations must use the managed
+  instance (`AbstractJpaRepositoryManagement#managed`, `JpaManagementHelper#isDetached`)
+- code run after commit (`AfterTransactionCommitExecutor`, e.g. event creation) must not navigate not initialized lazy
+  relations - read them within the transaction (EclipseLink assigns ids of new entities on flush, so ids of new
+  entities are available only after commit there)
+- in tests, navigate lazy relations of returned entities within a transaction or re-read them with the needed graph

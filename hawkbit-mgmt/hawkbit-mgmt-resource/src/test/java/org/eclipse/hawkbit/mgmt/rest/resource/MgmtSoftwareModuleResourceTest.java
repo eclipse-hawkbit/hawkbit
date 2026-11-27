@@ -400,7 +400,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
         // check rest of response compared to DB
         final MgmtArtifact artResult = ResourceUtility.convertArtifactResponse(
                 mvcResult.getResponse().getContentAsString());
-        final Long artId = softwareModuleManagement.find(sm.getId()).get().getArtifacts().get(0).getId();
+        final Long artId = getArtifacts(sm.getId()).get(0).getId();
         assertThat(artResult.getId()).as("Wrong artifact id").isEqualTo(artId);
         assertThat(JsonPath.compile("$._links.self.href").<Object> read(mvcResult.getResponse().getContentAsString()))
                 .as("Link contains no self url")
@@ -962,7 +962,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
         // check repo before delete
         assertThat(softwareModuleManagement.findAll(PAGE)).hasSize(1);
 
-        assertThat(softwareModuleManagement.find(moduleId).get().getArtifacts()).hasSize(2);
+        assertThat(getArtifacts(moduleId)).hasSize(2);
 
         // delete
         mvc.perform(delete("/rest/v1/softwaremodules/{smId}/artifacts/{artId}", moduleId, artifact.getId()))
@@ -975,7 +975,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
         final String sha1Hash = artifact.getSha1Hash();
         assertThatExceptionOfType(ArtifactBinaryNotFoundException.class)
                 .isThrownBy(() -> artifactManagement.getArtifactStream(sha1Hash, moduleId, encrypted));
-        assertThat(softwareModuleManagement.find(moduleId).get().getArtifacts())
+        assertThat(getArtifacts(moduleId))
                 .as("After delete artifact should available for marked as deleted sm's").hasSize(1);
     }
 
@@ -1648,16 +1648,21 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
                 .andExpect(status().isNotFound());
     }
 
+    // the artifacts are a lazy relation of the (detached) software module, so they are read within a transaction
+    private List<Artifact> getArtifacts(final long softwareModuleId) {
+        return inTransaction(() -> List.copyOf(softwareModuleManagement.find(softwareModuleId).orElseThrow().getArtifacts()));
+    }
+
     private void assertArtifact(final SoftwareModule sm, final byte[] random) throws IOException {
         // binary
         try (final ArtifactStream artifact = artifactManagement.getArtifactStream(
-                softwareModuleManagement.find(sm.getId()).orElseThrow().getArtifacts().get(0).getSha1Hash(), sm.getId(), sm.isEncrypted())) {
+                getArtifacts(sm.getId()).get(0).getSha1Hash(), sm.getId(), sm.isEncrypted())) {
             assertTrue(IOUtils.contentEquals(new ByteArrayInputStream(random), artifact), "Wrong artifact content");
             // hashes
             assertThat(artifact.getSha1Hash()).as("Wrong sha1 hash").isEqualTo(HashGeneratorUtils.generateSHA1(random));
         }
         // metadata
-        assertThat(softwareModuleManagement.find(sm.getId()).orElseThrow().getArtifacts().get(0).getFilename())
+        assertThat(getArtifacts(sm.getId()).get(0).getFilename())
                 .as("wrong metadata of the filename").isEqualTo("origFilename");
     }
 

@@ -164,7 +164,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
     public ResponseEntity<List<DdiArtifact>> getSoftwareModulesArtifacts(
             final String tenant, final String controllerId, final Long softwareModuleId) {
         final Target target = findTargetOrThrow(controllerId);
-        final SoftwareModule softwareModule = controllerManagement.getSoftwareModule(softwareModuleId);
+        SoftwareModule softwareModule = controllerManagement.getSoftwareModule(softwareModuleId);
 
         if (!skipArtifactAccessCheck(tenant)) {
             // check action assigned to device
@@ -187,6 +187,9 @@ public class DdiRootController implements DdiRootControllerRestApi {
                                 () -> {
                                     throw e;
                                 });
+                // the failed check rolled back its transaction, which clears the request-scoped (open in view) entity
+                // manager, so the module is detached - re-read it to be able to load its lazy artifacts
+                softwareModule = controllerManagement.getSoftwareModule(softwareModuleId);
             }
         }
 

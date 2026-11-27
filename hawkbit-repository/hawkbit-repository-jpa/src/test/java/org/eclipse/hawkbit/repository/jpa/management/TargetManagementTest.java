@@ -91,11 +91,6 @@ class TargetManagementTest extends AbstractRepositoryManagementWithMetadataTest<
     protected void setMetadataSupport() {
         metadataSupport = new MetadataSupport<>() {
 
-            @Override
-            public void createMetadata(final Long id, final String key, final String value) {
-                targetManagement.createMetadata(toControllerId(id), key, value);
-            }
-
             @SuppressWarnings("unchecked")
             @Override
             public void createMetadata(final Long id, final Map<String, ? extends String> metadata) {
@@ -121,6 +116,11 @@ class TargetManagementTest extends AbstractRepositoryManagementWithMetadataTest<
                 return targetManagement.get(id).getControllerId();
             }
         };
+    }
+
+    @Override
+    protected void createMetadata(final Long id, final String key, final String value) {
+        targetManagement.createMetadata(targetManagement.get(id).getControllerId(), key, value);
     }
 
     /**
@@ -588,7 +588,9 @@ class TargetManagementTest extends AbstractRepositoryManagementWithMetadataTest<
         final Optional<JpaTarget> targetFound = targetRepository.findById(target.getId());
         assertThat(targetFound).isPresent();
         assertThat(targetFound.get().getOptLockRevision()).isEqualTo(1);
-        assertThat(targetFound.get().getTargetType().getName()).isEqualTo(targetType.getName());
+        // target type is a lazy relation - read in transaction
+        assertThat(inTransaction(() -> targetRepository.findById(target.getId()).orElseThrow().getTargetType().getName()))
+                .isEqualTo(targetType.getName());
 
         // un-assign target type from target
         targetManagement.unassignType(targetFound.get().getControllerId());

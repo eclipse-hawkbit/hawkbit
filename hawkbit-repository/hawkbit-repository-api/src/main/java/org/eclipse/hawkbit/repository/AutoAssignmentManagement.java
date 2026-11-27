@@ -209,7 +209,7 @@ public interface AutoAssignmentManagement<T extends AutoAssignment>
     @Getter
     @EqualsAndHashCode
     @ToString
-    class Create {
+    class Create implements CreateRequest {
 
         private String name;
         private String description;

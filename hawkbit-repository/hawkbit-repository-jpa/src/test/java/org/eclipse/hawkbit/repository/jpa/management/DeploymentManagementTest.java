@@ -253,8 +253,9 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final List<Target> testTarget = testdataFactory.createTargets(1);
         // one action with one action status is generated
         final Long actionId = getFirstAssignedActionId(assignDistributionSet(testDs, testTarget));
-        final Slice<Action> actions = deploymentManagement.findActionsByTarget(testTarget.get(0).getControllerId(), PAGE);
-        final ActionStatus expectedActionStatus = ((JpaAction) actions.getContent().get(0)).getActionStatus().get(0);
+        // action status is a lazy relation - read in transaction
+        final ActionStatus expectedActionStatus = inTransaction(() -> ((JpaAction) deploymentManagement
+                .findActionsByTarget(testTarget.get(0).getControllerId(), PAGE).getContent().get(0)).getActionStatus().get(0));
 
         // act
         final Page<ActionStatus> actionStates = deploymentManagement.findActionStatusByAction(actionId, PAGE);
@@ -276,15 +277,18 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 .actionId(actionId).status(Action.Status.FINISHED).messages(List.of("finished message")).build());
         final Page<ActionStatus> actionStates = deploymentManagement.findActionStatusByAction(actionId, PAGE);
 
-        // find newly created action-status entry with message
-        final JpaActionStatus actionStatusWithMessage = actionStates.getContent().stream()
+        // find newly created action-status entry with message (messages is a lazy relation - read in transaction)
+        final Entry<Long, String> actionStatusIdAndExpectedMsg = inTransaction(() -> deploymentManagement
+                .findActionStatusByAction(actionId, PAGE).getContent().stream()
                 .map(JpaActionStatus.class::cast)
                 .filter(entry -> entry.getMessages() != null && !entry.getMessages().isEmpty())
-                .findFirst().orElseThrow();
-        final String expectedMsg = actionStatusWithMessage.getMessages().get(0);
+                .findFirst()
+                .map(entry -> new SimpleEntry<>(entry.getId(), entry.getMessages().get(0)))
+                .orElseThrow());
+        final String expectedMsg = actionStatusIdAndExpectedMsg.getValue();
 
         // act
-        final Page<String> messages = deploymentManagement.findMessagesByActionStatusId(actionStatusWithMessage.getId(), PAGE);
+        final Page<String> messages = deploymentManagement.findMessagesByActionStatusId(actionStatusIdAndExpectedMsg.getKey(), PAGE);
         assertThat(actionStates.getTotalElements()).as("Two action-states in total").isEqualTo(2L);
         assertThat(messages.getContent().get(0)).as("Message of action-status").isEqualTo(expectedMsg);
     }
@@ -682,7 +686,8 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 DeploymentRequest.builder(target.getControllerId(), distributionSet.getId())
                         .confirmationRequired(confirmationRequired).build()));
 
-        assertThat(deploymentManagement.findActionsByTarget(target.getControllerId(), PAGE).getContent()).hasSize(1)
+        // action status messages is a lazy relation - read in transaction
+        runInTransaction(() -> assertThat(deploymentManagement.findActionsByTarget(target.getControllerId(), PAGE).getContent()).hasSize(1)
                 .allSatisfy(action -> {
                     assertThat(action.getStatus()).isEqualTo(RUNNING);
                     assertThat(actionStatusRepository.findByActionId(PAGE, action.getId())).hasSize(1)
@@ -709,7 +714,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                                             .contains("Assignment confirmed by initiator [bumlux].");
                                 }
                             });
-                });
+                }));
     }
 
     /**
@@ -923,7 +928,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             assertThat(activeActionsByTarget).as("action should not be empty").isNotEmpty();
             assertThat(t.getUpdateStatus()).as("wrong target update status").isEqualTo(TargetUpdateStatus.PENDING);
             for (final Action ua : activeActionsByTarget) {
-                assertThat(ua.getDistributionSet()).as("action has wrong ds").isEqualTo(ds);
+                assertThat(ua.getDistributionSet().getId()).as("action has wrong ds").isEqualTo(ds.getId());
             }
         }
     }
@@ -1231,7 +1236,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         assertThat(deploymentManagement.findAssignedDistributionSet(targ.getControllerId()))
                 .as("Assigned distribution set of target is wrong").contains(dsA);
         assertThat(deploymentManagement.findActiveActionsByTarget(targ.getControllerId(), PAGE).getContent().get(0)
-                .getDistributionSet()).as("Distribution set of action is wrong").isEqualTo(dsA);
+                .getDistributionSet().getId()).as("Distribution set of action is wrong").isEqualTo(dsA.getId());
         assertThat(deploymentManagement.findActiveActionsByTarget(targ.getControllerId(), PAGE).getContent().get(0)
                 .getDistributionSet()).as("Installed distribution set of action should be null").isNotNull();
 
@@ -1260,7 +1265,8 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 "wrong assigned ds");
         assertEquals(dsA.getId(), deploymentManagement.findInstalledDistributionSet(targ.getControllerId()).get().getId(),
                 "Installed ds is wrong");
-        assertEquals(dsB, deploymentManagement.findActiveActionsByTarget(targ.getControllerId(), PAGE).getContent().get(0).getDistributionSet(),
+        assertEquals(dsB.getId(),
+                deploymentManagement.findActiveActionsByTarget(targ.getControllerId(), PAGE).getContent().get(0).getDistributionSet().getId(),
                 "Active ds is wrong");
     }
 
@@ -1400,7 +1406,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
         final List<? extends Target> content = targetManagement.findAll(Pageable.unpaged()).getContent();
         content.stream().map(JpaTarget.class::cast)
-                .forEach(jpaTarget -> assertThat(jpaTarget.getAssignedDistributionSet()).isEqualTo(ds));
+                .forEach(jpaTarget -> assertThat(jpaTarget.getAssignedDistributionSet().getId()).isEqualTo(ds.getId()));
     }
 
     /**

@@ -969,7 +969,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
 
         // assert download and install message
         waitUntilEventMessagesAreDispatchedToTarget(EventTopic.CONFIRM, EventTopic.DOWNLOAD_AND_INSTALL);
-        assertDownloadAndInstallMessage(assignmentResult.getDistributionSet().getModules(), controllerId);
+        assertDownloadAndInstallMessage(getModulesWithArtifacts(assignmentResult.getDistributionSet()), controllerId);
     }
 
     /**
@@ -1005,7 +1005,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
 
         // assert download and install message
         waitUntilEventMessagesAreDispatchedToTarget(EventTopic.CONFIRM, EventTopic.DOWNLOAD_AND_INSTALL);
-        assertDownloadAndInstallMessage(assignmentResult.getDistributionSet().getModules(), controllerId);
+        assertDownloadAndInstallMessage(getModulesWithArtifacts(assignmentResult.getDistributionSet()), controllerId);
     }
 
     /**
@@ -1073,7 +1073,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
 
         // assert download and install message
         waitUntilEventMessagesAreDispatchedToTarget(EventTopic.DOWNLOAD_AND_INSTALL);
-        assertDownloadAndInstallMessage(assignmentResult.getDistributionSet().getModules(), controllerId);
+        assertDownloadAndInstallMessage(getModulesWithArtifacts(assignmentResult.getDistributionSet()), controllerId);
     }
 
     /**

@@ -59,7 +59,7 @@ public interface ActionStatusCodeCatalogueManagement<T extends ActionStatusCode>
     @Getter
     @EqualsAndHashCode
     @ToString
-    final class Create {
+    final class Create implements CreateRequest {
 
         @NotNull
         private Integer code;

@@ -94,7 +94,7 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
                 DeploymentRequest.builder(controllerId, distributionSet.getId()).externalRef(externalRef).build())).get(0);
 
         waitUntilTargetHasStatus(controllerId, TargetUpdateStatus.PENDING);
-        assertDownloadAndInstallMessage(assignmentResult.getDistributionSet().getModules(), controllerId, externalRef);
+        assertDownloadAndInstallMessage(getModulesWithArtifacts(assignmentResult.getDistributionSet()), controllerId, externalRef);
     }
 
     /**

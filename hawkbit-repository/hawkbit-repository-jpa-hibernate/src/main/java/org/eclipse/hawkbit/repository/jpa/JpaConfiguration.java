@@ -16,6 +16,8 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import jakarta.persistence.spi.PersistenceUnitInfo;
+
 import lombok.Data;
 import org.eclipse.hawkbit.repository.jpa.model.EntityPropertyChangeListener;
 import org.eclipse.hawkbit.repository.jpa.utils.ExceptionMapper;
@@ -23,6 +25,7 @@ import org.eclipse.hawkbit.repository.jpa.utils.JpaExceptionTranslator;
 import org.hibernate.boot.Metadata;
 import org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl;
 import org.hibernate.boot.spi.BootstrapContext;
+import org.hibernate.cfg.JdbcSettings;
 import org.hibernate.cfg.MultiTenancySettings;
 import org.hibernate.context.spi.CurrentTenantIdentifierResolver;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
@@ -89,6 +92,28 @@ public class JpaConfiguration extends JpaBaseConfiguration {
             public HibernateJpaDialect getJpaDialect() {
                 return hibernateJpaDialect;
             }
+
+            // Spring sets 'hibernate.dialect' derived from 'spring.jpa.database' (always set by hawkBit, e.g. for the Flyway
+            // script suffix). Hibernate detects the dialect from the JDBC metadata and logs a deprecation warning (HHH90000025)
+            // for an explicitly set dialect. So, keep it only if explicitly configured via 'spring.jpa.database-platform'.
+            @Override
+            public Map<String, Object> getJpaPropertyMap(final PersistenceUnitInfo persistenceUnitInfo) {
+                return withoutDerivedDialect(super.getJpaPropertyMap(persistenceUnitInfo));
+            }
+
+            @Override
+            public Map<String, Object> getJpaPropertyMap() {
+                return withoutDerivedDialect(super.getJpaPropertyMap());
+            }
+
+            private Map<String, Object> withoutDerivedDialect(final Map<String, Object> jpaPropertyMap) {
+                if (getDatabasePlatform() != null) {
+                    return jpaPropertyMap;
+                }
+                final Map<String, Object> withoutDialect = new HashMap<>(jpaPropertyMap);
+                withoutDialect.remove(JdbcSettings.DIALECT);
+                return withoutDialect;
+            }
         };
     }
 
@@ -117,10 +142,6 @@ public class JpaConfiguration extends JpaBaseConfiguration {
         properties.put("hibernate.physical_naming_strategy", PhysicalNamingStrategyStandardImpl.class.getName());
         properties.put(MultiTenancySettings.MULTI_TENANT_IDENTIFIER_RESOLVER, tenantIdentifier);
         properties.put("hibernate.multiTenancy", "DISCRIMINATOR");
-        // LAZY_LOAD - Enable lazy loading of lazy fields when session is closed - N + 1 problem occur.
-        // So it would be good if in future hawkBit run without that
-        // Otherwise, if false, call for the lazy field will throw LazyInitializationException
-        properties.put("hibernate.enable_lazy_load_no_trans", "true");
         properties.put("hibernate.integrator_provider", (IntegratorProvider) () -> Collections.singletonList(new Integrator() {
 
             @Override

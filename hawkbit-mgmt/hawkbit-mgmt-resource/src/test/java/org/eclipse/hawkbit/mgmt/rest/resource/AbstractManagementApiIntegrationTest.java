@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import lombok.SneakyThrows;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
@@ -41,6 +42,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.ResultMatcher;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 @ContextConfiguration(
         classes = { MgmtApiConfiguration.class, RestConfiguration.class, JpaRepositoryConfiguration.class, TestConfiguration.class })
@@ -50,6 +53,8 @@ public abstract class AbstractManagementApiIntegrationTest extends AbstractRestI
     // enabled via mgmt-test.properties - verifies the @RequiredPermissions against the actually checked permissions
     @Autowired(required = false)
     private MgmtRequiredPermissionsVerifier requiredPermissionsVerifier;
+    @Autowired
+    private PlatformTransactionManager transactionManager;
 
     // the verifiers of all used contexts (test classes with different configurations use different contexts), kept for the report
     private static final Set<MgmtRequiredPermissionsVerifier> REQUIRED_PERMISSIONS_VERIFIERS =
@@ -77,6 +82,17 @@ public abstract class AbstractManagementApiIntegrationTest extends AbstractRestI
                     Path.of(System.getProperty("hawkbit.test.required-permissions-report", "target/required-permissions-unused.txt")),
                     unused);
         }
+    }
+
+    // entities returned by the management services are detached, so their lazy relations could be navigated (with all JPA vendors,
+    // e.g. Hibernate without enable_lazy_load_no_trans) only within a transaction
+    protected <T> T inTransaction(final Supplier<T> supplier) {
+        return new TransactionTemplate(transactionManager).execute(_ -> supplier.get());
+    }
+
+    // see inTransaction(Supplier)
+    protected void runInTransaction(final Runnable runnable) {
+        new TransactionTemplate(transactionManager).executeWithoutResult(_ -> runnable.run());
     }
 
     protected static ResultMatcher applyBaseEntityMatcherOnArrayResult(final BaseEntity entity, final String arrayElement) {

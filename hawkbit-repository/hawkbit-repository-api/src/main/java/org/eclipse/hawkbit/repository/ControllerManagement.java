@@ -31,6 +31,7 @@ import org.eclipse.hawkbit.repository.model.Action.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.AutoConfirmationStatus;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
@@ -66,6 +67,18 @@ public interface ControllerManagement {
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
     SoftwareModule getSoftwareModule(long moduleId);
+
+    /**
+     * Retrieves a {@link DistributionSet} (e.g. of an action of a target) with its {@link DistributionSet#getModules()} and their
+     * {@link SoftwareModule#getType()} and {@link SoftwareModule#getArtifacts()} loaded. The returned entity could be used detached
+     * (e.g. out of a transaction / persistence context) to build the software module descriptions for the device.
+     *
+     * @param distributionSetId of the {@link DistributionSet}
+     * @return {@link DistributionSet} identified by ID
+     * @throws EntityNotFoundException if distribution set with given ID does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
+    DistributionSet getDistributionSetWithArtifacts(long distributionSetId);
 
     /**
      * Retrieves software module metadata where isTargetVisible.
