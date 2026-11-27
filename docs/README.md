@@ -3,6 +3,10 @@
 Eclipse hawkBit™ is a domain independent back-end framework for rolling out software updates to constrained edge devices
 as well as more powerful controllers and gateways connected to IP based networking infrastructure.
 
+> [hawkbit.eclipse.dev](https://hawkbit.eclipse.dev/) shows the docs of the latest release. The docs of the unreleased
+> `master` are at [hawkbit.eclipse.dev/master/](https://hawkbit.eclipse.dev/master/), and other versions can be
+> selected in the sidebar.
+
 <p>
   <img src="images/hawkBit_overview.png" alt="Eclipse hawkBit Overview" width="800">
 </p>

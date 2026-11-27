@@ -1,0 +1,4 @@
+# Supported releases whose docs are published at hawkbit.eclipse.dev/<tag>/ (by docs-publish.yaml).
+# One release tag per line (e.g. 1.2.0). The latest release is always published at / - don't list
+# it (it's skipped if listed). Remove a line when the support for the release ends.
+1.2.0

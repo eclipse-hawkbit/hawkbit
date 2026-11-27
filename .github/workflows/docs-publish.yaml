@@ -1,0 +1,69 @@
+name: Publish Docs
+
+# Publishes the versioned docs site hawkbit.eclipse.dev to GitHub Pages (built by .github/docs/build-site.sh):
+# / - latest release, /master/ - master, /<tag>/ (e.g. /1.2.0/) - releases listed in .github/docs-versions.txt.
+# Each run rebuilds and deploys the whole site, since a Pages deployment replaces the entire site.
+on:
+  release:
+    # "released": a release was published, or a prerelease was changed to a release - never fires for a prerelease
+    # ("published" would fire for prereleases, but not when a prerelease is promoted to a release)
+    types: [ released ]
+  push:
+    branches:
+      - master
+    paths:
+      - 'docs/**'
+      - '.github/docs-versions.txt'
+      - '.github/docs/**'
+      - '.github/workflows/docs-publish.yaml'
+  workflow_dispatch:
+    inputs:
+      latest_ref:
+        description: 'Ref published as / instead of the latest release (e.g. a release branch with a docs fix)'
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+# one deployment at a time; a queued run is replaced by a newer one, a running deployment isn't cancelled
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    # only on original eclipse-hawkbit/hawkbit repo
+    if: github.repository == 'eclipse-hawkbit/hawkbit'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+
+    steps:
+      # always master (also on release): it holds the build script, the switcher and the supported versions list
+      - uses: actions/checkout@v7.0.1
+        with:
+          ref: master
+          # all tags - the docs of each version are taken from its tag
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Build site
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          LATEST_REF: ${{ inputs.latest_ref }}
+          MASTER_REF: HEAD
+        run: .github/docs/build-site.sh site
+
+      - uses: actions/upload-pages-artifact@v5.0.0
+        with:
+          path: site
+
+      - id: deploy
+        uses: actions/deploy-pages@v5.0.1
