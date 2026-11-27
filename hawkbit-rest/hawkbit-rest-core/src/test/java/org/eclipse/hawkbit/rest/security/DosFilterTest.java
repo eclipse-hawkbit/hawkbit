@@ -179,9 +179,11 @@ class DosFilterTest {
         perform(filter, request("POST", CLIENT_IP, DDI_PATH));
         assertThat(output).doesNotContain("[DOS] Load report");
 
+        // the counter windows (one second) expire with the interval too - the high load is reached again in a new window
         ticker.addAndGet(LOAD_REPORT.interval().toNanos());
         // a not high load request doesn't end the interval
         perform(filter, get("203.0.113.9"));
+        perform(filter, get(CLIENT_IP));
         assertThat(output).doesNotContain("[DOS] Load report");
         perform(filter, get(CLIENT_IP));
         assertThat(output)
@@ -189,7 +191,7 @@ class DosFilterTest {
                         + "DEFAULT, forwarded for []")
                 .contains("[DOS] Load report: client 203.0.113.8 peak 0 READ / 2 WRITE requests per second (limits 10 / 10) - tenant "
                         + "null, forwarded for []")
-                .contains("[DOS] High load! Client " + CLIENT_IP + " reached 4 READ requests per second");
+                .contains("[DOS] High load! Client " + CLIENT_IP + " reached 2 READ requests per second");
         assertThat(occurrences(output, "[DOS] High load! Client " + CLIENT_IP)).isEqualTo(2);
         assertThat(occurrences(output, "[DOS] Load report: client")).isEqualTo(2);
 
@@ -198,8 +200,8 @@ class DosFilterTest {
         perform(filter, get(CLIENT_IP));
         assertThat(occurrences(output, "[DOS] Load report: client")).isEqualTo(2);
         ticker.addAndGet(1);
-        perform(filter, get(CLIENT_IP));
-        assertThat(output).contains("[DOS] Load report: client " + CLIENT_IP + " peak 5 READ / 0 WRITE requests per second");
+        perform(filter, get(CLIENT_IP)); // the second in the window - high load, ends the interval
+        assertThat(output).contains("[DOS] Load report: client " + CLIENT_IP + " peak 2 READ / 0 WRITE requests per second");
         assertThat(occurrences(output, "[DOS] Load report: client")).isEqualTo(3);
         assertThat(occurrences(output, "[DOS] High load! Client " + CLIENT_IP)).isEqualTo(3);
     }
@@ -269,7 +271,10 @@ class DosFilterTest {
                         + "forwarded for [192.0.2.2, 192.0.2.3, 192.0.2.4, 192.0.2.5, 192.0.2.6]");
 
         ticker.addAndGet(LOAD_REPORT.interval().toNanos());
-        perform(filter, forwarded(request("GET", PROXY_IP, "/Tenant1/controller/v1/device1"), "192.0.2.1"));
+        // high load again (new counter window) - ends the interval
+        for (int i = 0; i < 2; i++) {
+            perform(filter, forwarded(request("GET", PROXY_IP, "/Tenant1/controller/v1/device1"), "192.0.2.1"));
+        }
         assertThat(output).contains("[DOS] Load report: client " + PROXY_IP + " peak 2 READ / 0 WRITE requests per second (limits 10 / 10) "
                 + "- tenant Tenant1, forwarded for [192.0.2.1]");
     }
