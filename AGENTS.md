@@ -88,6 +88,8 @@ CI (`.github/workflows/reusable_workflow_verify.yaml`) runs `license:check`, the
     - Extend the matching base class: `AbstractJpaIntegrationTest`, `AbstractManagementApiIntegrationTest`,
       `AbstractDDiApiIntegrationTest`, `AbstractAmqpIntegrationTest`.
     - Use `@WithUser`, `TestdataFactory`, `@ExpectEvents`.
+    - Don't add test-only code to production classes (getters, setters, "package-private for tests" methods, extra
+      parameters / branches used only by tests). Reach internals from the test, e.g. `ReflectionTestUtils`.
     - Document the test class with Javadoc `Feature: <Type> - <Component><br/>` and `Story: …` (see `CONTRIBUTING.md`).
 - **Commits:**
     - Always sign off: `git commit -s` (Eclipse ECA, `Signed-off-by` trailer, see `CONTRIBUTING.md`). Also on amend.

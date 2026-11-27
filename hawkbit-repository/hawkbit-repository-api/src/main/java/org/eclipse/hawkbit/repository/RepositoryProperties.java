@@ -44,9 +44,17 @@ public class RepositoryProperties {
     private boolean publishTargetPollEvent = true;
 
     /**
-     * Maximum number of poll operations queued before flush.
+     * Maximum number of targets with buffered (not yet persisted) polls. A target polling again before the flush doesn't take
+     * another entry. If full, the poll time is written directly (skipped if the target is locked).
      */
     private int pollPersistenceQueueSize = 10_000;
+
+    /**
+     * Fill level of the poll queue, in percent (1-100) of {@link #pollPersistenceQueueSize}, at which a flush is triggered
+     * in addition to the periodic one (see {@link #pollPersistenceFlushTime}). Only targets newly added since the last flush are
+     * counted.
+     */
+    private int pollPersistenceFlushThresholdPercent = 50;
 
     /**
      * Maximum time before queue is flushed in {@link TimeUnit#MILLISECONDS}.
@@ -58,11 +66,6 @@ public class RepositoryProperties {
      * (e.g. the target was locked). Older polls are dropped.
      */
     private long pollPersistenceMaxQueueTime = TimeUnit.MINUTES.toMillis(5);
-
-    /**
-     * Set to true to persist polls immediately.
-     */
-    private boolean eagerPollPersistence;
 
     /**
      * If an {@link org.eclipse.hawkbit.repository.model.Action} has a weight of null this value is used as weight.

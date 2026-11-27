@@ -29,7 +29,7 @@ import org.springframework.test.context.TestPropertySource;
  * Story: Controller Management
  */
 @TestPropertySource(locations = "classpath:/jpa-test.properties", properties = {
-        "hawkbit.server.repository.eagerPollPersistence=false",
+        "hawkbit.server.repository.pollPersistenceQueueSize=10000",
         "hawkbit.server.repository.pollPersistenceFlushTime=1000" })
 class LazyControllerManagementTest extends AbstractJpaIntegrationTest {
 
